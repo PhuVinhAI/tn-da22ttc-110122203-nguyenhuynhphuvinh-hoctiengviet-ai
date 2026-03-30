@@ -1,0 +1,33 @@
+{
+  "name": "linvnix",
+  "version": "1.0.0",
+  "description": "LinVNix Monorepo - NestJS Backend & Flutter Mobile",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "packages/*"
+  ],
+  "scripts": {
+    "backend:dev": "cd backend && bun run start:dev",
+    "backend:build": "cd backend && bun run build",
+    "backend:start": "cd backend && bun run start:prod",
+    "mobile:run": "cd mobile && flutter run",
+    "mobile:build:android": "cd mobile && flutter build apk",
+    "mobile:build:ios": "cd mobile && flutter build ios"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PhuVinhAI/LinVNix.git"
+  },
+  "keywords": ["monorepo", "nestjs", "flutter", "bun"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
