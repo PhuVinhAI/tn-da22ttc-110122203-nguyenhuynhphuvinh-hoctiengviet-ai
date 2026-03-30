@@ -27,7 +27,8 @@
     "test:scenarios": "bun run scripts/test/run-all-scenarios.ts",
     "test:scenario:auth": "bun run scripts/test/scenarios/01-auth.scenario.ts",
     "test:scenario:learning": "bun run scripts/test/scenarios/02-learning.scenario.ts",
-    "test:scenario:progress": "bun run scripts/test/scenarios/03-progress.scenario.ts"
+    "test:scenario:progress": "bun run scripts/test/scenarios/03-progress.scenario.ts",
+    "docs:generate": "bun run scripts/generate-api-docs.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.1.0",
