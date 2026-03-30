@@ -1,6 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { SPACED_REPETITION_INTERVALS } from '../../../common/constants';
 
+/**
+ * TODO: ENHANCEMENT - Implement SM-2 (SuperMemo 2) Algorithm
+ * 
+ * Hiện tại đang dùng intervals cố định: 1, 3, 7, 14, 30 ngày.
+ * Trong tương lai nên áp dụng thuật toán SM-2 để tính toán động dựa trên:
+ * - Độ khó của từ (easiness factor)
+ * - Lịch sử trả lời đúng/sai của từng user
+ * - Điều chỉnh interval theo performance cá nhân
+ * 
+ * Tham khảo: https://en.wikipedia.org/wiki/SuperMemo#Description_of_SM-2_algorithm
+ */
 @Injectable()
 export class SpacedRepetitionService {
   /**
