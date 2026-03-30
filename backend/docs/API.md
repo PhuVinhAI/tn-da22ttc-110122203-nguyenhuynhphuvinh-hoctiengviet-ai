@@ -30,11 +30,14 @@ API cho ứng dụng học tiếng Việt
 
 **Lấy thống kê cache**
 
+Lấy thông tin thống kê về cache Redis (số keys, memory usage, hit rate...)
+
 🔒 **Authentication Required:** Bearer Token
 
 **Responses:**
 
-- **200**: Success
+- **200**: Thống kê cache
+- **401**: Chưa đăng nhập
 
 
 ---
@@ -43,11 +46,14 @@ API cho ứng dụng học tiếng Việt
 
 **Xóa toàn bộ cache**
 
+Xóa tất cả cache trong Redis - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Responses:**
 
-- **200**: Success
+- **200**: Xóa cache thành công
+- **401**: Chưa đăng nhập
 
 
 ---
@@ -57,6 +63,8 @@ API cho ứng dụng học tiếng Việt
 ### POST /api/v1/auth/register
 
 **Đăng ký tài khoản mới**
+
+Tạo tài khoản người dùng mới với email, password và thông tin cá nhân
 
 **Request Body:**
 
@@ -74,7 +82,9 @@ Schema: [`RegisterDto`](#registerdto)
 
 **Responses:**
 
-- **201**: Success
+- **201**: Đăng ký thành công
+- **400**: Dữ liệu không hợp lệ
+- **409**: Email đã tồn tại
 
 
 ---
@@ -82,6 +92,8 @@ Schema: [`RegisterDto`](#registerdto)
 ### POST /api/v1/auth/login
 
 **Đăng nhập**
+
+Đăng nhập bằng email và password để nhận JWT token
 
 **Request Body:**
 
@@ -96,7 +108,8 @@ Schema: [`LoginDto`](#logindto)
 
 **Responses:**
 
-- **201**: Success
+- **200**: Đăng nhập thành công
+- **401**: Email hoặc password không đúng
 
 
 ---
@@ -107,11 +120,14 @@ Schema: [`LoginDto`](#logindto)
 
 **Lấy thông tin user hiện tại**
 
+Lấy thông tin profile của user đang đăng nhập
+
 🔒 **Authentication Required:** Bearer Token
 
 **Responses:**
 
-- **200**: Success
+- **200**: Thông tin user
+- **401**: Chưa đăng nhập
 
 
 ---
@@ -120,11 +136,16 @@ Schema: [`LoginDto`](#logindto)
 
 **Cập nhật thông tin user**
 
+Cập nhật thông tin profile của user đang đăng nhập
+
 🔒 **Authentication Required:** Bearer Token
+
+**Request Body:**
 
 **Responses:**
 
-- **200**: Success
+- **200**: Cập nhật thành công
+- **401**: Chưa đăng nhập
 
 
 ---
@@ -135,9 +156,11 @@ Schema: [`LoginDto`](#logindto)
 
 **Lấy danh sách tất cả khóa học**
 
+Trả về danh sách tất cả khóa học có sẵn trong hệ thống
+
 **Responses:**
 
-- **200**: Success
+- **200**: Danh sách khóa học
 
 
 ---
@@ -146,11 +169,17 @@ Schema: [`LoginDto`](#logindto)
 
 **Tạo khóa học mới (Admin)**
 
+Tạo khóa học mới - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
+
+**Request Body:**
 
 **Responses:**
 
-- **201**: Success
+- **201**: Tạo khóa học thành công
+- **401**: Chưa đăng nhập
+- **403**: Không có quyền
 
 
 ---
@@ -159,15 +188,18 @@ Schema: [`LoginDto`](#logindto)
 
 **Lấy chi tiết khóa học**
 
+Lấy thông tin chi tiết của một khóa học bao gồm units và lessons
+
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của khóa học |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Chi tiết khóa học
+- **404**: Không tìm thấy khóa học
 
 
 ---
@@ -176,17 +208,22 @@ Schema: [`LoginDto`](#logindto)
 
 **Cập nhật khóa học (Admin)**
 
+Cập nhật thông tin khóa học - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của khóa học |
+
+**Request Body:**
 
 **Responses:**
 
-- **200**: Success
+- **200**: Cập nhật thành công
+- **404**: Không tìm thấy khóa học
 
 
 ---
@@ -195,17 +232,20 @@ Schema: [`LoginDto`](#logindto)
 
 **Xóa khóa học (Admin)**
 
+Xóa khóa học khỏi hệ thống - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của khóa học |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Xóa thành công
+- **404**: Không tìm thấy khóa học
 
 
 ---
@@ -216,15 +256,17 @@ Schema: [`LoginDto`](#logindto)
 
 **Lấy danh sách units theo course**
 
+Lấy tất cả units thuộc một khóa học
+
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `courseId` | path | string | ✅ | - |
+| `courseId` | path | string | ✅ | ID của khóa học |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Danh sách units
 
 
 ---
@@ -233,15 +275,18 @@ Schema: [`LoginDto`](#logindto)
 
 **Lấy chi tiết unit**
 
+Lấy thông tin chi tiết của unit bao gồm danh sách lessons
+
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của unit |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Chi tiết unit
+- **404**: Không tìm thấy unit
 
 
 ---
@@ -250,17 +295,33 @@ Schema: [`LoginDto`](#logindto)
 
 **Cập nhật unit**
 
+Cập nhật thông tin unit - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của unit |
+
+**Request Body:**
+
+Schema: [`CreateUnitDto`](#createunitdto)
+
+```json
+{
+  "title": "Unit 1: Chào hỏi và giới thiệu",
+  "description": "Học cách chào hỏi và giới thiệu bản thân",
+  "orderIndex": 1,
+  "courseId": "uuid-of-course"
+}
+```
 
 **Responses:**
 
-- **200**: Success
+- **200**: Cập nhật thành công
+- **404**: Không tìm thấy unit
 
 
 ---
@@ -269,17 +330,20 @@ Schema: [`LoginDto`](#logindto)
 
 **Xóa unit**
 
+Xóa unit khỏi khóa học - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của unit |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Xóa thành công
+- **404**: Không tìm thấy unit
 
 
 ---
@@ -287,6 +351,8 @@ Schema: [`LoginDto`](#logindto)
 ### POST /api/v1/units
 
 **Tạo unit mới**
+
+Tạo unit mới trong khóa học - yêu cầu quyền Admin
 
 🔒 **Authentication Required:** Bearer Token
 
@@ -305,7 +371,8 @@ Schema: [`CreateUnitDto`](#createunitdto)
 
 **Responses:**
 
-- **201**: Success
+- **201**: Tạo unit thành công
+- **401**: Chưa đăng nhập
 
 
 ---
@@ -316,15 +383,17 @@ Schema: [`CreateUnitDto`](#createunitdto)
 
 **Lấy danh sách lessons theo unit**
 
+Lấy tất cả lessons thuộc một unit
+
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `unitId` | path | string | ✅ | - |
+| `unitId` | path | string | ✅ | ID của unit |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Danh sách lessons
 
 
 ---
@@ -333,15 +402,18 @@ Schema: [`CreateUnitDto`](#createunitdto)
 
 **Lấy chi tiết lesson với nội dung đầy đủ**
 
+Lấy thông tin chi tiết lesson bao gồm contents, vocabularies, grammar, exercises
+
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của lesson |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Chi tiết lesson
+- **404**: Không tìm thấy lesson
 
 
 ---
@@ -350,17 +422,35 @@ Schema: [`CreateUnitDto`](#createunitdto)
 
 **Cập nhật lesson**
 
+Cập nhật thông tin lesson - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của lesson |
+
+**Request Body:**
+
+Schema: [`CreateLessonDto`](#createlessondto)
+
+```json
+{
+  "title": "Bài 1: Từ vựng chào hỏi",
+  "description": "Học các từ vựng cơ bản về chào hỏi",
+  "lessonType": "vocabulary",
+  "orderIndex": 1,
+  "estimatedDuration": 30,
+  "unitId": "uuid-of-unit"
+}
+```
 
 **Responses:**
 
-- **200**: Success
+- **200**: Cập nhật thành công
+- **404**: Không tìm thấy lesson
 
 
 ---
@@ -369,17 +459,20 @@ Schema: [`CreateUnitDto`](#createunitdto)
 
 **Xóa lesson**
 
+Xóa lesson khỏi unit - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của lesson |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Xóa thành công
+- **404**: Không tìm thấy lesson
 
 
 ---
@@ -387,6 +480,8 @@ Schema: [`CreateUnitDto`](#createunitdto)
 ### POST /api/v1/lessons
 
 **Tạo lesson mới**
+
+Tạo lesson mới trong unit - yêu cầu quyền Admin
 
 🔒 **Authentication Required:** Bearer Token
 
@@ -407,7 +502,8 @@ Schema: [`CreateLessonDto`](#createlessondto)
 
 **Responses:**
 
-- **201**: Success
+- **201**: Tạo lesson thành công
+- **401**: Chưa đăng nhập
 
 
 ---
@@ -418,15 +514,17 @@ Schema: [`CreateLessonDto`](#createlessondto)
 
 **Lấy nội dung theo lesson**
 
+Lấy tất cả nội dung học thuộc một lesson (text, audio, video, image)
+
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `lessonId` | path | string | ✅ | - |
+| `lessonId` | path | string | ✅ | ID của lesson |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Danh sách nội dung
 
 
 ---
@@ -435,15 +533,18 @@ Schema: [`CreateLessonDto`](#createlessondto)
 
 **Lấy chi tiết nội dung**
 
+Lấy thông tin chi tiết của một nội dung học
+
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của nội dung |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Chi tiết nội dung
+- **404**: Không tìm thấy nội dung
 
 
 ---
@@ -452,17 +553,39 @@ Schema: [`CreateLessonDto`](#createlessondto)
 
 **Cập nhật nội dung**
 
+Cập nhật thông tin nội dung - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của nội dung |
+
+**Request Body:**
+
+Schema: [`CreateContentDto`](#createcontentdto)
+
+```json
+{
+  "contentType": "text",
+  "vietnameseText": "Xin chào! Tôi là Minh.",
+  "translation": "Hello! I am Minh.",
+  "phonetic": "sin chao! toy la min",
+  "audioUrl": "https://example.com/audio.mp3",
+  "imageUrl": "https://example.com/image.jpg",
+  "videoUrl": "https://example.com/video.mp4",
+  "orderIndex": 1,
+  "notes": "Ghi chú thêm",
+  "lessonId": "uuid-of-lesson"
+}
+```
 
 **Responses:**
 
-- **200**: Success
+- **200**: Cập nhật thành công
+- **404**: Không tìm thấy nội dung
 
 
 ---
@@ -471,17 +594,20 @@ Schema: [`CreateLessonDto`](#createlessondto)
 
 **Xóa nội dung**
 
+Xóa nội dung khỏi lesson - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của nội dung |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Xóa thành công
+- **404**: Không tìm thấy nội dung
 
 
 ---
@@ -489,6 +615,8 @@ Schema: [`CreateLessonDto`](#createlessondto)
 ### POST /api/v1/contents
 
 **Tạo nội dung mới**
+
+Tạo nội dung học mới trong lesson - yêu cầu quyền Admin
 
 🔒 **Authentication Required:** Bearer Token
 
@@ -513,7 +641,8 @@ Schema: [`CreateContentDto`](#createcontentdto)
 
 **Responses:**
 
-- **201**: Success
+- **201**: Tạo nội dung thành công
+- **401**: Chưa đăng nhập
 
 
 ---
@@ -524,15 +653,17 @@ Schema: [`CreateContentDto`](#createcontentdto)
 
 **Lấy từ vựng theo lesson**
 
+Lấy tất cả từ vựng thuộc một lesson
+
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `lessonId` | path | string | ✅ | - |
+| `lessonId` | path | string | ✅ | ID của lesson |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Danh sách từ vựng
 
 
 ---
@@ -540,6 +671,8 @@ Schema: [`CreateContentDto`](#createcontentdto)
 ### POST /api/v1/vocabularies
 
 **Tạo từ vựng mới**
+
+Tạo từ vựng mới trong lesson - yêu cầu quyền Admin
 
 🔒 **Authentication Required:** Bearer Token
 
@@ -564,7 +697,8 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Responses:**
 
-- **201**: Success
+- **201**: Tạo từ vựng thành công
+- **401**: Chưa đăng nhập
 
 
 ---
@@ -573,17 +707,39 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Cập nhật từ vựng**
 
+Cập nhật thông tin từ vựng - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của từ vựng |
+
+**Request Body:**
+
+Schema: [`CreateVocabularyDto`](#createvocabularydto)
+
+```json
+{
+  "word": "xin chào",
+  "translation": "hello",
+  "phonetic": "sin chao",
+  "partOfSpeech": "phrase",
+  "exampleSentence": "Xin chào, bạn khỏe không?",
+  "exampleTranslation": "Hello, how are you?",
+  "audioUrl": "https://example.com/audio.mp3",
+  "imageUrl": "https://example.com/image.jpg",
+  "difficultyLevel": 1,
+  "lessonId": "uuid-of-lesson"
+}
+```
 
 **Responses:**
 
-- **200**: Success
+- **200**: Cập nhật thành công
+- **404**: Không tìm thấy từ vựng
 
 
 ---
@@ -592,17 +748,20 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Xóa từ vựng**
 
+Xóa từ vựng khỏi lesson - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của từ vựng |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Xóa thành công
+- **404**: Không tìm thấy từ vựng
 
 
 ---
@@ -611,17 +770,19 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Thêm từ vựng vào danh sách học**
 
+Thêm từ vựng vào danh sách học của user để theo dõi tiến độ
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `vocabularyId` | path | string | ✅ | - |
+| `vocabularyId` | path | string | ✅ | ID của từ vựng |
 
 **Responses:**
 
-- **201**: Success
+- **201**: Thêm thành công
 
 
 ---
@@ -630,17 +791,21 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Ôn tập từ vựng**
 
+Ghi nhận kết quả ôn tập từ vựng và cập nhật lịch ôn tập theo thuật toán spaced repetition
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `vocabularyId` | path | string | ✅ | - |
+| `vocabularyId` | path | string | ✅ | ID của từ vựng |
+
+**Request Body:**
 
 **Responses:**
 
-- **201**: Success
+- **200**: Cập nhật kết quả ôn tập
 
 
 ---
@@ -649,11 +814,13 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Lấy danh sách từ vựng đã học**
 
+Lấy tất cả từ vựng mà user đã thêm vào danh sách học
+
 🔒 **Authentication Required:** Bearer Token
 
 **Responses:**
 
-- **200**: Success
+- **200**: Danh sách từ vựng đã học
 
 
 ---
@@ -662,11 +829,13 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Lấy từ vựng cần ôn tập**
 
+Lấy danh sách từ vựng đến hạn ôn tập theo lịch spaced repetition
+
 🔒 **Authentication Required:** Bearer Token
 
 **Responses:**
 
-- **200**: Success
+- **200**: Danh sách từ vựng cần ôn tập
 
 
 ---
@@ -675,11 +844,15 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Upload audio cho từ vựng**
 
+Upload file audio phát âm cho từ vựng
+
 🔒 **Authentication Required:** Bearer Token
+
+**Request Body:**
 
 **Responses:**
 
-- **201**: Success
+- **201**: Upload thành công
 
 
 ---
@@ -688,11 +861,15 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Upload hình ảnh cho từ vựng**
 
+Upload file hình ảnh minh họa cho từ vựng
+
 🔒 **Authentication Required:** Bearer Token
+
+**Request Body:**
 
 **Responses:**
 
-- **201**: Success
+- **201**: Upload thành công
 
 
 ---
@@ -703,15 +880,17 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Lấy ngữ pháp theo lesson**
 
+Lấy tất cả quy tắc ngữ pháp thuộc một lesson
+
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `lessonId` | path | string | ✅ | - |
+| `lessonId` | path | string | ✅ | ID của lesson |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Danh sách ngữ pháp
 
 
 ---
@@ -720,15 +899,18 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Lấy chi tiết ngữ pháp**
 
+Lấy thông tin chi tiết của một quy tắc ngữ pháp
+
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của ngữ pháp |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Chi tiết ngữ pháp
+- **404**: Không tìm thấy ngữ pháp
 
 
 ---
@@ -737,17 +919,45 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Cập nhật ngữ pháp**
 
+Cập nhật thông tin ngữ pháp - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của ngữ pháp |
+
+**Request Body:**
+
+Schema: [`CreateGrammarDto`](#creategrammardto)
+
+```json
+{
+  "title": "Câu khẳng định với \"là\"",
+  "explanation": "\"Là\" dùng để nối chủ ngữ với danh từ/tính từ",
+  "structure": "Chủ ngữ + là + Danh từ",
+  "examples": [
+    {
+      "vi": "Tôi là sinh viên",
+      "en": "I am a student"
+    },
+    {
+      "vi": "Anh ấy là giáo viên",
+      "en": "He is a teacher"
+    }
+  ],
+  "notes": "Lưu ý đặc biệt",
+  "difficultyLevel": 1,
+  "lessonId": "uuid-of-lesson"
+}
+```
 
 **Responses:**
 
-- **200**: Success
+- **200**: Cập nhật thành công
+- **404**: Không tìm thấy ngữ pháp
 
 
 ---
@@ -756,17 +966,20 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 
 **Xóa ngữ pháp**
 
+Xóa quy tắc ngữ pháp khỏi lesson - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của ngữ pháp |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Xóa thành công
+- **404**: Không tìm thấy ngữ pháp
 
 
 ---
@@ -774,6 +987,8 @@ Schema: [`CreateVocabularyDto`](#createvocabularydto)
 ### POST /api/v1/grammar
 
 **Tạo ngữ pháp mới**
+
+Tạo quy tắc ngữ pháp mới trong lesson - yêu cầu quyền Admin
 
 🔒 **Authentication Required:** Bearer Token
 
@@ -804,7 +1019,8 @@ Schema: [`CreateGrammarDto`](#creategrammardto)
 
 **Responses:**
 
-- **201**: Success
+- **201**: Tạo ngữ pháp thành công
+- **401**: Chưa đăng nhập
 
 
 ---
@@ -815,11 +1031,13 @@ Schema: [`CreateGrammarDto`](#creategrammardto)
 
 **Lấy kết quả bài tập của user**
 
+Lấy lịch sử làm bài tập của user hiện tại
+
 🔒 **Authentication Required:** Bearer Token
 
 **Responses:**
 
-- **200**: Success
+- **200**: Danh sách kết quả bài tập
 
 
 ---
@@ -828,11 +1046,13 @@ Schema: [`CreateGrammarDto`](#creategrammardto)
 
 **Lấy thống kê bài tập**
 
+Lấy thống kê tổng quan về bài tập của user
+
 🔒 **Authentication Required:** Bearer Token
 
 **Responses:**
 
-- **200**: Success
+- **200**: Thống kê bài tập
 
 
 ---
@@ -841,15 +1061,17 @@ Schema: [`CreateGrammarDto`](#creategrammardto)
 
 **Lấy bài tập theo lesson**
 
+Lấy tất cả bài tập thuộc một lesson
+
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `lessonId` | path | string | ✅ | - |
+| `lessonId` | path | string | ✅ | ID của lesson |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Danh sách bài tập
 
 
 ---
@@ -858,15 +1080,18 @@ Schema: [`CreateGrammarDto`](#creategrammardto)
 
 **Lấy chi tiết bài tập**
 
+Lấy thông tin chi tiết của một bài tập
+
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của bài tập |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Chi tiết bài tập
+- **404**: Không tìm thấy bài tập
 
 
 ---
@@ -875,17 +1100,43 @@ Schema: [`CreateGrammarDto`](#creategrammardto)
 
 **Cập nhật bài tập**
 
+Cập nhật thông tin bài tập - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của bài tập |
+
+**Request Body:**
+
+Schema: [`CreateExerciseDto`](#createexercisedto)
+
+```json
+{
+  "exerciseType": "multiple_choice",
+  "question": "_____ là sinh viên.",
+  "questionAudioUrl": "https://example.com/audio.mp3",
+  "options": [
+    "Tôi",
+    "Bạn",
+    "Anh ấy",
+    "Cả 3 đều đúng"
+  ],
+  "correctAnswer": "Cả 3 đều đúng",
+  "explanation": "Cả 3 đại từ đều có thể đứng trước \"là sinh viên\"",
+  "orderIndex": 1,
+  "difficultyLevel": 1,
+  "lessonId": "uuid-of-lesson"
+}
+```
 
 **Responses:**
 
-- **200**: Success
+- **200**: Cập nhật thành công
+- **404**: Không tìm thấy bài tập
 
 
 ---
@@ -894,17 +1145,20 @@ Schema: [`CreateGrammarDto`](#creategrammardto)
 
 **Xóa bài tập**
 
+Xóa bài tập khỏi lesson - yêu cầu quyền Admin
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của bài tập |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Xóa thành công
+- **404**: Không tìm thấy bài tập
 
 
 ---
@@ -912,6 +1166,8 @@ Schema: [`CreateGrammarDto`](#creategrammardto)
 ### POST /api/v1/exercises
 
 **Tạo bài tập mới**
+
+Tạo bài tập mới trong lesson - yêu cầu quyền Admin
 
 🔒 **Authentication Required:** Bearer Token
 
@@ -940,7 +1196,8 @@ Schema: [`CreateExerciseDto`](#createexercisedto)
 
 **Responses:**
 
-- **201**: Success
+- **201**: Tạo bài tập thành công
+- **401**: Chưa đăng nhập
 
 
 ---
@@ -949,17 +1206,22 @@ Schema: [`CreateExerciseDto`](#createexercisedto)
 
 **Nộp bài tập**
 
+Nộp câu trả lời cho bài tập và nhận kết quả chấm điểm
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `id` | path | string | ✅ | - |
+| `id` | path | string | ✅ | ID của bài tập |
+
+**Request Body:**
 
 **Responses:**
 
-- **201**: Success
+- **200**: Kết quả chấm bài
+- **404**: Không tìm thấy bài tập
 
 
 ---
@@ -970,11 +1232,14 @@ Schema: [`CreateExerciseDto`](#createexercisedto)
 
 **Lấy toàn bộ tiến độ học của user**
 
+Lấy tổng quan tiến độ học tập của user bao gồm tất cả lessons đã học
+
 🔒 **Authentication Required:** Bearer Token
 
 **Responses:**
 
-- **200**: Success
+- **200**: Tiến độ học tập
+- **401**: Chưa đăng nhập
 
 
 ---
@@ -983,17 +1248,20 @@ Schema: [`CreateExerciseDto`](#createexercisedto)
 
 **Lấy tiến độ của 1 lesson**
 
+Lấy thông tin chi tiết tiến độ học của một lesson cụ thể
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `lessonId` | path | string | ✅ | - |
+| `lessonId` | path | string | ✅ | ID của lesson |
 
 **Responses:**
 
-- **200**: Success
+- **200**: Tiến độ lesson
+- **404**: Không tìm thấy tiến độ
 
 
 ---
@@ -1002,17 +1270,19 @@ Schema: [`CreateExerciseDto`](#createexercisedto)
 
 **Bắt đầu học lesson**
 
+Đánh dấu bắt đầu học một lesson mới
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `lessonId` | path | string | ✅ | - |
+| `lessonId` | path | string | ✅ | ID của lesson |
 
 **Responses:**
 
-- **201**: Success
+- **201**: Bắt đầu lesson thành công
 
 
 ---
@@ -1021,17 +1291,21 @@ Schema: [`CreateExerciseDto`](#createexercisedto)
 
 **Hoàn thành lesson**
 
+Đánh dấu hoàn thành lesson và lưu điểm số
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `lessonId` | path | string | ✅ | - |
+| `lessonId` | path | string | ✅ | ID của lesson |
+
+**Request Body:**
 
 **Responses:**
 
-- **201**: Success
+- **200**: Hoàn thành lesson
 
 
 ---
@@ -1040,17 +1314,21 @@ Schema: [`CreateExerciseDto`](#createexercisedto)
 
 **Cập nhật thời gian học**
 
+Cập nhật thời gian đã dành cho lesson (tính bằng giây)
+
 🔒 **Authentication Required:** Bearer Token
 
 **Parameters:**
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
-| `lessonId` | path | string | ✅ | - |
+| `lessonId` | path | string | ✅ | ID của lesson |
+
+**Request Body:**
 
 **Responses:**
 
-- **200**: Success
+- **200**: Cập nhật thời gian thành công
 
 
 ---
