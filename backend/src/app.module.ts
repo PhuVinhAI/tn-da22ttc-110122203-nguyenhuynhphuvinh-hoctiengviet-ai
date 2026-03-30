@@ -50,8 +50,8 @@ import { LoggingModule } from './infrastructure/logging/logging.module';
     }),
     ThrottlerModule.forRoot([
       {
-        ttl: 60000,
-        limit: 10,
+        ttl: 60000, // 60 seconds
+        limit: 1000, // Increased for integration tests
       },
     ]),
     CacheModule,

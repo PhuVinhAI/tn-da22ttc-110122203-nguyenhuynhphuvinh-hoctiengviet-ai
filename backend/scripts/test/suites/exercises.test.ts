@@ -16,10 +16,11 @@ export async function runExercisesTests() {
   let exerciseId: string;
 
   try {
-    // Setup: Create course structure
+    // Setup: Create course structure (this will set token)
     const setup = await setupCourseStructure();
     authToken = setup.token;
     lessonId = setup.lessonId;
+    // Token is already set in setupCourseStructure, no need to set again
 
     // Test 1: Create exercise
     exerciseId = await testCreateExercise(authToken, lessonId);
@@ -59,29 +60,34 @@ export async function runExercisesTests() {
  * Setup course structure
  */
 async function setupCourseStructure() {
-  // Register user
-  const user = userFixtures.randomUser();
-  const authResponse = await apiClient.post(endpoints.auth.register, user);
-  const token = authResponse.data.access_token;
+  try {
+    // Register user
+    const user = userFixtures.randomUser();
+    const authResponse = await apiClient.post(endpoints.auth.register, user);
+    const token = authResponse.data.access_token;
 
-  apiClient.setToken(token);
+    apiClient.setToken(token);
 
-  // Create course
-  const course = courseFixtures.beginnerCourse;
-  const courseResponse = await apiClient.post(endpoints.courses.create, course);
-  const courseId = courseResponse.data.id;
+    // Create course
+    const course = courseFixtures.beginnerCourse;
+    const courseResponse = await apiClient.post(endpoints.courses.create, course);
+    const courseId = courseResponse.data.id;
 
-  // Create unit
-  const unit = unitFixtures.greetingsUnit(courseId);
-  const unitResponse = await apiClient.post('/units', unit);
-  const unitId = unitResponse.data.id;
+    // Create unit
+    const unit = unitFixtures.greetingsUnit(courseId);
+    const unitResponse = await apiClient.post('/units', unit);
+    const unitId = unitResponse.data.id;
 
-  // Create lesson
-  const lesson = lessonFixtures.vocabularyLesson(unitId);
-  const lessonResponse = await apiClient.post('/lessons', lesson);
-  const lessonId = lessonResponse.data.id;
+    // Create lesson
+    const lesson = lessonFixtures.vocabularyLesson(unitId);
+    const lessonResponse = await apiClient.post('/lessons', lesson);
+    const lessonId = lessonResponse.data.id;
 
-  return { token, lessonId };
+    return { token, lessonId };
+  } catch (error) {
+    console.error('  ❌ Setup failed:', error);
+    throw error;
+  }
 }
 
 /**
@@ -90,7 +96,7 @@ async function setupCourseStructure() {
 async function testCreateExercise(token: string, lessonId: string): Promise<string> {
   console.log('📝 Test: Create exercise');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const exercise = exerciseFixtures.multipleChoice(lessonId);
   const response = await apiClient.post('/exercises', exercise);
 
@@ -109,7 +115,7 @@ async function testCreateExercise(token: string, lessonId: string): Promise<stri
 async function testGetExercisesByLesson(token: string, lessonId: string) {
   console.log('📖 Test: Get exercises by lesson');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const response = await apiClient.get(endpoints.exercises.byLesson(lessonId));
 
   TestAssertions.assertStatus(response.status, 200, 'Get exercises should return 200');
@@ -125,7 +131,7 @@ async function testGetExercisesByLesson(token: string, lessonId: string) {
 async function testGetExerciseById(token: string, exerciseId: string) {
   console.log('🔍 Test: Get exercise by ID');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const response = await apiClient.get(endpoints.exercises.detail(exerciseId));
 
   TestAssertions.assertStatus(response.status, 200, 'Get exercise should return 200');
@@ -141,7 +147,7 @@ async function testGetExerciseById(token: string, exerciseId: string) {
 async function testSubmitCorrectAnswer(token: string, exerciseId: string) {
   console.log('✅ Test: Submit correct answer');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const submitData = {
     userAnswer: 'xin chào',
     timeSpent: 10,
@@ -165,7 +171,7 @@ async function testSubmitCorrectAnswer(token: string, exerciseId: string) {
 async function testSubmitWrongAnswer(token: string, exerciseId: string) {
   console.log('❌ Test: Submit wrong answer');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const submitData = {
     userAnswer: 'wrong answer',
     timeSpent: 5,
@@ -189,7 +195,7 @@ async function testSubmitWrongAnswer(token: string, exerciseId: string) {
 async function testGetMyResults(token: string) {
   console.log('📊 Test: Get my results');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const response = await apiClient.get(endpoints.exercises.myResults);
 
   TestAssertions.assertStatus(response.status, 200, 'Get my results should return 200');
@@ -205,7 +211,7 @@ async function testGetMyResults(token: string) {
 async function testGetMyStats(token: string) {
   console.log('📈 Test: Get my stats');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const response = await apiClient.get(endpoints.exercises.myStats);
 
   TestAssertions.assertStatus(response.status, 200, 'Get my stats should return 200');
@@ -229,7 +235,7 @@ if (require.main === module) {
 async function testUpdateExercise(token: string, exerciseId: string) {
   console.log('✏️ Test: Update exercise');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const updateData = {
     question: 'Updated: What does "xin chào" mean?',
   };
@@ -247,7 +253,7 @@ async function testUpdateExercise(token: string, exerciseId: string) {
 async function testDeleteExercise(token: string, exerciseId: string) {
   console.log('🗑️ Test: Delete exercise');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const response = await apiClient.delete(`/exercises/${exerciseId}`);
 
   TestAssertions.assertStatus(response.status, 200, 'Delete exercise should return 200');

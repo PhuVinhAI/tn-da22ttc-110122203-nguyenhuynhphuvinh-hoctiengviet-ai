@@ -89,7 +89,7 @@ async function testGetProfile(token: string) {
   TestAssertions.assertIsUUID(response.data.id, 'User ID should be UUID');
 
   console.log('  ✓ Profile retrieved successfully');
-  apiClient.clearToken();
+  // Don't clear token - other tests may need it
 }
 
 /**

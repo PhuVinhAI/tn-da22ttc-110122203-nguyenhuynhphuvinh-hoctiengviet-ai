@@ -9,6 +9,7 @@ import { runGrammarTests } from './suites/grammar.test';
 import { runExercisesTests } from './suites/exercises.test';
 import { runProgressTests } from './suites/progress.test';
 import { runCacheTests } from './suites/cache.test';
+import { runSecurityTests } from './suites/security.test';
 
 /**
  * Run all test suites
@@ -28,6 +29,7 @@ async function runAllTests() {
 
   // Test suites to run
   const testSuites = [
+    { name: 'Security', fn: runSecurityTests }, // CRITICAL: Chạy đầu tiên
     { name: 'Auth', fn: runAuthTests },
     { name: 'Users', fn: runUsersTests },
     { name: 'Courses', fn: runCoursesTests },

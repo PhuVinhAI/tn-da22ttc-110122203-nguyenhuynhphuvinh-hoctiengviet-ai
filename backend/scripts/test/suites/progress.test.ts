@@ -14,10 +14,11 @@ export async function runProgressTests() {
   let lessonId: string;
 
   try {
-    // Setup: Create course structure
+    // Setup: Create course structure (this will set token)
     const setup = await setupCourseStructure();
     authToken = setup.token;
     lessonId = setup.lessonId;
+    // Token is already set in setupCourseStructure, no need to set again
 
     // Test 1: Start lesson
     await testStartLesson(authToken, lessonId);
@@ -76,7 +77,7 @@ async function setupCourseStructure() {
 async function testStartLesson(token: string, lessonId: string) {
   console.log('▶️ Test: Start lesson');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const response = await apiClient.post(endpoints.progress.start(lessonId));
 
   TestAssertions.assertStatus(response.status, 201, 'Start lesson should return 201');
@@ -97,7 +98,7 @@ async function testStartLesson(token: string, lessonId: string) {
 async function testGetProgressByLesson(token: string, lessonId: string) {
   console.log('🔍 Test: Get progress by lesson');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const response = await apiClient.get(endpoints.progress.byLesson(lessonId));
 
   TestAssertions.assertStatus(response.status, 200, 'Get progress should return 200');
@@ -114,7 +115,7 @@ async function testGetProgressByLesson(token: string, lessonId: string) {
 async function testUpdateTimeSpent(token: string, lessonId: string) {
   console.log('⏱️ Test: Update time spent');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const updateData = {
     timeSpent: 300, // 5 minutes
   };
@@ -136,7 +137,7 @@ async function testUpdateTimeSpent(token: string, lessonId: string) {
 async function testCompleteLesson(token: string, lessonId: string) {
   console.log('✅ Test: Complete lesson');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const completeData = {
     score: 85,
   };
@@ -164,7 +165,7 @@ async function testCompleteLesson(token: string, lessonId: string) {
 async function testGetAllProgress(token: string) {
   console.log('📚 Test: Get all progress');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const response = await apiClient.get(endpoints.progress.list);
 
   TestAssertions.assertStatus(response.status, 200, 'Get all progress should return 200');

@@ -12,11 +12,12 @@ export async function runCacheTests() {
   let authToken: string;
 
   try {
-    // Setup: Register and login
+    // Setup: Register and login (this will set token)
     const user = userFixtures.randomUser();
     const registerResponse = await apiClient.post(endpoints.auth.register, user);
     authToken = registerResponse.data.access_token;
     apiClient.setToken(authToken);
+    // Token is set, ready for tests
 
     // Test 1: Get cache stats
     await testGetCacheStats(authToken);
@@ -37,7 +38,7 @@ export async function runCacheTests() {
 async function testGetCacheStats(token: string) {
   console.log('📊 Test: Get cache stats');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const response = await apiClient.get(endpoints.cache.stats);
 
   TestAssertions.assertStatus(response.status, 200, 'Get cache stats should return 200');
@@ -53,7 +54,7 @@ async function testGetCacheStats(token: string) {
 async function testClearCache(token: string) {
   console.log('🗑️ Test: Clear cache');
 
-  apiClient.setToken(token);
+  // Token already set in setup
   const response = await apiClient.delete(endpoints.cache.clear);
 
   TestAssertions.assertStatus(response.status, 200, 'Clear cache should return 200');
