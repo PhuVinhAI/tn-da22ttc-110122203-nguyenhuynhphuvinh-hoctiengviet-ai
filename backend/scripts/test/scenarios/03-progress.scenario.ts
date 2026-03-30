@@ -90,7 +90,7 @@ export async function runProgressScenario() {
       timeSpent: 5,
     });
     
-    TestAssertions.assertHasProperty(review1_1.data, 'nextReviewDate');
+    TestAssertions.assertHasProperty(review1_1.data, 'nextReviewAt');
     TestAssertions.assertHasProperty(review1_1.data, 'reviewCount');
     
     console.log('  ✓ Reviewed 2 vocabularies correctly');

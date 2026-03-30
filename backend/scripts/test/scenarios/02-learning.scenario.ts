@@ -37,7 +37,7 @@ export async function runLearningScenario() {
   try {
     // Step 1: Register and login
     console.log('Step 1: Student registers and logs in');
-    const user = userFixtures.beginnerUser;
+    const user = userFixtures.randomUser();
     const registerResponse = await apiClient.post(endpoints.auth.register, user);
     authToken = registerResponse.data.access_token;
     apiClient.setToken(authToken);

@@ -163,9 +163,9 @@ async function testReviewVocabulary(token: string, vocabId: string) {
     reviewData,
   );
 
-  TestAssertions.assertStatus(response.status, 200, 'Review vocabulary should return 200');
+  TestAssertions.assertStatus(response.status, 201, 'Review vocabulary should return 201');
   TestAssertions.assertHasData(response, 'Response should have data');
-  TestAssertions.assertHasProperty(response.data, 'nextReviewDate', 'Should have next review date');
+  TestAssertions.assertHasProperty(response.data, 'nextReviewAt', 'Should have next review date');
 
   console.log('  ✓ Vocabulary reviewed successfully');
 }

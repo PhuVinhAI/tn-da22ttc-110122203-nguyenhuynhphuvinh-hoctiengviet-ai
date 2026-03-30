@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { VocabulariesService } from '../application/vocabularies.service';
@@ -8,6 +8,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators';
 import { User } from '../../users/domain/user.entity';
 import { Public } from '../../../common/decorators';
+import { CreateVocabularyDto } from '../dto/create-vocabulary.dto';
 
 @ApiTags('Vocabularies')
 @Controller('vocabularies')
@@ -23,6 +24,30 @@ export class VocabulariesController {
   @ApiOperation({ summary: 'Lấy từ vựng theo lesson' })
   async findByLesson(@Param('lessonId') lessonId: string) {
     return this.vocabulariesService.findByLessonId(lessonId);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  @ApiOperation({ summary: 'Tạo từ vựng mới' })
+  async create(@Body() createVocabularyDto: CreateVocabularyDto) {
+    return this.vocabulariesService.create(createVocabularyDto);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  @ApiOperation({ summary: 'Cập nhật từ vựng' })
+  async update(@Param('id') id: string, @Body() updateVocabularyDto: Partial<CreateVocabularyDto>) {
+    return this.vocabulariesService.update(id, updateVocabularyDto);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  @ApiOperation({ summary: 'Xóa từ vựng' })
+  async remove(@Param('id') id: string) {
+    return this.vocabulariesService.delete(id);
   }
 
   @ApiBearerAuth()

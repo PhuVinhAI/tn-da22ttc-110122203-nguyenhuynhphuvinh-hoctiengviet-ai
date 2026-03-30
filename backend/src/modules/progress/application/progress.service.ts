@@ -64,8 +64,11 @@ export class ProgressService {
       throw new Error('Progress not found');
     }
 
+    const currentTimeSpent = progress.timeSpent ?? 0;
+    const newTimeSpent = currentTimeSpent + (additionalTime || 0);
+
     return this.progressRepository.update(progress.id, {
-      timeSpent: progress.timeSpent + additionalTime,
+      timeSpent: newTimeSpent,
       lastAccessedAt: new Date(),
     });
   }

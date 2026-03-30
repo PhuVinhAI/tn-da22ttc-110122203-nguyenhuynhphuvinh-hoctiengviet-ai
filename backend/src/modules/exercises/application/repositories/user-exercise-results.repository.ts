@@ -20,7 +20,6 @@ export class UserExerciseResultsRepository {
   async findByUserId(userId: string): Promise<UserExerciseResult[]> {
     return this.repository.find({
       where: { userId },
-      relations: ['exercise'],
       order: { attemptedAt: 'DESC' },
     });
   }
@@ -36,17 +35,17 @@ export class UserExerciseResultsRepository {
   }
 
   async getStatsByUser(userId: string): Promise<{
-    total: number;
-    correct: number;
-    incorrect: number;
+    totalExercises: number;
+    correctAnswers: number;
+    incorrectAnswers: number;
     accuracy: number;
   }> {
     const results = await this.repository.find({ where: { userId } });
-    const total = results.length;
-    const correct = results.filter((r) => r.isCorrect).length;
-    const incorrect = total - correct;
-    const accuracy = total > 0 ? (correct / total) * 100 : 0;
+    const totalExercises = results.length;
+    const correctAnswers = results.filter((r) => r.isCorrect).length;
+    const incorrectAnswers = totalExercises - correctAnswers;
+    const accuracy = totalExercises > 0 ? (correctAnswers / totalExercises) * 100 : 0;
 
-    return { total, correct, incorrect, accuracy };
+    return { totalExercises, correctAnswers, incorrectAnswers, accuracy };
   }
 }

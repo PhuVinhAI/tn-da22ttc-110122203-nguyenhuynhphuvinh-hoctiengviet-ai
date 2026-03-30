@@ -29,6 +29,16 @@ export class ExercisesService {
     return exercise;
   }
 
+  async update(id: string, data: Partial<Exercise>): Promise<Exercise> {
+    await this.findById(id);
+    return this.exercisesRepository.update(id, data);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.findById(id);
+    await this.exercisesRepository.delete(id);
+  }
+
   async submitAnswer(
     userId: string,
     exerciseId: string,

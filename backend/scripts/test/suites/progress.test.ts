@@ -145,7 +145,7 @@ async function testCompleteLesson(token: string, lessonId: string) {
     completeData,
   );
 
-  TestAssertions.assertStatus(response.status, 200, 'Complete lesson should return 200');
+  TestAssertions.assertStatus(response.status, 201, 'Complete lesson should return 201');
   TestAssertions.assertHasData(response, 'Response should have data');
   TestAssertions.assertHasProperty(response.data, 'status', 'Should have status');
   TestAssertions.assertEquals(

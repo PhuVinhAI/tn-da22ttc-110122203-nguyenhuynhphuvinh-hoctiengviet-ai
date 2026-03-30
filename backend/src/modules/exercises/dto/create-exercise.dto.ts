@@ -24,6 +24,7 @@ export class CreateExerciseDto {
   options?: any;
 
   @ApiProperty({ example: 'Cả 3 đều đúng' })
+  @IsOptional()
   correctAnswer: any;
 
   @ApiProperty({
