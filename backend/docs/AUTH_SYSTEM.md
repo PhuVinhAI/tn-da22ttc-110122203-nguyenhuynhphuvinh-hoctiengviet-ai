@@ -123,6 +123,49 @@ Response 200:
 }
 ```
 
+#### 7. Đăng nhập bằng Google OAuth
+```http
+GET /api/auth/google
+
+Response 302:
+Redirect đến trang đăng nhập Google
+```
+
+#### 8. Google OAuth Callback
+```http
+GET /api/auth/google/callback
+
+Response 302:
+Redirect về frontend với token: 
+{frontendUrl}/auth/callback?token={jwt-token}
+```
+
+## Google OAuth Flow
+
+### Setup Google OAuth
+
+1. Truy cập [Google Cloud Console](https://console.cloud.google.com/)
+2. Tạo project mới hoặc chọn project có sẵn
+3. Enable Google+ API
+4. Tạo OAuth 2.0 Client ID:
+   - Application type: Web application
+   - Authorized redirect URIs: `http://localhost:3000/api/auth/google/callback`
+5. Copy Client ID và Client Secret vào `.env`
+
+### Flow
+
+1. Frontend redirect user đến `GET /api/auth/google`
+2. Backend redirect đến Google login page
+3. User đăng nhập và cho phép quyền truy cập
+4. Google redirect về `GET /api/auth/google/callback`
+5. Backend xử lý:
+   - Tìm user theo `googleId` hoặc `email`
+   - Nếu chưa có: tạo user mới với `provider=google`, `emailVerified=true`
+   - Nếu đã có: cập nhật `googleId` nếu chưa có
+   - Generate JWT token
+6. Backend redirect về frontend với token: `{frontendUrl}/auth/callback?token={jwt}`
+7. Frontend lưu token và redirect đến dashboard
+
 ## Roles & Permissions
 
 ### Roles
@@ -201,6 +244,9 @@ Xem chi tiết trong [RBAC.md](./RBAC.md)
 - Added: `email_verified` (BOOLEAN, default: false)
 - Added: `email_verified_at` (TIMESTAMP, nullable)
 - Added: `roles` (ManyToMany relation)
+- Added: `google_id` (VARCHAR, nullable, unique) - Google OAuth ID
+- Added: `provider` (VARCHAR, default: 'local') - Auth provider: 'local' | 'google'
+- Modified: `password` (VARCHAR, nullable) - Nullable cho OAuth users
 
 ## Configuration
 
@@ -221,6 +267,11 @@ MAIL_FROM_ADDRESS=your-email@gmail.com
 
 # Frontend
 FRONTEND_URL=http://localhost:3001
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
 ```
 
 ### Gmail Setup

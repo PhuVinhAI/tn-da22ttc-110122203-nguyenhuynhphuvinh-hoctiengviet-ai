@@ -10,6 +10,7 @@ import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { OAuthUserDto } from './dto/oauth-user.dto';
 import { EmailVerificationToken } from './domain/email-verification-token.entity';
 import { PasswordResetToken } from './domain/password-reset-token.entity';
 import { Role } from './domain/role.entity';
@@ -324,5 +325,76 @@ export class AuthService {
     });
 
     this.loggingService.log('Expired tokens cleaned up', 'AuthService');
+  }
+
+  // OAuth methods
+  async validateOAuthUser(oauthUser: OAuthUserDto) {
+    const { googleId, email, fullName, avatarUrl, provider } = oauthUser;
+
+    // Tìm user theo googleId hoặc email
+    let user = googleId ? await this.usersService.findByGoogleId(googleId) : null;
+    
+    if (!user) {
+      user = await this.usersService.findByEmail(email);
+    }
+
+    if (user) {
+      // Cập nhật thông tin nếu user đã tồn tại
+      if (!user.googleId && googleId) {
+        await this.usersService.update(user.id, {
+          googleId,
+          provider,
+          avatarUrl: avatarUrl || user.avatarUrl,
+          emailVerified: true,
+          emailVerifiedAt: new Date(),
+        } as any);
+      }
+      return user;
+    }
+
+    // Tạo user mới từ Google
+    const newUser = await this.usersService.createOAuthUser({
+      email,
+      fullName,
+      googleId,
+      provider,
+      avatarUrl,
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
+    });
+
+    // Assign USER role
+    const userRole = await this.roleRepository.findOne({
+      where: { name: RoleEnum.USER },
+    });
+    
+    if (userRole) {
+      newUser.roles = [userRole];
+      await this.usersService.save(newUser);
+    }
+
+    // Gửi welcome email
+    await this.mailService.sendWelcomeEmail(newUser.email, newUser.fullName);
+
+    this.loggingService.log(
+      `New OAuth user created: ${newUser.email}`,
+      'AuthService',
+    );
+
+    return newUser;
+  }
+
+  async loginWithGoogle(user: any) {
+    const token = this.generateToken(user.id, user.email);
+    
+    this.loggingService.log(
+      `User logged in via Google: ${user.email}`,
+      'AuthService',
+    );
+    
+    return {
+      user,
+      access_token: token,
+    };
   }
 }

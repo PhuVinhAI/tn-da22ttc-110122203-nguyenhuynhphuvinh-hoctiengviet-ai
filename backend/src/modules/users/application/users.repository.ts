@@ -45,4 +45,11 @@ export class UsersRepository {
   async save(user: User): Promise<User> {
     return this.repository.save(user);
   }
+
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    return this.repository.findOne({ 
+      where: { googleId },
+      relations: ['roles', 'roles.permissions'],
+    });
+  }
 }

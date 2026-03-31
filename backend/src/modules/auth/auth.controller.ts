@@ -1,5 +1,6 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req, Res } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -7,6 +8,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { Public } from '../../common/decorators';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -164,5 +166,51 @@ export class AuthController {
   @ApiResponse({ status: 404, description: 'User không tồn tại' })
   async resendVerification(@Body('email') email: string) {
     return this.authService.resendVerificationEmail(email);
+  }
+
+  @Public()
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({
+    summary: 'Đăng nhập bằng Google',
+    description: 'Redirect đến trang đăng nhập Google OAuth'
+  })
+  @ApiResponse({ status: 302, description: 'Redirect đến Google' })
+  async googleAuth() {
+    // Guard sẽ redirect đến Google
+  }
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({
+    summary: 'Google OAuth callback',
+    description: 'Xử lý callback từ Google sau khi đăng nhập thành công'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Đăng nhập thành công',
+    schema: {
+      example: {
+        user: {
+          id: 'uuid-string',
+          email: 'user@gmail.com',
+          fullName: 'John Doe',
+          googleId: 'google-user-id',
+          provider: 'google',
+          emailVerified: true
+        },
+        access_token: 'jwt-token-string'
+      }
+    }
+  })
+  async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
+    const result = await this.authService.loginWithGoogle(req.user);
+    
+    // Redirect về frontend với token
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const redirectUrl = `${frontendUrl}/auth/callback?token=${result.access_token}`;
+    
+    return res.redirect(redirectUrl);
   }
 }

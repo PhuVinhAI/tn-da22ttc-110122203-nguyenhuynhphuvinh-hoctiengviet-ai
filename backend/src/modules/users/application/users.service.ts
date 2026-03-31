@@ -44,4 +44,13 @@ export class UsersService {
   async save(user: User): Promise<User> {
     return this.usersRepository.save(user);
   }
+
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    return this.usersRepository.findByGoogleId(googleId);
+  }
+
+  async createOAuthUser(data: Partial<User>): Promise<User> {
+    // OAuth users không cần password
+    return this.usersRepository.create(data);
+  }
 }

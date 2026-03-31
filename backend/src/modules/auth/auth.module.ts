@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 import { UsersModule } from '../users/users.module';
 import { MailModule } from '../../infrastructure/mail/mail.module';
 import { Role } from './domain/role.entity';
@@ -39,7 +40,7 @@ import { RbacService } from './application/rbac.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RbacService],
+  providers: [AuthService, JwtStrategy, GoogleStrategy, RbacService],
   exports: [AuthService, RbacService],
 })
 export class AuthModule {}

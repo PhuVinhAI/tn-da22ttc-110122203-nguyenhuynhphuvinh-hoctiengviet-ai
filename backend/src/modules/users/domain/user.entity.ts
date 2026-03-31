@@ -12,9 +12,15 @@ export class User extends BaseEntity {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Exclude()
   password: string;
+
+  @Column({ name: 'google_id', nullable: true, unique: true })
+  googleId?: string;
+
+  @Column({ default: 'local' })
+  provider: string;
 
   @Column({ name: 'full_name' })
   fullName: string;
