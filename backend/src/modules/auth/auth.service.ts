@@ -461,9 +461,9 @@ export class AuthService {
   ) {
     const { refreshToken: tokenValue } = refreshTokenDto;
 
-    // Find refresh token
+    // Find refresh token (only non-revoked)
     const refreshToken = await this.refreshTokenRepository.findOne({
-      where: { token: tokenValue },
+      where: { token: tokenValue, revokedAt: null as any },
       relations: ['user'],
     });
 

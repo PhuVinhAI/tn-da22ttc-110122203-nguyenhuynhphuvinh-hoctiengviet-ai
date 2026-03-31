@@ -254,6 +254,54 @@ Xử lý callback từ Google sau khi đăng nhập thành công
 
 ---
 
+### POST /api/v1/auth/refresh
+
+**Làm mới access token**
+
+Sử dụng refresh token để lấy access token mới. Refresh token cũ sẽ bị thu hồi (token rotation).
+
+**Request Body:**
+
+Type: [`RefreshTokenDto`](#refreshtokendto)
+
+```json
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Responses:**
+
+✅ **200** - Token đã được làm mới
+
+⚠️ **401** - Refresh token không hợp lệ hoặc đã hết hạn
+
+
+---
+
+### POST /api/v1/auth/logout
+
+**Đăng xuất**
+
+Thu hồi refresh token và đăng xuất khỏi hệ thống
+
+**Request Body:**
+
+Type: [`RefreshTokenDto`](#refreshtokendto)
+
+```json
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Responses:**
+
+✅ **200** - Đăng xuất thành công
+
+
+---
+
 ## Users
 
 ### GET /api/v1/users/me
@@ -1768,6 +1816,23 @@ Complete schema definitions for all DTOs used in the API.
 {
   "token": "abc123xyz456",
   "newPassword": "NewPassword123!"
+}
+```
+
+
+### RefreshTokenDto
+
+**Properties:**
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `refreshToken` | string | ✅ | Refresh token nhận được từ login/register |
+
+**Example:**
+
+```json
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 

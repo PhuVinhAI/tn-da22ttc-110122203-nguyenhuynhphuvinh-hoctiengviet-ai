@@ -17,6 +17,9 @@ import { runExerciseTypesTests } from './suites/exercise-types.test';
 import { runFSRSTests } from './suites/fsrs.test';
 import { runDialectTests } from './suites/dialect.test';
 import { runVocabularyEnhancementsTests } from './suites/vocabulary-enhancements.test';
+import { runRefreshTokenTests } from './suites/refresh-token.test';
+import { runEmailQueueTests } from './suites/email-queue.test';
+import { runArchivingTests } from './suites/archiving.test';
 import { TestUsers } from './utils/test-users';
 
 /**
@@ -62,6 +65,8 @@ async function runAllTests() {
   const testSuites = [
     { name: 'Security', fn: runSecurityTests }, // CRITICAL: Chạy đầu tiên
     { name: 'Auth', fn: runAuthTests },
+    { name: 'Refresh Token', fn: runRefreshTokenTests }, // NEW: Token refresh & rotation
+    { name: 'Email Queue', fn: runEmailQueueTests }, // NEW: Async email with BullMQ
     { name: 'RBAC', fn: runRbacTests },
     { name: 'Users', fn: runUsersTests },
     { name: 'FSRS Algorithm', fn: runFSRSTests }, // NEW: Test thuật toán FSRS
@@ -77,6 +82,7 @@ async function runAllTests() {
     { name: 'Transactions', fn: runTransactionTests },
     { name: 'Cache', fn: runCacheTests },
     { name: 'Soft Delete', fn: runSoftDeleteTests },
+    { name: 'Database Archiving', fn: runArchivingTests }, // NEW: Archive old data
   ];
 
   // Run each test suite

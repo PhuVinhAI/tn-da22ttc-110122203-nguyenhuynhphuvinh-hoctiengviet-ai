@@ -25,6 +25,8 @@ export const endpoints = {
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
     resendVerification: '/auth/resend-verification',
+    refresh: '/auth/refresh',
+    logout: '/auth/logout',
   },
   users: {
     me: '/users/me',
