@@ -29,6 +29,9 @@ import { CacheModule } from './infrastructure/cache/cache.module';
 import { StorageModule } from './infrastructure/storage/storage.module';
 import { LoggingModule } from './infrastructure/logging/logging.module';
 import { MailModule } from './infrastructure/mail/mail.module';
+import { QueueModule } from './infrastructure/queue/queue.module';
+import { ArchivingModule } from './infrastructure/archiving/archiving.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -57,10 +60,13 @@ import { MailModule } from './infrastructure/mail/mail.module';
         limit: 1000, // Increased for integration tests
       },
     ]),
+    ScheduleModule.forRoot(),
     CacheModule,
     StorageModule,
     LoggingModule,
     MailModule,
+    QueueModule,
+    ArchivingModule,
     AuthModule,
     UsersModule,
     CoursesModule,

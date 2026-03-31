@@ -8,29 +8,31 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { UsersModule } from '../users/users.module';
-import { MailModule } from '../../infrastructure/mail/mail.module';
+import { QueueModule } from '../../infrastructure/queue/queue.module';
 import { Role } from './domain/role.entity';
 import { Permission } from './domain/permission.entity';
 import { EmailVerificationToken } from './domain/email-verification-token.entity';
 import { PasswordResetToken } from './domain/password-reset-token.entity';
+import { RefreshToken } from './domain/refresh-token.entity';
 import { RbacService } from './application/rbac.service';
 
 @Module({
   imports: [
     UsersModule,
-    MailModule,
+    QueueModule,
     PassportModule,
     TypeOrmModule.forFeature([
       Role,
       Permission,
       EmailVerificationToken,
       PasswordResetToken,
+      RefreshToken,
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         const secret = configService.get<string>('jwt.secret') || 'default-secret';
-        const expiresIn = configService.get<string>('jwt.expiresIn') || '7d';
+        const expiresIn = configService.get<string>('jwt.accessTokenExpiresIn') || '15m';
         return {
           secret,
           signOptions: { expiresIn } as any,

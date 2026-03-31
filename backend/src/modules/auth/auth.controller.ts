@@ -7,7 +7,8 @@ import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
-import { Public } from '../../common/decorators';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { Public, CurrentUser } from '../../common/decorators';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 
 @ApiTags('Authentication')
@@ -37,15 +38,19 @@ export class AuthController {
           roles: [{ name: 'USER' }],
           createdAt: '2024-01-01T00:00:00.000Z'
         },
-        accessToken: 'jwt-token-string',
+        access_token: 'jwt-access-token',
+        refresh_token: 'refresh-token-string',
+        expires_in: 900,
         message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.'
       }
     }
   })
   @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   @ApiResponse({ status: 409, description: 'Email đã tồn tại' })
-  async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  async register(@Body() registerDto: RegisterDto, @Req() req: Request) {
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.ip || req.socket.remoteAddress;
+    return this.authService.register(registerDto, userAgent, ipAddress);
   }
 
   @Public()
@@ -68,13 +73,17 @@ export class AuthController {
           emailVerified: true,
           roles: [{ name: 'USER', permissions: [] }]
         },
-        accessToken: 'jwt-token-string'
+        access_token: 'jwt-access-token',
+        refresh_token: 'refresh-token-string',
+        expires_in: 900
       }
     }
   })
   @ApiResponse({ status: 401, description: 'Email hoặc password không đúng' })
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto, @Req() req: Request) {
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.ip || req.socket.remoteAddress;
+    return this.authService.login(loginDto, userAgent, ipAddress);
   }
 
   @Public()
@@ -212,5 +221,49 @@ export class AuthController {
     const redirectUrl = `${frontendUrl}/auth/callback?token=${result.access_token}`;
     
     return res.redirect(redirectUrl);
+  }
+
+  @Public()
+  @Post('refresh')
+  @ApiOperation({
+    summary: 'Làm mới access token',
+    description: 'Sử dụng refresh token để lấy access token mới. Refresh token cũ sẽ bị thu hồi (token rotation).'
+  })
+  @ApiBody({ type: RefreshTokenDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Token đã được làm mới',
+    schema: {
+      example: {
+        access_token: 'new-jwt-access-token',
+        refresh_token: 'new-refresh-token',
+        expires_in: 900
+      }
+    }
+  })
+  @ApiResponse({ status: 401, description: 'Refresh token không hợp lệ hoặc đã hết hạn' })
+  async refresh(@Body() refreshTokenDto: RefreshTokenDto, @Req() req: Request) {
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.ip || req.socket.remoteAddress;
+    return this.authService.refreshAccessToken(refreshTokenDto, userAgent, ipAddress);
+  }
+
+  @Post('logout')
+  @ApiOperation({
+    summary: 'Đăng xuất',
+    description: 'Thu hồi refresh token và đăng xuất khỏi hệ thống'
+  })
+  @ApiBody({ type: RefreshTokenDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Đăng xuất thành công',
+    schema: {
+      example: {
+        message: 'Đăng xuất thành công'
+      }
+    }
+  })
+  async logout(@Body() refreshTokenDto: RefreshTokenDto, @CurrentUser() user: any) {
+    return this.authService.logout(refreshTokenDto, user.id);
   }
 }

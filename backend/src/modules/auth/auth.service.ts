@@ -1,18 +1,21 @@
 import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { UsersService } from '../users/application/users.service';
 import { LoggingService } from '../../infrastructure/logging/logging.service';
-import { MailService } from '../../infrastructure/mail/mail.service';
+import { EmailQueueService } from '../../infrastructure/queue/email-queue.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { OAuthUserDto } from './dto/oauth-user.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { EmailVerificationToken } from './domain/email-verification-token.entity';
 import { PasswordResetToken } from './domain/password-reset-token.entity';
+import { RefreshToken } from './domain/refresh-token.entity';
 import { Role } from './domain/role.entity';
 import { Role as RoleEnum } from '../../common/enums';
 import { randomBytes } from 'crypto';
@@ -22,17 +25,20 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private configService: ConfigService,
     private loggingService: LoggingService,
-    private mailService: MailService,
+    private emailQueueService: EmailQueueService,
     @InjectRepository(EmailVerificationToken)
     private emailVerificationTokenRepository: Repository<EmailVerificationToken>,
     @InjectRepository(PasswordResetToken)
     private passwordResetTokenRepository: Repository<PasswordResetToken>,
+    @InjectRepository(RefreshToken)
+    private refreshTokenRepository: Repository<RefreshToken>,
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
   ) {}
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: RegisterDto, userAgent?: string, ipAddress?: string) {
     try {
       // Tạo user mới
       const user = await this.usersService.create(registerDto);
@@ -52,13 +58,13 @@ export class AuthService {
       const verificationToken = await this.createEmailVerificationToken(user.id);
       
       // Gửi email xác thực
-      await this.mailService.sendVerificationEmail(
+      await this.emailQueueService.sendVerificationEmail(
         user.email,
         user.fullName,
         verificationToken.token,
       );
 
-      const token = this.generateToken(user.id, user.email);
+      const tokens = await this.generateTokens(user.id, user.email, userAgent, ipAddress);
       
       this.loggingService.log(
         `User registered: ${user.email}`,
@@ -67,7 +73,9 @@ export class AuthService {
       
       return {
         user,
-        access_token: token,
+        access_token: tokens.accessToken,
+        refresh_token: tokens.refreshToken,
+        expires_in: 900, // 15 minutes in seconds
         message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
       };
     } catch (error) {
@@ -80,7 +88,7 @@ export class AuthService {
     }
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto, userAgent?: string, ipAddress?: string) {
     try {
       const user = await this.usersService.findByEmail(loginDto.email);
       if (!user) {
@@ -104,7 +112,7 @@ export class AuthService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const token = this.generateToken(user.id, user.email);
+      const tokens = await this.generateTokens(user.id, user.email, userAgent, ipAddress);
       
       this.loggingService.log(
         `User logged in: ${user.email}`,
@@ -113,7 +121,9 @@ export class AuthService {
       
       return {
         user,
-        access_token: token,
+        access_token: tokens.accessToken,
+        refresh_token: tokens.refreshToken,
+        expires_in: 900, // 15 minutes in seconds
       };
     } catch (error) {
       if (!(error instanceof UnauthorizedException)) {
@@ -154,7 +164,7 @@ export class AuthService {
     await this.emailVerificationTokenRepository.save(verificationToken);
 
     // Gửi welcome email
-    await this.mailService.sendWelcomeEmail(
+    await this.emailQueueService.sendWelcomeEmail(
       verificationToken.user.email,
       verificationToken.user.fullName,
     );
@@ -190,7 +200,7 @@ export class AuthService {
     const resetToken = await this.createPasswordResetToken(user.id);
 
     // Gửi email
-    await this.mailService.sendPasswordResetEmail(
+    await this.emailQueueService.sendPasswordResetEmail(
       user.email,
       user.fullName,
       resetToken.token,
@@ -232,7 +242,7 @@ export class AuthService {
     await this.passwordResetTokenRepository.save(resetToken);
 
     // Gửi email thông báo
-    await this.mailService.sendPasswordChangedEmail(
+    await this.emailQueueService.sendPasswordChangedEmail(
       resetToken.user.email,
       resetToken.user.fullName,
     );
@@ -268,7 +278,7 @@ export class AuthService {
     const verificationToken = await this.createEmailVerificationToken(user.id);
 
     // Gửi lại email
-    await this.mailService.sendVerificationEmail(
+    await this.emailQueueService.sendVerificationEmail(
       user.email,
       user.fullName,
       verificationToken.token,
@@ -312,6 +322,46 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
+  private async generateTokens(
+    userId: string,
+    email: string,
+    userAgent?: string,
+    ipAddress?: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = { sub: userId, email };
+
+    // Generate access token (short-lived)
+    const expiresIn = this.configService.get<string>('jwt.accessTokenExpiresIn') || '15m';
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn,
+    } as any);
+
+    // Generate refresh token (long-lived)
+    const refreshTokenValue = randomBytes(64).toString('hex');
+    const refreshTokenExpiresIn = this.configService.get<string>('jwt.refreshTokenExpiresIn') || '7d';
+    
+    // Calculate expiration date
+    const expiresAt = new Date();
+    const days = parseInt(refreshTokenExpiresIn.replace('d', ''));
+    expiresAt.setDate(expiresAt.getDate() + days);
+
+    // Save refresh token to database
+    const refreshToken = this.refreshTokenRepository.create({
+      token: refreshTokenValue,
+      userId,
+      expiresAt,
+      userAgent,
+      ipAddress,
+    });
+
+    await this.refreshTokenRepository.save(refreshToken);
+
+    return {
+      accessToken,
+      refreshToken: refreshTokenValue,
+    };
+  }
+
   // Cleanup expired tokens (có thể chạy bằng cron job)
   async cleanupExpiredTokens() {
     const now = new Date();
@@ -321,6 +371,11 @@ export class AuthService {
     });
 
     await this.passwordResetTokenRepository.delete({
+      expiresAt: LessThan(now),
+    });
+
+    // Cleanup expired refresh tokens
+    await this.refreshTokenRepository.delete({
       expiresAt: LessThan(now),
     });
 
@@ -374,7 +429,7 @@ export class AuthService {
     }
 
     // Gửi welcome email
-    await this.mailService.sendWelcomeEmail(newUser.email, newUser.fullName);
+    await this.emailQueueService.sendWelcomeEmail(newUser.email, newUser.fullName);
 
     this.loggingService.log(
       `New OAuth user created: ${newUser.email}`,
@@ -396,5 +451,84 @@ export class AuthService {
       user,
       access_token: token,
     };
+  }
+
+  // Refresh Token Methods
+  async refreshAccessToken(
+    refreshTokenDto: RefreshTokenDto,
+    userAgent?: string,
+    ipAddress?: string,
+  ) {
+    const { refreshToken: tokenValue } = refreshTokenDto;
+
+    // Find refresh token
+    const refreshToken = await this.refreshTokenRepository.findOne({
+      where: { token: tokenValue },
+      relations: ['user'],
+    });
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    // Validate token
+    if (!refreshToken.isValid()) {
+      throw new UnauthorizedException('Refresh token expired or revoked');
+    }
+
+    // Revoke old token (token rotation)
+    refreshToken.revokedAt = new Date();
+    await this.refreshTokenRepository.save(refreshToken);
+
+    // Generate new tokens
+    const tokens = await this.generateTokens(
+      refreshToken.userId,
+      refreshToken.user.email,
+      userAgent,
+      ipAddress,
+    );
+
+    this.loggingService.log(
+      `Access token refreshed for user: ${refreshToken.user.email}`,
+      'AuthService',
+    );
+
+    return {
+      access_token: tokens.accessToken,
+      refresh_token: tokens.refreshToken,
+      expires_in: 900, // 15 minutes
+    };
+  }
+
+  async logout(refreshTokenDto: RefreshTokenDto, userId: string) {
+    const { refreshToken: tokenValue } = refreshTokenDto;
+
+    // Find and revoke refresh token
+    const refreshToken = await this.refreshTokenRepository.findOne({
+      where: { token: tokenValue, userId },
+    });
+
+    if (refreshToken && !refreshToken.isRevoked()) {
+      refreshToken.revokedAt = new Date();
+      await this.refreshTokenRepository.save(refreshToken);
+    }
+
+    this.loggingService.log(`User logged out: ${userId}`, 'AuthService');
+
+    return {
+      message: 'Đăng xuất thành công',
+    };
+  }
+
+  async revokeAllUserTokens(userId: string) {
+    await this.refreshTokenRepository.update(
+      { userId, revokedAt: null as any },
+      { revokedAt: new Date() },
+    );
+
+    this.loggingService.log(
+      `All tokens revoked for user: ${userId}`,
+      'AuthService',
+    );
   }
 }

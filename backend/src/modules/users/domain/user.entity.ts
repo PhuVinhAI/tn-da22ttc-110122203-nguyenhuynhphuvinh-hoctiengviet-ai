@@ -6,6 +6,7 @@ import { UserProgress } from '../../progress/domain/user-progress.entity';
 import { UserVocabulary } from '../../vocabularies/domain/user-vocabulary.entity';
 import { UserExerciseResult } from '../../exercises/domain/user-exercise-result.entity';
 import { Role } from '../../auth/domain/role.entity';
+import { RefreshToken } from '../../auth/domain/refresh-token.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -69,4 +70,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => UserExerciseResult, (result) => result.user)
   exerciseResults: UserExerciseResult[];
+
+  @OneToMany(() => RefreshToken, (token) => token.user)
+  refreshTokens: RefreshToken[];
 }
