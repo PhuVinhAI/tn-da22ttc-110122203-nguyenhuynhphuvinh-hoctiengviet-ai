@@ -29,6 +29,7 @@
     "test:scenario:auth": "bun run scripts/test/scenarios/01-auth.scenario.ts",
     "test:scenario:learning": "bun run scripts/test/scenarios/02-learning.scenario.ts",
     "test:scenario:progress": "bun run scripts/test/scenarios/03-progress.scenario.ts",
+    "test:manual:google-oauth": "bun run scripts/test/manual/google-oauth.test.ts",
     "docs:generate": "bun run scripts/generate-api-docs.ts",
     "admin:create": "bun run scripts/create-admin.ts"
   },

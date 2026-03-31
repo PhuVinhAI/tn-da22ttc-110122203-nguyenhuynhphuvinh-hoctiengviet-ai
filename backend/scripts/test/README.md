@@ -73,3 +73,14 @@ bun run test:scenario:progress   # Progress tracking flow
 - ✅ Clean up sau mỗi test
 - ✅ Isolated tests
 - ✅ Readable test names
+
+### Manual Tests (Interactive)
+
+Test các flow yêu cầu tương tác người dùng như OAuth.
+
+```bash
+# Google OAuth login test
+bun run test:manual:google-oauth
+```
+
+Chi tiết: [Manual Tests README](./manual/README.md)
