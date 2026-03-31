@@ -12,6 +12,7 @@ import { join } from 'path';
  * - Nested object expansion
  * - Error response details
  * - Type information for arrays and objects
+ * - Split by module for better AI context management
  */
 async function generateAPIDocs() {
   console.log('📚 Generating AI-Optimized API Documentation...\n');
@@ -25,22 +26,32 @@ async function generateAPIDocs() {
 
     const swagger = await response.json();
 
-    // Create docs directory
+    // Create directories
     const docsDir = join(process.cwd(), 'docs');
+    const kiroApiDocsDir = join(process.cwd(), '..', '.kiro', 'api-docs');
     mkdirSync(docsDir, { recursive: true });
+    mkdirSync(kiroApiDocsDir, { recursive: true });
 
-    // Generate main API documentation
+    // Generate main API documentation (legacy, for reference)
     const markdown = generateMarkdown(swagger);
     const filePath = join(docsDir, 'API.md');
     writeFileSync(filePath, markdown);
 
+    // Generate split documentation by module
+    generateSplitDocs(swagger, kiroApiDocsDir);
+
+    // Generate steering index
+    generateSteeringIndex(swagger, join(process.cwd(), '..', '.kiro', 'steering'));
+
     console.log('✅ API Documentation generated successfully!\n');
-    console.log(`📄 File: ${filePath}\n`);
+    console.log(`📄 Main file: ${filePath}`);
+    console.log(`📁 Split docs: ${kiroApiDocsDir}\n`);
     console.log('🤖 Optimized for AI consumption with:');
     console.log('   - Complete request/response schemas');
     console.log('   - Inline enum values');
     console.log('   - Nested object expansion');
-    console.log('   - Error response details\n');
+    console.log('   - Error response details');
+    console.log('   - Split by module for better context management\n');
   } catch (error) {
     console.error('❌ Error:', error);
     process.exit(1);
@@ -437,3 +448,146 @@ function getDefaultValue(type: string): any {
 
 // Run
 generateAPIDocs();
+
+/**
+ * Generate split documentation by module
+ */
+function generateSplitDocs(swagger: any, outputDir: string) {
+  const { paths, components } = swagger;
+  const endpointsByTag = groupEndpointsByTag(paths);
+
+  console.log('📂 Generating split documentation by module...');
+
+  for (const [tag, endpoints] of Object.entries(endpointsByTag)) {
+    let md = `# ${tag} API\n\n`;
+    md += `> API endpoints for ${tag} module\n\n`;
+    md += `**Base URL:** \`http://localhost:3000/api/v1\`\n\n`;
+    md += `---\n\n`;
+
+    // Generate endpoints for this tag
+    for (const endpoint of endpoints as any[]) {
+      md += generateEndpointDoc(endpoint, components);
+      md += `\n---\n\n`;
+    }
+
+    // Add relevant schemas for this tag
+    const relevantSchemas = findRelevantSchemas(endpoints as any[], components);
+    if (relevantSchemas.length > 0) {
+      md += `## 📦 Related Schemas\n\n`;
+      for (const schemaName of relevantSchemas) {
+        const schema = components?.schemas?.[schemaName];
+        if (schema) {
+          md += generateSchemaDoc(schemaName, schema, components);
+          md += `\n`;
+        }
+      }
+    }
+
+    // Write to file
+    const fileName = tag.toLowerCase().replace(/\s+/g, '-') + '.md';
+    const filePath = join(outputDir, fileName);
+    writeFileSync(filePath, md);
+    console.log(`   ✓ ${fileName}`);
+  }
+}
+
+/**
+ * Find relevant schemas for a set of endpoints
+ */
+function findRelevantSchemas(endpoints: any[], components: any): string[] {
+  const schemas = new Set<string>();
+
+  for (const endpoint of endpoints) {
+    // Check request body
+    const requestContent = endpoint.requestBody?.content?.['application/json'];
+    if (requestContent?.schema?.$ref) {
+      const schemaName = requestContent.schema.$ref.split('/').pop();
+      schemas.add(schemaName);
+    }
+
+    // Check responses
+    if (endpoint.responses) {
+      for (const response of Object.values(endpoint.responses)) {
+        const resp = response as any;
+        const respContent = resp.content?.['application/json'];
+        if (respContent?.schema?.$ref) {
+          const schemaName = respContent.schema.$ref.split('/').pop();
+          schemas.add(schemaName);
+        }
+      }
+    }
+  }
+
+  return Array.from(schemas);
+}
+
+/**
+ * Generate steering index file
+ */
+function generateSteeringIndex(swagger: any, steeringDir: string) {
+  const { paths } = swagger;
+  const tags = extractTags(paths);
+
+  console.log('📋 Generating steering index...');
+
+  let md = `---
+description: API Reference Index - BẮT BUỘC đọc docs module tương ứng trước khi code để tránh ảo giác về API
+---
+
+# LinVNix API Reference Index
+
+> **CRITICAL - Hướng dẫn cho AI:**
+> 
+> 1. **File này là INDEX/MAP** - Liệt kê tất cả API modules có sẵn
+> 2. **BẮT BUỘC đọc docs trước khi code** - Đọc file tương ứng trong \`.kiro/api-docs/{module}.md\` trước khi chỉnh sửa bất kỳ endpoint nào
+> 3. **Tránh ảo giác về API** - KHÔNG đoán request/response schema, luôn verify với docs
+> 
+> **Khi thêm/sửa endpoint:**
+> 1. Thêm Swagger decorators đầy đủ (\`@ApiOperation\`, \`@ApiResponse\`, \`@ApiBody\`, etc.)
+> 2. Chạy \`npm run docs:generate\` trong \`backend/\` để cập nhật docs
+> 3. Verify docs đã được generate đúng trước khi commit
+
+## 📚 Available API Modules
+
+Dưới đây là danh sách các module API có sẵn. Mỗi module được tách thành file riêng để tối ưu context window.
+
+`;
+
+  for (const tag of tags) {
+    const fileName = tag.toLowerCase().replace(/\s+/g, '-');
+    md += `### ${tag}\n`;
+    md += `📄 File: \`.kiro/api-docs/${fileName}.md\`\n\n`;
+    
+    // List endpoints in this tag
+    const endpointsByTag = groupEndpointsByTag(paths);
+    const endpoints = endpointsByTag[tag] || [];
+    
+    md += `**Endpoints:**\n`;
+    for (const endpoint of endpoints as any[]) {
+      md += `- \`${endpoint.method} ${endpoint.path}\` - ${endpoint.summary || 'No description'}\n`;
+    }
+    md += `\n`;
+  }
+
+  md += `---
+
+## 🤖 AI Workflow
+
+Khi làm việc với API:
+
+1. **Đọc file module tương ứng** trước khi code
+2. **Kiểm tra request/response schema** để hiểu đúng cấu trúc
+3. **Xem ví dụ JSON** để tránh sai format
+4. **Không đoán** - luôn verify với docs
+
+## 📝 Notes
+
+- Docs được tự động generate từ Swagger
+- Chạy \`npm run docs:generate\` để cập nhật
+- Mỗi module có schemas liên quan đi kèm
+`;
+
+  const filePath = join(steeringDir, 'API_REFERENCE.md');
+  writeFileSync(filePath, md);
+  console.log(`   ✓ API_REFERENCE.md (steering index)`);
+}

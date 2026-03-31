@@ -32,8 +32,6 @@
     "test:scenario:progress": "bun run scripts/test/scenarios/03-progress.scenario.ts",
     "test:manual:google-oauth": "bun run scripts/test/manual/google-oauth.test.ts",
     "docs:generate": "bun run scripts/generate-api-docs.ts",
-    "docs:sync": "bun run scripts/sync-api-docs-to-steering.ts",
-    "docs:build": "npm run docs:generate && npm run docs:sync",
     "admin:create": "bun run scripts/create-admin.ts"
   },
   "dependencies": {
