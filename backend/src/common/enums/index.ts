@@ -7,3 +7,4 @@ export * from './progress-status.enum';
 export * from './mastery-level.enum';
 export * from './role.enum';
 export * from './permission.enum';
+export * from './dialect.enum';

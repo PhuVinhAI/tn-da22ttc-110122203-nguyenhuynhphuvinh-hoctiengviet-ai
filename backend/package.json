@@ -23,6 +23,7 @@
     "test:integration:auth": "bun run scripts/test/suites/auth.test.ts",
     "test:integration:courses": "bun run scripts/test/suites/courses.test.ts",
     "test:integration:vocabularies": "bun run scripts/test/suites/vocabularies.test.ts",
+    "test:integration:dialect": "bun run scripts/test/run-dialect-test.ts",
     "test:integration:exercises": "bun run scripts/test/suites/exercises.test.ts",
     "test:integration:progress": "bun run scripts/test/suites/progress.test.ts",
     "test:scenarios": "bun run scripts/test/run-all-scenarios.ts",

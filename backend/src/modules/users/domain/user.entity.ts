@@ -1,7 +1,7 @@
 import { Entity, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { BaseEntity } from '../../../database/base/base.entity';
-import { UserLevel } from '../../../common/enums';
+import { UserLevel, Dialect } from '../../../common/enums';
 import { UserProgress } from '../../progress/domain/user-progress.entity';
 import { UserVocabulary } from '../../vocabularies/domain/user-vocabulary.entity';
 import { UserExerciseResult } from '../../exercises/domain/user-exercise-result.entity';
@@ -38,6 +38,14 @@ export class User extends BaseEntity {
 
   @Column({ name: 'avatar_url', nullable: true })
   avatarUrl?: string;
+
+  @Column({
+    type: 'enum',
+    enum: Dialect,
+    name: 'preferred_dialect',
+    default: Dialect.STANDARD,
+  })
+  preferredDialect: Dialect;
 
   @Column({ name: 'email_verified', default: false })
   emailVerified: boolean;

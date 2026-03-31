@@ -1,6 +1,6 @@
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
-import { PartOfSpeech } from '../../../common/enums';
+import { PartOfSpeech, Dialect } from '../../../common/enums';
 import { Lesson } from '../../courses/domain/lesson.entity';
 import { UserVocabulary } from './user-vocabulary.entity';
 
@@ -33,6 +33,26 @@ export class Vocabulary extends BaseEntity {
 
   @Column({ name: 'image_url', nullable: true })
   imageUrl?: string;
+
+  // Classifier for nouns (e.g., "con" for animals, "cái" for objects)
+  @Column({ nullable: true })
+  classifier?: string;
+
+  // Regional dialect variants (e.g., {"SOUTHERN": "heo", "NORTHERN": "lợn"})
+  @Column({ name: 'dialect_variants', type: 'jsonb', nullable: true })
+  dialectVariants?: Record<Dialect, string>;
+
+  // Audio URLs for different dialects
+  @Column({ name: 'audio_urls', type: 'jsonb', nullable: true })
+  audioUrls?: Record<Dialect, string>;
+
+  // Primary dialect/region for this vocabulary (if region-specific)
+  @Column({
+    type: 'enum',
+    enum: Dialect,
+    nullable: true,
+  })
+  region?: Dialect;
 
   @Column({ name: 'difficulty_level', default: 1 })
   difficultyLevel: number;

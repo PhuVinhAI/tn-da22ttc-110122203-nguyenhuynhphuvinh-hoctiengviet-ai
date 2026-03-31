@@ -67,42 +67,71 @@ async function loginUser(user: any): Promise<string> {
 }
 
 /**
- * Setup test data (get existing course/unit/lesson)
+ * Setup test data (create course/unit/lesson if not exists)
  */
 async function setupTestData(token: string): Promise<{
   courseId: string;
   unitId: string;
   lessonId: string;
 }> {
-  console.log('🎯 Setup: Get test data');
+  console.log('🎯 Setup: Get or create test data');
 
   apiClient.setToken(token);
 
-  // Get first course
-  const coursesResponse = await apiClient.get(endpoints.courses.list);
-  TestAssertions.assertTrue(
-    coursesResponse.data.length > 0,
-    'Should have at least one course',
-  );
-  const courseId = coursesResponse.data[0].id;
+  // Get or create course
+  let coursesResponse = await apiClient.get(endpoints.courses.list);
+  let courseId: string;
+  
+  if (coursesResponse.data.length === 0) {
+    console.log('  Creating test course...');
+    const courseResponse = await apiClient.post(endpoints.courses.create, {
+      title: 'Transaction Test Course',
+      description: 'Course for transaction testing',
+      level: 'A1',
+      orderIndex: 1,
+    });
+    courseId = courseResponse.data.id;
+  } else {
+    courseId = coursesResponse.data[0].id;
+  }
 
-  // Get first unit
-  const unitsResponse = await apiClient.get(endpoints.units.byCourse(courseId));
-  TestAssertions.assertTrue(
-    unitsResponse.data.length > 0,
-    'Should have at least one unit',
-  );
-  const unitId = unitsResponse.data[0].id;
+  // Get or create unit
+  let unitsResponse = await apiClient.get(endpoints.units.byCourse(courseId));
+  let unitId: string;
+  
+  if (unitsResponse.data.length === 0) {
+    console.log('  Creating test unit...');
+    const unitResponse = await apiClient.post('/units', {
+      title: 'Transaction Test Unit',
+      description: 'Unit for transaction testing',
+      courseId: courseId,
+      orderIndex: 1,
+    });
+    unitId = unitResponse.data.id;
+  } else {
+    unitId = unitsResponse.data[0].id;
+  }
 
-  // Get first lesson
-  const lessonsResponse = await apiClient.get(endpoints.lessons.byUnit(unitId));
-  TestAssertions.assertTrue(
-    lessonsResponse.data.length > 0,
-    'Should have at least one lesson',
-  );
-  const lessonId = lessonsResponse.data[0].id;
+  // Get or create lesson
+  let lessonsResponse = await apiClient.get(endpoints.lessons.byUnit(unitId));
+  let lessonId: string;
+  
+  if (lessonsResponse.data.length === 0) {
+    console.log('  Creating test lesson...');
+    const lessonResponse = await apiClient.post('/lessons', {
+      title: 'Transaction Test Lesson',
+      description: 'Lesson for transaction testing',
+      lessonType: 'vocabulary',
+      unitId: unitId,
+      orderIndex: 1,
+    });
+    lessonId = lessonResponse.data.id;
+  } else {
+    lessonId = lessonsResponse.data[0].id;
+  }
 
-  console.log('  ✓ Test data ready');
+  console.log(`  ✓ Test data ready (Course: ${courseId.substring(0, 8)}...)`);
+
   return { courseId, unitId, lessonId };
 }
 

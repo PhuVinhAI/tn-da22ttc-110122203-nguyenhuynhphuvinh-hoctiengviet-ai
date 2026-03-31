@@ -166,8 +166,7 @@ async function testReviewVocabulary(token: string, vocabId: string) {
 
   apiClient.setToken(token);
   const reviewData = {
-    isCorrect: true,
-    timeSpent: 5,
+    rating: 3, // Good rating (FSRS system)
   };
   const response = await apiClient.post(
     endpoints.vocabularies.review(vocabId),

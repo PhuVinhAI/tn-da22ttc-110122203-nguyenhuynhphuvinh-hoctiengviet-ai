@@ -23,7 +23,7 @@ export class VocabulariesController {
   @Get('lesson/:lessonId')
   @ApiOperation({ 
     summary: 'Lấy từ vựng theo lesson',
-    description: 'Lấy tất cả từ vựng thuộc một lesson'
+    description: 'Lấy tất cả từ vựng thuộc một lesson. Nếu user đã đăng nhập, sẽ tự động áp dụng dialect preference của user.'
   })
   @ApiParam({ name: 'lessonId', description: 'ID của lesson' })
   @ApiResponse({
@@ -41,12 +41,24 @@ export class VocabulariesController {
           exampleTranslation: 'Hello, how are you?',
           audioUrl: 'https://example.com/audio.mp3',
           imageUrl: 'https://example.com/image.jpg',
-          difficultyLevel: 1
+          difficultyLevel: 1,
+          classifier: 'con',
+          region: 'SOUTHERN'
         }
       ]
     }
   })
-  async findByLesson(@Param('lessonId') lessonId: string) {
+  async findByLesson(
+    @Param('lessonId') lessonId: string,
+    @CurrentUser() user?: User,
+  ) {
+    // If user is logged in, apply their dialect preference
+    if (user?.preferredDialect) {
+      return this.vocabulariesService.findByLessonIdWithDialect(
+        lessonId,
+        user.preferredDialect,
+      );
+    }
     return this.vocabulariesService.findByLessonId(lessonId);
   }
 

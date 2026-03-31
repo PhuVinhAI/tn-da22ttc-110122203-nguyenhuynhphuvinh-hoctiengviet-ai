@@ -1,6 +1,6 @@
 import { IsString, IsEnum, IsOptional, IsUrl } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserLevel } from '../../../common/enums';
+import { UserLevel, Dialect } from '../../../common/enums';
 
 export class UpdateUserDto {
   @ApiProperty({ example: 'John Doe', required: false })
@@ -22,4 +22,14 @@ export class UpdateUserDto {
   @IsUrl()
   @IsOptional()
   avatarUrl?: string;
+
+  @ApiProperty({ 
+    enum: Dialect, 
+    example: Dialect.NORTHERN,
+    description: 'Preferred Vietnamese dialect for learning',
+    required: false 
+  })
+  @IsEnum(Dialect)
+  @IsOptional()
+  preferredDialect?: Dialect;
 }
