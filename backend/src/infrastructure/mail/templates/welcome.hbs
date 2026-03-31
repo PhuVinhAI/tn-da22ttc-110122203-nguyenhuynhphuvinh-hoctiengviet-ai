@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #2196F3; color: white; padding: 20px; text-align: center; }
+    .content { padding: 30px; background: #f9f9f9; }
+    .button { display: inline-block; padding: 12px 30px; background: #2196F3; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+    .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+    .features { background: white; padding: 15px; margin: 20px 0; border-left: 4px solid #2196F3; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎉 Chào mừng bạn!</h1>
+    </div>
+    <div class="content">
+      <p>Xin chào <strong>{{fullName}}</strong>,</p>
+      <p>Chào mừng bạn đến với ứng dụng học tiếng Đức! Chúng tôi rất vui khi bạn tham gia cộng đồng học viên của chúng tôi.</p>
+      
+      <div class="features">
+        <h3>Bạn có thể bắt đầu với:</h3>
+        <ul>
+          <li>📚 Khám phá các khóa học từ cơ bản đến nâng cao</li>
+          <li>📝 Luyện tập với hàng ngàn bài tập tương tác</li>
+          <li>🎯 Theo dõi tiến độ học tập của bạn</li>
+          <li>💬 Học từ vựng và ngữ pháp một cách hiệu quả</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center;">
+        <a href="{{loginUrl}}" class="button">Bắt đầu học ngay</a>
+      </div>
+
+      <p>Chúc bạn có một hành trình học tập thú vị và hiệu quả!</p>
+    </div>
+    <div class="footer">
+      <p>Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi.</p>
+      <p>&copy; 2024 Language Learning App. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

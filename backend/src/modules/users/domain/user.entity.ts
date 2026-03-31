@@ -1,10 +1,11 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { UserLevel } from '../../../common/enums';
 import { UserProgress } from '../../progress/domain/user-progress.entity';
 import { UserVocabulary } from '../../vocabularies/domain/user-vocabulary.entity';
 import { UserExerciseResult } from '../../exercises/domain/user-exercise-result.entity';
+import { Role } from '../../auth/domain/role.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -31,6 +32,20 @@ export class User extends BaseEntity {
 
   @Column({ name: 'avatar_url', nullable: true })
   avatarUrl?: string;
+
+  @Column({ name: 'email_verified', default: false })
+  emailVerified: boolean;
+
+  @Column({ name: 'email_verified_at', type: 'timestamp', nullable: true })
+  emailVerifiedAt: Date;
+
+  @ManyToMany(() => Role, { eager: true })
+  @JoinTable({
+    name: 'user_roles',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' },
+  })
+  roles: Role[];
 
   @OneToMany(() => UserProgress, (progress) => progress.user)
   progress: UserProgress[];

@@ -10,6 +10,7 @@ import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import redisConfig from './config/redis.config';
+import mailConfig from './config/mail.config';
 
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -26,12 +27,13 @@ import { ProgressModule } from './modules/progress/progress.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
 import { StorageModule } from './infrastructure/storage/storage.module';
 import { LoggingModule } from './infrastructure/logging/logging.module';
+import { MailModule } from './infrastructure/mail/mail.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, jwtConfig, redisConfig],
+      load: [appConfig, databaseConfig, jwtConfig, redisConfig, mailConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -57,6 +59,7 @@ import { LoggingModule } from './infrastructure/logging/logging.module';
     CacheModule,
     StorageModule,
     LoggingModule,
+    MailModule,
     AuthModule,
     UsersModule,
     CoursesModule,
