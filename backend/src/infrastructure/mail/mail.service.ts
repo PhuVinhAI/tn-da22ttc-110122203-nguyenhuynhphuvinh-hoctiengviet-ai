@@ -10,6 +10,15 @@ export class MailService {
   ) {}
 
   async sendVerificationEmail(email: string, fullName: string, token: string) {
+    // Skip sending email if configured (useful for testing)
+    if (process.env.SKIP_MAIL_SENDING === 'true') {
+      this.loggingService.log(
+        `[SKIPPED] Verification email for: ${email}`,
+        'MailService',
+      );
+      return;
+    }
+
     const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${token}`;
 
     try {
@@ -38,6 +47,15 @@ export class MailService {
   }
 
   async sendWelcomeEmail(email: string, fullName: string) {
+    // Skip sending email if configured (useful for testing)
+    if (process.env.SKIP_MAIL_SENDING === 'true') {
+      this.loggingService.log(
+        `[SKIPPED] Welcome email for: ${email}`,
+        'MailService',
+      );
+      return;
+    }
+
     try {
       await this.mailerService.sendMail({
         to: email,
@@ -63,6 +81,15 @@ export class MailService {
   }
 
   async sendPasswordResetEmail(email: string, fullName: string, token: string) {
+    // Skip sending email if configured (useful for testing)
+    if (process.env.SKIP_MAIL_SENDING === 'true') {
+      this.loggingService.log(
+        `[SKIPPED] Password reset email for: ${email}`,
+        'MailService',
+      );
+      return;
+    }
+
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
 
     try {
@@ -92,6 +119,15 @@ export class MailService {
   }
 
   async sendPasswordChangedEmail(email: string, fullName: string) {
+    // Skip sending email if configured (useful for testing)
+    if (process.env.SKIP_MAIL_SENDING === 'true') {
+      this.loggingService.log(
+        `[SKIPPED] Password changed email for: ${email}`,
+        'MailService',
+      );
+      return;
+    }
+
     try {
       await this.mailerService.sendMail({
         to: email,

@@ -3,6 +3,7 @@ import { BaseEntity } from '../../../database/base/base.entity';
 import { ExerciseType } from '../../../common/enums';
 import { Lesson } from '../../courses/domain/lesson.entity';
 import { UserExerciseResult } from './user-exercise-result.entity';
+import type { ExerciseOptions, ExerciseAnswer } from './exercise-options.types';
 
 @Entity('exercises')
 export class Exercise extends BaseEntity {
@@ -20,10 +21,10 @@ export class Exercise extends BaseEntity {
   questionAudioUrl?: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  options?: any;
+  options?: ExerciseOptions;
 
   @Column({ type: 'jsonb', name: 'correct_answer' })
-  correctAnswer: any;
+  correctAnswer: ExerciseAnswer;
 
   @Column({ type: 'text', nullable: true })
   explanation?: string;

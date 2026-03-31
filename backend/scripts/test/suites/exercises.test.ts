@@ -150,7 +150,9 @@ async function testSubmitCorrectAnswer(token: string, exerciseId: string) {
 
   apiClient.setToken(token);
   const submitData = {
-    userAnswer: 'xin chào',
+    userAnswer: {
+      selectedChoice: 'xin chào',
+    },
     timeSpent: 10,
   };
   const response = await apiClient.post(
@@ -174,7 +176,9 @@ async function testSubmitWrongAnswer(token: string, exerciseId: string) {
 
   apiClient.setToken(token);
   const submitData = {
-    userAnswer: 'wrong answer',
+    userAnswer: {
+      selectedChoice: 'wrong answer',
+    },
     timeSpent: 5,
   };
   const response = await apiClient.post(

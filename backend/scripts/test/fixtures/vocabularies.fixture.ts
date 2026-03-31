@@ -151,13 +151,18 @@ export const grammarFixtures = {
  */
 export const exerciseFixtures = {
   /**
-   * Multiple choice exercise
+   * Multiple choice exercise (with strict typing)
    */
   multipleChoice: (lessonId: string) => ({
     exerciseType: 'multiple_choice',
     question: 'What is the Vietnamese word for "hello"?',
-    options: ['xin chào', 'cảm ơn', 'tạm biệt', 'xin lỗi'],
-    correctAnswer: 'xin chào',
+    options: {
+      type: 'multiple_choice',
+      choices: ['xin chào', 'cảm ơn', 'tạm biệt', 'xin lỗi'],
+    },
+    correctAnswer: {
+      selectedChoice: 'xin chào',
+    },
     explanation: '"Xin chào" is the most common way to say hello in Vietnamese.',
     orderIndex: 1,
     difficultyLevel: 1,
@@ -165,12 +170,19 @@ export const exerciseFixtures = {
   }),
 
   /**
-   * Fill in the blank exercise
+   * Fill in the blank exercise (with strict typing)
    */
   fillBlank: (lessonId: string) => ({
     exerciseType: 'fill_blank',
     question: 'Complete: Tôi ___ cơm. (I eat rice)',
-    correctAnswer: 'ăn',
+    options: {
+      type: 'fill_blank',
+      blanks: 1,
+      acceptedAnswers: [['ăn']],
+    },
+    correctAnswer: {
+      answers: ['ăn'],
+    },
     explanation: '"Ăn" means "to eat" in Vietnamese.',
     orderIndex: 2,
     difficultyLevel: 1,
@@ -178,12 +190,20 @@ export const exerciseFixtures = {
   }),
 
   /**
-   * Translation exercise
+   * Translation exercise (with strict typing)
    */
   translation: (lessonId: string) => ({
     exerciseType: 'translation',
     question: 'Translate to Vietnamese: Thank you very much',
-    correctAnswer: 'Cảm ơn rất nhiều',
+    options: {
+      type: 'translation',
+      sourceLanguage: 'English',
+      targetLanguage: 'Vietnamese',
+      acceptedTranslations: ['Cảm ơn rất nhiều', 'Cảm ơn nhiều'],
+    },
+    correctAnswer: {
+      translation: 'Cảm ơn rất nhiều',
+    },
     explanation: '"Cảm ơn" means thank you, "rất nhiều" means very much.',
     orderIndex: 3,
     difficultyLevel: 1,

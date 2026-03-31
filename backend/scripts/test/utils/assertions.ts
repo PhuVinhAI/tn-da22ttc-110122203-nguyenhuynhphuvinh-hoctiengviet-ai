@@ -68,6 +68,17 @@ export class TestAssertions {
   }
 
   /**
+   * Assert not equals
+   */
+  static assertNotEquals(actual: any, expected: any, message?: string): void {
+    if (actual === expected) {
+      throw new Error(
+        message || `Expected value to not equal ${expected}, but it does`,
+      );
+    }
+  }
+
+  /**
    * Assert not null
    */
   static assertNotNull(value: any, message?: string): void {

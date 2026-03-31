@@ -1,6 +1,6 @@
 import { apiClient } from '../utils/api-client';
 import { TestAssertions } from '../utils/assertions';
-import { endpoints } from '../config/test.config';
+import { endpoints, testConfig } from '../config/test.config';
 import { userFixtures } from '../fixtures/users.fixture';
 
 /**

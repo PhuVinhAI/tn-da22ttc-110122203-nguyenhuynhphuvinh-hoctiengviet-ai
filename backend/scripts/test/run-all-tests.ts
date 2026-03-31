@@ -11,6 +11,9 @@ import { runProgressTests } from './suites/progress.test';
 import { runCacheTests } from './suites/cache.test';
 import { runSecurityTests } from './suites/security.test';
 import { runRbacTests } from './suites/rbac.test';
+import { runSoftDeleteTests } from './suites/soft-delete.test';
+import { runTransactionTests } from './suites/transactions.test';
+import { runExerciseTypesTests } from './suites/exercise-types.test';
 import { TestUsers } from './utils/test-users';
 
 /**
@@ -56,15 +59,18 @@ async function runAllTests() {
   const testSuites = [
     { name: 'Security', fn: runSecurityTests }, // CRITICAL: Chạy đầu tiên
     { name: 'Auth', fn: runAuthTests },
-    { name: 'RBAC', fn: runRbacTests }, // NEW: Test phân quyền
+    { name: 'RBAC', fn: runRbacTests },
     { name: 'Users', fn: runUsersTests },
     { name: 'Courses', fn: runCoursesTests },
     { name: 'Contents', fn: runContentsTests },
     { name: 'Vocabularies', fn: runVocabulariesTests },
     { name: 'Grammar', fn: runGrammarTests },
     { name: 'Exercises', fn: runExercisesTests },
+    { name: 'Exercise Types (Strict Typing)', fn: runExerciseTypesTests }, // NEW
     { name: 'Progress', fn: runProgressTests },
+    { name: 'Transactions', fn: runTransactionTests }, // NEW
     { name: 'Cache', fn: runCacheTests },
+    { name: 'Soft Delete', fn: runSoftDeleteTests }, // NEW (requires manual DB operation)
   ];
 
   // Run each test suite

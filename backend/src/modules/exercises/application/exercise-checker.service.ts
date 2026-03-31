@@ -1,97 +1,181 @@
 import { Injectable } from '@nestjs/common';
 import { ExerciseType } from '../../../common/enums';
+import type {
+  ExerciseAnswer,
+  MultipleChoiceAnswer,
+  FillBlankAnswer,
+  MatchingAnswer,
+  OrderingAnswer,
+  TranslationAnswer,
+  ListeningAnswer,
+} from '../domain/exercise-options.types';
 
 @Injectable()
 export class ExerciseCheckerService {
   checkAnswer(
     exerciseType: ExerciseType,
-    userAnswer: any,
-    correctAnswer: any,
+    userAnswer: ExerciseAnswer | any, // any for backward compatibility
+    correctAnswer: ExerciseAnswer,
   ): boolean {
     switch (exerciseType) {
       case ExerciseType.MULTIPLE_CHOICE:
-        return this.checkMultipleChoice(userAnswer, correctAnswer);
+        return this.checkMultipleChoice(
+          userAnswer as MultipleChoiceAnswer,
+          correctAnswer as MultipleChoiceAnswer,
+        );
 
       case ExerciseType.FILL_BLANK:
-        return this.checkFillBlank(userAnswer, correctAnswer);
+        return this.checkFillBlank(
+          userAnswer as FillBlankAnswer,
+          correctAnswer as FillBlankAnswer,
+        );
 
       case ExerciseType.MATCHING:
-        return this.checkMatching(userAnswer, correctAnswer);
+        return this.checkMatching(
+          userAnswer as MatchingAnswer,
+          correctAnswer as MatchingAnswer,
+        );
 
       case ExerciseType.ORDERING:
-        return this.checkOrdering(userAnswer, correctAnswer);
+        return this.checkOrdering(
+          userAnswer as OrderingAnswer,
+          correctAnswer as OrderingAnswer,
+        );
 
       case ExerciseType.TRANSLATION:
-        return this.checkTranslation(userAnswer, correctAnswer);
+        return this.checkTranslation(
+          userAnswer as TranslationAnswer,
+          correctAnswer as TranslationAnswer,
+        );
 
       case ExerciseType.LISTENING:
-        return this.checkListening(userAnswer, correctAnswer);
+        return this.checkListening(
+          userAnswer as ListeningAnswer,
+          correctAnswer as ListeningAnswer,
+        );
 
       default:
         return false;
     }
   }
 
-  private checkMultipleChoice(userAnswer: string, correctAnswer: string): boolean {
-    return userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
-  }
+  private checkMultipleChoice(
+    userAnswer: MultipleChoiceAnswer | any,
+    correctAnswer: MultipleChoiceAnswer,
+  ): boolean {
+    // Handle both old format (string) and new format (object)
+    const userChoice =
+      typeof userAnswer === 'string' ? userAnswer : userAnswer?.selectedChoice;
+    const correctChoice = correctAnswer.selectedChoice;
 
-  private checkFillBlank(userAnswer: string, correctAnswer: string | string[]): boolean {
-    const normalizedUserAnswer = this.normalizeVietnamese(userAnswer);
+    if (!userChoice || !correctChoice) return false;
 
-    if (Array.isArray(correctAnswer)) {
-      return correctAnswer.some(
-        (answer) =>
-          this.normalizeVietnamese(answer) === normalizedUserAnswer,
-      );
-    }
-
-    return this.normalizeVietnamese(correctAnswer) === normalizedUserAnswer;
-  }
-
-  private checkMatching(userAnswer: Record<string, string>, correctAnswer: Record<string, string>): boolean {
-    const userKeys = Object.keys(userAnswer).sort();
-    const correctKeys = Object.keys(correctAnswer).sort();
-
-    if (userKeys.length !== correctKeys.length) {
-      return false;
-    }
-
-    return userKeys.every(
-      (key) =>
-        userAnswer[key].trim().toLowerCase() ===
-        correctAnswer[key]?.trim().toLowerCase(),
+    return (
+      userChoice.trim().toLowerCase() === correctChoice.trim().toLowerCase()
     );
   }
 
-  private checkOrdering(userAnswer: string[], correctAnswer: string[]): boolean {
-    if (userAnswer.length !== correctAnswer.length) {
-      return false;
+  private checkFillBlank(
+    userAnswer: FillBlankAnswer | any,
+    correctAnswer: FillBlankAnswer,
+  ): boolean {
+    // Handle both old format (string) and new format (object)
+    const userAnswers = Array.isArray(userAnswer)
+      ? userAnswer
+      : userAnswer?.answers || [userAnswer];
+    const correctAnswers = correctAnswer.answers;
+
+    if (userAnswers.length !== correctAnswers.length) return false;
+
+    return userAnswers.every((userAns, index) => {
+      const normalizedUser = this.normalizeVietnamese(userAns);
+      const normalizedCorrect = this.normalizeVietnamese(correctAnswers[index]);
+      return normalizedUser === normalizedCorrect;
+    });
+  }
+
+  private checkMatching(
+    userAnswer: MatchingAnswer | any,
+    correctAnswer: MatchingAnswer,
+  ): boolean {
+    // Handle both old format (object) and new format (array of pairs)
+    const userMatches = userAnswer?.matches || [];
+    const correctMatches = correctAnswer.matches;
+
+    if (userMatches.length !== correctMatches.length) return false;
+
+    // Convert to maps for easier comparison
+    const userMap = new Map(
+      userMatches.map((m: any) => [
+        m.left.trim().toLowerCase(),
+        m.right.trim().toLowerCase(),
+      ]),
+    );
+    const correctMap = new Map(
+      correctMatches.map((m) => [
+        m.left.trim().toLowerCase(),
+        m.right.trim().toLowerCase(),
+      ]),
+    );
+
+    for (const [left, right] of correctMap) {
+      if (userMap.get(left) !== right) return false;
     }
 
-    return userAnswer.every(
+    return true;
+  }
+
+  private checkOrdering(
+    userAnswer: OrderingAnswer | any,
+    correctAnswer: OrderingAnswer,
+  ): boolean {
+    // Handle both old format (array) and new format (object)
+    const userItems = Array.isArray(userAnswer)
+      ? userAnswer
+      : userAnswer?.orderedItems || [];
+    const correctItems = correctAnswer.orderedItems;
+
+    if (userItems.length !== correctItems.length) return false;
+
+    return userItems.every(
       (item, index) =>
-        item.trim().toLowerCase() === correctAnswer[index].trim().toLowerCase(),
+        item.trim().toLowerCase() ===
+        correctItems[index].trim().toLowerCase(),
     );
   }
 
-  private checkTranslation(userAnswer: string, correctAnswer: string | string[]): boolean {
-    // Similar to fill blank but more lenient
-    const normalizedUserAnswer = this.normalizeVietnamese(userAnswer);
+  private checkTranslation(
+    userAnswer: TranslationAnswer | any,
+    correctAnswer: TranslationAnswer,
+  ): boolean {
+    // Handle both old format (string) and new format (object)
+    const userTranslation =
+      typeof userAnswer === 'string' ? userAnswer : userAnswer?.translation;
+    const correctTranslation = correctAnswer.translation;
 
-    if (Array.isArray(correctAnswer)) {
-      return correctAnswer.some((answer) => {
-        const normalized = this.normalizeVietnamese(answer);
-        return this.calculateSimilarity(normalizedUserAnswer, normalized) > 0.8;
-      });
-    }
+    if (!userTranslation || !correctTranslation) return false;
 
-    const normalizedCorrect = this.normalizeVietnamese(correctAnswer);
-    return this.calculateSimilarity(normalizedUserAnswer, normalizedCorrect) > 0.8;
+    const normalizedUser = this.normalizeVietnamese(userTranslation);
+    const normalizedCorrect = this.normalizeVietnamese(correctTranslation);
+
+    return this.calculateSimilarity(normalizedUser, normalizedCorrect) > 0.8;
   }
 
-  private checkListening(userAnswer: string, correctAnswer: string): boolean {
-    return this.checkFillBlank(userAnswer, correctAnswer);
+  private checkListening(
+    userAnswer: ListeningAnswer | any,
+    correctAnswer: ListeningAnswer,
+  ): boolean {
+    // Handle both old format (string) and new format (object)
+    const userTranscript =
+      typeof userAnswer === 'string' ? userAnswer : userAnswer?.transcript;
+    const correctTranscript = correctAnswer.transcript;
+
+    if (!userTranscript || !correctTranscript) return false;
+
+    const normalizedUser = this.normalizeVietnamese(userTranscript);
+    const normalizedCorrect = this.normalizeVietnamese(correctTranscript);
+
+    return normalizedUser === normalizedCorrect;
   }
 
   private normalizeVietnamese(text: string): string {

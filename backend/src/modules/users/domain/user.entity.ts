@@ -9,14 +9,14 @@ import { Role } from '../../auth/domain/role.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
-  @Column({ unique: true })
+  @Column()
   email: string;
 
   @Column({ nullable: true })
   @Exclude()
   password: string;
 
-  @Column({ name: 'google_id', nullable: true, unique: true })
+  @Column({ name: 'google_id', nullable: true })
   googleId?: string;
 
   @Column({ default: 'local' })

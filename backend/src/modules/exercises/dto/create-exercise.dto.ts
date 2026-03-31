@@ -1,6 +1,8 @@
-import { IsString, IsEnum, IsNumber, IsUUID, IsOptional, IsUrl } from 'class-validator';
+import { IsString, IsEnum, IsNumber, IsUUID, IsOptional, IsUrl, ValidateNested, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { ExerciseType } from '../../../common/enums';
+import type { ExerciseOptions, ExerciseAnswer } from '../domain/exercise-options.types';
 
 export class CreateExerciseDto {
   @ApiProperty({ enum: ExerciseType, example: ExerciseType.MULTIPLE_CHOICE })
@@ -17,15 +19,21 @@ export class CreateExerciseDto {
   questionAudioUrl?: string;
 
   @ApiProperty({
-    example: ['Tôi', 'Bạn', 'Anh ấy', 'Cả 3 đều đúng'],
+    example: {
+      type: 'multiple_choice',
+      choices: ['Tôi', 'Bạn', 'Anh ấy', 'Cả 3 đều đúng'],
+    },
     required: false,
   })
+  @IsObject()
   @IsOptional()
-  options?: any;
+  options?: ExerciseOptions;
 
-  @ApiProperty({ example: 'Cả 3 đều đúng' })
-  @IsOptional()
-  correctAnswer: any;
+  @ApiProperty({
+    example: { selectedChoice: 'Cả 3 đều đúng' },
+  })
+  @IsObject()
+  correctAnswer: ExerciseAnswer;
 
   @ApiProperty({
     example: 'Cả 3 đại từ đều có thể đứng trước "là sinh viên"',
