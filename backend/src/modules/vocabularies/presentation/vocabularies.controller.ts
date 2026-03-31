@@ -131,13 +131,26 @@ export class VocabulariesController {
   @Post(':vocabularyId/review')
   @ApiOperation({ 
     summary: 'Ôn tập từ vựng',
-    description: 'Ghi nhận kết quả ôn tập từ vựng và cập nhật lịch ôn tập theo thuật toán spaced repetition'
+    description: 'Ghi nhận kết quả ôn tập từ vựng và cập nhật lịch ôn tập theo thuật toán FSRS. Rating: 1=Again (quên hoàn toàn), 2=Hard (nhớ khó), 3=Good (nhớ đúng), 4=Easy (nhớ dễ dàng)'
   })
   @ApiParam({ name: 'vocabularyId', description: 'ID của từ vựng' })
   @ApiBody({
     schema: {
       example: {
-        isCorrect: true
+        rating: 3,
+        reviewDate: '2024-01-01T00:00:00.000Z'
+      },
+      properties: {
+        rating: {
+          type: 'number',
+          enum: [1, 2, 3, 4],
+          description: '1=Again (forgot), 2=Hard, 3=Good, 4=Easy'
+        },
+        reviewDate: {
+          type: 'string',
+          format: 'date-time',
+          description: 'Optional: Custom review date for testing time-based scenarios'
+        }
       }
     }
   })
@@ -149,20 +162,25 @@ export class VocabulariesController {
         id: 'uuid-string',
         masteryLevel: 'LEARNING',
         reviewCount: 1,
-        nextReviewDate: '2024-01-03T00:00:00.000Z',
-        lastReviewedAt: '2024-01-01T00:00:00.000Z'
+        nextReviewAt: '2024-01-03T00:00:00.000Z',
+        lastReviewedAt: '2024-01-01T00:00:00.000Z',
+        stability: 2.5,
+        difficulty: 5.2,
+        scheduledDays: 3
       }
     }
   })
   async reviewVocabulary(
     @CurrentUser() user: User,
     @Param('vocabularyId') vocabularyId: string,
-    @Body() body: { isCorrect: boolean },
+    @Body() body: { rating: number; reviewDate?: string },
   ) {
+    const reviewDate = body.reviewDate ? new Date(body.reviewDate) : undefined;
     return this.userVocabulariesService.reviewVocabulary(
       user.id,
       vocabularyId,
-      body.isCorrect,
+      body.rating,
+      reviewDate,
     );
   }
 

@@ -7,9 +7,13 @@ import { UserVocabulariesService } from './application/user-vocabularies.service
 import { VocabulariesRepository } from './application/repositories/vocabularies.repository';
 import { UserVocabulariesRepository } from './application/repositories/user-vocabularies.repository';
 import { VocabulariesController } from './presentation/vocabularies.controller';
+import { ProgressModule } from '../progress/progress.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Vocabulary, UserVocabulary])],
+  imports: [
+    TypeOrmModule.forFeature([Vocabulary, UserVocabulary]),
+    ProgressModule,
+  ],
   controllers: [VocabulariesController],
   providers: [
     VocabulariesService,

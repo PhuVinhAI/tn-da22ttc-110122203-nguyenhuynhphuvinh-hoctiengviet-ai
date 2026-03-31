@@ -14,6 +14,7 @@ import { runRbacTests } from './suites/rbac.test';
 import { runSoftDeleteTests } from './suites/soft-delete.test';
 import { runTransactionTests } from './suites/transactions.test';
 import { runExerciseTypesTests } from './suites/exercise-types.test';
+import { runFSRSTests } from './suites/fsrs.test';
 import { TestUsers } from './utils/test-users';
 
 /**
@@ -61,16 +62,17 @@ async function runAllTests() {
     { name: 'Auth', fn: runAuthTests },
     { name: 'RBAC', fn: runRbacTests },
     { name: 'Users', fn: runUsersTests },
+    { name: 'FSRS Algorithm', fn: runFSRSTests }, // NEW: Test thuật toán FSRS
     { name: 'Courses', fn: runCoursesTests },
     { name: 'Contents', fn: runContentsTests },
     { name: 'Vocabularies', fn: runVocabulariesTests },
     { name: 'Grammar', fn: runGrammarTests },
     { name: 'Exercises', fn: runExercisesTests },
-    { name: 'Exercise Types (Strict Typing)', fn: runExerciseTypesTests }, // NEW
+    { name: 'Exercise Types (Strict Typing)', fn: runExerciseTypesTests },
     { name: 'Progress', fn: runProgressTests },
-    { name: 'Transactions', fn: runTransactionTests }, // NEW
+    { name: 'Transactions', fn: runTransactionTests },
     { name: 'Cache', fn: runCacheTests },
-    { name: 'Soft Delete', fn: runSoftDeleteTests }, // NEW (requires manual DB operation)
+    { name: 'Soft Delete', fn: runSoftDeleteTests },
   ];
 
   // Run each test suite

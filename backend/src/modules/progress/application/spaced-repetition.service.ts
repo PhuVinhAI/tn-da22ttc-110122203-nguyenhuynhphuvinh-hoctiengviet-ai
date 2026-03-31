@@ -1,57 +1,122 @@
 import { Injectable } from '@nestjs/common';
-import { SPACED_REPETITION_INTERVALS } from '../../../common/constants';
+import { FSRSService, Rating, Card, State } from './fsrs.service';
 
 /**
- * TODO: ENHANCEMENT - Implement SM-2 (SuperMemo 2) Algorithm
+ * Spaced Repetition Service using FSRS Algorithm
  * 
- * Hiện tại đang dùng intervals cố định: 1, 3, 7, 14, 30 ngày.
- * Trong tương lai nên áp dụng thuật toán SM-2 để tính toán động dựa trên:
- * - Độ khó của từ (easiness factor)
- * - Lịch sử trả lời đúng/sai của từng user
- * - Điều chỉnh interval theo performance cá nhân
+ * FSRS (Free Spaced Repetition Scheduler) là thuật toán hiện đại được Anki sử dụng.
+ * Ưu điểm:
+ * - Cá nhân hóa cao dựa trên performance của từng user
+ * - Tính toán retention probability chính xác
+ * - Tối ưu hóa cho long-term memory retention
  * 
- * Tham khảo: https://en.wikipedia.org/wiki/SuperMemo#Description_of_SM-2_algorithm
+ * Thay thế fixed intervals cũ [1, 3, 7, 14, 30] bằng dynamic scheduling.
  */
 @Injectable()
 export class SpacedRepetitionService {
+  constructor(private readonly fsrsService: FSRSService) {}
   /**
-   * Calculate next review date based on review count and correctness
-   * @param reviewCount Number of times reviewed
-   * @param isCorrect Whether the last review was correct
-   * @returns Next review date
+   * Calculate next review using FSRS algorithm
+   * @param currentCard Current FSRS card state
+   * @param rating User's rating (1=Again, 2=Hard, 3=Good, 4=Easy)
+   * @returns Updated card with next review date
    */
-  calculateNextReview(reviewCount: number, isCorrect: boolean): Date {
-    let intervalDays: number;
-
-    if (!isCorrect) {
-      // If incorrect, reset to 1 day
-      intervalDays = 1;
-    } else {
-      // Use spaced repetition intervals
-      const intervalIndex = Math.min(
-        reviewCount,
-        SPACED_REPETITION_INTERVALS.length - 1,
-      );
-      intervalDays = SPACED_REPETITION_INTERVALS[intervalIndex];
-    }
-
-    const nextReview = new Date();
-    nextReview.setDate(nextReview.getDate() + intervalDays);
-    return nextReview;
+  calculateNextReview(currentCard: Card, rating: Rating): Card {
+    const now = new Date();
+    return this.calculateNextReviewWithDate(currentCard, rating, now);
   }
 
   /**
-   * Calculate mastery level based on correct count
-   * @param correctCount Number of correct reviews
-   * @returns Mastery level: learning, familiar, mastered
+   * Calculate next review with custom date (for testing)
+   * @param currentCard Current FSRS card state
+   * @param rating User's rating
+   * @param reviewDate Date of review (for time simulation)
+   * @returns Updated card with next review date
    */
-  calculateMasteryLevel(correctCount: number): string {
-    if (correctCount >= 10) {
-      return 'mastered';
-    } else if (correctCount >= 3) {
-      return 'familiar';
+  calculateNextReviewWithDate(currentCard: Card, rating: Rating, reviewDate: Date): Card {
+    const schedulingInfo = this.fsrsService.repeat(currentCard, reviewDate);
+    return schedulingInfo[rating].card;
+  }
+
+  /**
+   * Initialize a new card for first-time learning
+   */
+  initializeCard(): Card {
+    return this.fsrsService.initCard();
+  }
+
+  /**
+   * Convert user vocabulary entity to FSRS Card
+   */
+  toCard(userVocab: {
+    nextReviewAt?: Date;
+    lastReviewedAt?: Date;
+    stability: number;
+    difficulty: number;
+    state: number;
+    elapsedDays: number;
+    scheduledDays: number;
+    reps: number;
+    lapses: number;
+  }): Card {
+    return {
+      due: userVocab.nextReviewAt || new Date(),
+      stability: userVocab.stability,
+      difficulty: userVocab.difficulty,
+      elapsedDays: userVocab.elapsedDays,
+      scheduledDays: userVocab.scheduledDays,
+      reps: userVocab.reps,
+      lapses: userVocab.lapses,
+      state: userVocab.state as State,
+      lastReview: userVocab.lastReviewedAt,
+    };
+  }
+
+  /**
+   * Get all possible next states for a card (for preview)
+   */
+  getSchedulingOptions(currentCard: Card): Record<Rating, Card> {
+    const now = new Date();
+    const schedulingInfo = this.fsrsService.repeat(currentCard, now);
+    
+    return {
+      [Rating.Again]: schedulingInfo[Rating.Again].card,
+      [Rating.Hard]: schedulingInfo[Rating.Hard].card,
+      [Rating.Good]: schedulingInfo[Rating.Good].card,
+      [Rating.Easy]: schedulingInfo[Rating.Easy].card,
+    };
+  }
+
+  /**
+   * Calculate mastery level based on FSRS state and stability
+   */
+  calculateMasteryLevel(card: Card): string {
+    // New or Learning state
+    if (card.state === State.New || card.state === State.Learning) {
+      return 'learning';
     }
+    
+    // Relearning (forgot previously learned)
+    if (card.state === State.Relearning) {
+      return 'learning';
+    }
+
+    // Review state - check stability
+    if (card.stability >= 100) {
+      return 'mastered'; // Very stable memory (100+ days)
+    } else if (card.stability >= 21) {
+      return 'familiar'; // Stable memory (3+ weeks)
+    }
+    
     return 'learning';
+  }
+
+  /**
+   * Get current retrievability (probability of recall)
+   */
+  getRetrievability(card: Card): number {
+    const now = new Date();
+    return this.fsrsService.getRetrievability(card, now);
   }
 
   /**
