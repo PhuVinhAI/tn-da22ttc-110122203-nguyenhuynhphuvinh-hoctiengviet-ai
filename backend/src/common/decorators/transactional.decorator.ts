@@ -1,8 +1,20 @@
-import { DataSource } from 'typeorm';
+import { DataSource, QueryRunner } from 'typeorm';
+
+/**
+ * Interface cho service sử dụng @Transactional() decorator.
+ * Service phải implement interface này để có thể truy cập queryRunner một cách type-safe.
+ */
+export interface TransactionalHost {
+  dataSource: DataSource;
+  queryRunner?: QueryRunner;
+}
 
 /**
  * Decorator để wrap method trong database transaction
  * Tự động rollback nếu có lỗi, commit nếu thành công
+ *
+ * Service sử dụng decorator này phải inject DataSource và implement TransactionalHost.
+ * Truy cập queryRunner qua `this.queryRunner` (đã được typed).
  *
  * Usage:
  * @Transactional()
@@ -16,9 +28,11 @@ export function Transactional() {
   ) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
-      // Lấy DataSource từ instance (giả sử service có inject DataSource)
-      const dataSource: DataSource = this.dataSource;
+    descriptor.value = async function (
+      this: TransactionalHost,
+      ...args: any[]
+    ) {
+      const dataSource = this.dataSource;
 
       if (!dataSource) {
         throw new Error(
@@ -31,8 +45,6 @@ export function Transactional() {
       await queryRunner.startTransaction();
 
       try {
-        // Inject queryRunner vào context để các repository có thể dùng
-        const originalDataSource = this.dataSource;
         this.queryRunner = queryRunner;
 
         const result = await originalMethod.apply(this, args);
@@ -43,9 +55,8 @@ export function Transactional() {
         await queryRunner.rollbackTransaction();
         throw error;
       } finally {
+        this.queryRunner = undefined;
         await queryRunner.release();
-        // Cleanup
-        delete this.queryRunner;
       }
     };
 

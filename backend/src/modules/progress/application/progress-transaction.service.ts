@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { Transactional } from '../../../common/decorators';
+import { DataSource, EntityManager } from 'typeorm';
+import { Transactional, TransactionalHost } from '../../../common/decorators';
 import { ProgressRepository } from './progress.repository';
-import { ProgressStatus } from '../../../common/enums';
+import { UserExerciseResultsRepository } from '../../exercises/application/repositories/user-exercise-results.repository';
+import { UserVocabulariesRepository } from '../../vocabularies/application/repositories/user-vocabularies.repository';
+import { MasteryLevel, ProgressStatus } from '../../../common/enums';
 import { UserProgress } from '../domain/user-progress.entity';
 
 /**
@@ -16,11 +18,21 @@ import { UserProgress } from '../domain/user-progress.entity';
  * Nếu 1 trong 3 bước fail → rollback tất cả
  */
 @Injectable()
-export class ProgressTransactionService {
+export class ProgressTransactionService implements TransactionalHost {
+  queryRunner?: import('typeorm').QueryRunner;
+
   constructor(
-    private readonly dataSource: DataSource,
+    readonly dataSource: DataSource,
     private readonly progressRepository: ProgressRepository,
+    private readonly exerciseResultsRepository: UserExerciseResultsRepository,
+    private readonly vocabulariesRepository: UserVocabulariesRepository,
   ) {}
+
+  private getManager(): EntityManager {
+    return this.queryRunner
+      ? this.queryRunner.manager
+      : this.dataSource.manager;
+  }
 
   /**
    * Complete lesson với transaction
@@ -35,13 +47,13 @@ export class ProgressTransactionService {
       score: number;
       isCorrect: boolean;
     }>,
-    vocabularyUpdates: Array<{ vocabularyId: string; masteryLevel: number }>,
+    vocabularyUpdates: Array<{
+      vocabularyId: string;
+      masteryLevel: MasteryLevel;
+    }>,
   ): Promise<UserProgress> {
-    // Sử dụng queryRunner từ decorator nếu có, nếu không dùng default
-    const queryRunner = (this as any).queryRunner;
-    const manager = queryRunner ? queryRunner.manager : this.dataSource.manager;
+    const manager = this.getManager();
 
-    // 1. Update Progress
     const progress = await manager.findOne(UserProgress, {
       where: { userId, lessonId },
     });
@@ -60,25 +72,22 @@ export class ProgressTransactionService {
 
     await manager.save(UserProgress, progress);
 
-    // 2. Save Exercise Results
-    // (Giả sử có UserExerciseResult entity)
     for (const result of exerciseResults) {
-      await manager.query(
-        `INSERT INTO user_exercise_results (user_id, exercise_id, score, is_correct, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, NOW(), NOW())
-         ON CONFLICT (user_id, exercise_id) 
-         DO UPDATE SET score = $3, is_correct = $4, updated_at = NOW()`,
-        [userId, result.exerciseId, result.score, result.isCorrect],
+      await this.exerciseResultsRepository.upsertResult(
+        manager,
+        userId,
+        result.exerciseId,
+        result.score,
+        result.isCorrect,
       );
     }
 
-    // 3. Update Vocabulary Mastery
     for (const vocab of vocabularyUpdates) {
-      await manager.query(
-        `UPDATE user_vocabularies 
-         SET mastery_level = $1, updated_at = NOW()
-         WHERE user_id = $2 AND vocabulary_id = $3`,
-        [vocab.masteryLevel, userId, vocab.vocabularyId],
+      await this.vocabulariesRepository.updateMastery(
+        manager,
+        userId,
+        vocab.vocabularyId,
+        vocab.masteryLevel,
       );
     }
 
@@ -98,15 +107,16 @@ export class ProgressTransactionService {
       score?: number;
     }>,
   ): Promise<void> {
-    const queryRunner = (this as any).queryRunner;
-    const manager = queryRunner ? queryRunner.manager : this.dataSource.manager;
+    const manager = this.getManager();
 
     for (const update of updates) {
-      await manager.query(
-        `UPDATE user_progress 
-         SET status = $1, score = COALESCE($2, score), updated_at = NOW()
-         WHERE user_id = $3 AND lesson_id = $4`,
-        [update.status, update.score, update.userId, update.lessonId],
+      await manager.update(
+        UserProgress,
+        { userId: update.userId, lessonId: update.lessonId },
+        {
+          status: update.status,
+          ...(update.score !== undefined && { score: update.score }),
+        },
       );
     }
   }

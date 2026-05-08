@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 ## Parent
 
@@ -16,12 +16,12 @@ Viết Jest *.spec.ts cho `completeLessonWithTransaction` — test transaction r
 
 ## Acceptance criteria
 
-- [ ] `completeLessonWithTransaction` không chứa SQL thô
-- [ ] `batchUpdateProgress` không chứa SQL thô
-- [ ] `(this as any).queryRunner` bị thay bằng pattern type-safe
-- [ ] Jest *.spec.ts test transaction rollback pass
+- [x] `completeLessonWithTransaction` không chứa SQL thô
+- [x] `batchUpdateProgress` không chứa SQL thô
+- [x] `(this as any).queryRunner` bị thay bằng pattern type-safe
+- [x] Jest *.spec.ts test transaction rollback pass
 - [ ] Progress integration tests vẫn pass
-- [ ] Mọi truy cập dữ liệu trong ProgressTransactionService đi qua repository
+- [x] Mọi truy cập dữ liệu trong ProgressTransactionService đi qua repository
 
 ## Blocked by
 
