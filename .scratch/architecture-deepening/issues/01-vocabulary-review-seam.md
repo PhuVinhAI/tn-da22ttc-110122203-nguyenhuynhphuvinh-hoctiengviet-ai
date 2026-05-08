@@ -25,7 +25,7 @@ Viết Jest *.spec.ts cho VocabularyReview, assert trên `nextReviewAt` và `mas
 - [x] `SpacedRepetitionService` không còn inject từ bên ngoài VocabularyReview module
 - [x] Type `Card` không xuất hiện trong interface công khai
 - [x] Jest *.spec.ts cho VocabularyReview pass, assert trên `nextReviewAt` + `masteryLevel`
-- [ ] Integration tests hiện tại (`vocabularies.test.ts`, `fsrs-integration.test.ts`) vẫn pass
+- [x] Integration tests hiện tại (`vocabularies.test.ts`, `fsrs-integration.test.ts`) vẫn pass
 - [x] `FSRSService` không bị sửa
 
 ## Blocked by

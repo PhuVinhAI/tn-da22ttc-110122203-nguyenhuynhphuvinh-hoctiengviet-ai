@@ -14,12 +14,12 @@ Viết test Jest cho `batchReview` và `getDueForReview` qua VocabularyReview in
 
 ## Acceptance criteria
 
-- [ ] `batchReview` trả kết quả riêng từng item, không nuốt lỗi
-- [ ] `LoggingService` dùng thay `console.error`
-- [ ] `getDueForReview` hoạt động đúng qua VocabularyReview seam
-- [ ] Jest *.spec.ts cho batchReview + getDueForReview pass
-- [ ] Integration tests hiện tại vẫn pass
-- [ ] Không còn gọi trực tiếp `UserVocabulariesService` từ controller cho review/due endpoints
+- [x] `batchReview` trả kết quả riêng từng item, không nuốt lỗi
+- [x] `LoggingService` dùng thay `console.error`
+- [x] `getDueForReview` hoạt động đúng qua VocabularyReview seam
+- [x] Jest *.spec.ts cho batchReview + getDueForReview pass
+- [x] Integration tests hiện tại vẫn pass
+- [x] Không còn gọi trực tiếp `UserVocabulariesService` từ controller cho review/due endpoints
 
 ## Blocked by
 
