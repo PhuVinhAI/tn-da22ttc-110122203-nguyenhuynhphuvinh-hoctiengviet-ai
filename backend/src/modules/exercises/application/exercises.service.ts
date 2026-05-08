@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { ExercisesRepository } from './repositories/exercises.repository';
 import { UserExerciseResultsRepository } from './repositories/user-exercise-results.repository';
 import { AnswerAssessment } from './answer-assessment.service';
+import { AnswerNormalizer } from './answer-normalizer';
 import { Transactional } from '../../../common/decorators';
 import { Exercise } from '../domain/exercise.entity';
 import { UserExerciseResult } from '../domain/user-exercise-result.entity';
@@ -14,6 +15,7 @@ export class ExercisesService {
     private readonly exercisesRepository: ExercisesRepository,
     private readonly userExerciseResultsRepository: UserExerciseResultsRepository,
     private readonly answerAssessment: AnswerAssessment,
+    private readonly answerNormalizer: AnswerNormalizer,
   ) {}
 
   async create(data: Partial<Exercise>): Promise<Exercise> {
@@ -60,9 +62,14 @@ export class ExercisesService {
   ): Promise<UserExerciseResult> {
     const exercise = await this.findById(exerciseId);
 
-    const { isCorrect } = this.answerAssessment.assessAnswer(
+    const normalizedAnswer = this.answerNormalizer.normalize(
       exercise.exerciseType,
       userAnswer,
+    );
+
+    const { isCorrect } = this.answerAssessment.assessAnswer(
+      exercise.exerciseType,
+      normalizedAnswer,
       exercise.correctAnswer,
     );
 

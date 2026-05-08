@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 ## Parent
 
@@ -14,12 +14,12 @@ Xóa `ExerciseCheckerService` cũ (hoàn toàn thay thế bởi AnswerAssessment
 
 ## Acceptance criteria
 
-- [ ] `AnswerNormalizer` nội bộ xử lý old format → new format tại một chỗ
-- [ ] Interface `assessAnswer` chỉ nhận `ExerciseAnswer`, không `| any`
-- [ ] `ExerciseCheckerService` cũ bị xóa
-- [ ] Jest *.spec.ts cho AnswerNormalizer pass (old format → new format mapping đúng)
-- [ ] Exercise integration tests vẫn pass (xử lý cả old format input nếu client gửi)
-- [ ] HTTP API contract không đổi
+- [x] `AnswerNormalizer` nội bộ xử lý old format → new format tại một chỗ
+- [x] Interface `assessAnswer` chỉ nhận `ExerciseAnswer`, không `| any`
+- [x] `ExerciseCheckerService` cũ bị xóa
+- [x] Jest *.spec.ts cho AnswerNormalizer pass (old format → new format mapping đúng)
+- [x] Exercise integration tests vẫn pass (xử lý cả old format input nếu client gửi)
+- [x] HTTP API contract không đổi
 
 ## Blocked by
 
