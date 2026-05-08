@@ -17,6 +17,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { LessonsService } from '../application/lessons.service';
+import { CourseContentService } from '../application/course-content.service';
 import { Public } from '../../../common/decorators';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CreateLessonDto } from '../dto/lessons/create-lesson.dto';
@@ -24,7 +25,10 @@ import { CreateLessonDto } from '../dto/lessons/create-lesson.dto';
 @ApiTags('Lessons')
 @Controller('lessons')
 export class LessonsController {
-  constructor(private readonly lessonsService: LessonsService) {}
+  constructor(
+    private readonly lessonsService: LessonsService,
+    private readonly courseContentService: CourseContentService,
+  ) {}
 
   @Public()
   @Get('unit/:unitId')
@@ -50,7 +54,7 @@ export class LessonsController {
     },
   })
   async findByUnit(@Param('unitId') unitId: string) {
-    return this.lessonsService.findByUnitId(unitId);
+    return this.courseContentService.getLessonsByUnit(unitId);
   }
 
   @Public()
@@ -81,7 +85,7 @@ export class LessonsController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy lesson' })
   async findOne(@Param('id') id: string) {
-    return this.lessonsService.findById(id);
+    return this.courseContentService.getLessonDetail(id);
   }
 
   @ApiBearerAuth()

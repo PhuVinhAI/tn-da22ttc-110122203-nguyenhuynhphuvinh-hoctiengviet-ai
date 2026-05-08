@@ -17,6 +17,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { ContentsService } from '../application/contents.service';
+import { CourseContentService } from '../../courses/application/course-content.service';
 import { Public } from '../../../common/decorators';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CreateContentDto } from '../dto/create-content.dto';
@@ -24,7 +25,10 @@ import { CreateContentDto } from '../dto/create-content.dto';
 @ApiTags('Contents')
 @Controller('contents')
 export class ContentsController {
-  constructor(private readonly contentsService: ContentsService) {}
+  constructor(
+    private readonly contentsService: ContentsService,
+    private readonly courseContentService: CourseContentService,
+  ) {}
 
   @Public()
   @Get('lesson/:lessonId')
@@ -55,7 +59,7 @@ export class ContentsController {
     },
   })
   async findByLesson(@Param('lessonId') lessonId: string) {
-    return this.contentsService.findByLessonId(lessonId);
+    return this.courseContentService.getContentsByLesson(lessonId);
   }
 
   @Public()
@@ -82,7 +86,7 @@ export class ContentsController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy nội dung' })
   async findOne(@Param('id') id: string) {
-    return this.contentsService.findById(id);
+    return this.courseContentService.getContentDetail(id);
   }
 
   @ApiBearerAuth()

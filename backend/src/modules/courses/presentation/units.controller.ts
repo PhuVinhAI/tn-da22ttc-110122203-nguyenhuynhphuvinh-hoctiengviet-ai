@@ -17,6 +17,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { UnitsService } from '../application/units.service';
+import { CourseContentService } from '../application/course-content.service';
 import { Public } from '../../../common/decorators';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CreateUnitDto } from '../dto/units/create-unit.dto';
@@ -24,7 +25,10 @@ import { CreateUnitDto } from '../dto/units/create-unit.dto';
 @ApiTags('Units')
 @Controller('units')
 export class UnitsController {
-  constructor(private readonly unitsService: UnitsService) {}
+  constructor(
+    private readonly unitsService: UnitsService,
+    private readonly courseContentService: CourseContentService,
+  ) {}
 
   @Public()
   @Get('course/:courseId')
@@ -49,7 +53,7 @@ export class UnitsController {
     },
   })
   async findByCourse(@Param('courseId') courseId: string) {
-    return this.unitsService.findByCourseId(courseId);
+    return this.courseContentService.getUnitsByCourse(courseId);
   }
 
   @Public()
@@ -81,7 +85,7 @@ export class UnitsController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy unit' })
   async findOne(@Param('id') id: string) {
-    return this.unitsService.findById(id);
+    return this.courseContentService.getUnitDetail(id);
   }
 
   @ApiBearerAuth()

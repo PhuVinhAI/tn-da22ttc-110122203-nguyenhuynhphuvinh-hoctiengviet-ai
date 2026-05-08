@@ -17,6 +17,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { CoursesService } from '../application/courses.service';
+import { CourseContentService } from '../application/course-content.service';
 import { Public, RequirePermissions } from '../../../common/decorators';
 import { PermissionsGuard } from '../../../common/guards/permissions.guard';
 import { Permission } from '../../../common/enums';
@@ -25,7 +26,10 @@ import { Permission } from '../../../common/enums';
 @Controller('courses')
 @UseGuards(PermissionsGuard)
 export class CoursesController {
-  constructor(private readonly coursesService: CoursesService) {}
+  constructor(
+    private readonly coursesService: CoursesService,
+    private readonly courseContentService: CourseContentService,
+  ) {}
 
   @Public()
   @Get()
@@ -88,7 +92,7 @@ export class CoursesController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy khóa học' })
   async findOne(@Param('id') id: string) {
-    return this.coursesService.findById(id);
+    return this.courseContentService.getCourseStructure(id);
   }
 
   @ApiBearerAuth()

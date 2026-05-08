@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 ## Parent
 
@@ -20,12 +20,12 @@ Viết Jest *.spec.ts cho `CourseContentService` — test `getCourseStructure`, 
 
 ## Acceptance criteria
 
-- [ ] `CourseContentService` tồn tại với `getCourseStructure`, `getUnitDetail`, `getLessonDetail`
-- [ ] 4 controller ủy quyền read operations cho `CourseContentService`
-- [ ] NotFoundException xử lý gom tại `CourseContentService`
-- [ ] Jest *.spec.ts cho CourseContentService pass
-- [ ] Courses integration tests (`courses.test.ts`) vẫn pass
-- [ ] HTTP API contract không đổi
+- [x] `CourseContentService` tồn tại với `getCourseStructure`, `getUnitDetail`, `getLessonDetail`
+- [x] 4 controller ủy quyền read operations cho `CourseContentService`
+- [x] NotFoundException xử lý gom tại `CourseContentService`
+- [x] Jest *.spec.ts cho CourseContentService pass
+- [ ] Courses integration tests (`courses.test.ts`) vẫn pass (cần Docker `db:up`)
+- [x] HTTP API contract không đổi
 
 ## Blocked by
 
