@@ -18,7 +18,6 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { OAuthUserDto } from './dto/oauth-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { PasswordResetToken } from './domain/password-reset-token.entity';
 import { RefreshToken } from './domain/refresh-token.entity';
 import { Role } from './domain/role.entity';
 import { Role as RoleEnum } from '../../common/enums';
@@ -34,8 +33,6 @@ export class AuthService {
     private loggingService: LoggingService,
     private emailQueueService: EmailQueueService,
     private tokenLifecycle: TokenLifecycle,
-    @InjectRepository(PasswordResetToken)
-    private passwordResetTokenRepository: Repository<PasswordResetToken>,
     @InjectRepository(RefreshToken)
     private refreshTokenRepository: Repository<RefreshToken>,
     @InjectRepository(Role)
@@ -181,22 +178,15 @@ export class AuthService {
 
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      // Không tiết lộ email có tồn tại hay không
       return {
         message: 'Nếu email tồn tại, bạn sẽ nhận được link đặt lại mật khẩu.',
       };
     }
 
-    // Xóa các token cũ chưa sử dụng
-    await this.passwordResetTokenRepository.delete({
-      userId: user.id,
-      usedAt: null as any,
-    });
+    const resetToken = await this.tokenLifecycle.createPasswordResetToken(
+      user.id,
+    );
 
-    // Tạo token mới
-    const resetToken = await this.createPasswordResetToken(user.id);
-
-    // Gửi email
     await this.emailQueueService.sendPasswordResetEmail(
       user.email,
       user.fullName,
@@ -216,36 +206,25 @@ export class AuthService {
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
     const { token, newPassword } = resetPasswordDto;
 
-    const resetToken = await this.passwordResetTokenRepository.findOne({
-      where: { token, usedAt: null as any },
-      relations: ['user'],
-    });
+    const result = await this.tokenLifecycle.verifyPasswordResetToken(token);
 
-    if (!resetToken) {
-      throw new BadRequestException('Token không hợp lệ hoặc đã được sử dụng');
+    if (!result) {
+      throw new BadRequestException('Token không hợp lệ hoặc đã hết hạn');
     }
 
-    if (resetToken.expiresAt < new Date()) {
-      throw new BadRequestException('Token đã hết hạn');
-    }
-
-    // Cập nhật mật khẩu
-    await this.usersService.update(resetToken.userId, {
+    await this.usersService.update(result.userId, {
       password: newPassword,
     } as any);
 
-    // Đánh dấu token đã sử dụng
-    resetToken.usedAt = new Date();
-    await this.passwordResetTokenRepository.save(resetToken);
+    const user = await this.usersService.findById(result.userId);
 
-    // Gửi email thông báo
     await this.emailQueueService.sendPasswordChangedEmail(
-      resetToken.user.email,
-      resetToken.user.fullName,
+      result.email,
+      user?.fullName ?? '',
     );
 
     this.loggingService.log(
-      `Password reset completed: ${resetToken.user.email}`,
+      `Password reset completed: ${result.email}`,
       'AuthService',
     );
 
@@ -278,22 +257,6 @@ export class AuthService {
     return {
       message: 'Email xác thực đã được gửi lại!',
     };
-  }
-
-  private async createPasswordResetToken(
-    userId: string,
-  ): Promise<PasswordResetToken> {
-    const token = randomBytes(32).toString('hex');
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 1); // 1 giờ
-
-    const resetToken = this.passwordResetTokenRepository.create({
-      token,
-      userId,
-      expiresAt,
-    });
-
-    return this.passwordResetTokenRepository.save(resetToken);
   }
 
   private generateToken(userId: string, email: string): string {
@@ -346,17 +309,19 @@ export class AuthService {
   async cleanupExpiredTokens() {
     const now = new Date();
 
-    await this.tokenLifecycle.cleanupExpired();
+    const lifecycleResult = await this.tokenLifecycle.cleanupExpired();
 
-    await this.passwordResetTokenRepository.delete({
-      expiresAt: LessThan(now),
-    });
-
-    await this.refreshTokenRepository.delete({
+    const refreshResult = await this.refreshTokenRepository.delete({
       expiresAt: LessThan(now),
     });
 
     this.loggingService.log('Expired tokens cleaned up', 'AuthService');
+
+    return {
+      verificationTokensRemoved: lifecycleResult.verificationTokensRemoved,
+      passwordResetTokensRemoved: lifecycleResult.passwordResetTokensRemoved,
+      refreshTokensRemoved: refreshResult.affected ?? 0,
+    };
   }
 
   // OAuth methods
