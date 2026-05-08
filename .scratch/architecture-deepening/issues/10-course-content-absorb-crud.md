@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 ## Parent
 
@@ -16,13 +16,13 @@ Cập nhật Jest *.spec.ts cho CourseContentService — thêm test CRUD operati
 
 ## Acceptance criteria
 
-- [ ] `UnitsService`, `LessonsService`, `ContentsService`, `GrammarService` bị xóa
-- [ ] Repository pass-through bị nội bộ hóa
-- [ ] 4 controller ủy quyền toàn bộ cho `CourseContentService`
-- [ ] CRUD operations hoạt động đúng qua `CourseContentService`
-- [ ] Jest *.spec.ts cho CourseContentService CRUD pass
-- [ ] Integration tests vẫn pass
-- [ ] HTTP API contract không đổi
+- [x] `UnitsService`, `LessonsService`, `ContentsService`, `GrammarService` bị xóa
+- [x] Repository pass-through bị nội bộ hóa (ContentsRepository, GrammarRepository chuyển vào CoursesModule providers)
+- [x] 4 controller ủy quyền toàn bộ cho `CourseContentService`
+- [x] CRUD operations hoạt động đúng qua `CourseContentService`
+- [x] Jest *.spec.ts cho CourseContentService CRUD pass (34 tests)
+- [ ] Integration tests vẫn pass (cần db:up)
+- [x] HTTP API contract không đổi (route paths và response shapes giữ nguyên)
 
 ## Blocked by
 

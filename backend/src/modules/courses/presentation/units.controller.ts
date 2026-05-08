@@ -16,7 +16,6 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
-import { UnitsService } from '../application/units.service';
 import { CourseContentService } from '../application/course-content.service';
 import { Public } from '../../../common/decorators';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -25,10 +24,7 @@ import { CreateUnitDto } from '../dto/units/create-unit.dto';
 @ApiTags('Units')
 @Controller('units')
 export class UnitsController {
-  constructor(
-    private readonly unitsService: UnitsService,
-    private readonly courseContentService: CourseContentService,
-  ) {}
+  constructor(private readonly courseContentService: CourseContentService) {}
 
   @Public()
   @Get('course/:courseId')
@@ -99,7 +95,7 @@ export class UnitsController {
   @ApiResponse({ status: 201, description: 'Tạo unit thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
   async create(@Body() createUnitDto: CreateUnitDto) {
-    return this.unitsService.create(createUnitDto);
+    return this.courseContentService.createUnit(createUnitDto);
   }
 
   @ApiBearerAuth()
@@ -117,7 +113,7 @@ export class UnitsController {
     @Param('id') id: string,
     @Body() updateUnitDto: Partial<CreateUnitDto>,
   ) {
-    return this.unitsService.update(id, updateUnitDto);
+    return this.courseContentService.updateUnit(id, updateUnitDto);
   }
 
   @ApiBearerAuth()
@@ -135,6 +131,6 @@ export class UnitsController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy unit' })
   async remove(@Param('id') id: string) {
-    return this.unitsService.delete(id);
+    return this.courseContentService.deleteUnit(id);
   }
 }

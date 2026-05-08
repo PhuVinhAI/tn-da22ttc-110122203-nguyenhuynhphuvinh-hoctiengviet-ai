@@ -1,14 +1,16 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GrammarRule } from './domain/grammar-rule.entity';
-import { GrammarService } from './application/grammar.service';
-import { GrammarRepository } from './application/grammar.repository';
 import { GrammarController } from './presentation/grammar.controller';
+import { CoursesModule } from '../courses/courses.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([GrammarRule])],
+  imports: [
+    TypeOrmModule.forFeature([GrammarRule]),
+    forwardRef(() => CoursesModule),
+  ],
   controllers: [GrammarController],
-  providers: [GrammarService, GrammarRepository],
-  exports: [GrammarService],
+  providers: [],
+  exports: [],
 })
 export class GrammarModule {}

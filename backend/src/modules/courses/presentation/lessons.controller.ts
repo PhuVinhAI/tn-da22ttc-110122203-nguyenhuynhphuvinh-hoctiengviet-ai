@@ -16,7 +16,6 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
-import { LessonsService } from '../application/lessons.service';
 import { CourseContentService } from '../application/course-content.service';
 import { Public } from '../../../common/decorators';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -25,10 +24,7 @@ import { CreateLessonDto } from '../dto/lessons/create-lesson.dto';
 @ApiTags('Lessons')
 @Controller('lessons')
 export class LessonsController {
-  constructor(
-    private readonly lessonsService: LessonsService,
-    private readonly courseContentService: CourseContentService,
-  ) {}
+  constructor(private readonly courseContentService: CourseContentService) {}
 
   @Public()
   @Get('unit/:unitId')
@@ -99,7 +95,7 @@ export class LessonsController {
   @ApiResponse({ status: 201, description: 'Tạo lesson thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
   async create(@Body() createLessonDto: CreateLessonDto) {
-    return this.lessonsService.create(createLessonDto);
+    return this.courseContentService.createLesson(createLessonDto);
   }
 
   @ApiBearerAuth()
@@ -117,7 +113,7 @@ export class LessonsController {
     @Param('id') id: string,
     @Body() updateLessonDto: Partial<CreateLessonDto>,
   ) {
-    return this.lessonsService.update(id, updateLessonDto);
+    return this.courseContentService.updateLesson(id, updateLessonDto);
   }
 
   @ApiBearerAuth()
@@ -135,6 +131,6 @@ export class LessonsController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy lesson' })
   async remove(@Param('id') id: string) {
-    return this.lessonsService.delete(id);
+    return this.courseContentService.deleteLesson(id);
   }
 }

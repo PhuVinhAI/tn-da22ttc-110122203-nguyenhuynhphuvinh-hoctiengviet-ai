@@ -16,7 +16,6 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
-import { ContentsService } from '../application/contents.service';
 import { CourseContentService } from '../../courses/application/course-content.service';
 import { Public } from '../../../common/decorators';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -25,10 +24,7 @@ import { CreateContentDto } from '../dto/create-content.dto';
 @ApiTags('Contents')
 @Controller('contents')
 export class ContentsController {
-  constructor(
-    private readonly contentsService: ContentsService,
-    private readonly courseContentService: CourseContentService,
-  ) {}
+  constructor(private readonly courseContentService: CourseContentService) {}
 
   @Public()
   @Get('lesson/:lessonId')
@@ -100,7 +96,7 @@ export class ContentsController {
   @ApiResponse({ status: 201, description: 'Tạo nội dung thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
   async create(@Body() createContentDto: CreateContentDto) {
-    return this.contentsService.create(createContentDto);
+    return this.courseContentService.createContent(createContentDto);
   }
 
   @ApiBearerAuth()
@@ -118,7 +114,7 @@ export class ContentsController {
     @Param('id') id: string,
     @Body() updateContentDto: Partial<CreateContentDto>,
   ) {
-    return this.contentsService.update(id, updateContentDto);
+    return this.courseContentService.updateContent(id, updateContentDto);
   }
 
   @ApiBearerAuth()
@@ -136,6 +132,6 @@ export class ContentsController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy nội dung' })
   async remove(@Param('id') id: string) {
-    return this.contentsService.delete(id);
+    return this.courseContentService.deleteContent(id);
   }
 }

@@ -16,7 +16,7 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
-import { GrammarService } from '../application/grammar.service';
+import { CourseContentService } from '../../courses/application/course-content.service';
 import { Public } from '../../../common/decorators';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CreateGrammarDto } from '../dto/create-grammar.dto';
@@ -24,7 +24,7 @@ import { CreateGrammarDto } from '../dto/create-grammar.dto';
 @ApiTags('Grammar')
 @Controller('grammar')
 export class GrammarController {
-  constructor(private readonly grammarService: GrammarService) {}
+  constructor(private readonly courseContentService: CourseContentService) {}
 
   @Public()
   @Get('lesson/:lessonId')
@@ -54,7 +54,7 @@ export class GrammarController {
     },
   })
   async findByLesson(@Param('lessonId') lessonId: string) {
-    return this.grammarService.findByLessonId(lessonId);
+    return this.courseContentService.getGrammarByLesson(lessonId);
   }
 
   @Public()
@@ -83,7 +83,7 @@ export class GrammarController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy ngữ pháp' })
   async findOne(@Param('id') id: string) {
-    return this.grammarService.findById(id);
+    return this.courseContentService.getGrammarDetail(id);
   }
 
   @ApiBearerAuth()
@@ -97,7 +97,7 @@ export class GrammarController {
   @ApiResponse({ status: 201, description: 'Tạo ngữ pháp thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
   async create(@Body() createGrammarDto: CreateGrammarDto) {
-    return this.grammarService.create(createGrammarDto);
+    return this.courseContentService.createGrammarRule(createGrammarDto);
   }
 
   @ApiBearerAuth()
@@ -115,7 +115,7 @@ export class GrammarController {
     @Param('id') id: string,
     @Body() updateGrammarDto: Partial<CreateGrammarDto>,
   ) {
-    return this.grammarService.update(id, updateGrammarDto);
+    return this.courseContentService.updateGrammarRule(id, updateGrammarDto);
   }
 
   @ApiBearerAuth()
@@ -133,6 +133,6 @@ export class GrammarController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy ngữ pháp' })
   async remove(@Param('id') id: string) {
-    return this.grammarService.delete(id);
+    return this.courseContentService.deleteGrammarRule(id);
   }
 }
