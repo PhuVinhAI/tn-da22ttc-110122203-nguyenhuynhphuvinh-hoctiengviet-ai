@@ -19,7 +19,7 @@ export class StorageService {
   private readonly baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 
   constructor() {
-    this.ensureUploadDir();
+    void this.ensureUploadDir();
   }
 
   /**
@@ -149,7 +149,7 @@ export class StorageService {
         created: stats.birthtime,
         modified: stats.mtime,
       };
-    } catch (error) {
+    } catch (_error) {
       this.logger.error(`File not found: ${filename}`);
       return null;
     }

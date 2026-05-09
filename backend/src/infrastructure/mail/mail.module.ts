@@ -3,13 +3,12 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter';
 import { MailService } from './mail.service';
-import mailConfig from '../../config/mail.config';
 
 @Module({
   imports: [
     MailerModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         transport: configService.get('mail.transport'),
         defaults: configService.get('mail.defaults'),
         template: {

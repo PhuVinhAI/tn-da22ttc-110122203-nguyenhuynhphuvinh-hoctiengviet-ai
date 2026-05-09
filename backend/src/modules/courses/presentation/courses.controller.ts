@@ -21,6 +21,7 @@ import { CourseContentService } from '../application/course-content.service';
 import { Public, RequirePermissions } from '../../../common/decorators';
 import { PermissionsGuard } from '../../../common/guards/permissions.guard';
 import { Permission } from '../../../common/enums';
+import { CreateCourseDto } from '../dto/courses/create-course.dto';
 
 @ApiTags('Courses')
 @Controller('courses')
@@ -62,7 +63,7 @@ export class CoursesController {
   @ApiOperation({
     summary: 'Lấy chi tiết khóa học',
     description:
-      'Lấy thông tin chi tiết của một khóa học bao gồm units và lessons',
+      'Lấy thông tin chi tiết của một khóa học bao gồm modules và lessons',
   })
   @ApiParam({
     name: 'id',
@@ -79,10 +80,10 @@ export class CoursesController {
         description: 'Khóa học tiếng Việt cho người mới bắt đầu',
         level: 'A1',
         imageUrl: 'https://example.com/image.jpg',
-        units: [
+        modules: [
           {
-            id: 'unit-uuid',
-            title: 'Unit 1: Chào hỏi',
+            id: 'module-uuid',
+            title: 'Module 1: Chào hỏi',
             orderIndex: 1,
           },
         ],
@@ -115,7 +116,7 @@ export class CoursesController {
   @ApiResponse({ status: 201, description: 'Tạo khóa học thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
   @ApiResponse({ status: 403, description: 'Không có quyền COURSE_CREATE' })
-  async create(@Body() createData: any) {
+  async create(@Body() createData: CreateCourseDto) {
     return this.coursesService.create(createData);
   }
 
@@ -139,7 +140,7 @@ export class CoursesController {
   @ApiResponse({ status: 200, description: 'Cập nhật thành công' })
   @ApiResponse({ status: 403, description: 'Không có quyền COURSE_UPDATE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy khóa học' })
-  async update(@Param('id') id: string, @Body() updateData: any) {
+  async update(@Param('id') id: string, @Body() updateData: CreateCourseDto) {
     return this.coursesService.update(id, updateData);
   }
 

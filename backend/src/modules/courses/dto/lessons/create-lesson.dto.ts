@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsUUID,
   IsOptional,
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { LessonType } from '../../../../common/enums';
@@ -30,7 +31,12 @@ export class CreateLessonDto {
   @IsOptional()
   estimatedDuration?: number;
 
-  @ApiProperty({ example: 'uuid-of-unit' })
+  @ApiProperty({ example: false, required: false })
+  @IsBoolean()
+  @IsOptional()
+  isAssessment?: boolean;
+
+  @ApiProperty({ example: 'uuid-of-module' })
   @IsUUID()
-  unitId: string;
+  moduleId: string;
 }

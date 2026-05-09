@@ -5,4 +5,6 @@ export enum LessonType {
   LISTENING = 'listening',
   SPEAKING = 'speaking',
   WRITING = 'writing',
+  PRONUNCIATION = 'pronunciation',
+  CULTURE = 'culture',
 }

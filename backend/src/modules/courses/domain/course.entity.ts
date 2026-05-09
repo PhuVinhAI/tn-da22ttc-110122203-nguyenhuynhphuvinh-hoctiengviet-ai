@@ -25,6 +25,12 @@ export class Course extends BaseEntity {
   @Column({ name: 'thumbnail_url', nullable: true })
   thumbnailUrl?: string;
 
-  @OneToMany('Unit', 'course')
-  units: any[];
+  @Column({ name: 'estimated_hours', nullable: true })
+  estimatedHours?: number;
+
+  @Column({ name: 'vietnamese_level_name', nullable: true })
+  vietnameseLevelName?: string;
+
+  @OneToMany('Module', 'course')
+  modules: any[];
 }

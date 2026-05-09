@@ -229,8 +229,8 @@ export class AuthController {
       },
     },
   })
-  async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
-    const result = await this.authService.loginWithGoogle(req.user);
+  googleAuthCallback(@Req() req: Request, @Res() res: Response) {
+    const result = this.authService.loginWithGoogle(req.user);
 
     // Redirect về frontend với token
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';

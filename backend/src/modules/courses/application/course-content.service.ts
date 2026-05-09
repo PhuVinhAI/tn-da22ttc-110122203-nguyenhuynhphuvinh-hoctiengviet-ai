@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CoursesRepository } from './repositories/courses.repository';
-import { UnitsRepository } from './repositories/units.repository';
+import { ModulesRepository } from './repositories/modules.repository';
 import { LessonsRepository } from './repositories/lessons.repository';
 import { ContentsRepository } from '../../contents/application/contents.repository';
 import { GrammarRepository } from '../../grammar/application/grammar.repository';
 import { ProgressRepository } from '../../progress/application/progress.repository';
 import { Course } from '../domain/course.entity';
-import { Unit } from '../domain/unit.entity';
+import { Module } from '../domain/module.entity';
 import { Lesson } from '../domain/lesson.entity';
 import { LessonContent } from '../../contents/domain/lesson-content.entity';
 import { GrammarRule } from '../../grammar/domain/grammar-rule.entity';
@@ -19,7 +19,7 @@ import {
 export class CourseContentService implements CourseStatsPort {
   constructor(
     private readonly coursesRepository: CoursesRepository,
-    private readonly unitsRepository: UnitsRepository,
+    private readonly modulesRepository: ModulesRepository,
     private readonly lessonsRepository: LessonsRepository,
     private readonly contentsRepository: ContentsRepository,
     private readonly grammarRepository: GrammarRepository,
@@ -38,13 +38,13 @@ export class CourseContentService implements CourseStatsPort {
     return course;
   }
 
-  async getUnitDetail(unitId: string): Promise<Unit> {
-    const unit = await this.unitsRepository.findById(unitId);
-    if (!unit) {
-      throw new NotFoundException(`Unit with ID ${unitId} not found`);
+  async getModuleDetail(moduleId: string): Promise<Module> {
+    const module = await this.modulesRepository.findById(moduleId);
+    if (!module) {
+      throw new NotFoundException(`Module with ID ${moduleId} not found`);
     }
-    unit.lessons = await this.lessonsRepository.findByUnitId(unitId);
-    return unit;
+    module.lessons = await this.lessonsRepository.findByModuleId(moduleId);
+    return module;
   }
 
   async getLessonDetail(lessonId: string): Promise<Lesson> {
@@ -57,12 +57,12 @@ export class CourseContentService implements CourseStatsPort {
     return lesson;
   }
 
-  async getUnitsByCourse(courseId: string): Promise<Unit[]> {
-    return this.unitsRepository.findByCourseId(courseId);
+  async getModulesByCourse(courseId: string): Promise<Module[]> {
+    return this.modulesRepository.findByCourseId(courseId);
   }
 
-  async getLessonsByUnit(unitId: string): Promise<Lesson[]> {
-    return this.lessonsRepository.findByUnitId(unitId);
+  async getLessonsByModule(moduleId: string): Promise<Lesson[]> {
+    return this.lessonsRepository.findByModuleId(moduleId);
   }
 
   async getContentsByLesson(lessonId: string): Promise<LessonContent[]> {
@@ -91,18 +91,18 @@ export class CourseContentService implements CourseStatsPort {
     return grammar;
   }
 
-  async createUnit(data: Partial<Unit>): Promise<Unit> {
-    return this.unitsRepository.create(data);
+  async createModule(data: Partial<Module>): Promise<Module> {
+    return this.modulesRepository.create(data);
   }
 
-  async updateUnit(id: string, data: Partial<Unit>): Promise<Unit> {
-    await this.findUnitById(id);
-    return this.unitsRepository.update(id, data);
+  async updateModule(id: string, data: Partial<Module>): Promise<Module> {
+    await this.findModuleById(id);
+    return this.modulesRepository.update(id, data);
   }
 
-  async deleteUnit(id: string): Promise<void> {
-    await this.findUnitById(id);
-    await this.unitsRepository.delete(id);
+  async deleteModule(id: string): Promise<void> {
+    await this.findModuleById(id);
+    await this.modulesRepository.delete(id);
   }
 
   async createLesson(data: Partial<Lesson>): Promise<Lesson> {
@@ -153,12 +153,12 @@ export class CourseContentService implements CourseStatsPort {
     await this.grammarRepository.delete(id);
   }
 
-  private async findUnitById(id: string): Promise<Unit> {
-    const unit = await this.unitsRepository.findById(id);
-    if (!unit) {
-      throw new NotFoundException(`Unit with ID ${id} not found`);
+  private async findModuleById(id: string): Promise<Module> {
+    const module = await this.modulesRepository.findById(id);
+    if (!module) {
+      throw new NotFoundException(`Module with ID ${id} not found`);
     }
-    return unit;
+    return module;
   }
 
   private async findLessonById(id: string): Promise<Lesson> {

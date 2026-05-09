@@ -27,12 +27,12 @@ export class LessonsController {
   constructor(private readonly courseContentService: CourseContentService) {}
 
   @Public()
-  @Get('unit/:unitId')
+  @Get('module/:moduleId')
   @ApiOperation({
-    summary: 'Lấy danh sách lessons theo unit',
-    description: 'Lấy tất cả lessons thuộc một unit',
+    summary: 'Lấy danh sách lessons theo module',
+    description: 'Lấy tất cả lessons thuộc một module',
   })
-  @ApiParam({ name: 'unitId', description: 'ID của unit' })
+  @ApiParam({ name: 'moduleId', description: 'ID của module' })
   @ApiResponse({
     status: 200,
     description: 'Danh sách lessons',
@@ -42,15 +42,16 @@ export class LessonsController {
           id: 'uuid-string',
           title: 'Bài 1: Từ vựng chào hỏi',
           description: 'Học các từ vựng cơ bản về chào hỏi',
-          lessonType: 'VOCABULARY',
+          lessonType: 'vocabulary',
           orderIndex: 1,
           estimatedDuration: 30,
+          isAssessment: false,
         },
       ],
     },
   })
-  async findByUnit(@Param('unitId') unitId: string) {
-    return this.courseContentService.getLessonsByUnit(unitId);
+  async findByModule(@Param('moduleId') moduleId: string) {
+    return this.courseContentService.getLessonsByModule(moduleId);
   }
 
   @Public()
@@ -69,9 +70,10 @@ export class LessonsController {
         id: 'uuid-string',
         title: 'Bài 1: Từ vựng chào hỏi',
         description: 'Học các từ vựng cơ bản về chào hỏi',
-        lessonType: 'VOCABULARY',
+        lessonType: 'vocabulary',
         orderIndex: 1,
         estimatedDuration: 30,
+        isAssessment: false,
         contents: [],
         vocabularies: [],
         grammarRules: [],
@@ -89,7 +91,7 @@ export class LessonsController {
   @Post()
   @ApiOperation({
     summary: 'Tạo lesson mới',
-    description: 'Tạo lesson mới trong unit - yêu cầu quyền Admin',
+    description: 'Tạo lesson mới trong module - yêu cầu quyền Admin',
   })
   @ApiBody({ type: CreateLessonDto })
   @ApiResponse({ status: 201, description: 'Tạo lesson thành công' })
@@ -121,7 +123,7 @@ export class LessonsController {
   @Delete(':id')
   @ApiOperation({
     summary: 'Xóa lesson',
-    description: 'Xóa lesson khỏi unit - yêu cầu quyền Admin',
+    description: 'Xóa lesson khỏi module - yêu cầu quyền Admin',
   })
   @ApiParam({ name: 'id', description: 'ID của lesson' })
   @ApiResponse({

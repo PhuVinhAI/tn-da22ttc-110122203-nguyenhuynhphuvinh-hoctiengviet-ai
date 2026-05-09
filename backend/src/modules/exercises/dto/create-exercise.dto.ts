@@ -5,11 +5,9 @@ import {
   IsUUID,
   IsOptional,
   IsUrl,
-  ValidateNested,
   IsObject,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 import { ExerciseType } from '../../../common/enums';
 import type {
   ExerciseOptions,

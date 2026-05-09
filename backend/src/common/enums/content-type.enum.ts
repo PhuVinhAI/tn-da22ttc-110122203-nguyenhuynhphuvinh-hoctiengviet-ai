@@ -3,4 +3,5 @@ export enum ContentType {
   AUDIO = 'audio',
   IMAGE = 'image',
   VIDEO = 'video',
+  DIALOGUE = 'dialogue',
 }

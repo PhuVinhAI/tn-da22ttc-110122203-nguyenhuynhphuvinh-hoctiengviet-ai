@@ -39,7 +39,7 @@ export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
       // Try to authenticate if token is present
       const result = await super.canActivate(context);
       return result as boolean;
-    } catch (err) {
+    } catch (_err) {
       // If authentication fails, that's OK for optional auth
       // We'll just continue without a user
       // Return true to allow the request to proceed

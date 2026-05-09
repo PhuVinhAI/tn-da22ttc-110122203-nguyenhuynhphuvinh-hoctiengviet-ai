@@ -109,26 +109,26 @@ export class RbacService implements OnModuleInit {
         category: 'course',
       },
 
-      // Unit permissions
+      // Module permissions
       {
-        name: PermissionEnum.UNIT_CREATE,
-        description: 'Tạo unit',
-        category: 'unit',
+        name: PermissionEnum.MODULE_CREATE,
+        description: 'Tạo module',
+        category: 'module',
       },
       {
-        name: PermissionEnum.UNIT_READ,
-        description: 'Xem unit',
-        category: 'unit',
+        name: PermissionEnum.MODULE_READ,
+        description: 'Xem module',
+        category: 'module',
       },
       {
-        name: PermissionEnum.UNIT_UPDATE,
-        description: 'Cập nhật unit',
-        category: 'unit',
+        name: PermissionEnum.MODULE_UPDATE,
+        description: 'Cập nhật module',
+        category: 'module',
       },
       {
-        name: PermissionEnum.UNIT_DELETE,
-        description: 'Xóa unit',
-        category: 'unit',
+        name: PermissionEnum.MODULE_DELETE,
+        description: 'Xóa module',
+        category: 'module',
       },
 
       // Lesson permissions
@@ -307,7 +307,7 @@ export class RbacService implements OnModuleInit {
     const userPermissions = [
       PermissionEnum.COURSE_READ,
       PermissionEnum.COURSE_LIST,
-      PermissionEnum.UNIT_READ,
+      PermissionEnum.MODULE_READ,
       PermissionEnum.LESSON_READ,
       PermissionEnum.EXERCISE_READ,
       PermissionEnum.EXERCISE_SUBMIT,
@@ -355,19 +355,11 @@ export class RbacService implements OnModuleInit {
     await this.roleRepository.save(role);
   }
 
-  async hasPermission(
-    userId: string,
-    permission: PermissionEnum,
-  ): Promise<boolean> {
-    // Implementation will be in UsersService
+  hasPermission(_userId: string, _permission: PermissionEnum): boolean {
     return false;
   }
 
-  async hasAnyPermission(
-    userId: string,
-    permissions: PermissionEnum[],
-  ): Promise<boolean> {
-    // Implementation will be in UsersService
+  hasAnyPermission(_userId: string, _permissions: PermissionEnum[]): boolean {
     return false;
   }
 }

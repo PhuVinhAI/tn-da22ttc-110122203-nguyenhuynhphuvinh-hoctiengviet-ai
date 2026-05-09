@@ -15,9 +15,9 @@ export class LessonsRepository {
     return this.repository.save(lesson);
   }
 
-  async findByUnitId(unitId: string): Promise<Lesson[]> {
+  async findByModuleId(moduleId: string): Promise<Lesson[]> {
     return this.repository.find({
-      where: { unitId },
+      where: { moduleId },
       order: { orderIndex: 'ASC' },
     });
   }
@@ -26,7 +26,7 @@ export class LessonsRepository {
     return this.repository.findOne({
       where: { id },
       relations: [
-        'unit',
+        'module',
         'contents',
         'vocabularies',
         'grammarRules',

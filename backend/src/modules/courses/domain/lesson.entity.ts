@@ -23,12 +23,15 @@ export class Lesson extends BaseEntity {
   @Column({ name: 'estimated_duration', nullable: true })
   estimatedDuration?: number;
 
-  @Column({ name: 'unit_id' })
-  unitId: string;
+  @Column({ name: 'is_assessment', default: false })
+  isAssessment: boolean;
 
-  @ManyToOne('Unit', 'lessons', { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'unit_id' })
-  unit: any;
+  @Column({ name: 'module_id' })
+  moduleId: string;
+
+  @ManyToOne('Module', 'lessons', { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'module_id' })
+  module: any;
 
   @OneToMany('LessonContent', 'lesson')
   contents: any[];

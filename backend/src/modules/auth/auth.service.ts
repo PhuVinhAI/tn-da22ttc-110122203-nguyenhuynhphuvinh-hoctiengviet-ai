@@ -386,7 +386,7 @@ export class AuthService {
     return newUser;
   }
 
-  async loginWithGoogle(user: any) {
+  loginWithGoogle(user: any) {
     const token = this.generateToken(user.id, user.email);
 
     this.loggingService.log(

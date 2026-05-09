@@ -49,7 +49,7 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
       // Test connection
       await this.redisClient.ping();
       this.useRedis = true;
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn('Redis not available, using in-memory cache');
       this.useRedis = false;
     }

@@ -1,8 +1,8 @@
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 
-@Entity('units')
-export class Unit extends BaseEntity {
+@Entity('modules')
+export class Module extends BaseEntity {
   @Column()
   title: string;
 
@@ -12,13 +12,19 @@ export class Unit extends BaseEntity {
   @Column({ name: 'order_index' })
   orderIndex: number;
 
+  @Column({ name: 'estimated_hours', nullable: true })
+  estimatedHours?: number;
+
+  @Column({ nullable: true })
+  topic?: string;
+
   @Column({ name: 'course_id' })
   courseId: string;
 
-  @ManyToOne('Course', 'units', { onDelete: 'CASCADE' })
+  @ManyToOne('Course', 'modules', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'course_id' })
   course: any;
 
-  @OneToMany('Lesson', 'unit')
+  @OneToMany('Lesson', 'module')
   lessons: any[];
 }

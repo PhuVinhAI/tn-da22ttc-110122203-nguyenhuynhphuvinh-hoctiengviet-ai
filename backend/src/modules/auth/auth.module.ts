@@ -32,7 +32,7 @@ import { RbacService } from './application/rbac.service';
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
+      useFactory: (configService: ConfigService) => {
         const secret =
           configService.get<string>('jwt.secret') || 'default-secret';
         const expiresIn =

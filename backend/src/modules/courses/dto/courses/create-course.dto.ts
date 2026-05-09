@@ -38,4 +38,14 @@ export class CreateCourseDto {
   @IsUrl()
   @IsOptional()
   thumbnailUrl?: string;
+
+  @ApiProperty({ example: 40, required: false })
+  @IsNumber()
+  @IsOptional()
+  estimatedHours?: number;
+
+  @ApiProperty({ example: 'Sơ cấp 1', required: false })
+  @IsString()
+  @IsOptional()
+  vietnameseLevelName?: string;
 }

@@ -39,7 +39,7 @@ export class UsersController {
     },
   })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  async getProfile(@CurrentUser() user: User) {
+  getProfile(@CurrentUser() user: User) {
     return user;
   }
 
