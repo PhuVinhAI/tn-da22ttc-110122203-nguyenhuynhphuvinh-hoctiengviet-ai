@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 ## Parent
 
@@ -18,18 +18,18 @@ Progress tracking: call `POST /progress/lesson/:id/start` when entering a lesson
 
 ## Acceptance criteria
 
-- [ ] Lesson wizard shows step-by-step with PageController and progress bar
-- [ ] 5 content types render correctly (text, audio, image, video, dialogue)
-- [ ] Audio player has speed control (0.5x–2.0x cycle chip)
-- [ ] Video plays via chewie player
-- [ ] Vocabulary step shows word, translation, phonetic, POS, classifier, dialect variants
-- [ ] "Learn" button adds vocabulary to learning list via API
-- [ ] Grammar step shows structure, explanation, examples
-- [ ] `POST /progress/lesson/:id/start` called on lesson entry
-- [ ] Smart resume dialog appears for IN_PROGRESS lessons
-- [ ] `POST /progress/lesson/:id/complete` called after lesson done (placeholder score until exercises)
-- [ ] Error and loading states handled
-- [ ] Be Vietnam Pro font applied to Vietnamese text content
+- [x] Lesson wizard shows step-by-step with PageController and progress bar
+- [x] 5 content types render correctly (text, audio, image, video, dialogue)
+- [x] Audio player has speed control (0.5x–2.0x cycle chip)
+- [x] Video plays via chewie player
+- [x] Vocabulary step shows word, translation, phonetic, POS, classifier, dialect variants
+- [x] "Learn" button adds vocabulary to learning list via API
+- [x] Grammar step shows structure, explanation, examples
+- [x] `POST /progress/lesson/:id/start` called on lesson entry
+- [x] Smart resume dialog appears for IN_PROGRESS lessons
+- [x] `POST /progress/lesson/:id/complete` called after lesson done (placeholder score until exercises)
+- [x] Error and loading states handled
+- [x] Be Vietnam Pro font applied to Vietnamese text content
 
 ## Blocked by
 
