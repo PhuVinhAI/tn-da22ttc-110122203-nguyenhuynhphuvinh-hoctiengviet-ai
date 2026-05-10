@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class GoogleSignInButton extends StatefulWidget {
@@ -22,7 +23,10 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
     setState(() => _isLoading = true);
     try {
       final googleSignIn = GoogleSignIn.instance;
-      await googleSignIn.initialize();
+      final serverClientId = dotenv.env['GOOGLE_CLIENT_ID'];
+      await googleSignIn.initialize(
+        serverClientId: serverClientId,
+      );
       final account = await googleSignIn.authenticate();
       final auth = account.authentication;
       final idToken = auth.idToken;
