@@ -7,6 +7,7 @@ import {
   VerifiedEmailResult,
   PasswordResetTokenResult,
   VerifiedPasswordResetResult,
+  VerifiedResetCodeResult,
   CleanupResult,
 } from './interfaces';
 
@@ -69,12 +70,13 @@ export class TokenLifecycle {
     await this.repo.deleteUnusedPasswordResetByUserId(userId);
 
     const token = randomBytes(32).toString('hex');
+    const code = String(Math.floor(100000 + Math.random() * 900000));
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 1);
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15);
 
-    await this.repo.savePasswordReset(token, userId, expiresAt);
+    await this.repo.savePasswordReset(token, userId, expiresAt, code);
 
-    return { token, expiresAt };
+    return { token, code, expiresAt };
   }
 
   async verifyPasswordResetToken(
@@ -89,6 +91,24 @@ export class TokenLifecycle {
     return {
       userId: entry.userId,
       email: entry.email,
+    };
+  }
+
+  async verifyResetCode(
+    code: string,
+    email: string,
+  ): Promise<VerifiedResetCodeResult | null> {
+    const entry = await this.repo.findUnusedPasswordResetByCodeAndEmail(
+      code,
+      email,
+    );
+    if (!entry) return null;
+    if (entry.expiresAt < new Date()) return null;
+
+    return {
+      userId: entry.userId,
+      email: entry.email,
+      resetToken: entry.token,
     };
   }
 

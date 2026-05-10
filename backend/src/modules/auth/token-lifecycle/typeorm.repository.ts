@@ -96,8 +96,14 @@ export class TypeOrmTokenRepository implements ITokenRepository {
     token: string,
     userId: string,
     expiresAt: Date,
+    code?: string,
   ): Promise<void> {
-    const entity = this.passwordResetRepo.create({ token, userId, expiresAt });
+    const entity = this.passwordResetRepo.create({
+      token,
+      userId,
+      expiresAt,
+      code,
+    });
     await this.passwordResetRepo.save(entity);
   }
 
@@ -125,6 +131,42 @@ export class TypeOrmTokenRepository implements ITokenRepository {
   async markPasswordResetUsed(token: string): Promise<void> {
     const entity = await this.passwordResetRepo.findOne({ where: { token } });
     if (entity) {
+      entity.usedAt = new Date();
+      await this.passwordResetRepo.save(entity);
+    }
+  }
+
+  async findUnusedPasswordResetByCodeAndEmail(
+    code: string,
+    email: string,
+  ): Promise<{
+    userId: string;
+    expiresAt: Date;
+    email: string;
+    token: string;
+  } | null> {
+    const entity = await this.passwordResetRepo.findOne({
+      where: { code, usedAt: IsNull() },
+      relations: ['user'],
+    });
+    if (!entity || entity.user.email !== email) return null;
+    return {
+      userId: entity.userId,
+      expiresAt: entity.expiresAt,
+      email: entity.user.email,
+      token: entity.token,
+    };
+  }
+
+  async markPasswordResetUsedByCodeAndEmail(
+    code: string,
+    email: string,
+  ): Promise<void> {
+    const entity = await this.passwordResetRepo.findOne({
+      where: { code, usedAt: IsNull() },
+      relations: ['user'],
+    });
+    if (entity && entity.user.email === email) {
       entity.usedAt = new Date();
       await this.passwordResetRepo.save(entity);
     }

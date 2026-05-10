@@ -35,6 +35,7 @@ export class EmailProcessor {
             to,
             data.fullName,
             data.token!,
+            data.code,
           );
           break;
 

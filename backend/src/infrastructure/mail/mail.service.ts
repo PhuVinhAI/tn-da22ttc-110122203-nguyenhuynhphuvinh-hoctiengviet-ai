@@ -83,7 +83,12 @@ export class MailService {
     }
   }
 
-  async sendPasswordResetEmail(email: string, fullName: string, token: string) {
+  async sendPasswordResetEmail(
+    email: string,
+    fullName: string,
+    token: string,
+    code?: string,
+  ) {
     // Skip sending email if configured (useful for testing)
     if (process.env.SKIP_MAIL_SENDING === 'true') {
       this.loggingService.log(
@@ -93,8 +98,6 @@ export class MailService {
       return;
     }
 
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
-
     try {
       await this.mailerService.sendMail({
         to: email,
@@ -102,8 +105,8 @@ export class MailService {
         template: 'password-reset',
         context: {
           fullName,
-          resetUrl,
-          expiresIn: '1 giờ',
+          code: code || '',
+          expiresIn: '15 phút',
         },
       });
 

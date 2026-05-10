@@ -6,6 +6,7 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/email_verification_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_otp_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/courses/presentation/screens/courses_screen.dart';
@@ -28,7 +29,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthRoute = location == '/login' ||
           location == '/register' ||
           location == '/forgot-password' ||
-          location == '/reset-password';
+          location == '/reset-password' ||
+          location == '/reset-password-otp';
 
       // /verify-email is accessible regardless of auth state
       if (location == '/verify-email') {
@@ -64,6 +66,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/reset-password-otp',
+        builder: (context, state) {
+          final email = state.uri.queryParameters['email'] ?? '';
+          return ResetPasswordOtpScreen(email: email);
+        },
       ),
       GoRoute(
         path: '/reset-password',

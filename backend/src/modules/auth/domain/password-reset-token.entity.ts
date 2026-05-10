@@ -7,6 +7,9 @@ export class PasswordResetToken extends BaseEntity {
   @Column()
   token: string;
 
+  @Column({ name: 'code', length: 6, nullable: true })
+  code: string;
+
   @Column({ name: 'user_id' })
   userId: string;
 

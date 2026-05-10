@@ -83,6 +83,21 @@ class AuthRepository {
     }
   }
 
+  Future<ResetCodeResponse> verifyResetCode({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/auth/verify-reset-code',
+        data: {'email': email, 'code': code},
+      );
+      return ResetCodeResponse.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
   Future<MessageResponse> resetPassword({
     required String token,
     required String newPassword,

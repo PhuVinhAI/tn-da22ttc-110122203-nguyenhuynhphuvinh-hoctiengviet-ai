@@ -12,6 +12,7 @@ interface TokenRecord {
 
 interface PasswordResetRecord {
   token: string;
+  code: string;
   userId: string;
   expiresAt: Date;
   usedAt: Date | null;
@@ -128,10 +129,12 @@ export class InMemoryTokenRepository implements ITokenRepository {
     token: string,
     userId: string,
     expiresAt: Date,
+    code?: string,
   ): Promise<void> {
     const user = this.users.get(userId) || { email: '' };
     this.passwordResetTokens.set(token, {
       token,
+      code: code || '',
       userId,
       expiresAt,
       usedAt: null,
@@ -164,6 +167,48 @@ export class InMemoryTokenRepository implements ITokenRepository {
   async markPasswordResetUsed(token: string): Promise<void> {
     const entry = this.passwordResetTokens.get(token);
     if (entry) entry.usedAt = new Date();
+  }
+
+  async findUnusedPasswordResetByCodeAndEmail(
+    code: string,
+    email: string,
+  ): Promise<{
+    userId: string;
+    expiresAt: Date;
+    email: string;
+    token: string;
+  } | null> {
+    for (const entry of this.passwordResetTokens.values()) {
+      if (
+        entry.code === code &&
+        entry.email === email &&
+        entry.usedAt === null
+      ) {
+        return {
+          userId: entry.userId,
+          expiresAt: entry.expiresAt,
+          email: entry.email,
+          token: entry.token,
+        };
+      }
+    }
+    return null;
+  }
+
+  async markPasswordResetUsedByCodeAndEmail(
+    code: string,
+    email: string,
+  ): Promise<void> {
+    for (const entry of this.passwordResetTokens.values()) {
+      if (
+        entry.code === code &&
+        entry.email === email &&
+        entry.usedAt === null
+      ) {
+        entry.usedAt = new Date();
+        return;
+      }
+    }
   }
 
   async deleteExpiredPasswordResetTokens(): Promise<number> {

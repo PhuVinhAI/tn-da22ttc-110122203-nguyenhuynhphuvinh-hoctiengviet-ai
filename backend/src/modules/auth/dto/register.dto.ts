@@ -2,6 +2,7 @@ import {
   IsEmail,
   IsString,
   MinLength,
+  Matches,
   IsEnum,
   IsOptional,
 } from 'class-validator';
@@ -13,9 +14,15 @@ export class RegisterDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'password123', minLength: 6 })
+  @ApiProperty({
+    example: 'Password123',
+    description: 'Mật khẩu (tối thiểu 8 ký tự, có chữ hoa, chữ thường, số)',
+  })
   @IsString()
-  @MinLength(6)
+  @MinLength(8, { message: 'Mật khẩu phải có ít nhất 8 ký tự' })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
+    message: 'Mật khẩu phải có ít nhất 1 chữ hoa, 1 chữ thường và 1 số',
+  })
   password: string;
 
   @ApiProperty({ example: 'John Doe' })

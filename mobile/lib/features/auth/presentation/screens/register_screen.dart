@@ -136,8 +136,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Password is required';
                       }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                      if (value.length < 8) {
+                        return 'Password must be at least 8 characters';
+                      }
+                      if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)')
+                          .hasMatch(value)) {
+                        return 'Must contain uppercase, lowercase, and digit';
                       }
                       return null;
                     },

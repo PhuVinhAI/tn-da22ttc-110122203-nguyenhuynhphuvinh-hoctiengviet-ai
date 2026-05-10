@@ -155,3 +155,21 @@ class MessageResponse {
     return {'message': message};
   }
 }
+
+class ResetCodeResponse {
+  const ResetCodeResponse({required this.resetToken, required this.message});
+
+  factory ResetCodeResponse.fromJson(Map<String, dynamic> json) {
+    return ResetCodeResponse(
+      resetToken: json['reset_token'] as String,
+      message: json['message'] as String,
+    );
+  }
+
+  final String resetToken;
+  final String message;
+
+  Map<String, dynamic> toJson() {
+    return {'reset_token': resetToken, 'message': message};
+  }
+}

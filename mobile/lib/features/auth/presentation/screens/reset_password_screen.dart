@@ -16,7 +16,6 @@ class ResetPasswordScreen extends ConsumerStatefulWidget {
 
 class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _tokenController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
@@ -25,16 +24,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   bool _obscureConfirmPassword = true;
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.token != null) {
-      _tokenController.text = widget.token!;
-    }
-  }
-
-  @override
   void dispose() {
-    _tokenController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -42,13 +32,14 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   Future<void> _handleReset() async {
     if (!_formKey.currentState!.validate()) return;
+    if (widget.token == null) return;
 
     setState(() => _isLoading = true);
 
     try {
       final repository = ref.read(authRepositoryProvider);
       await repository.resetPassword(
-        token: _tokenController.text.trim(),
+        token: widget.token!,
         newPassword: _passwordController.text,
       );
       setState(() => _isReset = true);
@@ -120,22 +111,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),
-                      if (widget.token == null) ...[
-                        TextFormField(
-                          controller: _tokenController,
-                          decoration: const InputDecoration(
-                            labelText: 'Reset Token',
-                            prefixIcon: Icon(Icons.vpn_key_outlined),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Reset token is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                      ],
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,

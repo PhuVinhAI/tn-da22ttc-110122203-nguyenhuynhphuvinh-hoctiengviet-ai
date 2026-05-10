@@ -14,6 +14,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { VerifyEmailCodeDto } from './dto/verify-email-code.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -150,7 +151,7 @@ export class AuthController {
   @Post('forgot-password')
   @ApiOperation({
     summary: 'Quên mật khẩu',
-    description: 'Gửi email chứa link đặt lại mật khẩu',
+    description: 'Gửi email chứa mã OTP đặt lại mật khẩu',
   })
   @ApiBody({ type: ForgotPasswordDto })
   @ApiResponse({
@@ -158,12 +159,41 @@ export class AuthController {
     description: 'Email đã được gửi',
     schema: {
       example: {
-        message: 'Nếu email tồn tại, bạn sẽ nhận được link đặt lại mật khẩu.',
+        message: 'Nếu email tồn tại, bạn sẽ nhận được mã đặt lại mật khẩu.',
       },
     },
   })
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     return this.authService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Public()
+  @Post('verify-reset-code')
+  @ApiOperation({
+    summary: 'Xác thực mã OTP đặt lại mật khẩu',
+    description:
+      'Xác thực mã OTP 6 chữ số từ email quên mật khẩu. Trả về reset token để đặt lại mật khẩu.',
+  })
+  @ApiBody({ type: VerifyResetCodeDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Mã OTP hợp lệ',
+    schema: {
+      example: {
+        reset_token: 'hex-token-string',
+        message: 'Mã xác thực hợp lệ. Vui lòng đặt lại mật khẩu.',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Mã OTP không hợp lệ hoặc đã hết hạn',
+  })
+  async verifyResetCode(@Body() verifyResetCodeDto: VerifyResetCodeDto) {
+    return this.authService.verifyResetCode(
+      verifyResetCodeDto.email,
+      verifyResetCodeDto.code,
+    );
   }
 
   @Public()

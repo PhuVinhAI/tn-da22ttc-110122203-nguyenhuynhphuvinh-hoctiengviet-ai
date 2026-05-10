@@ -136,19 +136,21 @@ describe('TokenLifecycle', () => {
   });
 
   describe('createPasswordResetToken', () => {
-    it('returns { token, expiresAt } with 64-char hex token and 1h expiry', async () => {
+    it('returns { token, code, expiresAt } with 64-char hex token and 15min expiry', async () => {
       repo.addUser('user-1', 'user@example.com');
       const result = await service.createPasswordResetToken('user-1');
 
       expect(result.token).toBeDefined();
       expect(result.token).toHaveLength(64);
+      expect(result.code).toBeDefined();
+      expect(result.code).toHaveLength(6);
       expect(result.expiresAt).toBeDefined();
 
       const now = new Date();
       const diffMs = result.expiresAt.getTime() - now.getTime();
-      const diffHours = diffMs / (1000 * 60 * 60);
-      expect(diffHours).toBeGreaterThan(0.9);
-      expect(diffHours).toBeLessThan(1.1);
+      const diffMinutes = diffMs / (1000 * 60);
+      expect(diffMinutes).toBeGreaterThan(14);
+      expect(diffMinutes).toBeLessThan(16);
     });
 
     it('generates different tokens on each call', async () => {

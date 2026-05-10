@@ -71,13 +71,18 @@ export class EmailQueueService {
     );
   }
 
-  async sendPasswordResetEmail(email: string, fullName: string, token: string) {
+  async sendPasswordResetEmail(
+    email: string,
+    fullName: string,
+    token: string,
+    code?: string,
+  ) {
     await this.emailQueue.add(
       'send-email',
       {
         type: 'password-reset',
         to: email,
-        data: { fullName, token },
+        data: { fullName, token, code },
       } as EmailJob,
       {
         attempts: 3,

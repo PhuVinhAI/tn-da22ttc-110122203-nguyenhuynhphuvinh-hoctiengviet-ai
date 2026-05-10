@@ -235,7 +235,7 @@ export class AuthService {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       return {
-        message: 'Nếu email tồn tại, bạn sẽ nhận được link đặt lại mật khẩu.',
+        message: 'Nếu email tồn tại, bạn sẽ nhận được mã đặt lại mật khẩu.',
       };
     }
 
@@ -247,6 +247,7 @@ export class AuthService {
       user.email,
       user.fullName,
       resetToken.token,
+      resetToken.code,
     );
 
     this.loggingService.log(
@@ -255,7 +256,7 @@ export class AuthService {
     );
 
     return {
-      message: 'Nếu email tồn tại, bạn sẽ nhận được link đặt lại mật khẩu.',
+      message: 'Nếu email tồn tại, bạn sẽ nhận được mã đặt lại mật khẩu.',
     };
   }
 
@@ -286,6 +287,26 @@ export class AuthService {
 
     return {
       message: 'Mật khẩu đã được đặt lại thành công!',
+    };
+  }
+
+  async verifyResetCode(email: string, code: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('Email không tồn tại');
+    }
+
+    const result = await this.tokenLifecycle.verifyResetCode(code, email);
+
+    if (!result) {
+      throw new BadRequestException('Mã xác thực không hợp lệ hoặc đã hết hạn');
+    }
+
+    this.loggingService.log(`Reset code verified: ${email}`, 'AuthService');
+
+    return {
+      reset_token: result.resetToken,
+      message: 'Mã xác thực hợp lệ. Vui lòng đặt lại mật khẩu.',
     };
   }
 
