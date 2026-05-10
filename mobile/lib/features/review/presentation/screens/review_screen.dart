@@ -15,6 +15,7 @@ enum ReviewState {
   reviewing,
   submitting,
   completed,
+  empty,
   error,
 }
 
@@ -47,7 +48,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       final items = await repo.getDueForReview();
       setState(() {
         _items = items;
-        _state = items.isEmpty ? ReviewState.completed : ReviewState.ready;
+        _state = items.isEmpty ? ReviewState.empty : ReviewState.ready;
         _sessionStartTime = DateTime.now();
       });
     } catch (e) {
@@ -153,6 +154,9 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       case ReviewState.completed:
         return _buildCompletedState();
 
+      case ReviewState.empty:
+        return _buildEmptyState();
+
       case ReviewState.error:
         return _buildErrorState();
     }
@@ -225,6 +229,45 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
             ),
           const SizedBox(height: 16),
           _buildMasteryIndicator(item.masteryLevel),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.check_circle_outline,
+            size: 64,
+            color: Colors.green,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'All caught up!',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'No vocabulary due for review right now.',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.grey[600],
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Come back later or learn new words!',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[500],
+                ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton(
+            onPressed: () => context.go('/'),
+            child: const Text('Back to Home'),
+          ),
         ],
       ),
     );
