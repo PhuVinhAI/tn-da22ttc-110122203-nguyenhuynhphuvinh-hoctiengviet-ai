@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 ## Parent
 
@@ -47,17 +47,17 @@ Error mapping: SDK errors have `.name`, `.message`, `.status` — map HTTP statu
 
 ## Acceptance criteria
 
-- [ ] `GenaiModule` is `@Global()` and exports `IAiProvider` token bound to `GenaiService`
-- [ ] `GenaiService` implements `IAiProvider` from `@linvnix/shared`
-- [ ] `chat(req)` calls Interactions API (stateless mode, `store: false`), maps response to `AiChatResponse`, accumulates token usage in Conversation and KeyPool stats
-- [ ] `chatStream(req)` calls Interactions API with `stream: true`, yields `AsyncIterable<AiChatChunk>` with text deltas
-- [ ] `embed(texts)`, `uploadFile(file)`, `generateImage(prompt)` are scaffolded (throw `AiInvalidRequestException` or return placeholder)
-- [ ] `executeWithRetry(fn)` implements: KeyPool.getKey() → fn() → on 429: markCooldown + rotate + retry → on exhaustion: try fallback model from config → on still failing: throw `AiServiceUnavailableException`
-- [ ] SDK errors mapped to `AiException` hierarchy (429→AiRateLimitException, timeout→AiTimeoutException, safety block→AiSafetyBlockedException, etc.)
-- [ ] YAML prompt templates loaded from `genai/prompts/` directory, cached on module init, render `{{variable}}` placeholders
-- [ ] Config-driven model selection: `chat` model from `genai.models.chat`, fallback from `genai.models.chatFallback`, override per request supported
-- [ ] Config-driven safety settings per use case applied to requests
-- [ ] Unit tests pass with mocked `GoogleGenAI` SDK: retry/fallback logic, key rotation, streaming chunks, error mapping, prompt rendering
+- [x] `GenaiModule` is `@Global()` and exports `IAiProvider` token bound to `GenaiService`
+- [x] `GenaiService` implements `IAiProvider` from `@linvnix/shared`
+- [x] `chat(req)` calls Interactions API (stateless mode, `store: false`), maps response to `AiChatResponse`, accumulates token usage in Conversation and KeyPool stats
+- [x] `chatStream(req)` calls Interactions API with `stream: true`, yields `AsyncIterable<AiChatChunk>` with text deltas
+- [x] `embed(texts)`, `uploadFile(file)`, `generateImage(prompt)` are scaffolded (throw `AiInvalidRequestException` or return placeholder)
+- [x] `executeWithRetry(fn)` implements: KeyPool.getKey() → fn() → on 429: markCooldown + rotate + retry → on exhaustion: try fallback model from config → on still failing: throw `AiServiceUnavailableException`
+- [x] SDK errors mapped to `AiException` hierarchy (429→AiRateLimitException, timeout→AiTimeoutException, safety block→AiSafetyBlockedException, etc.)
+- [x] YAML prompt templates loaded from `genai/prompts/` directory, cached on module init, render `{{variable}}` placeholders
+- [x] Config-driven model selection: `chat` model from `genai.models.chat`, fallback from `genai.models.chatFallback`, override per request supported
+- [x] Config-driven safety settings per use case applied to requests
+- [x] Unit tests pass with mocked `GoogleGenAI` SDK: retry/fallback logic, key rotation, streaming chunks, error mapping, prompt rendering
 
 ## Blocked by
 
