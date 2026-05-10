@@ -191,12 +191,20 @@ class ProfileScreen extends ConsumerWidget {
                         currentLevel: selectedLevel,
                         preferredDialect: selectedDialect,
                       );
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Profile updated successfully'),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                      ),
+                    );
+                  }
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Failed to update profile: $e'),
-                        backgroundColor: Colors.red,
+                        content: Text('Failed to update profile: ${e.toString()}'),
+                        backgroundColor: Theme.of(context).colorScheme.error,
                       ),
                     );
                   }
@@ -232,31 +240,39 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = Theme.of(context).extension<VietnameseAccentTokens>()!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final accent = theme.extension<VietnameseAccentTokens>()!;
+
     return Center(
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundColor: accent.accentPrimary.withOpacity(0.2),
-            backgroundImage: profile.avatarUrl != null
-                ? NetworkImage(profile.avatarUrl!)
-                : null,
-            child: profile.avatarUrl == null
-                ? Icon(Icons.person, size: 50, color: accent.accentPrimary)
-                : null,
+          Semantics(
+            label: profile.avatarUrl != null
+                ? 'Profile picture of ${profile.fullName}'
+                : 'Default profile picture',
+            child: CircleAvatar(
+              radius: 50,
+              backgroundColor: accent.accentPrimary.withValues(alpha: 0.2),
+              backgroundImage: profile.avatarUrl != null
+                  ? NetworkImage(profile.avatarUrl!)
+                  : null,
+              child: profile.avatarUrl == null
+                  ? Icon(Icons.person, size: 50, color: accent.accentPrimary)
+                  : null,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
             profile.fullName,
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: theme.textTheme.headlineSmall,
           ),
           const SizedBox(height: 4),
           Text(
             profile.email,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -328,30 +344,36 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                ),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Semantics(
+      label: '$label: $value',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: colorScheme.onSurfaceVariant),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -364,12 +386,15 @@ class _StatsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Statistics',
-          style: Theme.of(context).textTheme.titleMedium,
+          style: theme.textTheme.titleMedium,
         ),
         const SizedBox(height: 12),
         statsAsync.when(
@@ -384,13 +409,20 @@ class _StatsSection extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  const Icon(Icons.error_outline, color: Colors.red),
+                  Semantics(
+                    label: 'Error loading statistics',
+                    child: Icon(Icons.error_outline, color: colorScheme.error),
+                  ),
                   const SizedBox(height: 8),
                   const Text('Failed to load statistics'),
                   const SizedBox(height: 8),
-                  OutlinedButton(
-                    onPressed: () {},
-                    child: const Text('Retry'),
+                  Semantics(
+                    label: 'Retry loading statistics',
+                    button: true,
+                    child: OutlinedButton(
+                      onPressed: () {},
+                      child: const Text('Retry'),
+                    ),
                   ),
                 ],
               ),
@@ -442,45 +474,45 @@ class _StatsSection extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Icon(Icons.speed, color: accent.accentPrimary),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Accuracy',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            Text(
-                              '${stats.accuracy.toStringAsFixed(1)}%',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineSmall
-                                  ?.copyWith(
-                                    color: accent.accentPrimary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ],
+              Semantics(
+                label: 'Accuracy: ${stats.accuracy.toStringAsFixed(1)} percent',
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Icon(Icons.speed, color: accent.accentPrimary),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Accuracy',
+                                style: theme.textTheme.bodySmall,
+                              ),
+                              Text(
+                                '${stats.accuracy.toStringAsFixed(1)}%',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  color: accent.accentPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        width: 60,
-                        height: 60,
-                        child: CircularProgressIndicator(
-                          value: stats.accuracy / 100,
-                          backgroundColor: Colors.grey[200],
-                          color: accent.accentPrimary,
-                          strokeWidth: 6,
+                        SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: CircularProgressIndicator(
+                            value: stats.accuracy / 100,
+                            backgroundColor: colorScheme.surfaceContainerHighest,
+                            color: accent.accentPrimary,
+                            strokeWidth: 6,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -515,28 +547,33 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-          ],
+    final theme = Theme.of(context);
+
+    return Semantics(
+      label: '$label: $value',
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: color, size: 24),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

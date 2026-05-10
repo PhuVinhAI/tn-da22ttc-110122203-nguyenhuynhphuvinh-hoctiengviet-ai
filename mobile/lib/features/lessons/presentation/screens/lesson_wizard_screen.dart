@@ -292,42 +292,58 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
               child: Row(
                 children: [
                   if (_currentPage > 0)
-                    OutlinedButton(
-                      onPressed: () {
-                        _pageController?.previousPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      child: const Text('Back'),
+                    Semantics(
+                      label: 'Go to previous step',
+                      button: true,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          _pageController?.previousPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                        child: const Text('Back'),
+                      ),
                     )
                   else
                     const SizedBox.shrink(),
                   const Spacer(),
                   if (!isLastStep && !isExerciseStep)
-                    FilledButton(
-                      onPressed: () {
-                        _pageController?.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      child: const Text('Next'),
+                    Semantics(
+                      label: 'Go to next step',
+                      button: true,
+                      child: FilledButton(
+                        onPressed: () {
+                          _pageController?.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                        child: const Text('Next'),
+                      ),
                     )
                   else if (isExerciseStep && isExerciseCompleted && !isLastStep)
-                    FilledButton(
-                      onPressed: () {
-                        _pageController?.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      child: const Text('Next'),
+                    Semantics(
+                      label: 'Go to next step',
+                      button: true,
+                      child: FilledButton(
+                        onPressed: () {
+                          _pageController?.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                        child: const Text('Next'),
+                      ),
                     )
                   else if (isLastStep && (!isExerciseStep || isExerciseCompleted))
-                    FilledButton(
-                      onPressed: _completeLesson,
-                      child: const Text('Complete'),
+                    Semantics(
+                      label: 'Complete lesson',
+                      button: true,
+                      child: FilledButton(
+                        onPressed: _completeLesson,
+                        child: const Text('Complete'),
+                      ),
                     ),
                 ],
               ),

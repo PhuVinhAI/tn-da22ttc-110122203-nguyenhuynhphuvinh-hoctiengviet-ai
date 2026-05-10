@@ -36,26 +36,30 @@ class ShellScreen extends StatelessWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _getCurrentIndex(context),
         onDestinationSelected: (index) => _onTap(context, index),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
             label: 'Home',
+            tooltip: 'Go to Home screen',
           ),
           NavigationDestination(
-            icon: Icon(Icons.school_outlined),
-            selectedIcon: Icon(Icons.school),
+            icon: const Icon(Icons.school_outlined),
+            selectedIcon: const Icon(Icons.school),
             label: 'Courses',
+            tooltip: 'Browse available courses',
           ),
           NavigationDestination(
-            icon: Icon(Icons.style_outlined),
-            selectedIcon: Icon(Icons.style),
+            icon: const Icon(Icons.style_outlined),
+            selectedIcon: const Icon(Icons.style),
             label: 'Review',
+            tooltip: 'Review vocabulary',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outlined),
-            selectedIcon: Icon(Icons.person),
+            icon: const Icon(Icons.person_outlined),
+            selectedIcon: const Icon(Icons.person),
             label: 'Profile',
+            tooltip: 'View your profile',
           ),
         ],
       ),

@@ -60,28 +60,37 @@ class _RatingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color,
-            foregroundColor: Colors.white,
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(16),
-          ),
-          child: Icon(icon, size: 28),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          rating.displayName,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
+    return Semantics(
+      label: 'Rate as ${rating.displayName}',
+      button: true,
+      enabled: onPressed != null,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 56,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: color,
+                foregroundColor: Colors.white,
+                shape: const CircleBorder(),
+                padding: EdgeInsets.zero,
               ),
-        ),
-      ],
+              child: Icon(icon, size: 28),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            rating.displayName,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

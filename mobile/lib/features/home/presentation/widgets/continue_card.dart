@@ -129,6 +129,9 @@ class _EmptyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -136,20 +139,26 @@ class _EmptyCard extends StatelessWidget {
         children: [
           Text(
             'Continue Learning',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: theme.textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
           Text(
             'Start a course to begin learning',
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () => context.go('/courses'),
-            icon: const Icon(Icons.school),
-            label: const Text('Browse Courses'),
-            style: FilledButton.styleFrom(
-              backgroundColor: accent.accentPrimary,
+          Semantics(
+            label: 'Browse available courses',
+            button: true,
+            child: FilledButton.icon(
+              onPressed: () => context.go('/courses'),
+              icon: const Icon(Icons.school),
+              label: const Text('Browse Courses'),
+              style: FilledButton.styleFrom(
+                backgroundColor: accent.accentPrimary,
+              ),
             ),
           ),
         ],
@@ -169,6 +178,8 @@ class _DataCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isInProgress =
         continueLearning.status == ContinueLearningStatus.inProgress;
 
@@ -184,32 +195,38 @@ class _DataCard extends StatelessWidget {
                 size: 16,
                 color: isInProgress
                     ? accent.accentPrimary
-                    : Theme.of(context).colorScheme.outline,
+                    : colorScheme.outline,
               ),
               const SizedBox(width: 4),
               Text(
                 isInProgress ? 'In Progress' : 'Completed',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: isInProgress
-                          ? accent.accentPrimary
-                          : Theme.of(context).colorScheme.outline,
-                    ),
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: isInProgress
+                      ? accent.accentPrimary
+                      : colorScheme.outline,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             continueLearning.lessonTitle,
-            style: Theme.of(context).textTheme.titleMedium,
+            style: theme.textTheme.titleMedium,
           ),
           const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () =>
-                context.go('/lessons/${continueLearning.lessonId}'),
-            icon: Icon(isInProgress ? Icons.play_arrow : Icons.replay),
-            label: Text(isInProgress ? 'Resume' : 'Review'),
-            style: FilledButton.styleFrom(
-              backgroundColor: accent.accentPrimary,
+          Semantics(
+            label: isInProgress
+                ? 'Resume lesson: ${continueLearning.lessonTitle}'
+                : 'Review lesson: ${continueLearning.lessonTitle}',
+            button: true,
+            child: FilledButton.icon(
+              onPressed: () =>
+                  context.go('/lessons/${continueLearning.lessonId}'),
+              icon: Icon(isInProgress ? Icons.play_arrow : Icons.replay),
+              label: Text(isInProgress ? 'Resume' : 'Review'),
+              style: FilledButton.styleFrom(
+                backgroundColor: accent.accentPrimary,
+              ),
             ),
           ),
         ],

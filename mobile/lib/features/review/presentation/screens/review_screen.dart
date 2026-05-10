@@ -163,6 +163,9 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   }
 
   Widget _buildReadyState() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -170,30 +173,34 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
           Icon(
             Icons.school,
             size: 64,
-            color: Theme.of(context).primaryColor,
+            color: colorScheme.primary,
           ),
           const SizedBox(height: 16),
           Text(
             '${_items.length} items due for review',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: theme.textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
             'Keep your vocabulary fresh!',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
-                ),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: _startReview,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 48,
-                vertical: 16,
+          Semantics(
+            label: 'Start reviewing ${_items.length} vocabulary items',
+            button: true,
+            child: ElevatedButton(
+              onPressed: _startReview,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 48,
+                  vertical: 16,
+                ),
               ),
+              child: const Text('Start Review'),
             ),
-            child: const Text('Start Review'),
           ),
         ],
       ),
@@ -201,6 +208,8 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   }
 
   Widget _buildReviewingState() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final item = _items[_currentIndex];
 
     return Padding(
@@ -221,11 +230,14 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
               enabled: _state == ReviewState.reviewing,
             )
           else
-            Text(
-              'Tap the card to reveal the answer',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+            Semantics(
+              label: 'Tap the card above to reveal the answer',
+              child: Text(
+                'Tap the card to reveal the answer',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
             ),
           const SizedBox(height: 16),
           _buildMasteryIndicator(item.masteryLevel),
@@ -235,38 +247,48 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   }
 
   Widget _buildEmptyState() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.check_circle_outline,
-            size: 64,
-            color: Colors.green,
+          Semantics(
+            label: 'All caught up icon',
+            child: Icon(
+              Icons.check_circle_outline,
+              size: 64,
+              color: colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             'All caught up!',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: theme.textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
             'No vocabulary due for review right now.',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
-                ),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'Come back later or learn new words!',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
-                ),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: () => context.go('/'),
-            child: const Text('Back to Home'),
+          Semantics(
+            label: 'Go back to home screen',
+            button: true,
+            child: ElevatedButton(
+              onPressed: () => context.go('/'),
+              child: const Text('Back to Home'),
+            ),
           ),
         ],
       ),
@@ -292,21 +314,31 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   }
 
   Widget _buildErrorState() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 48, color: Colors.red),
+          Semantics(
+            label: 'Error icon',
+            child: Icon(Icons.error_outline, size: 48, color: colorScheme.error),
+          ),
           const SizedBox(height: 16),
           Text(
             _error ?? 'An error occurred',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: theme.textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadDueItems,
-            child: const Text('Retry'),
+          Semantics(
+            label: 'Retry loading review items',
+            button: true,
+            child: ElevatedButton(
+              onPressed: _loadDueItems,
+              child: const Text('Retry'),
+            ),
           ),
         ],
       ),
@@ -314,31 +346,35 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   }
 
   Widget _buildMasteryIndicator(MasteryLevel level) {
+    final colorScheme = Theme.of(context).colorScheme;
     Color color;
     String text;
 
     switch (level) {
       case MasteryLevel.newWord:
-        color = Colors.grey;
+        color = colorScheme.outline;
         text = 'New';
       case MasteryLevel.learning:
         color = Colors.orange;
         text = 'Learning';
       case MasteryLevel.familiar:
-        color = Colors.blue;
+        color = colorScheme.primary;
         text = 'Familiar';
       case MasteryLevel.mastered:
         color = Colors.green;
         text = 'Mastered';
     }
 
-    return Chip(
-      label: Text(
-        text,
-        style: TextStyle(color: color, fontWeight: FontWeight.bold),
+    return Semantics(
+      label: 'Mastery level: $text',
+      child: Chip(
+        label: Text(
+          text,
+          style: TextStyle(color: color, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: color.withValues(alpha: 0.1),
+        side: BorderSide(color: color),
       ),
-      backgroundColor: color.withOpacity(0.1),
-      side: BorderSide(color: color),
     );
   }
 }

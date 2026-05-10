@@ -32,14 +32,29 @@ class _CoursesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     if (courses.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.school_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('No courses available'),
+            Semantics(
+              label: 'No courses available icon',
+              child: Icon(
+                Icons.school_outlined,
+                size: 64,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No courses available',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       );
@@ -201,27 +216,31 @@ class _LevelBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _getLevelColor(level);
+    final colorScheme = Theme.of(context).colorScheme;
+    final color = _getLevelColor(level, colorScheme);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        level,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
+    return Semantics(
+      label: 'Course level: $level',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Text(
+          level,
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+          ),
         ),
       ),
     );
   }
 
-  Color _getLevelColor(String level) {
+  Color _getLevelColor(String level, ColorScheme colorScheme) {
     return switch (level) {
       'A1' => const Color(0xFF4CAF50),
       'A2' => const Color(0xFF8BC34A),
@@ -229,7 +248,7 @@ class _LevelBadge extends StatelessWidget {
       'B2' => const Color(0xFFFF9800),
       'C1' => const Color(0xFFFF5722),
       'C2' => const Color(0xFFF44336),
-      _ => const Color(0xFF9E9E9E),
+      _ => colorScheme.outline,
     };
   }
 }
@@ -320,18 +339,31 @@ class _CoursesError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+          Semantics(
+            label: 'Error loading courses',
+            child: Icon(Icons.error_outline, size: 64, color: colorScheme.error),
+          ),
           const SizedBox(height: 16),
-          const Text('Failed to load courses'),
+          Text(
+            'Failed to load courses',
+            style: theme.textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
-          FilledButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+          Semantics(
+            label: 'Retry loading courses',
+            button: true,
+            child: FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
           ),
         ],
       ),
