@@ -11,6 +11,7 @@ import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import redisConfig from './config/redis.config';
 import mailConfig from './config/mail.config';
+import genaiConfig from './config/genai.config';
 
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -31,13 +32,21 @@ import { LoggingModule } from './infrastructure/logging/logging.module';
 import { MailModule } from './infrastructure/mail/mail.module';
 import { QueueModule } from './infrastructure/queue/queue.module';
 import { ArchivingModule } from './infrastructure/archiving/archiving.module';
+import { GenaiModule } from './infrastructure/genai/genai.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, jwtConfig, redisConfig, mailConfig],
+      load: [
+        appConfig,
+        databaseConfig,
+        jwtConfig,
+        redisConfig,
+        mailConfig,
+        genaiConfig,
+      ],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -67,6 +76,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     MailModule,
     QueueModule,
     ArchivingModule,
+    GenaiModule,
     AuthModule,
     UsersModule,
     CoursesModule,

@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 ## Parent
 
@@ -35,17 +35,17 @@ Environment variables: `GEMINI_API_KEY`, `GENAI_API_KEYS`, `GENAI_CHAT_MODEL`, `
 
 ## Acceptance criteria
 
-- [ ] `registerAs('genai')` config file exists in `backend/src/config/` and is loaded in `AppModule`
-- [ ] All 9 genai env vars added to `backend/.env.example` with sensible defaults
-- [ ] `KeyPool` class is injectable (`@Injectable()`)
-- [ ] `KeyPool` creates one `GoogleGenAI` instance per API key on init (pooled instances)
-- [ ] `getKey()` returns key with lowest `totalTokens` that is not in cooldown; falls back to single `apiKey` if pool empty
-- [ ] `markCooldown(key, error)` sets `cooldownUntil` with exponential backoff (30s, 60s, 120s) on 429
-- [ ] `updateStats(key, tokens)` increments per-key `totalCalls`, `totalTokens`, `totalErrors`
-- [ ] `isExhausted()` returns true when all keys are in cooldown
-- [ ] `keyStats` exposes per-key stats: `{ totalCalls, totalTokens, totalErrors, cooldownUntil }`
-- [ ] Unit tests pass: key selection priority, cooldown marking/expiry, rotation on 429, stats tracking, exhaustion detection
-- [ ] Config values accessible via `configService.get('genai.models.chat')` etc.
+- [x] `registerAs('genai')` config file exists in `backend/src/config/` and is loaded in `AppModule`
+- [x] All 9 genai env vars added to `backend/.env.example` with sensible defaults
+- [x] `KeyPool` class is injectable (`@Injectable()`)
+- [x] `KeyPool` creates one `GoogleGenAI` instance per API key on init (pooled instances)
+- [x] `getKey()` returns key with lowest `totalTokens` that is not in cooldown; falls back to single `apiKey` if pool empty
+- [x] `markCooldown(key, error)` sets `cooldownUntil` with exponential backoff (30s, 60s, 120s) on 429
+- [x] `updateStats(key, tokens)` increments per-key `totalCalls`, `totalTokens`, `totalErrors`
+- [x] `isExhausted()` returns true when all keys are in cooldown
+- [x] `keyStats` exposes per-key stats: `{ totalCalls, totalTokens, totalErrors, cooldownUntil }`
+- [x] Unit tests pass: key selection priority, cooldown marking/expiry, rotation on 429, stats tracking, exhaustion detection
+- [x] Config values accessible via `configService.get('genai.models.chat')` etc.
 
 ## Blocked by
 
