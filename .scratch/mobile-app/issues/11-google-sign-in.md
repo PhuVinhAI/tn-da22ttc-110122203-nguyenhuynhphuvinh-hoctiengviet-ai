@@ -1,4 +1,4 @@
-Status: ready-for-human
+Status: ready-for-agent
 
 ## Parent
 
@@ -10,12 +10,12 @@ Add Google Sign-In authentication. Client-side: use `google_sign_in` package to 
 
 ## Acceptance criteria
 
-- [ ] Backend `POST /auth/google/token` endpoint exists and works
-- [ ] "Sign in with Google" button on login and register screens
-- [ ] Google Sign-In obtains idToken client-side
-- [ ] idToken sent to backend, tokens received and stored
-- [ ] Post-login flow same as email auth (onboarding check → home)
-- [ ] Google users can log out and log back in via Google
+- [x] Backend `POST /auth/google/token` endpoint exists and works
+- [x] "Sign in with Google" button on login and register screens
+- [x] Google Sign-In obtains idToken client-side
+- [x] idToken sent to backend, tokens received and stored
+- [x] Post-login flow same as email auth (onboarding check → home)
+- [x] Google users can log out and log back in via Google
 - [ ] Works on both iOS and Android (requires Google client ID config per platform)
 
 ## Blocked by

@@ -10,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
+import { OAuth2Client } from 'google-auth-library';
 import { UsersService } from '../users/application/users.service';
 import { LoggingService } from '../../infrastructure/logging/logging.service';
 import { EmailQueueService } from '../../infrastructure/queue/email-queue.service';
@@ -475,6 +476,55 @@ export class AuthService {
     return {
       user,
       access_token: token,
+    };
+  }
+
+  async loginWithGoogleToken(
+    idToken: string,
+    userAgent?: string,
+    ipAddress?: string,
+  ) {
+    const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
+    const client = new OAuth2Client(clientId);
+
+    let payload: Record<string, any>;
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken,
+        audience: clientId,
+      });
+      payload = ticket.getPayload()!;
+    } catch {
+      throw new UnauthorizedException('Google ID token không hợp lệ');
+    }
+
+    const oauthUser: OAuthUserDto = {
+      googleId: payload.sub,
+      email: payload.email!,
+      fullName: payload.name || payload.email!,
+      avatarUrl: payload.picture,
+      provider: 'google',
+    };
+
+    const user = await this.validateOAuthUser(oauthUser);
+
+    const tokens = await this.generateTokens(
+      user.id,
+      user.email,
+      userAgent,
+      ipAddress,
+    );
+
+    this.loggingService.log(
+      `User logged in via Google token: ${user.email}`,
+      'AuthService',
+    );
+
+    return {
+      user,
+      access_token: tokens.accessToken,
+      refresh_token: tokens.refreshToken,
+      expires_in: 900,
     };
   }
 

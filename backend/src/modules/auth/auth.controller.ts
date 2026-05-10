@@ -18,6 +18,7 @@ import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { VerifyEmailCodeDto } from './dto/verify-email-code.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { GoogleTokenDto } from './dto/google-token.dto';
 import { Public, CurrentUser } from '../../common/decorators';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 
@@ -293,6 +294,47 @@ export class AuthController {
     const redirectUrl = `${frontendUrl}/auth/callback?token=${result.access_token}`;
 
     return res.redirect(redirectUrl);
+  }
+
+  @Public()
+  @Post('google/token')
+  @ApiOperation({
+    summary: 'Đăng nhập bằng Google ID token',
+    description:
+      'Xác thực Google ID token từ client-side (mobile/SPA), trả về JWT access + refresh tokens.',
+  })
+  @ApiBody({ type: GoogleTokenDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Đăng nhập thành công',
+    schema: {
+      example: {
+        user: {
+          id: 'uuid-string',
+          email: 'user@gmail.com',
+          fullName: 'John Doe',
+          googleId: 'google-user-id',
+          provider: 'google',
+          emailVerified: true,
+        },
+        access_token: 'jwt-access-token',
+        refresh_token: 'refresh-token-string',
+        expires_in: 900,
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: 'Google ID token không hợp lệ' })
+  async googleTokenAuth(
+    @Body() googleTokenDto: GoogleTokenDto,
+    @Req() req: Request,
+  ) {
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.ip || req.socket.remoteAddress;
+    return this.authService.loginWithGoogleToken(
+      googleTokenDto.idToken,
+      userAgent,
+      ipAddress,
+    );
   }
 
   @Public()

@@ -143,4 +143,18 @@ class AuthRepository {
       throw mapDioException(e);
     }
   }
+
+  Future<AuthResponse> loginWithGoogle({
+    required String idToken,
+  }) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/auth/google/token',
+        data: {'idToken': idToken},
+      );
+      return AuthResponse.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
 }

@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/providers/providers.dart';
+import '../../../../core/providers/auth_state_provider.dart';
+import '../../../profile/data/profile_providers.dart';
+import '../widgets/google_sign_in_button.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -46,6 +49,49 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (mounted) {
         context.go('/verify-email?email=${Uri.encodeComponent(_emailController.text.trim())}');
       }
+    } on AppException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('An unexpected error occurred'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleGoogleRegister(String idToken) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final repository = ref.read(authRepositoryProvider);
+      final response = await repository.loginWithGoogle(idToken: idToken);
+
+      final storage = ref.read(secureStorageProvider);
+      await storage.saveTokens(
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken,
+      );
+
+      ref.invalidate(userProfileProvider);
+      ref.invalidate(exerciseStatsProvider);
+
+      if (response.user.onboardingCompleted) {
+        ref.read(onboardingCompletedProvider.notifier).markCompleted();
+      } else {
+        ref.read(onboardingCompletedProvider.notifier).reset();
+      }
+
+      ref.read(authStateProvider.notifier).setAuthenticated(true);
     } on AppException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -186,6 +232,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Text('Create Account'),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'OR',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  GoogleSignInButton(
+                    enabled: !_isLoading,
+                    onSuccess: _handleGoogleRegister,
                   ),
                   const SizedBox(height: 16),
                   Row(

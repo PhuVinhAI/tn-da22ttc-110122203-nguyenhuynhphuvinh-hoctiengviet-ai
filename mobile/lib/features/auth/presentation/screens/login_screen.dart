@@ -5,6 +5,7 @@ import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/providers/providers.dart';
 import '../../../../core/providers/auth_state_provider.dart';
 import '../../../profile/data/profile_providers.dart';
+import '../widgets/google_sign_in_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -61,6 +62,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (mounted) {
         context.push('/verify-email?email=${Uri.encodeComponent(e.email)}');
       }
+    } on AppException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('An unexpected error occurred'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleGoogleLogin(String idToken) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final repository = ref.read(authRepositoryProvider);
+      final response = await repository.loginWithGoogle(idToken: idToken);
+
+      final storage = ref.read(secureStorageProvider);
+      await storage.saveTokens(
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken,
+      );
+
+      ref.invalidate(userProfileProvider);
+      ref.invalidate(exerciseStatsProvider);
+
+      if (response.user.onboardingCompleted) {
+        ref.read(onboardingCompletedProvider.notifier).markCompleted();
+      } else {
+        ref.read(onboardingCompletedProvider.notifier).reset();
+      }
+
+      ref.read(authStateProvider.notifier).setAuthenticated(true);
     } on AppException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -172,6 +216,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   OutlinedButton(
                     onPressed: () => context.push('/register'),
                     child: const Text('Create Account'),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'OR',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  GoogleSignInButton(
+                    enabled: !_isLoading,
+                    onSuccess: _handleGoogleLogin,
                   ),
                 ],
               ),
