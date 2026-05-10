@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 ## Parent
 
@@ -52,20 +52,20 @@ AiException (base, extends Error)
 
 ## Acceptance criteria
 
-- [ ] `packages/shared/package.json` exists with name `@linvnix/shared`, proper `exports`/`types` fields, and is listed in root `package.json` workspaces
-- [ ] `packages/shared/tsconfig.json` extends or is compatible with backend tsconfig (single quotes, trailing commas `"all"`, `removeComments: true`)
-- [ ] `IAiProvider` interface exported with `chat`, `chatStream`, `embed`, `uploadFile`, `generateImage` methods
-- [ ] Abstract AI types exported: `AiChatRequest` (with `messages`, `systemInstruction?`, `tools?`, `model?`, and `functionResults?: AiFunctionResult[]` for tool loop round-trips), `AiChatResponse` (with `text`, `functionCalls?: AiFunctionCall[]`, `usageMetadata`), `AiChatChunk` (streaming text delta), `AiEmbedding`, `AiFileRef`, `AiImageRef` (and `AiFileUpload`, `AiImageRequest` input types)
-- [ ] `AiFunctionCall` type: `{ name: string, arguments: Record<string, any> }`
-- [ ] `AiFunctionResult` type: `{ name: string, result: any }`
-- [ ] `AiException` hierarchy: base class + 6 subclasses, each with correct HTTP status code property
-- [ ] `BaseTool<TParams, TResult>` abstract class with `toDeclaration()` returning `ToolDeclaration` (SDK-agnostic), auto-converted from `this.parameters` via `zodToJsonSchema()`
-- [ ] `ToolDeclaration` interface exported: `{ name, description, parameters }` (plain JSON Schema, no SDK types)
-- [ ] Prompt template types exported (for YAML rendering in agent module)
-- [ ] Barrel export (`index.ts`) re-exports all public types
-- [ ] Unit tests pass: exception status codes, BaseTool Zod→JSON Schema conversion, type contracts
-- [ ] `bun install` from root succeeds (workspace resolves `@linvnix/shared`)
-- [ ] Backend can import from `@linvnix/shared` without path alias
+- [x] `packages/shared/package.json` exists with name `@linvnix/shared`, proper `exports`/`types` fields, and is listed in root `package.json` workspaces
+- [x] `packages/shared/tsconfig.json` extends or is compatible with backend tsconfig (single quotes, trailing commas `"all"`, `removeComments: true`)
+- [x] `IAiProvider` interface exported with `chat`, `chatStream`, `embed`, `uploadFile`, `generateImage` methods
+- [x] Abstract AI types exported: `AiChatRequest` (with `messages`, `systemInstruction?`, `tools?`, `model?`, and `functionResults?: AiFunctionResult[]` for tool loop round-trips), `AiChatResponse` (with `text`, `functionCalls?: AiFunctionCall[]`, `usageMetadata`), `AiChatChunk` (streaming text delta), `AiEmbedding`, `AiFileRef`, `AiImageRef` (and `AiFileUpload`, `AiImageRequest` input types)
+- [x] `AiFunctionCall` type: `{ name: string, arguments: Record<string, any> }`
+- [x] `AiFunctionResult` type: `{ name: string, result: any }`
+- [x] `AiException` hierarchy: base class + 6 subclasses, each with correct HTTP status code property
+- [x] `BaseTool<TParams, TResult>` abstract class with `toDeclaration()` returning `ToolDeclaration` (SDK-agnostic), auto-converted from `this.parameters` via `zodToJsonSchema()`
+- [x] `ToolDeclaration` interface exported: `{ name, description, parameters }` (plain JSON Schema, no SDK types)
+- [x] Prompt template types exported (for YAML rendering in agent module)
+- [x] Barrel export (`index.ts`) re-exports all public types
+- [x] Unit tests pass: exception status codes, BaseTool Zod→JSON Schema conversion, type contracts
+- [x] `bun install` from root succeeds (workspace resolves `@linvnix/shared`)
+- [x] Backend can import from `@linvnix/shared` without path alias
 
 ## Blocked by
 
