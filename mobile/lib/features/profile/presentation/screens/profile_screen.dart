@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/providers/auth_state_provider.dart';
+import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../data/profile_providers.dart';
@@ -57,6 +58,8 @@ class ProfileScreen extends ConsumerWidget {
                 profile: profile,
                 onEdit: () => _showEditDialog(context, ref, profile),
               ),
+              const SizedBox(height: 12),
+              _ThemeSection(),
               const SizedBox(height: 12),
               _StatsSection(),
               const SizedBox(height: 12),
@@ -367,6 +370,83 @@ class _InfoRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ThemeSection extends ConsumerWidget {
+  const _ThemeSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = AppTheme.colors(context);
+    final theme = Theme.of(context);
+    final currentMode = ref.watch(themeModeProvider);
+
+    Future<void> setMode(ThemeMode mode) async {
+      await ref.read(themeModeProvider.notifier).setThemeMode(mode);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Cài đặt',
+          style: theme.textTheme.titleMedium,
+        ),
+        const SizedBox(height: 12),
+        AppCard(
+          variant: AppCardVariant.outlined,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            children: [
+              AppListItem(
+                leading: Icon(Icons.brightness_auto, color: c.foreground),
+                title: 'Theo hệ thống',
+                subtitle: 'Tự động theo thiết lập thiết bị',
+                trailing: Icon(
+                  currentMode == ThemeMode.system
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  color: currentMode == ThemeMode.system
+                      ? c.primary
+                      : c.mutedForeground,
+                  size: 20,
+                ),
+                onTap: () => setMode(ThemeMode.system),
+              ),
+              AppListItem(
+                leading: Icon(Icons.light_mode, color: c.foreground),
+                title: 'Sáng',
+                trailing: Icon(
+                  currentMode == ThemeMode.light
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  color: currentMode == ThemeMode.light
+                      ? c.primary
+                      : c.mutedForeground,
+                  size: 20,
+                ),
+                onTap: () => setMode(ThemeMode.light),
+              ),
+              AppListItem(
+                leading: Icon(Icons.dark_mode, color: c.foreground),
+                title: 'Tối',
+                trailing: Icon(
+                  currentMode == ThemeMode.dark
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  color: currentMode == ThemeMode.dark
+                      ? c.primary
+                      : c.mutedForeground,
+                  size: 20,
+                ),
+                onTap: () => setMode(ThemeMode.dark),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
