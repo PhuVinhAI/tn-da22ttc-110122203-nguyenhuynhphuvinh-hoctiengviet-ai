@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../data/bookmark_providers.dart';
 import '../../domain/bookmark_models.dart';
 import '../widgets/bookmark_icon_button.dart';
@@ -78,6 +79,13 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Từ đã lưu'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.school),
+            tooltip: 'Học',
+            onPressed: () => context.push('/bookmarks/flashcard'),
+          ),
+        ],
       ),
       body: Column(
         children: [

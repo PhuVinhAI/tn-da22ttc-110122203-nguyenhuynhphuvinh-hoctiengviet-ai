@@ -7,7 +7,7 @@ import '../../domain/review_engine.dart';
 import '../widgets/flashcard_widget.dart';
 import '../widgets/rating_buttons.dart';
 import '../widgets/session_summary_widget.dart';
-import '../services/audio_player_service.dart';
+import '../../../../core/services/audio_player_service.dart';
 
 enum ReviewState {
   loading,

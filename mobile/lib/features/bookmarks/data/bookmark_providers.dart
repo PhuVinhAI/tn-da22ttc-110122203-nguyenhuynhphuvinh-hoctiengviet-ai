@@ -38,6 +38,20 @@ final bookmarksProvider = AsyncNotifierProvider<BookmarksNotifier, BookmarksPage
   BookmarksNotifier.new,
 );
 
+final flashcardBookmarksProvider = FutureProvider<List<BookmarkWithVocabulary>>((ref) async {
+  final repo = ref.watch(bookmarkRepositoryProvider);
+  final allItems = <BookmarkWithVocabulary>[];
+  int page = 1;
+  const limit = 50;
+  while (true) {
+    final result = await repo.getBookmarks(page: page, limit: limit);
+    allItems.addAll(result.items);
+    if (page >= result.totalPages) break;
+    page++;
+  }
+  return allItems;
+});
+
 class BookmarksNotifier extends AsyncNotifier<BookmarksPage> {
   int _page = 1;
   bool _hasMore = true;
