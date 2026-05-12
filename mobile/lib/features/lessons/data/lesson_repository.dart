@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import '../../../core/network/exception_mapper.dart';
 import '../domain/lesson_models.dart';
 import '../domain/exercise_models.dart';
-import '../../review/domain/review_models.dart';
 
 class LessonRepository {
   LessonRepository(this._dio);
@@ -56,14 +55,6 @@ class LessonRepository {
       return (response.data as List<dynamic>)
           .map((e) => LessonVocabulary.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
-
-  Future<void> learnVocabulary(String vocabularyId) async {
-    try {
-      await _dio.post<Map<String, dynamic>>('/vocabularies/$vocabularyId/learn');
     } on DioException catch (e) {
       throw mapDioException(e);
     }

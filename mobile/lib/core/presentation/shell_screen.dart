@@ -10,8 +10,7 @@ class ShellScreen extends StatelessWidget {
     return switch (location) {
       '/' => 0,
       '/courses' => 1,
-      '/review' => 2,
-      '/profile' => 3,
+      '/profile' => 2,
       _ => 0,
     };
   }
@@ -23,8 +22,6 @@ class ShellScreen extends StatelessWidget {
       case 1:
         context.go('/courses');
       case 2:
-        context.go('/review');
-      case 3:
         context.go('/profile');
     }
   }
@@ -48,12 +45,6 @@ class ShellScreen extends StatelessWidget {
             selectedIcon: const Icon(Icons.school),
             label: 'Courses',
             tooltip: 'Browse available courses',
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.style_outlined),
-            selectedIcon: const Icon(Icons.style),
-            label: 'Review',
-            tooltip: 'Review vocabulary',
           ),
           NavigationDestination(
             icon: const Icon(Icons.person_outlined),

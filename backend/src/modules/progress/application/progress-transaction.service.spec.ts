@@ -3,9 +3,8 @@ import { DataSource, EntityManager, QueryRunner } from 'typeorm';
 import { ProgressTransactionService } from './progress-transaction.service';
 import { ProgressRepository } from './progress.repository';
 import { UserExerciseResultsRepository } from '../../exercises/application/repositories/user-exercise-results.repository';
-import { UserVocabulariesRepository } from '../../vocabularies/application/repositories/user-vocabularies.repository';
 import { UserProgress } from '../domain/user-progress.entity';
-import { ProgressStatus, MasteryLevel } from '../../../common/enums';
+import { ProgressStatus } from '../../../common/enums';
 
 describe('ProgressTransactionService', () => {
   let service: ProgressTransactionService;
@@ -14,7 +13,6 @@ describe('ProgressTransactionService', () => {
   let mockManager: jest.Mocked<EntityManager>;
   let mockProgressRepo: jest.Mocked<ProgressRepository>;
   let mockExerciseResultsRepo: jest.Mocked<UserExerciseResultsRepository>;
-  let mockVocabulariesRepo: jest.Mocked<UserVocabulariesRepository>;
 
   const userId = 'user-1';
   const lessonId = 'lesson-1';
@@ -60,10 +58,6 @@ describe('ProgressTransactionService', () => {
       upsertResult: jest.fn().mockResolvedValue(undefined),
     } as any;
 
-    mockVocabulariesRepo = {
-      updateMastery: jest.fn().mockResolvedValue(undefined),
-    } as any;
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProgressTransactionService,
@@ -72,10 +66,6 @@ describe('ProgressTransactionService', () => {
         {
           provide: UserExerciseResultsRepository,
           useValue: mockExerciseResultsRepo,
-        },
-        {
-          provide: UserVocabulariesRepository,
-          useValue: mockVocabulariesRepo,
         },
       ],
     }).compile();
@@ -91,17 +81,11 @@ describe('ProgressTransactionService', () => {
       { exerciseId: 'ex-2', score: 60, isCorrect: false },
     ];
 
-    const vocabularyUpdates = [
-      { vocabularyId: 'vocab-1', masteryLevel: MasteryLevel.FAMILIAR },
-      { vocabularyId: 'vocab-2', masteryLevel: MasteryLevel.MASTERED },
-    ];
-
     it('updates progress status to COMPLETED with averaged score', async () => {
       const result = await service.completeLessonWithTransaction(
         userId,
         lessonId,
         exerciseResults,
-        vocabularyUpdates,
       );
 
       expect(result.status).toBe(ProgressStatus.COMPLETED);
@@ -121,7 +105,6 @@ describe('ProgressTransactionService', () => {
         userId,
         lessonId,
         exerciseResults,
-        vocabularyUpdates,
       );
 
       expect(mockExerciseResultsRepo.upsertResult).toHaveBeenCalledTimes(2);
@@ -141,29 +124,6 @@ describe('ProgressTransactionService', () => {
       );
     });
 
-    it('updates each vocabulary mastery via repository', async () => {
-      await service.completeLessonWithTransaction(
-        userId,
-        lessonId,
-        exerciseResults,
-        vocabularyUpdates,
-      );
-
-      expect(mockVocabulariesRepo.updateMastery).toHaveBeenCalledTimes(2);
-      expect(mockVocabulariesRepo.updateMastery).toHaveBeenCalledWith(
-        mockManager,
-        userId,
-        'vocab-1',
-        MasteryLevel.FAMILIAR,
-      );
-      expect(mockVocabulariesRepo.updateMastery).toHaveBeenCalledWith(
-        mockManager,
-        userId,
-        'vocab-2',
-        MasteryLevel.MASTERED,
-      );
-    });
-
     it('throws when progress not found', async () => {
       (mockManager.findOne as jest.Mock).mockResolvedValue(null);
 
@@ -172,7 +132,6 @@ describe('ProgressTransactionService', () => {
           userId,
           lessonId,
           exerciseResults,
-          vocabularyUpdates,
         ),
       ).rejects.toThrow('Progress not found');
     });
@@ -187,28 +146,8 @@ describe('ProgressTransactionService', () => {
           userId,
           lessonId,
           exerciseResults,
-          vocabularyUpdates,
         ),
       ).rejects.toThrow('DB constraint violation');
-
-      expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
-      expect(mockQueryRunner.commitTransaction).not.toHaveBeenCalled();
-      expect(mockQueryRunner.release).toHaveBeenCalled();
-    });
-
-    it('rolls back transaction when vocabulary mastery update fails', async () => {
-      (mockVocabulariesRepo.updateMastery as jest.Mock).mockRejectedValue(
-        new Error('Update failed'),
-      );
-
-      await expect(
-        service.completeLessonWithTransaction(
-          userId,
-          lessonId,
-          exerciseResults,
-          vocabularyUpdates,
-        ),
-      ).rejects.toThrow('Update failed');
 
       expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
       expect(mockQueryRunner.commitTransaction).not.toHaveBeenCalled();
@@ -225,7 +164,6 @@ describe('ProgressTransactionService', () => {
           userId,
           lessonId,
           exerciseResults,
-          vocabularyUpdates,
         ),
       ).rejects.toThrow('Save failed');
 
@@ -238,7 +176,6 @@ describe('ProgressTransactionService', () => {
         userId,
         lessonId,
         exerciseResults,
-        vocabularyUpdates,
       );
 
       expect(mockQueryRunner.startTransaction).toHaveBeenCalled();

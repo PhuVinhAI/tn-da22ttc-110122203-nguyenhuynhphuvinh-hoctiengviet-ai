@@ -13,8 +13,6 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/courses/presentation/screens/courses_screen.dart';
 import '../../features/courses/presentation/screens/course_detail_screen.dart';
 import '../../features/courses/presentation/screens/module_detail_screen.dart';
-import '../../features/review/presentation/screens/review_screen.dart';
-import '../../features/review/presentation/screens/vocabulary_browser_screen.dart';
 import '../../features/bookmarks/presentation/screens/bookmarks_screen.dart';
 import '../../features/bookmarks/presentation/screens/flashcard_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
@@ -135,10 +133,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: '/vocabulary',
-        builder: (context, state) => const VocabularyBrowserScreen(),
-      ),
-      GoRoute(
         path: '/bookmarks',
         builder: (context, state) => const BookmarksScreen(),
       ),
@@ -152,10 +146,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           final id = state.pathParameters['id']!;
           return LessonWizardScreen(lessonId: id);
         },
-      ),
-      GoRoute(
-        path: '/review/session',
-        builder: (context, state) => const ReviewScreen(),
       ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
@@ -171,12 +161,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/courses',
             pageBuilder: (context, state) => const NoTransitionPage(
               child: CoursesScreen(),
-            ),
-          ),
-          GoRoute(
-            path: '/review',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: ReviewScreen(),
             ),
           ),
           GoRoute(

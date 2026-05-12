@@ -4,7 +4,6 @@ export * from './content-type.enum';
 export * from './part-of-speech.enum';
 export * from './exercise-type.enum';
 export * from './progress-status.enum';
-export * from './mastery-level.enum';
 export * from './role.enum';
 export * from './permission.enum';
 export * from './dialect.enum';

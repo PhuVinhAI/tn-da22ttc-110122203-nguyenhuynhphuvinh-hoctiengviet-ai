@@ -104,55 +104,6 @@ void main() {
       });
     });
 
-    group('learnVocabulary', () {
-      test('returns UserVocabulary on success', () async {
-        when(() => mockDio
-                .post<Map<String, dynamic>>('/vocabularies/v1/learn'))
-            .thenAnswer(
-          (_) async => Response(
-            requestOptions:
-                RequestOptions(path: '/vocabularies/v1/learn'),
-            statusCode: 201,
-            data: {
-              'id': 'uv1',
-              'vocabulary': {
-                'id': 'v1',
-                'word': 'con mèo',
-                'translation': 'cat',
-              },
-              'masteryLevel': 'NEW',
-              'reviewCount': 0,
-            },
-          ),
-        );
-
-        await repository.learnVocabulary('v1');
-      });
-
-      test('throws AuthException on 401', () async {
-        when(() => mockDio
-                .post<Map<String, dynamic>>('/vocabularies/v1/learn'))
-            .thenThrow(
-          DioException(
-            requestOptions:
-                RequestOptions(path: '/vocabularies/v1/learn'),
-            response: Response(
-              requestOptions:
-                  RequestOptions(path: '/vocabularies/v1/learn'),
-              statusCode: 401,
-              data: {'message': 'Unauthorized'},
-            ),
-            type: DioExceptionType.badResponse,
-          ),
-        );
-
-        expect(
-          () => repository.learnVocabulary('v1'),
-          throwsA(isA<AuthException>()),
-        );
-      });
-    });
-
     group('startLesson', () {
       test('completes without error on success', () async {
         when(() => mockDio.post<Map<String, dynamic>>(

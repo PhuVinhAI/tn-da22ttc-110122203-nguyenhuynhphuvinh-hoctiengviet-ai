@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { VocabulariesController } from './vocabularies.controller';
 import { VocabulariesService } from '../application/vocabularies.service';
-import { UserVocabulariesService } from '../application/user-vocabularies.service';
-import { VocabularyReviewService } from '../application/vocabulary-review.service';
 import { BookmarksService } from '../application/bookmarks.service';
 import { StorageService } from '../../../infrastructure/storage/storage.service';
 import { BookmarkSort } from '../dto/bookmark-query.dto';
@@ -37,24 +35,10 @@ describe('VocabulariesController - Bookmark endpoints', () => {
       uploadImage: jest.fn(),
     };
 
-    const userVocabServiceMock = {
-      getUserVocabularies: jest.fn(),
-      getDueForReview: jest.fn(),
-    };
-
-    const reviewServiceMock = {
-      addVocabulary: jest.fn(),
-      reviewVocabulary: jest.fn(),
-      batchReview: jest.fn(),
-      getDueForReview: jest.fn(),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       controllers: [VocabulariesController],
       providers: [
         { provide: VocabulariesService, useValue: vocabServiceMock },
-        { provide: UserVocabulariesService, useValue: userVocabServiceMock },
-        { provide: VocabularyReviewService, useValue: reviewServiceMock },
         { provide: BookmarksService, useValue: bookmarksServiceMock },
         { provide: StorageService, useValue: storageServiceMock },
       ],

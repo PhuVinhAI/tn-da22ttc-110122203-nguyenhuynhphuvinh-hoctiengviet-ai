@@ -22,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { VocabulariesService } from '../application/vocabularies.service';
-import { UserVocabulariesService } from '../application/user-vocabularies.service';
-import { VocabularyReviewService } from '../application/vocabulary-review.service';
 import { BookmarksService } from '../application/bookmarks.service';
 import { StorageService } from '../../../infrastructure/storage/storage.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -32,7 +30,6 @@ import { CurrentUser } from '../../../common/decorators';
 import { User } from '../../users/domain/user.entity';
 import { Public } from '../../../common/decorators';
 import { CreateVocabularyDto } from '../dto/create-vocabulary.dto';
-import { BatchReviewDto } from '../dto/batch-review.dto';
 import { BookmarkQueryDto, BookmarkSort } from '../dto/bookmark-query.dto';
 import { Vocabulary } from '../domain/vocabulary.entity';
 
@@ -41,8 +38,6 @@ import { Vocabulary } from '../domain/vocabulary.entity';
 export class VocabulariesController {
   constructor(
     private readonly vocabulariesService: VocabulariesService,
-    private readonly userVocabulariesService: UserVocabulariesService,
-    private readonly vocabularyReviewService: VocabularyReviewService,
     private readonly bookmarksService: BookmarksService,
     private readonly storageService: StorageService,
   ) {}
@@ -254,209 +249,6 @@ export class VocabulariesController {
   @ApiResponse({ status: 404, description: 'Không tìm thấy từ vựng' })
   async remove(@Param('id') id: string) {
     return this.vocabulariesService.delete(id);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Post(':vocabularyId/learn')
-  @ApiOperation({
-    summary: 'Thêm từ vựng vào danh sách học',
-    description: 'Thêm từ vựng vào danh sách học của user để theo dõi tiến độ',
-  })
-  @ApiParam({ name: 'vocabularyId', description: 'ID của từ vựng' })
-  @ApiResponse({
-    status: 201,
-    description: 'Thêm thành công',
-    schema: {
-      example: {
-        id: 'uuid-string',
-        vocabularyId: 'vocab-uuid',
-        userId: 'user-uuid',
-        masteryLevel: 'NEW',
-        reviewCount: 0,
-        nextReviewDate: '2024-01-02T00:00:00.000Z',
-      },
-    },
-  })
-  async addToLearning(
-    @CurrentUser() user: User,
-    @Param('vocabularyId') vocabularyId: string,
-  ) {
-    return this.vocabularyReviewService.addVocabulary(user.id, vocabularyId);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Post('review/batch')
-  @ApiOperation({
-    summary: 'Ôn tập nhiều từ vựng cùng lúc',
-    description:
-      'Submit kết quả ôn tập cho nhiều từ vựng trong một request. Giúp giảm số lượng API calls khi học flashcard hàng loạt.',
-  })
-  @ApiBody({ type: BatchReviewDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Kết quả batch review',
-    schema: {
-      example: {
-        success: 3,
-        failed: 0,
-        results: [
-          {
-            id: 'uuid-1',
-            vocabularyId: 'vocab-1',
-            masteryLevel: 'LEARNING',
-            nextReviewAt: '2024-01-03T00:00:00.000Z',
-          },
-        ],
-      },
-    },
-  })
-  async batchReview(
-    @CurrentUser() user: User,
-    @Body() batchReviewDto: BatchReviewDto,
-  ) {
-    const reviewDate = batchReviewDto.reviewDate
-      ? new Date(batchReviewDto.reviewDate)
-      : undefined;
-
-    const results = await this.vocabularyReviewService.batchReview(
-      user.id,
-      batchReviewDto.reviews,
-      reviewDate,
-    );
-
-    const succeeded = results.filter((r) => r.success);
-    const failed = results.filter((r) => !r.success);
-
-    return {
-      success: succeeded.length,
-      failed: failed.length,
-      results: succeeded.map((r) => r.result),
-      errors: failed.map((r) => ({
-        vocabularyId: r.vocabularyId,
-        error: r.error,
-      })),
-    };
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Post(':vocabularyId/review')
-  @ApiOperation({
-    summary: 'Ôn tập từ vựng',
-    description:
-      'Ghi nhận kết quả ôn tập từ vựng và cập nhật lịch ôn tập theo thuật toán FSRS. Rating: 1=Again (quên hoàn toàn), 2=Hard (nhớ khó), 3=Good (nhớ đúng), 4=Easy (nhớ dễ dàng)',
-  })
-  @ApiParam({ name: 'vocabularyId', description: 'ID của từ vựng' })
-  @ApiBody({
-    schema: {
-      example: {
-        rating: 3,
-        reviewDate: '2024-01-01T00:00:00.000Z',
-      },
-      properties: {
-        rating: {
-          type: 'number',
-          enum: [1, 2, 3, 4],
-          description: '1=Again (forgot), 2=Hard, 3=Good, 4=Easy',
-        },
-        reviewDate: {
-          type: 'string',
-          format: 'date-time',
-          description:
-            'Optional: Custom review date for testing time-based scenarios',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Cập nhật kết quả ôn tập',
-    schema: {
-      example: {
-        id: 'uuid-string',
-        masteryLevel: 'LEARNING',
-        reviewCount: 1,
-        nextReviewAt: '2024-01-03T00:00:00.000Z',
-        lastReviewedAt: '2024-01-01T00:00:00.000Z',
-        stability: 2.5,
-        difficulty: 5.2,
-        scheduledDays: 3,
-      },
-    },
-  })
-  async reviewVocabulary(
-    @CurrentUser() user: User,
-    @Param('vocabularyId') vocabularyId: string,
-    @Body() body: { rating: number; reviewDate?: string },
-  ) {
-    const reviewDate = body.reviewDate ? new Date(body.reviewDate) : undefined;
-    return this.vocabularyReviewService.reviewVocabulary(
-      user.id,
-      vocabularyId,
-      body.rating,
-      reviewDate,
-    );
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Get('my-vocabularies')
-  @ApiOperation({
-    summary: 'Lấy danh sách từ vựng đã học',
-    description: 'Lấy tất cả từ vựng mà user đã thêm vào danh sách học',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Danh sách từ vựng đã học',
-    schema: {
-      example: [
-        {
-          id: 'uuid-string',
-          vocabulary: {
-            word: 'xin chào',
-            translation: 'hello',
-          },
-          masteryLevel: 'LEARNING',
-          reviewCount: 3,
-          nextReviewDate: '2024-01-05T00:00:00.000Z',
-        },
-      ],
-    },
-  })
-  async getMyVocabularies(@CurrentUser() user: User) {
-    return this.userVocabulariesService.getUserVocabularies(user.id);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Get('due-review')
-  @ApiOperation({
-    summary: 'Lấy từ vựng cần ôn tập',
-    description:
-      'Lấy danh sách từ vựng đến hạn ôn tập theo lịch spaced repetition',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Danh sách từ vựng cần ôn tập',
-    schema: {
-      example: [
-        {
-          id: 'uuid-string',
-          vocabulary: {
-            word: 'xin chào',
-            translation: 'hello',
-            audioUrl: 'https://example.com/audio.mp3',
-          },
-          masteryLevel: 'LEARNING',
-          nextReviewDate: '2024-01-01T00:00:00.000Z',
-        },
-      ],
-    },
-  })
-  async getDueForReview(@CurrentUser() user: User) {
-    return this.vocabularyReviewService.getDueForReview(user.id);
   }
 
   @ApiBearerAuth()

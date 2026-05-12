@@ -63,7 +63,6 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(NavigationBar), findsOneWidget);
       expect(find.text('Courses'), findsWidgets);
-      expect(find.text('Review'), findsWidgets);
       expect(find.text('Profile'), findsWidgets);
     });
 
@@ -87,13 +86,6 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text('Courses coming soon'), findsOneWidget);
-
-      await tester.tap(find.descendant(
-        of: find.byType(NavigationBar),
-        matching: find.text('Review'),
-      ));
-      await tester.pumpAndSettle();
-      expect(find.text('Vocabulary review coming soon'), findsOneWidget);
 
       await tester.tap(find.descendant(
         of: find.byType(NavigationBar),

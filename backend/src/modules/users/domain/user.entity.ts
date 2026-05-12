@@ -64,9 +64,6 @@ export class User extends BaseEntity {
   @OneToMany('UserProgress', 'user')
   progress: any[];
 
-  @OneToMany('UserVocabulary', 'user')
-  vocabularies: any[];
-
   @OneToMany('UserExerciseResult', 'user')
   exerciseResults: any[];
 

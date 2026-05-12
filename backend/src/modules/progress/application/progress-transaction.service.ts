@@ -3,20 +3,9 @@ import { DataSource, EntityManager } from 'typeorm';
 import { Transactional, TransactionalHost } from '../../../common/decorators';
 import { ProgressRepository } from './progress.repository';
 import { UserExerciseResultsRepository } from '../../exercises/application/repositories/user-exercise-results.repository';
-import { UserVocabulariesRepository } from '../../vocabularies/application/repositories/user-vocabularies.repository';
-import { MasteryLevel, ProgressStatus } from '../../../common/enums';
+import { ProgressStatus } from '../../../common/enums';
 import { UserProgress } from '../domain/user-progress.entity';
 
-/**
- * Service xử lý các thao tác phức tạp cần transaction
- *
- * Ví dụ: Khi user hoàn thành bài học, cần:
- * 1. Update progress
- * 2. Update exercise results
- * 3. Update vocabulary mastery
- *
- * Nếu 1 trong 3 bước fail → rollback tất cả
- */
 @Injectable()
 export class ProgressTransactionService implements TransactionalHost {
   queryRunner?: import('typeorm').QueryRunner;
@@ -25,7 +14,6 @@ export class ProgressTransactionService implements TransactionalHost {
     readonly dataSource: DataSource,
     private readonly progressRepository: ProgressRepository,
     private readonly exerciseResultsRepository: UserExerciseResultsRepository,
-    private readonly vocabulariesRepository: UserVocabulariesRepository,
   ) {}
 
   private getManager(): EntityManager {
@@ -34,10 +22,6 @@ export class ProgressTransactionService implements TransactionalHost {
       : this.dataSource.manager;
   }
 
-  /**
-   * Complete lesson với transaction
-   * Đảm bảo tất cả updates thành công hoặc rollback hết
-   */
   @Transactional()
   async completeLessonWithTransaction(
     userId: string,
@@ -46,10 +30,6 @@ export class ProgressTransactionService implements TransactionalHost {
       exerciseId: string;
       score: number;
       isCorrect: boolean;
-    }>,
-    vocabularyUpdates: Array<{
-      vocabularyId: string;
-      masteryLevel: MasteryLevel;
     }>,
   ): Promise<UserProgress> {
     const manager = this.getManager();
@@ -82,22 +62,9 @@ export class ProgressTransactionService implements TransactionalHost {
       );
     }
 
-    for (const vocab of vocabularyUpdates) {
-      await this.vocabulariesRepository.updateMastery(
-        manager,
-        userId,
-        vocab.vocabularyId,
-        vocab.masteryLevel,
-      );
-    }
-
     return progress;
   }
 
-  /**
-   * Batch update progress cho nhiều lessons
-   * Đảm bảo atomicity
-   */
   @Transactional()
   async batchUpdateProgress(
     updates: Array<{

@@ -62,9 +62,6 @@ export class Vocabulary extends BaseEntity {
   @JoinColumn({ name: 'lesson_id' })
   lesson: any;
 
-  @OneToMany('UserVocabulary', 'vocabulary')
-  userVocabularies: any[];
-
   @OneToMany('Bookmark', 'vocabulary')
   bookmarks: any[];
 }
