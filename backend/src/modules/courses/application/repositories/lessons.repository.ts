@@ -25,13 +25,7 @@ export class LessonsRepository {
   async findById(id: string): Promise<Lesson | null> {
     return this.repository.findOne({
       where: { id },
-      relations: [
-        'module',
-        'contents',
-        'vocabularies',
-        'grammarRules',
-        'exercises',
-      ],
+      relations: ['module', 'contents', 'vocabularies', 'grammarRules'],
     });
   }
 

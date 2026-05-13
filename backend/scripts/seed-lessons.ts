@@ -26,6 +26,7 @@ async function main() {
   if (parseInt(existing.rows[0].count) > 0) {
     console.log('Clearing old data...');
     await client.query('DELETE FROM exercises');
+    await client.query('DELETE FROM exercise_sets');
     await client.query('DELETE FROM grammar_rules');
     await client.query('DELETE FROM vocabularies');
     await client.query('DELETE FROM lesson_contents');
@@ -181,6 +182,19 @@ async function main() {
             ],
           );
           totalExercises++;
+        }
+
+        if (lessonData.exercises.length > 0) {
+          const setRes = await client.query(
+            `INSERT INTO exercise_sets (lesson_id, tier, is_custom, is_ai_generated, title, order_index)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+            [lessonId, 'BASIC', false, false, 'Basic Exercises', 0],
+          );
+          const setId = setRes.rows[0].id;
+          await client.query(
+            `UPDATE exercises SET set_id = $1 WHERE lesson_id = $2 AND set_id IS NULL`,
+            [setId, lessonId],
+          );
         }
       }
     }

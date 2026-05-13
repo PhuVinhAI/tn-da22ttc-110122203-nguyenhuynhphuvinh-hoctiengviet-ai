@@ -59,7 +59,7 @@ export class LessonsController {
   @ApiOperation({
     summary: 'Lấy chi tiết lesson với nội dung đầy đủ',
     description:
-      'Lấy thông tin chi tiết lesson bao gồm contents, vocabularies, grammar, exercises',
+      'Lấy thông tin chi tiết lesson bao gồm contents, vocabularies, grammar',
   })
   @ApiParam({ name: 'id', description: 'ID của lesson' })
   @ApiResponse({
@@ -77,7 +77,6 @@ export class LessonsController {
         contents: [],
         vocabularies: [],
         grammarRules: [],
-        exercises: [],
       },
     },
   })

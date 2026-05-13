@@ -55,6 +55,8 @@ class LessonDetail {
   final List<LessonVocabulary> vocabularies;
   final List<GrammarRule> grammarRules;
   final List<ExerciseStub> exercises;
+
+  bool get hasExercises => exercises.isNotEmpty;
 }
 
 class LessonContent {

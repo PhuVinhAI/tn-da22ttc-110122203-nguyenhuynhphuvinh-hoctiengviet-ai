@@ -22,6 +22,13 @@ export class ExercisesRepository {
     });
   }
 
+  async findBySetId(setId: string): Promise<Exercise[]> {
+    return this.repository.find({
+      where: { setId },
+      order: { orderIndex: 'ASC' },
+    });
+  }
+
   async findById(id: string): Promise<Exercise | null> {
     return this.repository.findOne({ where: { id } });
   }

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../../core/network/exception_mapper.dart';
 import '../domain/lesson_models.dart';
 import '../domain/exercise_models.dart';
+import '../domain/exercise_set_models.dart';
 
 class LessonRepository {
   LessonRepository(this._dio);
@@ -86,6 +87,26 @@ class LessonRepository {
       return response.data;
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) return null;
+      throw mapDioException(e);
+    }
+  }
+
+  Future<LessonTierSummary> getExerciseSetsByLesson(String lessonId) async {
+    try {
+      final response =
+          await _dio.get<Map<String, dynamic>>('/exercise-sets/lesson/$lessonId');
+      return LessonTierSummary.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  Future<ExerciseSetModel> getExerciseSet(String setId) async {
+    try {
+      final response =
+          await _dio.get<Map<String, dynamic>>('/exercise-sets/$setId');
+      return ExerciseSetModel.fromJson(response.data!);
+    } on DioException catch (e) {
       throw mapDioException(e);
     }
   }

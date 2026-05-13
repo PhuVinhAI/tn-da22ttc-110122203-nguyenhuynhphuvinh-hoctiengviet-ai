@@ -40,6 +40,13 @@ export class Exercise extends BaseEntity {
   @JoinColumn({ name: 'lesson_id' })
   lesson: any;
 
+  @Column({ name: 'set_id', nullable: true })
+  setId?: string;
+
+  @ManyToOne('ExerciseSet', 'exercises', { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'set_id' })
+  exerciseSet?: any;
+
   @OneToMany('UserExerciseResult', 'exercise')
   userResults: any[];
 }

@@ -20,6 +20,8 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/data/profile_providers.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/lessons/presentation/screens/lesson_wizard_screen.dart';
+import '../../features/lessons/presentation/screens/exercise_tier_screen.dart';
+import '../../features/lessons/presentation/screens/exercise_play_screen.dart';
 import '../presentation/shell_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -169,6 +171,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return LessonWizardScreen(lessonId: id);
+        },
+      ),
+      GoRoute(
+        path: '/lessons/:id/exercises',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ExerciseTierScreen(lessonId: id);
+        },
+      ),
+      GoRoute(
+        path: '/lessons/:id/exercises/play/:tier',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          final tier = state.pathParameters['tier']!;
+          return ExercisePlayScreen(lessonId: id, tierValue: tier);
         },
       ),
       ShellRoute(

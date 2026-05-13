@@ -7,14 +7,12 @@ import '../../../../core/theme/widgets/widgets.dart';
 import '../../data/lesson_providers.dart';
 import '../../data/lesson_repository.dart';
 import '../../domain/lesson_models.dart';
-import '../../domain/exercise_models.dart';
 import '../../../../core/providers/providers.dart';
 import '../../../courses/data/courses_providers.dart';
 import '../../../home/data/home_providers.dart';
 import '../widgets/content_widgets.dart';
 import '../widgets/vocabulary_step.dart';
 import '../widgets/grammar_step.dart';
-import '../widgets/exercise_step.dart';
 
 class LessonWizardScreen extends ConsumerStatefulWidget {
   const LessonWizardScreen({super.key, required this.lessonId});
@@ -31,10 +29,7 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
   bool _loading = true;
   String? _error;
   LessonDetail? _lesson;
-  final Map<String, int> _exerciseScores = {};
-  final Set<String> _completedExercises = {};
-  final Map<String, dynamic> _exerciseAnswers = {};
-  final Map<String, ExerciseSubmissionResult> _exerciseResults = {};
+  bool _promptShown = false;
 
   @override
   void initState() {
@@ -83,19 +78,6 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
         ));
       }
 
-      if (lesson.exercises.isNotEmpty) {
-        final exercises = await repo.getExercisesByLesson(widget.lessonId);
-        if (!mounted) return;
-
-        for (final exercise in exercises) {
-          steps.add(_WizardStep(
-            type: _StepType.exercise,
-            label: 'Exercise',
-            fullExercise: exercise,
-          ));
-        }
-      }
-
       setState(() {
         _lesson = lesson;
         _steps = steps;
@@ -106,7 +88,7 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
 
       await repo.startLesson(widget.lessonId);
 
-      if (isInProgress && mounted && lesson.exercises.isNotEmpty) {
+      if (isInProgress && mounted) {
         _showResumeDialog();
       }
     } catch (e) {
@@ -131,11 +113,11 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
             onPressed: () => Navigator.of(ctx).pop(),
           ),
           AppDialogAction(
-            label: 'Continue from exercises',
+            label: 'Go to exercises',
             isPrimary: true,
             onPressed: () {
               Navigator.of(ctx).pop();
-              _jumpToExercises();
+              _navigateToExerciseTiers();
             },
           ),
         ],
@@ -143,58 +125,43 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
     );
   }
 
-  void _jumpToExercises() {
-    final exerciseIndex =
-        _steps.indexWhere((s) => s.type == _StepType.exercise);
-    if (exerciseIndex >= 0 && _pageController != null) {
-      _pageController!.animateToPage(
-        exerciseIndex,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
+  void _navigateToExerciseTiers() {
+    context.go('/lessons/${widget.lessonId}/exercises');
   }
 
-  int get _totalScore => _exerciseScores.values.fold(0, (a, b) => a + b);
+  void _showExercisePrompt() {
+    if (_promptShown) return;
+    _promptShown = true;
 
-  int get _maxScore {
-    return _steps
-            .where((s) => s.type == _StepType.exercise && s.fullExercise != null)
-            .length *
-        10;
-  }
-
-  void _onExerciseScoreChanged(String exerciseId, int score) {
-    setState(() {
-      _exerciseScores[exerciseId] = score;
-    });
-  }
-
-  void _onExerciseCompleted(String exerciseId) {
-    setState(() {
-      _completedExercises.add(exerciseId);
-    });
-  }
-
-  void _onExerciseAnswerChanged(String exerciseId, dynamic answer) {
-    setState(() {
-      _exerciseAnswers[exerciseId] = answer;
-    });
-  }
-
-  void _onExerciseResultChanged(
-      String exerciseId, ExerciseSubmissionResult result) {
-    setState(() {
-      _exerciseResults[exerciseId] = result;
-    });
+    AppDialog.show(
+      context,
+      barrierDismissible: false,
+      builder: (ctx) => AppDialog(
+        title: 'Bắt đầu bài tập?',
+        content: 'Bạn đã xem xong nội dung bài học. Bạn có muốn làm bài tập không?',
+        actions: [
+          AppDialogAction(
+            label: 'Không',
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _completeLesson();
+            },
+          ),
+          AppDialogAction(
+            label: 'Có',
+            isPrimary: true,
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _navigateToExerciseTiers();
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   bool _canGoForwardFrom(int index) {
     if (index >= _steps.length - 1) return false;
-    final step = _steps[index];
-    if (step.type == _StepType.exercise && step.fullExercise != null) {
-      return _completedExercises.contains(step.fullExercise!.id);
-    }
     return true;
   }
 
@@ -240,11 +207,6 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
     }
 
     final isLastStep = _currentPage == _steps.length - 1;
-    final currentStep = _steps[_currentPage];
-    final isExerciseStep = currentStep.type == _StepType.exercise;
-    final isExerciseCompleted = isExerciseStep &&
-        currentStep.fullExercise != null &&
-        _completedExercises.contains(currentStep.fullExercise!.id);
     final canGoForward = _canGoForwardFrom(_currentPage);
 
     return Scaffold(
@@ -278,16 +240,6 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                if (_exerciseScores.isNotEmpty) ...[
-                  const Spacer(),
-                  Text(
-                    'Score: $_totalScore',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: c.primary,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
@@ -297,9 +249,6 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
               onPageChanged: (index) {
                 setState(() => _currentPage = index);
               },
-              physics: canGoForward
-                  ? null
-                  : const NeverScrollableScrollPhysics(),
               itemCount: _steps.length,
               itemBuilder: (context, index) {
                 return _buildStep(_steps[index]);
@@ -329,7 +278,7 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
                   else
                     const SizedBox.shrink(),
                   const Spacer(),
-                  if (!isLastStep && canGoForward && !isExerciseStep)
+                  if (!isLastStep && canGoForward)
                     Semantics(
                       label: 'Go to next step',
                       button: true,
@@ -344,39 +293,14 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
                         },
                       ),
                     )
-                  else if (isExerciseStep && isExerciseCompleted && !isLastStep)
+                  else if (isLastStep)
                     Semantics(
-                      label: 'Go to next step',
+                      label: 'Continue to exercises',
                       button: true,
                       child: AppButton(
-                        label: 'Next',
+                        label: 'Continue',
                         variant: AppButtonVariant.primary,
-                        onPressed: () {
-                          _pageController?.nextPage(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
-                        },
-                      ),
-                    )
-                  else if (isLastStep && (!isExerciseStep || isExerciseCompleted))
-                    Semantics(
-                      label: 'Complete lesson',
-                      button: true,
-                      child: AppButton(
-                        label: 'Complete',
-                        variant: AppButtonVariant.primary,
-                        onPressed: _completeLesson,
-                      ),
-                    )
-                  else if (isExerciseStep && !isExerciseCompleted)
-                    Semantics(
-                      label: 'Answer required to continue',
-                      button: true,
-                      child: AppButton(
-                        label: 'Next',
-                        variant: AppButtonVariant.outline,
-                        onPressed: null,
+                        onPressed: _showExercisePrompt,
                       ),
                     ),
                 ],
@@ -399,22 +323,6 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
         );
       case _StepType.grammar:
         return GrammarStepWidget(grammarRules: step.grammarRules ?? []);
-      case _StepType.exercise:
-        final exercise = step.fullExercise!;
-        final savedAnswer = _exerciseAnswers[exercise.id];
-        final savedResult = _exerciseResults[exercise.id];
-        return ExerciseStepWidget(
-          exercise: exercise,
-          initialAnswer: savedAnswer,
-          initialResult: savedResult,
-          onScoreChanged: (score) =>
-              _onExerciseScoreChanged(exercise.id, score),
-          onCompleted: () => _onExerciseCompleted(exercise.id),
-          onAnswerChanged: (answer) =>
-              _onExerciseAnswerChanged(exercise.id, answer),
-          onResultChanged: (result) =>
-              _onExerciseResultChanged(exercise.id, result),
-        );
     }
   }
 
@@ -438,83 +346,20 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
   Future<void> _completeLesson() async {
     try {
       final repo = ref.read(lessonRepositoryProvider);
-      final score = _maxScore > 0
-          ? ((_totalScore / _maxScore) * 100).round()
-          : 0;
-      await repo.completeLesson(widget.lessonId, score: score);
+      await repo.completeLesson(widget.lessonId);
 
       ref.invalidate(userProgressProvider);
       ref.invalidate(continueLearningProvider);
       ref.invalidate(lessonProgressProvider(widget.lessonId));
 
       if (mounted) {
-        _showCompletionDialog(score);
+        context.go('/');
       }
     } catch (e) {
       if (mounted) {
         AppToast.show(context, message: 'Error completing lesson: $e', type: AppToastType.error);
       }
     }
-  }
-
-  void _showCompletionDialog(int score) {
-    final c = AppTheme.colors(context);
-    final theme = Theme.of(context);
-    AppDialog.show(
-      context,
-      barrierDismissible: false,
-      builder: (ctx) => AppDialog(
-        titleWidget: Row(
-          children: [
-            Icon(Icons.celebration, color: c.primary),
-            const SizedBox(width: 8),
-            const Text('Lesson Complete!'),
-          ],
-        ),
-        contentWidget: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Your score',
-              style: theme.textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '$score%',
-              style: theme.textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: c.primary,
-              ),
-            ),
-            if (_exerciseScores.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                '${_exerciseScores.values.where((s) => s > 0).length} of ${_exerciseScores.length} exercises correct',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: c.mutedForeground,
-                ),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          AppDialogAction(
-            label: 'Home',
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              context.go('/');
-            },
-          ),
-          AppDialogAction(
-            label: 'Review Lesson',
-            isPrimary: true,
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-          ),
-        ],
-      ),
-    );
   }
 
   String _contentLabel(String contentType) {
@@ -529,7 +374,7 @@ class _LessonWizardScreenState extends ConsumerState<LessonWizardScreen> {
   }
 }
 
-enum _StepType { content, vocabulary, grammar, exercise }
+enum _StepType { content, vocabulary, grammar }
 
 class _WizardStep {
   const _WizardStep({
@@ -538,7 +383,6 @@ class _WizardStep {
     this.content,
     this.vocabularies,
     this.grammarRules,
-    this.fullExercise,
   });
 
   final _StepType type;
@@ -546,7 +390,6 @@ class _WizardStep {
   final LessonContent? content;
   final List<LessonVocabulary>? vocabularies;
   final List<GrammarRule>? grammarRules;
-  final Exercise? fullExercise;
 }
 
 class _LessonLoadingSkeleton extends StatelessWidget {

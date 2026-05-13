@@ -32,6 +32,18 @@ export class UserExerciseResultsRepository {
     });
   }
 
+  async findByUserAndExerciseIds(
+    userId: string,
+    exerciseIds: string[],
+  ): Promise<UserExerciseResult[]> {
+    if (exerciseIds.length === 0) return [];
+    return this.repository
+      .createQueryBuilder('result')
+      .where('result.userId = :userId', { userId })
+      .andWhere('result.exerciseId IN (:...exerciseIds)', { exerciseIds })
+      .getMany();
+  }
+
   async getStatsByUser(userId: string): Promise<{
     totalExercises: number;
     correctAnswers: number;
