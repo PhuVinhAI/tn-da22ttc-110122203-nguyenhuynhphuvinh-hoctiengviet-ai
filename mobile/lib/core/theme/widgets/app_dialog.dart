@@ -40,7 +40,7 @@ class AppDialog extends StatelessWidget {
       backgroundColor: c.card,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         side: BorderSide(color: c.border, width: 1),
       ),
       child: Padding(
@@ -53,7 +53,7 @@ class AppDialog extends StatelessWidget {
               titleWidget ??
                   Text(
                     title!,
-                    style: GoogleFonts.beVietnamPro(
+                    style: GoogleFonts.inter(
                       fontSize: AppTypography.titleSmall,
                       fontWeight: FontWeight.w600,
                       color: c.foreground,
@@ -64,7 +64,7 @@ class AppDialog extends StatelessWidget {
               contentWidget ??
                   Text(
                     content!,
-                    style: GoogleFonts.beVietnamPro(
+                    style: GoogleFonts.inter(
                       fontSize: AppTypography.bodyMedium,
                       color: c.mutedForeground,
                       height: 1.5,

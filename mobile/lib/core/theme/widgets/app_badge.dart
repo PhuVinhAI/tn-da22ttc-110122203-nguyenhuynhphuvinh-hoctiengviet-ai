@@ -32,15 +32,15 @@ class AppBadge extends StatelessWidget {
           ),
       decoration: BoxDecoration(
         color: bgColor.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderRadius: BorderRadius.circular(AppRadius.full),
         border: Border.all(color: bgColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Text(
         label,
-        style: GoogleFonts.beVietnamPro(
+        style: GoogleFonts.inter(
           fontSize: effectiveFontSize,
           fontWeight: FontWeight.w600,
-          color: bgColor,
+          color: foregroundColor ?? bgColor,
         ),
       ),
     );

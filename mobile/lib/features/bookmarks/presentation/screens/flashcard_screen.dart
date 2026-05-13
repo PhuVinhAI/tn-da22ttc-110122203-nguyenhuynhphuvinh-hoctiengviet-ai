@@ -120,14 +120,14 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.bookmark_border, size: 64, color: c.mutedForeground),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           Text(
             'Chưa lưu từ nào',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: c.mutedForeground,
                 ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             'Lưu từ yêu thích để học bằng flashcard',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -181,7 +181,7 @@ class _Flashcard extends StatelessWidget {
     return GestureDetector(
       onTap: onFlip,
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: AnimatedBuilder(
           animation: flipController,
           builder: (context, child) {
@@ -211,7 +211,7 @@ class _Flashcard extends StatelessWidget {
 
     return AppCard(
       variant: AppCardVariant.outlined,
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -221,7 +221,7 @@ class _Flashcard extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           if (item.phonetic != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               '/${item.phonetic}/',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -231,14 +231,14 @@ class _Flashcard extends StatelessWidget {
             ),
           ],
           if (onPlayAudio != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             IconButton(
               icon: Icon(Icons.volume_up, size: 32, color: c.primary),
               onPressed: onPlayAudio,
               tooltip: 'Nghe phát âm',
             ),
           ],
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xl),
           Text(
             'Chạm để lật',
             style: theme.textTheme.bodySmall?.copyWith(
@@ -256,7 +256,7 @@ class _Flashcard extends StatelessWidget {
 
     return AppCard(
       variant: AppCardVariant.outlined,
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,28 +266,28 @@ class _Flashcard extends StatelessWidget {
               style: theme.textTheme.headlineSmall,
             ),
             if (item.partOfSpeech != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               AppChip(
                 label: kPartOfSpeechViLabels[item.partOfSpeech!.toLowerCase()] ?? item.partOfSpeech!,
                 color: c.info,
               ),
             ],
             if (item.classifier != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 'Lượng từ: ${item.classifier}',
                 style: theme.textTheme.bodyMedium,
               ),
             ],
             if (item.exampleSentence != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               Text(
                 'Ví dụ:',
                 style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 item.exampleSentence!,
                 style: theme.textTheme.bodyLarge?.copyWith(
@@ -295,7 +295,7 @@ class _Flashcard extends StatelessWidget {
                     ),
               ),
               if (item.exampleTranslation != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   item.exampleTranslation!,
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -304,7 +304,7 @@ class _Flashcard extends StatelessWidget {
                 ),
               ],
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xl),
             Text(
               'Chạm để lật lại',
               style: theme.textTheme.bodySmall?.copyWith(

@@ -6,7 +6,6 @@ import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../data/profile_providers.dart';
-import '../../domain/exercise_stats.dart';
 import '../../../user/domain/user_profile.dart';
 import '../../../bookmarks/data/bookmark_providers.dart';
 import '../../../bookmarks/domain/bookmark_models.dart';
@@ -50,22 +49,26 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           data: (profile) => ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
             children: [
               _ProfileHeader(profile: profile),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               _ProfileInfoCard(
                 profile: profile,
                 onEdit: () => _showEditDialog(context, ref, profile),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               _ThemeSection(),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               _StatsSection(),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               _VocabStatsSection(),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               _SavedWordsSection(),
+              const SizedBox(height: AppSpacing.lg),
             ],
           ),
       ),
@@ -135,46 +138,29 @@ class ProfileScreen extends ConsumerWidget {
                   label: 'Full Name',
                 ),
                 const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
+                AppDropdownField<String>(
+                  label: 'Native Language',
                   value: selectedLanguage,
-                  decoration: const InputDecoration(
-                    labelText: 'Native Language',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: languages
-                      .map((l) => DropdownMenuItem(value: l, child: Text(l)))
-                      .toList(),
+                  items: languages,
                   onChanged: (value) {
                     setState(() => selectedLanguage = value);
                   },
                 ),
                 const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
+                AppDropdownField<String>(
+                  label: 'Current Level',
                   value: selectedLevel,
-                  decoration: const InputDecoration(
-                    labelText: 'Current Level',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: levels
-                      .map((l) => DropdownMenuItem(value: l, child: Text(l)))
-                      .toList(),
+                  items: levels,
                   onChanged: (value) {
                     setState(() => selectedLevel = value);
                   },
                 ),
                 const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
+                AppDropdownField<String>(
+                  label: 'Preferred Dialect',
                   value: selectedDialect,
-                  decoration: const InputDecoration(
-                    labelText: 'Preferred Dialect',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: dialects
-                      .map((d) => DropdownMenuItem(
-                            value: d,
-                            child: Text(_formatDialect(d)),
-                          ))
-                      .toList(),
+                  items: dialects,
+                  itemLabelBuilder: (d) => _formatDialect(d),
                   onChanged: (value) {
                     setState(() => selectedDialect = value);
                   },
@@ -249,7 +235,7 @@ class _ProfileHeader extends StatelessWidget {
                 : 'Default profile picture',
             child: AppAvatar(
               radius: 50,
-              backgroundColor: c.primary.withValues(alpha: 0.2),
+              backgroundColor: c.primary.withValues(alpha: 0.08),
               backgroundImage: profile.avatarUrl != null
                   ? NetworkImage(profile.avatarUrl!)
                   : null,
@@ -258,12 +244,12 @@ class _ProfileHeader extends StatelessWidget {
                   : null,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
             profile.fullName,
             style: theme.textTheme.headlineSmall,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             profile.email,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -283,92 +269,87 @@ class _ProfileInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return AppCard(
       variant: AppCardVariant.outlined,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Profile Information',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: onEdit,
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Profile Information',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 18),
+                  onPressed: onEdit,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
           ),
           AppDivider(),
-          _InfoRow(
-            icon: Icons.language,
-            label: 'Native Language',
-            value: profile.nativeLanguage ?? 'Not set',
+          AppListItem(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            leading: const Icon(Icons.language, size: 20),
+            titleWidget: Text(
+              'Native Language',
+              style: theme.textTheme.bodySmall,
+            ),
+            subtitleWidget: Text(
+              profile.nativeLanguage ?? 'Not set',
+              style: theme.textTheme.bodyMedium,
+            ),
           ),
-          _InfoRow(
-            icon: Icons.trending_up,
-            label: 'Current Level',
-            value: profile.currentLevel ?? 'Not set',
+          AppDivider(),
+          AppListItem(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            leading: const Icon(Icons.trending_up, size: 20),
+            titleWidget: Text(
+              'Current Level',
+              style: theme.textTheme.bodySmall,
+            ),
+            subtitleWidget: Text(
+              profile.currentLevel ?? 'Not set',
+              style: theme.textTheme.bodyMedium,
+            ),
           ),
-          _InfoRow(
-            icon: Icons.record_voice_over,
-            label: 'Preferred Dialect',
-            value: profile.preferredDialect != null
-                ? ProfileScreen._formatDialect(profile.preferredDialect!)
-                : 'Not set',
+          AppDivider(),
+          AppListItem(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            leading: const Icon(Icons.record_voice_over, size: 20),
+            titleWidget: Text(
+              'Preferred Dialect',
+              style: theme.textTheme.bodySmall,
+            ),
+            subtitleWidget: Text(
+              profile.preferredDialect != null
+                  ? ProfileScreen._formatDialect(profile.preferredDialect!)
+                  : 'Not set',
+              style: theme.textTheme.bodyMedium,
+            ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppTheme.colors(context);
-    final theme = Theme.of(context);
-
-    return Semantics(
-      label: '$label: $value',
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: c.mutedForeground),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: c.mutedForeground,
-                    ),
-                  ),
-                  Text(
-                    value,
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -390,32 +371,34 @@ class _ThemeSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Cài đặt',
-          style: theme.textTheme.titleMedium,
+          'Settings',
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         AppCard(
           variant: AppCardVariant.outlined,
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [
               _ThemeBlock(
                 icon: Icons.brightness_auto,
-                label: 'Hệ thống',
+                label: 'System',
                 isSelected: currentMode == ThemeMode.system,
                 onTap: () => setMode(ThemeMode.system),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               _ThemeBlock(
                 icon: Icons.light_mode,
-                label: 'Sáng',
+                label: 'Light',
                 isSelected: currentMode == ThemeMode.light,
                 onTap: () => setMode(ThemeMode.light),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               _ThemeBlock(
                 icon: Icons.dark_mode,
-                label: 'Tối',
+                label: 'Dark',
                 isSelected: currentMode == ThemeMode.dark,
                 onTap: () => setMode(ThemeMode.dark),
               ),
@@ -451,7 +434,7 @@ class _ThemeBlock extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             color: isSelected ? c.primary.withValues(alpha: 0.12) : c.muted,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
             border: Border.all(
               color: isSelected ? c.primary : c.border,
               width: isSelected ? 1.5 : 1,
@@ -465,7 +448,7 @@ class _ThemeBlock extends StatelessWidget {
                 size: 28,
                 color: isSelected ? c.primary : c.mutedForeground,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 label,
                 style: TextStyle(
@@ -497,9 +480,11 @@ class _StatsSection extends ConsumerWidget {
       children: [
         Text(
           'Statistics',
-          style: theme.textTheme.titleMedium,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         statsAsync.when(
           loading: () => const AppCard(
             variant: AppCardVariant.outlined,
@@ -540,7 +525,7 @@ class _StatsSection extends ConsumerWidget {
                       color: c.primary,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: _StatCard(
                       icon: Icons.menu_book,
@@ -551,7 +536,7 @@ class _StatsSection extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               Row(
                 children: [
                   Expanded(
@@ -562,7 +547,7 @@ class _StatsSection extends ConsumerWidget {
                       color: accent.toneLow,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: _StatCard(
                       icon: Icons.timer,
@@ -573,16 +558,16 @@ class _StatsSection extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               Semantics(
                 label: 'Accuracy: ${stats.accuracy.toStringAsFixed(1)} percent',
                 child: AppCard(
                   variant: AppCardVariant.outlined,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
                   child: Row(
                     children: [
                       Icon(Icons.speed, color: c.primary),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -651,14 +636,18 @@ class _StatCard extends StatelessWidget {
       label: '$label: $value',
       child: AppCard(
         variant: AppCardVariant.outlined,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        borderRadius: AppRadius.lg,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(icon, color: color, size: 20),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   value,
                   style: theme.textTheme.headlineSmall?.copyWith(
@@ -667,7 +656,7 @@ class _StatCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               label,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -694,10 +683,12 @@ class _VocabStatsSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Thống kê từ vựng',
-          style: theme.textTheme.titleMedium,
+          'Vocabulary Stats',
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         statsAsync.when(
           loading: () => const AppCard(
             variant: AppCardVariant.outlined,
@@ -708,8 +699,8 @@ class _VocabStatsSection extends ConsumerWidget {
             child: Row(
               children: [
                 Icon(Icons.error_outline, color: c.error),
-                const SizedBox(width: 12),
-                const Expanded(child: Text('Không thể tải thống kê')),
+                const SizedBox(width: AppSpacing.md),
+                const Expanded(child: Text('Unable to load stats')),
               ],
             ),
           ),
@@ -732,14 +723,18 @@ class _VocabStatsCard extends StatelessWidget {
     if (stats.total == 0) {
       return AppCard(
         variant: AppCardVariant.outlined,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        borderRadius: AppRadius.lg,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(Icons.bookmark_border, color: c.primary, size: 20),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   '0',
                   style: theme.textTheme.headlineSmall?.copyWith(
@@ -748,9 +743,9 @@ class _VocabStatsCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(
-              'Từ đã lưu',
+              'Saved Words',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: c.mutedForeground,
               ),
@@ -765,14 +760,18 @@ class _VocabStatsCard extends StatelessWidget {
 
     return AppCard(
       variant: AppCardVariant.outlined,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      borderRadius: AppRadius.lg,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Icon(Icons.bookmark, color: c.primary, size: 20),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 '${stats.total}',
                 style: theme.textTheme.headlineSmall?.copyWith(
@@ -782,7 +781,7 @@ class _VocabStatsCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                'Từ đã lưu',
+                'Saved Words',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: c.mutedForeground,
                 ),
@@ -791,10 +790,10 @@ class _VocabStatsCard extends StatelessWidget {
           ),
           if (breakdownItems.isNotEmpty) ...[
             AppDivider(),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.sm),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
               children: breakdownItems.map((entry) {
                 final viLabel = kPartOfSpeechViLabels[entry.key] ?? entry.key;
                 return AppChip(
@@ -823,7 +822,7 @@ class _SavedWordsSection extends StatelessWidget {
       child: AppListItem(
         leading: Icon(Icons.bookmark, color: c.primary),
         titleWidget: Text(
-          'Từ đã lưu',
+          'Saved Words',
           style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w600,
           ),

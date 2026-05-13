@@ -35,20 +35,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     await ref.read(continueLearningProvider.future);
   }
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    final theme = Theme.of(context);
     final coursesAsync = ref.watch(coursesProvider);
 
     return Scaffold(
-      appBar: AppAppBar(title: const Text('Home')),
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            const ContinueCard(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.xl,
+                AppSpacing.xl,
+                AppSpacing.xl,
+                AppSpacing.lg,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _getGreeting(),
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: c.foreground,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Ready to learn?',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: c.mutedForeground,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              child: const ContinueCard(),
+            ),
             const SizedBox(height: AppSpacing.xl),
-            _CoursesSection(coursesAsync: coursesAsync),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              child: _CoursesSection(coursesAsync: coursesAsync),
+            ),
+            const SizedBox(height: AppSpacing.xl),
           ],
         ),
       ),
@@ -72,7 +113,7 @@ class _CoursesSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Courses',
+              'Explore',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -134,7 +175,7 @@ class _CoursesSection extends StatelessWidget {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: c.primary.withValues(alpha: 0.1),
+                            color: c.primary.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(AppRadius.md),
                           ),
                           child: Icon(

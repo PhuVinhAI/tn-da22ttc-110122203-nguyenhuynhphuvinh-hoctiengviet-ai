@@ -52,34 +52,68 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final c = AppTheme.colors(context);
+
     return Scaffold(
       appBar: const AppAppBar(title: Text('Forgot Password')),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Reset your password',
-                  style: Theme.of(context).textTheme.titleLarge,
-                  textAlign: TextAlign.center,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 28,
+              vertical: AppSpacing.xl,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Icon
+                  Center(
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: c.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                      ),
+                      child: Icon(
+                        Icons.lock_reset_outlined,
+                        size: 32,
+                        color: c.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  // Title
+                  Text(
+                    'Reset your password',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  // Description
+                  Text(
+                    'Enter your email address and we\'ll send you a code to reset your password.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: c.mutedForeground,
+                      height: 1.5,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Enter your email and we\'ll send you a code to reset your password.',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
+                const SizedBox(height: AppSpacing.xxl),
+                // Email input
                 AppInput(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
                   label: 'Email',
                   prefixIcon: const Icon(Icons.email_outlined),
+                  hint: 'Enter your email address',
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Email is required';
@@ -90,7 +124,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xl),
+                // Submit button
                 AppButton(
                   variant: AppButtonVariant.primary,
                   isFullWidth: true,
@@ -98,14 +133,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   isLoading: _isLoading,
                   label: 'Send Reset Code',
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
+                // Back link
                 AppButton(
                   variant: AppButtonVariant.text,
+                  isFullWidth: true,
                   onPressed: () => context.pop(),
                   label: 'Back to Sign In',
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

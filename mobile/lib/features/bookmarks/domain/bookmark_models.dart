@@ -1,13 +1,13 @@
 const kPartOfSpeechViLabels = <String, String>{
-  'noun': 'Danh từ',
-  'verb': 'Động từ',
-  'adjective': 'Tính từ',
-  'adverb': 'Phó từ',
-  'pronoun': 'Đại từ',
-  'preposition': 'Giới từ',
-  'conjunction': 'Liên từ',
-  'phrase': 'Cụm từ',
-  'interjection': 'Thán từ',
+  'noun': 'Noun',
+  'verb': 'Verb',
+  'adjective': 'Adjective',
+  'adverb': 'Adverb',
+  'pronoun': 'Pronoun',
+  'preposition': 'Preposition',
+  'conjunction': 'Conjunction',
+  'phrase': 'Phrase',
+  'interjection': 'Interjection',
 };
 
 enum BookmarkSort {

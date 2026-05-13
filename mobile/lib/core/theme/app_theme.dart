@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 abstract class AppTypography {
-  static const double caption = 12;
-  static const double bodySmall = 14;
-  static const double bodyMedium = 16;
-  static const double bodyLarge = 18;
-  static const double titleSmall = 20;
-  static const double titleMedium = 22;
-  static const double titleLarge = 24;
-  static const double headlineSmall = 28;
-  static const double headlineMedium = 32;
-  static const double headlineLarge = 36;
-  static const double displaySmall = 40;
-  static const double displayMedium = 48;
-  static const double displayLarge = 56;
+  static const double caption = 11;
+  static const double bodySmall = 13;
+  static const double bodyMedium = 15;
+  static const double bodyLarge = 17;
+  static const double titleSmall = 18;
+  static const double titleMedium = 20;
+  static const double titleLarge = 22;
+  static const double headlineSmall = 26;
+  static const double headlineMedium = 30;
+  static const double headlineLarge = 34;
+  static const double displaySmall = 38;
+  static const double displayMedium = 44;
+  static const double displayLarge = 52;
 }
 
 abstract class AppSpacing {
@@ -28,10 +28,11 @@ abstract class AppSpacing {
 }
 
 abstract class AppRadius {
-  static const double sm = 4;
-  static const double md = 8;
-  static const double lg = 12;
-  static const double xl = 16;
+  static const double xs = 4;
+  static const double sm = 6;
+  static const double md = 10;
+  static const double lg = 14;
+  static const double xl = 20;
   static const double full = 999;
 }
 
@@ -85,21 +86,21 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color infoForeground;
 
   static const light = AppColors(
-    primary: Color(0xFFE53935),
+    primary: Color(0xFF6366F1),
     primaryForeground: Color(0xFFFFFFFF),
-    secondary: Color(0xFFFF8F00),
+    secondary: Color(0xFF8B5CF6),
     secondaryForeground: Color(0xFFFFFFFF),
-    accent: Color(0xFF1565C0),
+    accent: Color(0xFF06B6D4),
     accentForeground: Color(0xFFFFFFFF),
-    background: Color(0xFFF8F9FA),
-    foreground: Color(0xFF1A1A2E),
+    background: Color(0xFFFAFAF9),
+    foreground: Color(0xFF18181B),
     card: Color(0xFFFFFFFF),
-    cardForeground: Color(0xFF1A1A2E),
-    muted: Color(0xFFF1F3F5),
-    mutedForeground: Color(0xFF6B7280),
-    border: Color(0xFFE5E7EB),
-    inputBorder: Color(0xFFD1D5DB),
-    success: Color(0xFF10B981),
+    cardForeground: Color(0xFF18181B),
+    muted: Color(0xFFF4F4F5),
+    mutedForeground: Color(0xFF71717A),
+    border: Color(0xFFE4E4E7),
+    inputBorder: Color(0xFFD4D4D8),
+    success: Color(0xFF22C55E),
     successForeground: Color(0xFFFFFFFF),
     warning: Color(0xFFF59E0B),
     warningForeground: Color(0xFFFFFFFF),
@@ -110,28 +111,28 @@ class AppColors extends ThemeExtension<AppColors> {
   );
 
   static const dark = AppColors(
-    primary: Color(0xFFFF6B6B),
-    primaryForeground: Color(0xFF1A1A2E),
-    secondary: Color(0xFFFFB347),
-    secondaryForeground: Color(0xFF1A1A2E),
-    accent: Color(0xFF60A5FA),
-    accentForeground: Color(0xFF0F0F1A),
-    background: Color(0xFF0F0F1A),
-    foreground: Color(0xFFF1F5F9),
-    card: Color(0xFF1A1A2E),
-    cardForeground: Color(0xFFF1F5F9),
-    muted: Color(0xFF252540),
-    mutedForeground: Color(0xFF94A3B8),
-    border: Color(0xFF2D2D44),
-    inputBorder: Color(0xFF3B3B5C),
-    success: Color(0xFF34D399),
-    successForeground: Color(0xFF0F0F1A),
+    primary: Color(0xFF818CF8),
+    primaryForeground: Color(0xFFFFFFFF),
+    secondary: Color(0xFFA78BFA),
+    secondaryForeground: Color(0xFFFFFFFF),
+    accent: Color(0xFF22D3EE),
+    accentForeground: Color(0xFFFFFFFF),
+    background: Color(0xFF09090B),
+    foreground: Color(0xFFFAFAFA),
+    card: Color(0xFF18181B),
+    cardForeground: Color(0xFFFAFAFA),
+    muted: Color(0xFF27272A),
+    mutedForeground: Color(0xFFA1A1AA),
+    border: Color(0xFF27272A),
+    inputBorder: Color(0xFF3F3F46),
+    success: Color(0xFF4ADE80),
+    successForeground: Color(0xFFFFFFFF),
     warning: Color(0xFFFBBF24),
-    warningForeground: Color(0xFF0F0F1A),
+    warningForeground: Color(0xFFFFFFFF),
     error: Color(0xFFF87171),
-    errorForeground: Color(0xFF0F0F1A),
+    errorForeground: Color(0xFFFFFFFF),
     info: Color(0xFF60A5FA),
-    infoForeground: Color(0xFF0F0F1A),
+    infoForeground: Color(0xFFFFFFFF),
   );
 
   @override
@@ -255,37 +256,37 @@ class VietnameseAccentTokens extends ThemeExtension<VietnameseAccentTokens> {
   }
 
   static const light = VietnameseAccentTokens(
-    toneHigh: Color(0xFFD32F2F),
-    toneMid: Color(0xFFF57C00),
-    toneLow: Color(0xFF388E3C),
-    diacriticColor: Color(0xFF1565C0),
+    toneHigh: Color(0xFFDC2626),
+    toneMid: Color(0xFFD97706),
+    toneLow: Color(0xFF16A34A),
+    diacriticColor: Color(0xFF6366F1),
   );
 
   static const dark = VietnameseAccentTokens(
-    toneHigh: Color(0xFFEF5350),
-    toneMid: Color(0xFFFFA726),
-    toneLow: Color(0xFF66BB6A),
-    diacriticColor: Color(0xFF42A5F5),
+    toneHigh: Color(0xFFF87171),
+    toneMid: Color(0xFFFBBF24),
+    toneLow: Color(0xFF4ADE80),
+    diacriticColor: Color(0xFF818CF8),
   );
 }
 
 TextTheme _buildTextTheme(TextTheme base) {
   return base.copyWith(
-    displayLarge: GoogleFonts.beVietnamPro(textStyle: base.displayLarge),
-    displayMedium: GoogleFonts.beVietnamPro(textStyle: base.displayMedium),
-    displaySmall: GoogleFonts.beVietnamPro(textStyle: base.displaySmall),
-    headlineLarge: GoogleFonts.beVietnamPro(textStyle: base.headlineLarge),
-    headlineMedium: GoogleFonts.beVietnamPro(textStyle: base.headlineMedium),
-    headlineSmall: GoogleFonts.beVietnamPro(textStyle: base.headlineSmall),
-    titleLarge: GoogleFonts.beVietnamPro(textStyle: base.titleLarge),
-    titleMedium: GoogleFonts.beVietnamPro(textStyle: base.titleMedium),
-    titleSmall: GoogleFonts.beVietnamPro(textStyle: base.titleSmall),
-    bodyLarge: GoogleFonts.beVietnamPro(textStyle: base.bodyLarge),
-    bodyMedium: GoogleFonts.beVietnamPro(textStyle: base.bodyMedium),
-    bodySmall: GoogleFonts.beVietnamPro(textStyle: base.bodySmall),
-    labelLarge: GoogleFonts.beVietnamPro(textStyle: base.labelLarge),
-    labelMedium: GoogleFonts.beVietnamPro(textStyle: base.labelMedium),
-    labelSmall: GoogleFonts.beVietnamPro(textStyle: base.labelSmall),
+    displayLarge: GoogleFonts.inter(textStyle: base.displayLarge),
+    displayMedium: GoogleFonts.inter(textStyle: base.displayMedium),
+    displaySmall: GoogleFonts.inter(textStyle: base.displaySmall),
+    headlineLarge: GoogleFonts.inter(textStyle: base.headlineLarge),
+    headlineMedium: GoogleFonts.inter(textStyle: base.headlineMedium),
+    headlineSmall: GoogleFonts.inter(textStyle: base.headlineSmall),
+    titleLarge: GoogleFonts.inter(textStyle: base.titleLarge),
+    titleMedium: GoogleFonts.inter(textStyle: base.titleMedium),
+    titleSmall: GoogleFonts.inter(textStyle: base.titleSmall),
+    bodyLarge: GoogleFonts.inter(textStyle: base.bodyLarge),
+    bodyMedium: GoogleFonts.inter(textStyle: base.bodyMedium),
+    bodySmall: GoogleFonts.inter(textStyle: base.bodySmall),
+    labelLarge: GoogleFonts.inter(textStyle: base.labelLarge),
+    labelMedium: GoogleFonts.inter(textStyle: base.labelMedium),
+    labelSmall: GoogleFonts.inter(textStyle: base.labelSmall),
   );
 }
 
@@ -298,6 +299,22 @@ class AppTheme {
 
   static VietnameseAccentTokens accents(BuildContext context) {
     return Theme.of(context).extension<VietnameseAccentTokens>()!;
+  }
+
+  static TextStyle vnStyle({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? height,
+    double? letterSpacing,
+  }) {
+    return GoogleFonts.beVietnamPro(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      height: height,
+      letterSpacing: letterSpacing,
+    );
   }
 
   static ThemeData light() {
@@ -349,10 +366,11 @@ class AppTheme {
         foregroundColor: c.foreground,
         elevation: 0,
         scrolledUnderElevation: 0,
-        titleTextStyle: GoogleFonts.beVietnamPro(
-          fontSize: AppTypography.titleMedium,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: AppTypography.titleSmall,
           fontWeight: FontWeight.w600,
           color: c.foreground,
+          letterSpacing: -0.3,
         ),
       ),
       cardTheme: CardThemeData(
@@ -376,7 +394,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: BorderSide(color: c.primary, width: 2),
+          borderSide: BorderSide(color: c.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -384,17 +402,17 @@ class AppTheme {
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: BorderSide(color: c.error, width: 2),
+          borderSide: BorderSide(color: c.error, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,
         ),
-        hintStyle: GoogleFonts.beVietnamPro(
+        hintStyle: GoogleFonts.inter(
           color: c.mutedForeground,
           fontSize: AppTypography.bodyMedium,
         ),
-        labelStyle: GoogleFonts.beVietnamPro(
+        labelStyle: GoogleFonts.inter(
           color: c.mutedForeground,
           fontSize: AppTypography.bodySmall,
         ),
@@ -415,26 +433,26 @@ class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: c.card,
         elevation: 0,
-        indicatorColor: c.primary.withValues(alpha: 0.12),
+        indicatorColor: c.primary.withValues(alpha: 0.1),
         surfaceTintColor: Colors.transparent,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return GoogleFonts.beVietnamPro(
+            return GoogleFonts.inter(
               fontSize: AppTypography.caption,
               fontWeight: FontWeight.w600,
               color: c.primary,
             );
           }
-          return GoogleFonts.beVietnamPro(
+          return GoogleFonts.inter(
             fontSize: AppTypography.caption,
             color: c.mutedForeground,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return IconThemeData(color: c.primary, size: 24);
+            return IconThemeData(color: c.primary, size: 22);
           }
-          return IconThemeData(color: c.mutedForeground, size: 24);
+          return IconThemeData(color: c.mutedForeground, size: 22);
         }),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -455,9 +473,9 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: c.foreground,
-        contentTextStyle: GoogleFonts.beVietnamPro(
+        contentTextStyle: GoogleFonts.inter(
           color: c.background,
-          fontSize: AppTypography.bodyMedium,
+          fontSize: AppTypography.bodySmall,
         ),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -467,8 +485,8 @@ class AppTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: c.muted,
-        selectedColor: c.primary.withValues(alpha: 0.12),
-        labelStyle: GoogleFonts.beVietnamPro(
+        selectedColor: c.primary.withValues(alpha: 0.1),
+        labelStyle: GoogleFonts.inter(
           fontSize: AppTypography.caption,
           color: c.foreground,
         ),
@@ -483,7 +501,7 @@ class AppTheme {
         activeTrackColor: c.primary,
         inactiveTrackColor: c.muted,
         thumbColor: c.primary,
-        overlayColor: c.primary.withValues(alpha: 0.12),
+        overlayColor: c.primary.withValues(alpha: 0.1),
         trackHeight: 4,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
@@ -491,8 +509,8 @@ class AppTheme {
         linearTrackColor: c.muted,
         circularTrackColor: c.muted,
       ),
-      listTileTheme: ListTileThemeData(
-        contentPadding: const EdgeInsets.symmetric(
+      listTileTheme: const ListTileThemeData(
+        contentPadding: EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.xs,
         ),
@@ -549,10 +567,11 @@ class AppTheme {
         foregroundColor: c.foreground,
         elevation: 0,
         scrolledUnderElevation: 0,
-        titleTextStyle: GoogleFonts.beVietnamPro(
-          fontSize: AppTypography.titleMedium,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: AppTypography.titleSmall,
           fontWeight: FontWeight.w600,
           color: c.foreground,
+          letterSpacing: -0.3,
         ),
       ),
       cardTheme: CardThemeData(
@@ -576,7 +595,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: BorderSide(color: c.primary, width: 2),
+          borderSide: BorderSide(color: c.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -584,17 +603,17 @@ class AppTheme {
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: BorderSide(color: c.error, width: 2),
+          borderSide: BorderSide(color: c.error, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,
         ),
-        hintStyle: GoogleFonts.beVietnamPro(
+        hintStyle: GoogleFonts.inter(
           color: c.mutedForeground,
           fontSize: AppTypography.bodyMedium,
         ),
-        labelStyle: GoogleFonts.beVietnamPro(
+        labelStyle: GoogleFonts.inter(
           color: c.mutedForeground,
           fontSize: AppTypography.bodySmall,
         ),
@@ -615,16 +634,16 @@ class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: c.card,
         elevation: 0,
-        indicatorColor: c.primary.withValues(alpha: 0.15),
+        indicatorColor: c.primary.withValues(alpha: 0.12),
         surfaceTintColor: Colors.transparent,
         labelTextStyle: WidgetStateProperty.fromMap(
           {
-            WidgetState.selected: GoogleFonts.beVietnamPro(
+            WidgetState.selected: GoogleFonts.inter(
               fontSize: AppTypography.caption,
               fontWeight: FontWeight.w600,
               color: c.primary,
             ),
-            WidgetState.any: GoogleFonts.beVietnamPro(
+            WidgetState.any: GoogleFonts.inter(
               fontSize: AppTypography.caption,
               color: c.mutedForeground,
             ),
@@ -632,8 +651,8 @@ class AppTheme {
         ),
         iconTheme: WidgetStateProperty.fromMap(
           {
-            WidgetState.selected: IconThemeData(color: c.primary, size: 24),
-            WidgetState.any: IconThemeData(color: c.mutedForeground, size: 24),
+            WidgetState.selected: IconThemeData(color: c.primary, size: 22),
+            WidgetState.any: IconThemeData(color: c.mutedForeground, size: 22),
           },
         ),
       ),
@@ -655,9 +674,9 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: c.foreground,
-        contentTextStyle: GoogleFonts.beVietnamPro(
+        contentTextStyle: GoogleFonts.inter(
           color: c.background,
-          fontSize: AppTypography.bodyMedium,
+          fontSize: AppTypography.bodySmall,
         ),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -667,8 +686,8 @@ class AppTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: c.muted,
-        selectedColor: c.primary.withValues(alpha: 0.15),
-        labelStyle: GoogleFonts.beVietnamPro(
+        selectedColor: c.primary.withValues(alpha: 0.12),
+        labelStyle: GoogleFonts.inter(
           fontSize: AppTypography.caption,
           color: c.foreground,
         ),
@@ -683,7 +702,7 @@ class AppTheme {
         activeTrackColor: c.primary,
         inactiveTrackColor: c.muted,
         thumbColor: c.primary,
-        overlayColor: c.primary.withValues(alpha: 0.15),
+        overlayColor: c.primary.withValues(alpha: 0.12),
         trackHeight: 4,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
@@ -691,8 +710,8 @@ class AppTheme {
         linearTrackColor: c.muted,
         circularTrackColor: c.muted,
       ),
-      listTileTheme: ListTileThemeData(
-        contentPadding: const EdgeInsets.symmetric(
+      listTileTheme: const ListTileThemeData(
+        contentPadding: EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.xs,
         ),

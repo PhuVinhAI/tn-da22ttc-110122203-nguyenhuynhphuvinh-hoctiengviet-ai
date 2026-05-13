@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
@@ -10,13 +9,13 @@ import '../../domain/course_models.dart';
 
 Color _getLevelColor(String level, AppColors c) {
   return switch (level) {
-    'A1' => const Color(0xFF4CAF50),
-    'A2' => const Color(0xFF8BC34A),
-    'B1' => const Color(0xFFFFC107),
-    'B2' => const Color(0xFFFF9800),
-    'C1' => const Color(0xFFFF5722),
-    'C2' => const Color(0xFFF44336),
-    _ => c.border,
+    'A1' => const Color(0xFF22C55E),
+    'A2' => const Color(0xFF84CC16),
+    'B1' => const Color(0xFFF59E0B),
+    'B2' => const Color(0xFFf97316),
+    'C1' => const Color(0xFFEF4444),
+    'C2' => const Color(0xFFDC2626),
+    _ => c.mutedForeground,
   };
 }
 
@@ -100,131 +99,74 @@ class _CourseCard extends StatelessWidget {
 
     return AppCard(
       variant: AppCardVariant.outlined,
+      borderRadius: AppRadius.lg,
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      clipBehavior: Clip.antiAlias,
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.all(AppSpacing.md),
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _CourseThumbnail(thumbnailUrl: course.thumbnailUrl),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        course.title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    AppBadge(
-                      label: course.level,
-                      color: _getLevelColor(course.level, c),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  course.description,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: c.mutedForeground,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  children: [
+          Row(
+            children: [
+              AppBadge(
+                label: course.level,
+                color: _getLevelColor(course.level, c),
+              ),
+              const Spacer(),
+              Row(
+                children: [
+                  if (course.estimatedHours != null) ...[
                     Icon(
                       Icons.access_time,
-                      size: 16,
+                      size: 14,
                       color: c.mutedForeground,
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Text(
-                      course.estimatedHours != null
-                          ? '${course.estimatedHours}h'
-                          : 'N/A',
+                      '${course.estimatedHours}h',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: c.mutedForeground,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.lg),
-                    Icon(
-                      Icons.menu_book,
-                      size: 16,
-                      color: c.mutedForeground,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      '${course.modules.length} modules',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: c.mutedForeground,
-                      ),
-                    ),
+                    const SizedBox(width: AppSpacing.md),
                   ],
-                ),
-              ],
-            ),
+                  Icon(
+                    Icons.menu_book,
+                    size: 14,
+                    color: c.mutedForeground,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    '${course.modules.length} modules',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: c.mutedForeground,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            course.title,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (course.description.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              course.description,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: c.mutedForeground,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ],
-      ),
-    );
-  }
-}
-
-class _CourseThumbnail extends StatelessWidget {
-  const _CourseThumbnail({this.thumbnailUrl});
-  final String? thumbnailUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    if (thumbnailUrl == null || thumbnailUrl!.isEmpty) {
-      return _buildPlaceholder(context);
-    }
-
-    return CachedNetworkImage(
-      imageUrl: thumbnailUrl!,
-      height: 160,
-      width: double.infinity,
-      fit: BoxFit.cover,
-      placeholder: (context, url) => _buildShimmerPlaceholder(context),
-      errorWidget: (context, url, error) => _buildPlaceholder(context),
-    );
-  }
-
-  Widget _buildShimmerPlaceholder(BuildContext context) {
-    final c = AppTheme.colors(context);
-    return Shimmer.fromColors(
-      baseColor: c.muted,
-      highlightColor: c.card,
-      child: Container(
-        height: 160,
-        width: double.infinity,
-        color: Colors.white,
-      ),
-    );
-  }
-
-  Widget _buildPlaceholder(BuildContext context) {
-    final c = AppTheme.colors(context);
-    return Container(
-      height: 160,
-      width: double.infinity,
-      color: c.muted,
-      child: Icon(
-        Icons.school,
-        size: 64,
-        color: c.mutedForeground,
       ),
     );
   }
@@ -243,64 +185,65 @@ class _CoursesLoading extends StatelessWidget {
       itemBuilder: (context, index) {
         return AppCard(
           variant: AppCardVariant.outlined,
+          borderRadius: AppRadius.lg,
           margin: const EdgeInsets.only(bottom: AppSpacing.md),
-          padding: EdgeInsets.zero,
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                children: [
+                  Shimmer.fromColors(
+                    baseColor: c.muted,
+                    highlightColor: c.card,
+                    child: Container(
+                      width: 40,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  Shimmer.fromColors(
+                    baseColor: c.muted,
+                    highlightColor: c.card,
+                    child: Container(
+                      width: 80,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
               Shimmer.fromColors(
                 baseColor: c.muted,
                 highlightColor: c.card,
                 child: Container(
-                  height: 160,
-                  width: double.infinity,
-                  color: Colors.white,
+                  height: 20,
+                  width: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Shimmer.fromColors(
-                      baseColor: c.muted,
-                      highlightColor: c.card,
-                      child: Container(
-                        height: 20,
-                        width: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Shimmer.fromColors(
-                      baseColor: c.muted,
-                      highlightColor: c.card,
-                      child: Container(
-                        height: 16,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Shimmer.fromColors(
-                      baseColor: c.muted,
-                      highlightColor: c.card,
-                      child: Container(
-                        height: 14,
-                        width: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                        ),
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: AppSpacing.sm),
+              Shimmer.fromColors(
+                baseColor: c.muted,
+                highlightColor: c.card,
+                child: Container(
+                  height: 16,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
                 ),
               ),
             ],

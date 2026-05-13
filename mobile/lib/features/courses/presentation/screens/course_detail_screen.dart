@@ -9,12 +9,12 @@ import '../../domain/course_models.dart';
 
 Color _getLevelColor(String level, AppColors c) {
   return switch (level) {
-    'A1' => const Color(0xFF4CAF50),
-    'A2' => const Color(0xFF8BC34A),
-    'B1' => const Color(0xFFFFC107),
-    'B2' => const Color(0xFFFF9800),
-    'C1' => const Color(0xFFFF5722),
-    'C2' => const Color(0xFFF44336),
+    'A1' => const Color(0xFF22C55E),
+    'A2' => const Color(0xFF84CC16),
+    'B1' => const Color(0xFFF59E0B),
+    'B2' => const Color(0xFFf97316),
+    'C1' => const Color(0xFFEF4444),
+    'C2' => const Color(0xFFDC2626),
     _ => c.mutedForeground,
   };
 }
@@ -183,31 +183,31 @@ class _ModuleCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
             if (module.estimatedHours != null) ...[
-              Icon(
-                Icons.access_time,
-                size: 14,
-                color: c.mutedForeground,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                '${module.estimatedHours}h',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: c.mutedForeground,
-                ),
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  Icon(
+                    Icons.access_time,
+                    size: 12,
+                    color: c.mutedForeground,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    '${module.estimatedHours}h',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: c.mutedForeground,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
               ),
             ],
-            const SizedBox(width: AppSpacing.sm),
-            Icon(
-              Icons.chevron_right,
-              color: c.mutedForeground,
-            ),
           ],
+        ),
+        trailing: Icon(
+          Icons.chevron_right,
+          color: c.mutedForeground,
         ),
       ),
     );

@@ -120,150 +120,196 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 28,
+              vertical: AppSpacing.xl,
+            ),
             child: Form(
               key: _formKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Branding - centered
+                  Center(
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: c.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                      ),
+                      child: Icon(
+                        Icons.translate_rounded,
+                        size: 36,
+                        color: c.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
                   Semantics(
                     label: 'LinVNix - Vietnamese Language Learning',
                     header: true,
                     child: Text(
                       'LinVNix',
-                      style: theme.textTheme.displaySmall,
                       textAlign: TextAlign.center,
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -1,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Vietnamese Language Learning',
-                    style: theme.textTheme.bodyLarge,
+                    'Learn Vietnamese, your way',
                     textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 48),
-                  Semantics(
-                    label: 'Email input field',
-                    textField: true,
-                    child: AppInput(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      autocorrect: false,
-                      label: 'Email',
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      hint: 'Enter your email address',
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Email is required';
-                        }
-                        if (!value.contains('@')) {
-                          return 'Enter a valid email';
-                        }
-                        return null;
-                      },
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: c.mutedForeground,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Semantics(
-                    label: 'Password input field',
-                    textField: true,
-                    child: AppInput(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      label: 'Password',
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      suffixIcon: Semantics(
-                        label: _obscurePassword
-                            ? 'Show password'
-                            : 'Hide password',
-                        button: true,
-                        child: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
-                          onPressed: () {
-                            setState(
-                                () => _obscurePassword = !_obscurePassword);
-                          },
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Password is required';
-                        }
-                        return null;
-                      },
-                    ),
+                  const SizedBox(height: AppSpacing.xxxl),
+                // Email field
+                Semantics(
+                  label: 'Email input field',
+                  textField: true,
+                  child: AppInput(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    autocorrect: false,
+                    label: 'Email',
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    hint: 'Enter your email address',
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Email is required';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Enter a valid email';
+                      }
+                      return null;
+                    },
                   ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Semantics(
-                      label: 'Forgot password',
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // Password field
+                Semantics(
+                  label: 'Password input field',
+                  textField: true,
+                  child: AppInput(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    label: 'Password',
+                    prefixIcon: const Icon(Icons.lock_outlined),
+                    suffixIcon: Semantics(
+                      label: _obscurePassword
+                          ? 'Show password'
+                          : 'Hide password',
                       button: true,
-                      child: AppButton(
-                        variant: AppButtonVariant.text,
-                        onPressed: () => context.push('/forgot-password'),
-                        label: 'Forgot password?',
+                      child: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                        onPressed: () {
+                          setState(
+                              () => _obscurePassword = !_obscurePassword);
+                        },
                       ),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Password is required';
+                      }
+                      return null;
+                    },
                   ),
-                  const SizedBox(height: 24),
-                  Semantics(
-                    label: 'Sign in to your account',
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                // Forgot password - right-aligned
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Semantics(
+                    label: 'Forgot password',
                     button: true,
-                    enabled: !_isLoading,
-                    child: AppButton(
-                      variant: AppButtonVariant.primary,
-                      isFullWidth: true,
-                      onPressed: _isLoading ? null : _handleLogin,
-                      isLoading: _isLoading,
-                      label: 'Sign In',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Semantics(
-                    label: 'Create a new account',
-                    button: true,
-                    child: AppButton(
-                      variant: AppButtonVariant.outline,
-                      isFullWidth: true,
-                      onPressed: () => context.push('/register'),
-                      label: 'Create Account',
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      const Expanded(child: AppDivider()),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          'OR',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: c.mutedForeground,
-                          ),
+                    child: TextButton(
+                      onPressed: () => context.push('/forgot-password'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xs,
+                          vertical: AppSpacing.xs,
+                        ),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        'Forgot password?',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: c.primary,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const Expanded(child: AppDivider()),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Semantics(
-                    label: 'Sign in with Google',
-                    button: true,
-                    enabled: !_isLoading,
-                    child: GoogleSignInButton(
-                      enabled: !_isLoading,
-                      onSuccess: _handleGoogleLogin,
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                // Sign in button
+                Semantics(
+                  label: 'Sign in to your account',
+                  button: true,
+                  enabled: !_isLoading,
+                  child: AppButton(
+                    variant: AppButtonVariant.primary,
+                    isFullWidth: true,
+                    onPressed: _isLoading ? null : _handleLogin,
+                    isLoading: _isLoading,
+                    label: 'Sign In',
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                // Create account button
+                Semantics(
+                  label: 'Create a new account',
+                  button: true,
+                  child: AppButton(
+                    variant: AppButtonVariant.outline,
+                    isFullWidth: true,
+                    onPressed: () => context.push('/register'),
+                    label: 'Create Account',
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                // Divider with "or"
+                Row(
+                  children: [
+                    const Expanded(child: AppDivider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
+                      child: Text(
+                        'or',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: c.mutedForeground,
+                          fontSize: AppTypography.caption,
+                        ),
+                      ),
+                    ),
+                    const Expanded(child: AppDivider()),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                // Google sign in
+                Semantics(
+                  label: 'Sign in with Google',
+                  button: true,
+                  enabled: !_isLoading,
+                  child: GoogleSignInButton(
+                    enabled: !_isLoading,
+                    onSuccess: _handleGoogleLogin,
+                  ),
+                ),
+              ],
             ),
+          ),
           ),
         ),
       ),

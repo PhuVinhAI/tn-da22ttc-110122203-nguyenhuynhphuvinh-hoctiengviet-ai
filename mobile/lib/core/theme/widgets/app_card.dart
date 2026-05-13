@@ -40,7 +40,7 @@ class AppCard extends StatelessWidget {
       AppCardVariant.outlined => c.border,
       AppCardVariant.muted => Colors.transparent,
     };
-    final radius = borderRadius ?? AppRadius.md;
+    final radius = borderRadius ?? AppRadius.lg;
 
     return GestureDetector(
       onTap: onTap,

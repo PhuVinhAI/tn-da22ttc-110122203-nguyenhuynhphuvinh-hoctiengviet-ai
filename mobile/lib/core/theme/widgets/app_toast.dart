@@ -25,7 +25,7 @@ class AppToast {
             Expanded(
               child: Text(
                 message,
-                style: GoogleFonts.beVietnamPro(
+                style: GoogleFonts.inter(
                   fontSize: AppTypography.bodySmall,
                   color: _fgColor(c, type),
                 ),

@@ -22,7 +22,7 @@ class AppBottomSheet {
           decoration: BoxDecoration(
             color: c.card,
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppRadius.lg),
+              top: Radius.circular(AppRadius.xl),
             ),
             border: Border.all(color: c.border, width: 1),
           ),

@@ -102,6 +102,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final c = AppTheme.colors(context);
 
     return Scaffold(
@@ -109,143 +110,196 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 28,
+              vertical: AppSpacing.xl,
+            ),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  AppInput(
-                    controller: _nameController,
-                    textCapitalization: TextCapitalization.words,
-                    label: 'Full Name',
-                    prefixIcon: const Icon(Icons.person_outlined),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Full name is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  AppInput(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    autocorrect: false,
-                    label: 'Email',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Email is required';
-                      }
-                      if (!value.contains('@')) {
-                        return 'Enter a valid email';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  AppInput(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    label: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
+                  Center(
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: c.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
                       ),
-                      onPressed: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      },
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Password is required';
-                      }
-                      if (value.length < 8) {
-                        return 'Password must be at least 8 characters';
-                      }
-                      if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)')
-                          .hasMatch(value)) {
-                        return 'Must contain uppercase, lowercase, and digit';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  AppInput(
-                    controller: _confirmPasswordController,
-                    obscureText: _obscureConfirmPassword,
-                    label: 'Confirm Password',
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
+                      child: Icon(
+                        Icons.person_add_outlined,
+                        size: 28,
+                        color: c.primary,
                       ),
-                      onPressed: () {
-                        setState(() =>
-                            _obscureConfirmPassword =
-                                !_obscureConfirmPassword);
-                      },
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please confirm your password';
-                      }
-                      if (value != _passwordController.text) {
-                        return 'Passwords do not match';
-                      }
-                      return null;
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    'Get started',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Create your account to begin learning',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: c.mutedForeground,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxl),
+                  // Full Name
+                AppInput(
+                  controller: _nameController,
+                  textCapitalization: TextCapitalization.words,
+                  label: 'Full Name',
+                  prefixIcon: const Icon(Icons.person_outlined),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Full name is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // Email
+                AppInput(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  autocorrect: false,
+                  label: 'Email',
+                  prefixIcon: const Icon(Icons.email_outlined),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Email is required';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Enter a valid email';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // Password
+                AppInput(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  label: 'Password',
+                  prefixIcon: const Icon(Icons.lock_outlined),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                    ),
+                    onPressed: () {
+                      setState(() => _obscurePassword = !_obscurePassword);
                     },
                   ),
-                  const SizedBox(height: 32),
-                  AppButton(
-                    variant: AppButtonVariant.primary,
-                    isFullWidth: true,
-                    onPressed: _isLoading ? null : _handleRegister,
-                    isLoading: _isLoading,
-                    label: 'Create Account',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Password is required';
+                    }
+                    if (value.length < 8) {
+                      return 'Password must be at least 8 characters';
+                    }
+                    if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)')
+                        .hasMatch(value)) {
+                      return 'Must contain uppercase, lowercase, and digit';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // Confirm Password
+                AppInput(
+                  controller: _confirmPasswordController,
+                  obscureText: _obscureConfirmPassword,
+                  label: 'Confirm Password',
+                  prefixIcon: const Icon(Icons.lock_outlined),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                    ),
+                    onPressed: () {
+                      setState(() =>
+                          _obscureConfirmPassword =
+                              !_obscureConfirmPassword);
+                    },
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      const Expanded(child: AppDivider()),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          'OR',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: c.mutedForeground,
-                          ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please confirm your password';
+                    }
+                    if (value != _passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSpacing.xxl),
+                // Create account button
+                AppButton(
+                  variant: AppButtonVariant.primary,
+                  isFullWidth: true,
+                  onPressed: _isLoading ? null : _handleRegister,
+                  isLoading: _isLoading,
+                  label: 'Create Account',
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // Divider
+                Row(
+                  children: [
+                    const Expanded(child: AppDivider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
+                      child: Text(
+                        'or',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: c.mutedForeground,
+                          fontSize: AppTypography.caption,
                         ),
                       ),
-                      const Expanded(child: AppDivider()),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  GoogleSignInButton(
-                    enabled: !_isLoading,
-                    onSuccess: _handleGoogleRegister,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Already have an account? ', style: TextStyle(color: c.foreground)),
-                      AppButton(
-                        variant: AppButtonVariant.text,
-                        onPressed: () => context.pop(),
-                        label: 'Sign in',
+                    ),
+                    const Expanded(child: AppDivider()),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // Google sign in
+                GoogleSignInButton(
+                  enabled: !_isLoading,
+                  onSuccess: _handleGoogleRegister,
+                ),
+                const SizedBox(height: AppSpacing.xxl),
+                // Already have account
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Already have an account?',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: c.mutedForeground,
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    AppButton(
+                      variant: AppButtonVariant.text,
+                      onPressed: () => context.pop(),
+                      label: 'Sign in',
+                    ),
+                  ],
+                ),
+              ],
             ),
+          ),
           ),
         ),
       ),

@@ -59,7 +59,7 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
     final isBookmarked =
         await ref.read(bookmarksProvider.notifier).toggleBookmark(vocabularyId);
     if (!isBookmarked && mounted) {
-      AppToast.show(context, message: 'Đã bỏ lưu từ', type: AppToastType.info);
+      AppToast.show(context, message: 'Word removed', type: AppToastType.info);
     }
   }
 
@@ -78,11 +78,11 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
 
     return Scaffold(
       appBar: AppAppBar(
-        title: const Text('Từ đã lưu'),
+        title: const Text('Saved Words'),
         actions: [
           IconButton(
             icon: const Icon(Icons.school),
-            tooltip: 'Học',
+            tooltip: 'Study',
             onPressed: () => context.push('/bookmarks/flashcard'),
           ),
         ],
@@ -90,10 +90,10 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
             child: AppInput(
               controller: _searchController,
-              hint: 'Tìm từ hoặc nghĩa...',
+              hint: 'Search words or meanings...',
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
@@ -108,49 +108,21 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Row(
-              children: [
-                Text('Sắp xếp:', style: Theme.of(context).textTheme.bodyMedium),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: DropdownButtonFormField<BookmarkSort>(
-                    value: currentSort,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    ),
-                    items: [
-                      DropdownMenuItem(
-                        value: BookmarkSort.newest,
-                        child: Text('Mới nhất', style: Theme.of(context).textTheme.bodySmall),
-                      ),
-                      DropdownMenuItem(
-                        value: BookmarkSort.oldest,
-                        child: Text('Cũ nhất', style: Theme.of(context).textTheme.bodySmall),
-                      ),
-                      DropdownMenuItem(
-                        value: BookmarkSort.az,
-                        child: Text('A-Z', style: Theme.of(context).textTheme.bodySmall),
-                      ),
-                      DropdownMenuItem(
-                        value: BookmarkSort.za,
-                        child: Text('Z-A', style: Theme.of(context).textTheme.bodySmall),
-                      ),
-                      DropdownMenuItem(
-                        value: BookmarkSort.difficulty,
-                        child: Text('Độ khó', style: Theme.of(context).textTheme.bodySmall),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) _onSortChanged(value);
-                    },
-                  ),
-                ),
-              ],
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
+            child: AppDropdownField<BookmarkSort>(
+              label: 'Sort by',
+              value: currentSort,
+              items: BookmarkSort.values,
+              itemLabelBuilder: (sort) => switch (sort) {
+                BookmarkSort.newest => 'Newest',
+                BookmarkSort.oldest => 'Oldest',
+                BookmarkSort.az => 'A-Z',
+                BookmarkSort.za => 'Z-A',
+                BookmarkSort.difficulty => 'Difficulty',
+              },
+              onChanged: (value) {
+                if (value != null) _onSortChanged(value);
+              },
             ),
           ),
           Expanded(child: _buildBody(bookmarksAsync)),
@@ -171,14 +143,14 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
                 Icon(Icons.bookmark_border, size: 64, color: c.mutedForeground),
                 const SizedBox(height: 16),
                 Text(
-                  'Chưa lưu từ nào',
+                  'No saved words yet',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: c.mutedForeground,
                       ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Lưu từ yêu thích từ bài học',
+                  'Save your favorite words from lessons',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: c.mutedForeground,
                       ),
@@ -192,7 +164,7 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
           onRefresh: _onRefresh,
           child: ListView.builder(
             controller: _scrollController,
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             itemCount: page.items.length + (page.items.length < page.totalItems ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == page.items.length) {
@@ -224,7 +196,7 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
             Text(error.toString(), textAlign: TextAlign.center),
             const SizedBox(height: 16),
             AppButton(
-              label: 'Thử lại',
+              label: 'Retry',
               variant: AppButtonVariant.primary,
               onPressed: _onRefresh,
             ),
@@ -251,7 +223,8 @@ class _BookmarkTile extends StatelessWidget {
     final c = AppTheme.colors(context);
     return AppCard(
       variant: AppCardVariant.outlined,
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      borderRadius: AppRadius.lg,
+      margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs, horizontal: AppSpacing.sm),
       onTap: onTap,
       child: Row(
         children: [
@@ -263,26 +236,27 @@ class _BookmarkTile extends StatelessWidget {
                   children: [
                     Text(
                       item.word,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     if (item.partOfSpeech != null) ...[
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       AppChip(
                         label: kPartOfSpeechViLabels[item.partOfSpeech!.toLowerCase()] ?? item.partOfSpeech!,
                         color: c.info,
-                        fontSize: 11,
+                        fontSize: AppTypography.caption,
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       ),
                     ],
                   ],
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   item.translation,
-                  style: TextStyle(color: c.mutedForeground, fontSize: 14),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: c.mutedForeground,
+                      ),
                 ),
               ],
             ),
@@ -315,7 +289,7 @@ class _BookmarkDetailSheet extends StatelessWidget {
       builder: (context, scrollController) {
         return SingleChildScrollView(
           controller: scrollController,
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -329,13 +303,13 @@ class _BookmarkDetailSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               Text(
                 item.word,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               if (item.phonetic != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   '/${item.phonetic}/',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -343,34 +317,34 @@ class _BookmarkDetailSheet extends StatelessWidget {
                       ),
                 ),
               ],
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               Text(
                 item.translation,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               if (item.partOfSpeech != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 AppChip(
                   label: kPartOfSpeechViLabels[item.partOfSpeech!.toLowerCase()] ?? item.partOfSpeech!,
                   color: c.info,
                 ),
               ],
               if (item.classifier != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Lượng từ: ${item.classifier}',
+                  'Classifier: ${item.classifier}',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ],
               if (item.exampleSentence != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 Text(
-                  'Ví dụ:',
+                  'Example:',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   item.exampleSentence!,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -378,7 +352,7 @@ class _BookmarkDetailSheet extends StatelessWidget {
                       ),
                 ),
                 if (item.exampleTranslation != null) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     item.exampleTranslation!,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -389,14 +363,14 @@ class _BookmarkDetailSheet extends StatelessWidget {
               ],
               if (item.dialectVariants != null &&
                   item.dialectVariants!.isNotEmpty) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 Text(
-                  'Phương ngữ:',
+                  'Dialect Variants:',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 ...item.dialectVariants!.entries.map(
                   (e) => Text(
                     '${e.key}: ${e.value}',

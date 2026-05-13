@@ -36,7 +36,7 @@ class AppChip extends StatelessWidget {
             ),
         decoration: BoxDecoration(
           color: isSelected ? accentColor.withValues(alpha: 0.12) : c.muted,
-          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderRadius: BorderRadius.circular(AppRadius.full),
           border: Border.all(
             color: isSelected ? accentColor : c.border,
             width: isSelected ? 1.5 : 1,
@@ -44,7 +44,7 @@ class AppChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.beVietnamPro(
+          style: GoogleFonts.inter(
             fontSize: effectiveFontSize,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
             color: isSelected ? accentColor : c.foreground,

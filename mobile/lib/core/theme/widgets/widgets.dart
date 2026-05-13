@@ -6,6 +6,7 @@ export 'app_card.dart';
 export 'app_chip.dart';
 export 'app_dialog.dart';
 export 'app_divider.dart';
+export 'app_dropdown_field.dart';
 export 'app_input.dart';
 export 'app_list_item.dart';
 export 'app_nav_bar.dart';

@@ -34,7 +34,7 @@ class AppSlider extends StatelessWidget {
         thumbColor: activeColor ?? c.primary,
         overlayColor: (activeColor ?? c.primary).withValues(alpha: 0.12),
         trackHeight: 4,
-        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
       ),
       child: Slider(
         value: value,

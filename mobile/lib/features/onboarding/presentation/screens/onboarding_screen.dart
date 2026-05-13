@@ -118,13 +118,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // Top bar: dot progress
             Padding(
-              padding: const EdgeInsets.all(24),
-              child: _ProgressIndicator(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 28,
+                vertical: AppSpacing.lg,
+              ),
+              child: _DotProgressIndicator(
                 currentStep: _currentStep,
                 totalSteps: 3,
               ),
             ),
+            // Page content
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -156,8 +161,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ],
               ),
             ),
+            // Bottom navigation
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 28,
+                vertical: AppSpacing.xl,
+              ),
               child: Row(
                 children: [
                   AppButton(
@@ -182,8 +191,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 }
 
-class _ProgressIndicator extends StatelessWidget {
-  const _ProgressIndicator({
+// Dot-style progress indicator
+class _DotProgressIndicator extends StatelessWidget {
+  const _DotProgressIndicator({
     required this.currentStep,
     required this.totalSteps,
   });
@@ -196,16 +206,19 @@ class _ProgressIndicator extends StatelessWidget {
     final c = AppTheme.colors(context);
 
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(totalSteps, (index) {
-        final isActive = index <= currentStep;
-        return Expanded(
-          child: Container(
-            height: 4,
-            margin: EdgeInsets.only(right: index < totalSteps - 1 ? 8 : 0),
-            decoration: BoxDecoration(
-              color: isActive ? c.primary : c.muted,
-              borderRadius: BorderRadius.circular(2),
-            ),
+        final isActive = index == currentStep;
+        final isPast = index < currentStep;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          width: isActive ? 24 : 8,
+          height: 8,
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          decoration: BoxDecoration(
+            color: (isActive || isPast) ? c.primary : c.muted,
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
         );
       }),
@@ -226,32 +239,38 @@ class _LevelStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final c = AppTheme.colors(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: AppSpacing.sm),
           Text(
             "What's your current level?",
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.5,
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             'Select the level that best describes your Vietnamese proficiency.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: c.mutedForeground,
-                ),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: c.mutedForeground,
+              height: 1.5,
+            ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xxl),
           Expanded(
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 1.5,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+                crossAxisSpacing: AppSpacing.md,
+                mainAxisSpacing: AppSpacing.md,
               ),
               itemCount: levels.length,
               itemBuilder: (context, index) {
@@ -297,29 +316,35 @@ class _DialectStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final c = AppTheme.colors(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: AppSpacing.sm),
           Text(
             'Which dialect do you prefer?',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.5,
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             'Choose the Vietnamese dialect you want to focus on.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: c.mutedForeground,
-                ),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: c.mutedForeground,
+              height: 1.5,
+            ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xxl),
           ...dialects.map((dialect) {
             final isSelected = dialect.value == selected;
             return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: _SelectableCard(
                 label: dialect.label,
                 subtitle: dialect.description,
@@ -346,42 +371,54 @@ class _DailyGoalStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final c = AppTheme.colors(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: AppSpacing.sm),
           Text(
             'Set your daily goal',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.5,
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             'How many words do you want to review each day? You can change this later.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: c.mutedForeground,
-                ),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: c.mutedForeground,
+              height: 1.5,
+            ),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: AppSpacing.xxxl),
+          // Big number display
           Center(
-            child: Text(
-              '$goal',
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+            child: Column(
+              children: [
+                Text(
+                  '$goal',
+                  style: theme.textTheme.displayLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
                     color: c.primary,
+                    letterSpacing: -2,
                   ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'words per day',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: c.mutedForeground,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Center(
-            child: Text(
-              'words per day',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ),
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xxl),
           AppSlider(
             value: goal.toDouble(),
             min: 5,
@@ -390,11 +427,22 @@ class _DailyGoalStep extends StatelessWidget {
             label: '$goal',
             onChanged: (value) => onChanged(value.round()),
           ),
+          const SizedBox(height: AppSpacing.xs),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('5', style: Theme.of(context).textTheme.bodySmall),
-              Text('50', style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                '5',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: c.mutedForeground,
+                ),
+              ),
+              Text(
+                '50',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: c.mutedForeground,
+                ),
+              ),
             ],
           ),
         ],
@@ -420,12 +468,13 @@ class _SelectableCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final c = AppTheme.colors(context);
 
     return AppCard(
       onTap: onTap,
       variant: AppCardVariant.outlined,
-      color: isSelected ? c.muted : c.card,
+      color: isSelected ? c.primary.withValues(alpha: 0.06) : c.card,
       borderColor: isSelected ? c.primary : c.border,
       borderRadius: AppRadius.lg,
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -438,25 +487,33 @@ class _SelectableCard extends StatelessWidget {
                     children: [
                       Text(
                         label,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: isSelected ? c.primary : c.foreground,
-                            ),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: isSelected ? c.primary : c.foreground,
+                        ),
                       ),
                       if (subtitle != null) ...[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(
                           subtitle!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: isSelected ? c.primary : c.mutedForeground,
-                              ),
+                          style: AppTheme.vnStyle(
+                            fontSize: AppTypography.bodySmall,
+                            color: isSelected ? c.primary : c.mutedForeground,
+                          ),
                         ),
                       ],
                     ],
                   ),
                 ),
-                if (isSelected)
-                  Icon(Icons.check_circle, color: c.primary),
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 150),
+                  opacity: isSelected ? 1.0 : 0.0,
+                  child: Icon(
+                    Icons.check_circle_rounded,
+                    color: c.primary,
+                    size: 20,
+                  ),
+                ),
               ],
             )
           : Column(
@@ -464,18 +521,19 @@ class _SelectableCard extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? c.primary : c.foreground,
-                      ),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: isSelected ? c.primary : c.foreground,
+                  ),
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     subtitle!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isSelected ? c.primary : c.mutedForeground,
-                        ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: isSelected ? c.primary : c.mutedForeground,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ],

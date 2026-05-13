@@ -15,6 +15,7 @@ class ContinueCard extends ConsumerWidget {
 
     return AppCard(
       variant: AppCardVariant.outlined,
+      borderRadius: AppRadius.lg,
       clipBehavior: Clip.antiAlias,
       padding: EdgeInsets.zero,
       child: continueAsync.when(
@@ -50,16 +51,16 @@ class _ShimmerCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 140,
-              height: 14,
+              width: 80,
+              height: 22,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
+                borderRadius: BorderRadius.circular(AppRadius.full),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
             Container(
-              width: 200,
+              width: 220,
               height: 20,
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -77,11 +78,11 @@ class _ShimmerCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             Container(
-              width: 100,
+              width: 110,
               height: 36,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(AppRadius.xl),
               ),
             ),
           ],
@@ -138,22 +139,33 @@ class _EmptyCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xl,
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'Continue Learning',
-            style: theme.textTheme.titleMedium,
+          Icon(
+            Icons.menu_book_outlined,
+            size: 48,
+            color: c.mutedForeground,
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.md),
           Text(
-            'Start a course to begin learning',
-            style: theme.textTheme.bodyMedium?.copyWith(
+            'Start a course',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Begin learning Vietnamese today',
+            style: theme.textTheme.bodySmall?.copyWith(
               color: c.mutedForeground,
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
           Semantics(
             label: 'Browse available courses',
             button: true,
@@ -189,31 +201,21 @@ class _DataCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                isInProgress ? Icons.play_circle : Icons.check_circle,
-                size: 16,
-                color: isInProgress ? c.primary : c.border,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                isInProgress ? 'In Progress' : 'Completed',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: isInProgress ? c.primary : c.border,
-                ),
-              ),
-            ],
+          AppBadge(
+            label: isInProgress ? 'In Progress' : 'Completed',
+            color: isInProgress ? c.primary : c.success,
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             continueLearning.lessonTitle,
-            style: theme.textTheme.titleMedium,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           Semantics(
             label: isInProgress
-                ? 'Resume lesson: ${continueLearning.lessonTitle}'
+                ? 'Continue lesson: ${continueLearning.lessonTitle}'
                 : 'Review lesson: ${continueLearning.lessonTitle}',
             button: true,
             child: AppButton(
@@ -221,7 +223,7 @@ class _DataCard extends StatelessWidget {
               onPressed: () =>
                   context.push('/lessons/${continueLearning.lessonId}'),
               icon: Icon(isInProgress ? Icons.play_arrow : Icons.replay),
-              label: isInProgress ? 'Resume' : 'Review',
+              label: isInProgress ? 'Continue' : 'Review',
             ),
           ),
         ],

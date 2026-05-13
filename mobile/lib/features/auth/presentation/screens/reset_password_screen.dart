@@ -60,34 +60,58 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final c = AppTheme.colors(context);
 
     return Scaffold(
       appBar: const AppAppBar(title: Text('Reset Password')),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 28,
+              vertical: AppSpacing.xl,
+            ),
           child: _isReset
               ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(
-                      Icons.check_circle_outline,
-                      size: 64,
-                      color: c.success,
+                    const SizedBox(height: AppSpacing.xxxl),
+                    // Success icon
+                    Center(
+                      child: Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: c.success.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
+                        ),
+                        child: Icon(
+                          Icons.check_rounded,
+                          size: 36,
+                          color: c.success,
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xl),
                     Text(
-                      'Password reset successfully!',
-                      style: Theme.of(context).textTheme.titleLarge,
+                      'Password reset!',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.3,
+                      ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'You can now sign in with your new password.',
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Your password has been reset successfully. You can now sign in with your new password.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: c.mutedForeground,
+                        height: 1.5,
+                      ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xxl),
                     AppButton(
                       variant: AppButtonVariant.primary,
                       isFullWidth: true,
@@ -99,15 +123,44 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               : Form(
                   key: _formKey,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Icon
+                      Center(
+                        child: Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: c.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
+                          ),
+                          child: Icon(
+                            Icons.lock_outlined,
+                            size: 26,
+                            color: c.primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
                       Text(
                         'Set new password',
-                        style: Theme.of(context).textTheme.titleLarge,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.3,
+                        ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'Choose a strong password for your account.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: c.mutedForeground,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: AppSpacing.xxl),
+                      // New password
                       AppInput(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
@@ -138,7 +191,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.lg),
+                      // Confirm password
                       AppInput(
                         controller: _confirmPasswordController,
                         obscureText: _obscureConfirmPassword,
@@ -166,7 +220,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: AppSpacing.xxl),
                       AppButton(
                         variant: AppButtonVariant.primary,
                         isFullWidth: true,
@@ -174,15 +228,17 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                         isLoading: _isLoading,
                         label: 'Reset Password',
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                       AppButton(
                         variant: AppButtonVariant.text,
+                        isFullWidth: true,
                         onPressed: () => context.go('/login'),
                         label: 'Back to Sign In',
                       ),
                     ],
                   ),
                 ),
+          ),
         ),
       ),
     );

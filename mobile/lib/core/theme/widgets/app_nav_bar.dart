@@ -43,15 +43,27 @@ class AppNavBar extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          isSelected ? dest.selectedIcon : dest.icon,
-                          color: itemColor,
-                          size: 24,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: isSelected
+                              ? BoxDecoration(
+                                  color: c.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(AppRadius.full),
+                                )
+                              : null,
+                          child: Icon(
+                            isSelected ? dest.selectedIcon : dest.icon,
+                            color: itemColor,
+                            size: 22,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           dest.label,
-                          style: GoogleFonts.beVietnamPro(
+                          style: GoogleFonts.inter(
                             fontSize: AppTypography.caption,
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                             color: itemColor,

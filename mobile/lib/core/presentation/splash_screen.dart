@@ -7,6 +7,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: c.background,
@@ -16,23 +17,30 @@ class SplashScreen extends StatelessWidget {
           children: [
             Icon(
               Icons.language,
-              size: 64,
+              size: 80,
               color: c.primary,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               'LinVNix',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: c.primary,
-                  ),
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: c.foreground,
+              ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Learn Vietnamese',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: c.mutedForeground,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xxl),
             SizedBox(
-              width: 32,
-              height: 32,
+              width: 28,
+              height: 28,
               child: CircularProgressIndicator(
-                strokeWidth: 3,
+                strokeWidth: 2,
                 color: c.primary,
               ),
             ),

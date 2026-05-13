@@ -25,10 +25,7 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
     final c = AppTheme.colors(context);
 
     return Container(
-      decoration: BoxDecoration(
-        color: c.background,
-        border: Border(bottom: BorderSide(color: c.border, width: 1)),
-      ),
+      color: c.background,
       child: AppBar(
         title: title,
         leading: leading,

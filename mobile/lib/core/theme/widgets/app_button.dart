@@ -4,7 +4,7 @@ import '../app_theme.dart';
 
 enum AppButtonVariant { primary, secondary, outline, text, danger }
 
-class AppButton extends StatelessWidget {
+class AppButton extends StatefulWidget {
   const AppButton({
     super.key,
     required this.onPressed,
@@ -31,17 +31,24 @@ class AppButton extends StatelessWidget {
   final double? fontSize;
 
   @override
+  State<AppButton> createState() => _AppButtonState();
+}
+
+class _AppButtonState extends State<AppButton> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
-    final radius = borderRadius ?? AppRadius.md;
-    final effectivePadding = padding ??
+    final radius = widget.borderRadius ?? AppRadius.md;
+    final effectivePadding = widget.padding ??
         const EdgeInsets.symmetric(
           horizontal: AppSpacing.xl,
-          vertical: AppSpacing.md,
+          vertical: 10,
         );
-    final effectiveFontSize = fontSize ?? AppTypography.bodyMedium;
+    final effectiveFontSize = widget.fontSize ?? AppTypography.bodyMedium;
 
-    final (bgColor, fgColor, bdColor, bdWidth) = switch (variant) {
+    final (bgColor, fgColor, bdColor, bdWidth) = switch (widget.variant) {
       AppButtonVariant.primary => (c.primary, c.primaryForeground, Colors.transparent, 0.0),
       AppButtonVariant.secondary => (c.muted, c.foreground, Colors.transparent, 0.0),
       AppButtonVariant.outline => (Colors.transparent, c.foreground, c.border, 1.0),
@@ -51,10 +58,10 @@ class AppButton extends StatelessWidget {
 
     final disabledBg = c.muted;
     final disabledFg = c.mutedForeground;
-    final isDisabled = onPressed == null || isLoading;
+    final isDisabled = widget.onPressed == null || widget.isLoading;
 
     Widget content;
-    if (isLoading) {
+    if (widget.isLoading) {
       content = SizedBox(
         height: 20,
         width: 20,
@@ -63,37 +70,44 @@ class AppButton extends StatelessWidget {
           color: isDisabled ? disabledFg : fgColor,
         ),
       );
-    } else if (icon != null && label != null) {
+    } else if (widget.icon != null && widget.label != null) {
       content = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconTheme(data: IconThemeData(color: isDisabled ? disabledFg : fgColor, size: 20), child: icon!),
+          IconTheme(data: IconThemeData(color: isDisabled ? disabledFg : fgColor, size: 20), child: widget.icon!),
           const SizedBox(width: AppSpacing.sm),
-          Text(label!, style: GoogleFonts.beVietnamPro(fontSize: effectiveFontSize, fontWeight: FontWeight.w600, color: isDisabled ? disabledFg : fgColor)),
+          Text(widget.label!, style: GoogleFonts.inter(fontSize: effectiveFontSize, fontWeight: FontWeight.w600, color: isDisabled ? disabledFg : fgColor)),
         ],
       );
-    } else if (icon != null) {
-      content = IconTheme(data: IconThemeData(color: isDisabled ? disabledFg : fgColor, size: 20), child: icon!);
-    } else if (label != null) {
-      content = Text(label!, style: GoogleFonts.beVietnamPro(fontSize: effectiveFontSize, fontWeight: FontWeight.w600, color: isDisabled ? disabledFg : fgColor));
+    } else if (widget.icon != null) {
+      content = IconTheme(data: IconThemeData(color: isDisabled ? disabledFg : fgColor, size: 20), child: widget.icon!);
+    } else if (widget.label != null) {
+      content = Text(widget.label!, style: GoogleFonts.inter(fontSize: effectiveFontSize, fontWeight: FontWeight.w600, color: isDisabled ? disabledFg : fgColor));
     } else {
-      content = child ?? const SizedBox.shrink();
+      content = widget.child ?? const SizedBox.shrink();
     }
 
     Widget button = GestureDetector(
-      onTap: isDisabled ? null : onPressed,
-      child: Container(
-        padding: effectivePadding,
-        decoration: BoxDecoration(
-          color: isDisabled ? disabledBg : bgColor,
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(color: isDisabled ? Colors.transparent : bdColor, width: bdWidth),
+      onTap: isDisabled ? null : widget.onPressed,
+      onTapDown: isDisabled ? null : (_) => setState(() => _pressed = true),
+      onTapUp: isDisabled ? null : (_) => setState(() => _pressed = false),
+      onTapCancel: isDisabled ? null : () => setState(() => _pressed = false),
+      child: AnimatedOpacity(
+        opacity: _pressed ? 0.72 : 1.0,
+        duration: const Duration(milliseconds: 80),
+        child: Container(
+          padding: effectivePadding,
+          decoration: BoxDecoration(
+            color: isDisabled ? disabledBg : bgColor,
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(color: isDisabled ? Colors.transparent : bdColor, width: bdWidth),
+          ),
+          child: Center(child: content),
         ),
-        child: Center(child: content),
       ),
     );
 
-    if (isFullWidth) {
+    if (widget.isFullWidth) {
       button = SizedBox(width: double.infinity, child: button);
     }
 

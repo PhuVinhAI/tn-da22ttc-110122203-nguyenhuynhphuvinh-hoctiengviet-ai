@@ -60,7 +60,7 @@ class AppListItem extends StatelessWidget {
                       (title != null
                           ? Text(
                               title!,
-                              style: GoogleFonts.beVietnamPro(
+                              style: GoogleFonts.inter(
                                 fontSize: AppTypography.bodyMedium,
                                 fontWeight: FontWeight.w500,
                                 color: c.foreground,
@@ -72,7 +72,7 @@ class AppListItem extends StatelessWidget {
                     subtitleWidget ??
                         Text(
                           subtitle!,
-                          style: GoogleFonts.beVietnamPro(
+                          style: GoogleFonts.inter(
                             fontSize: AppTypography.bodySmall,
                             color: c.mutedForeground,
                           ),

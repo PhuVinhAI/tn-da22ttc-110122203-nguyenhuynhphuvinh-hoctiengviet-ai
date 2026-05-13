@@ -6,7 +6,7 @@ class AppSpinner extends StatelessWidget {
     super.key,
     this.size = 24,
     this.color,
-    this.strokeWidth = 2.5,
+    this.strokeWidth = 2,
   });
 
   final double size;

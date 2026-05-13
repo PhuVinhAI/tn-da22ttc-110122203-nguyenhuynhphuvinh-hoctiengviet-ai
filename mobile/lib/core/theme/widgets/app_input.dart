@@ -70,7 +70,7 @@ class AppInput extends StatelessWidget {
       focusNode: focusNode,
       textInputAction: textInputAction,
       onFieldSubmitted: onFieldSubmitted,
-      style: style ?? GoogleFonts.beVietnamPro(
+      style: style ?? GoogleFonts.inter(
         fontSize: AppTypography.bodyMedium,
         color: c.foreground,
       ),

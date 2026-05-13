@@ -104,6 +104,7 @@ class _EmailVerificationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final c = AppTheme.colors(context);
 
     return Scaffold(
@@ -111,82 +112,148 @@ class _EmailVerificationScreenState
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (_isVerifying) ...[
-                  const AppSpinner(size: 24),
-                  const SizedBox(height: 24),
-                  const Text('Verifying your email...'),
-                ] else if (_isVerified) ...[
-                  Icon(
-                    Icons.check_circle_outline,
-                    size: 64,
-                    color: c.success,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 28,
+              vertical: AppSpacing.xl,
+            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_isVerifying) ...[
+                const SizedBox(height: AppSpacing.xxxl),
+                const Center(child: AppSpinner(size: 32)),
+                const SizedBox(height: AppSpacing.xl),
+                Text(
+                  'Verifying your email...',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: c.mutedForeground,
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Email verified successfully!',
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  AppButton(
-                    variant: AppButtonVariant.primary,
-                    isFullWidth: true,
-                    onPressed: () => context.go('/'),
-                    label: 'Continue to Home',
-                  ),
-                ] else ...[
-                  const Icon(
-                    Icons.mark_email_read_outlined,
-                    size: 64,
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Enter verification code',
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'We sent a 6-digit code to ${widget.email ?? 'your email'}',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: c.mutedForeground,
-                        ),
-                  ),
-                  const SizedBox(height: 32),
-                  _OtpInputRow(
-                    controllers: _codeControllers,
-                    focusNodes: _focusNodes,
-                    onChanged: _onChanged,
-                  ),
-                  if (_errorMessage != null) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      _errorMessage!,
-                      style: TextStyle(color: c.error),
-                      textAlign: TextAlign.center,
+                  textAlign: TextAlign.center,
+                ),
+              ] else if (_isVerified) ...[
+                const SizedBox(height: AppSpacing.xxxl),
+                // Success icon
+                Center(
+                  child: Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: c.success.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
                     ),
-                  ],
-                  const SizedBox(height: 24),
-                  AppButton(
-                    variant: AppButtonVariant.primary,
-                    isFullWidth: true,
-                    onPressed: _code.length == 6 ? _verifyCode : null,
-                    label: 'Verify',
+                    child: Icon(
+                      Icons.check_rounded,
+                      size: 36,
+                      color: c.success,
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  AppButton(
-                    variant: AppButtonVariant.text,
-                    onPressed: _resendCode,
-                    label: 'Resend code',
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Text(
+                  'Email verified!',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.3,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Your email has been verified successfully. You\'re all set!',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: c.mutedForeground,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xxl),
+                AppButton(
+                  variant: AppButtonVariant.primary,
+                  isFullWidth: true,
+                  onPressed: () => context.go('/'),
+                  label: 'Continue to Home',
+                ),
+              ] else ...[
+                // Envelope icon
+                Center(
+                  child: Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: c.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                    ),
+                    child: Icon(
+                      Icons.mark_email_read_outlined,
+                      size: 32,
+                      color: c.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Text(
+                  'Check your email',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.3,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'We sent a 6-digit verification code to\n${widget.email ?? 'your email'}',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: c.mutedForeground,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xxl),
+                // OTP input
+                _OtpInputRow(
+                  controllers: _codeControllers,
+                  focusNodes: _focusNodes,
+                  onChanged: _onChanged,
+                ),
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    _errorMessage!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: c.error,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
+                const SizedBox(height: AppSpacing.xl),
+                AppButton(
+                  variant: AppButtonVariant.primary,
+                  isFullWidth: true,
+                  onPressed: _code.length == 6 ? _verifyCode : null,
+                  label: 'Verify',
+                ),
+                const SizedBox(height: AppSpacing.md),
+                // Resend row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Didn\'t receive a code?',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: c.mutedForeground,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    AppButton(
+                      variant: AppButtonVariant.text,
+                      onPressed: _resendCode,
+                      label: 'Resend',
+                    ),
+                  ],
+                ),
               ],
-            ),
+            ],
+          ),
           ),
         ),
       ),

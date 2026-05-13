@@ -8,7 +8,7 @@ class AppProgress extends StatelessWidget {
     this.isCircular = false,
     this.color,
     this.trackColor,
-    this.height = 4,
+    this.height = 3,
     this.radius = 16,
     this.strokeWidth = 4,
   });
