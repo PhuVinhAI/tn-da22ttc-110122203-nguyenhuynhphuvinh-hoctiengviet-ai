@@ -61,6 +61,7 @@ class ExerciseSetModel {
     this.lessonId,
     required this.title,
     this.moduleId,
+    this.courseId,
     this.description,
     this.userPrompt,
     this.isCustom = false,
@@ -75,6 +76,7 @@ class ExerciseSetModel {
       lessonId: json['lessonId'] as String?,
       title: json['title'] as String,
       moduleId: json['moduleId'] as String?,
+      courseId: json['courseId'] as String?,
       description: json['description'] as String?,
       userPrompt: json['userPrompt'] as String?,
       isCustom: json['isCustom'] as bool? ?? false,
@@ -91,6 +93,7 @@ class ExerciseSetModel {
   final String? lessonId;
   final String title;
   final String? moduleId;
+  final String? courseId;
   final String? description;
   final String? userPrompt;
   final bool isCustom;
@@ -195,6 +198,33 @@ class ModuleExerciseSummary {
   final int completedLessonsCount;
   final int totalLessonsCount;
   final List<SetProgress> moduleSets;
+}
+
+class CourseExerciseSummary {
+  const CourseExerciseSummary({
+    required this.eligible,
+    required this.completedModulesCount,
+    required this.totalModulesCount,
+    required this.courseSets,
+  });
+
+  factory CourseExerciseSummary.fromJson(Map<String, dynamic> json) {
+    return CourseExerciseSummary(
+      eligible: json['eligible'] as bool? ?? false,
+      completedModulesCount:
+          (json['completedModulesCount'] as num?)?.toInt() ?? 0,
+      totalModulesCount: (json['totalModulesCount'] as num?)?.toInt() ?? 0,
+      courseSets: (json['courseSets'] as List<dynamic>?)
+              ?.map((e) => SetProgress.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+    );
+  }
+
+  final bool eligible;
+  final int completedModulesCount;
+  final int totalModulesCount;
+  final List<SetProgress> courseSets;
 }
 
 class SetProgressDetail {

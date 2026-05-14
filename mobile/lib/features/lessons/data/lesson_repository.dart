@@ -202,6 +202,17 @@ class LessonRepository {
     }
   }
 
+  Future<CourseExerciseSummary> fetchCourseExerciseSets(
+      String courseId) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+          '/exercise-sets/course/$courseId');
+      return CourseExerciseSummary.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
   Future<ExerciseSetModel> createCustomSetForModule(
     String moduleId,
     CustomSetConfig config, {
@@ -212,6 +223,29 @@ class LessonRepository {
         '/exercise-sets/custom',
         data: {
           'moduleId': moduleId,
+          'config': config.toJson(),
+          if (config.userPrompt != null) 'userPrompt': config.userPrompt,
+        },
+        cancelToken: cancelToken,
+      );
+      final data = response.data!;
+      final setMap = data['set'] as Map<String, dynamic>;
+      return ExerciseSetModel.fromJson(setMap);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  Future<ExerciseSetModel> createCustomSetForCourse(
+    String courseId,
+    CustomSetConfig config, {
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/exercise-sets/custom',
+        data: {
+          'courseId': courseId,
           'config': config.toJson(),
           if (config.userPrompt != null) 'userPrompt': config.userPrompt,
         },
@@ -269,6 +303,26 @@ class LessonRepository {
     try {
       await _dio.post<Map<String, dynamic>>(
         '/exercise-sets/$setId/reset',
+      );
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  Future<void> completeAllCourseProgress(String courseId) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        '/progress/course/$courseId/complete-all',
+      );
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  Future<void> resetCourseProgress(String courseId) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        '/progress/course/$courseId/reset',
       );
     } on DioException catch (e) {
       throw mapDioException(e);
