@@ -16,7 +16,6 @@ import { ProgressRepository } from '../../progress/application/progress.reposito
 import { ModuleProgressRepository } from '../../progress/application/module-progress.repository';
 import { ModulesRepository } from '../../courses/application/repositories/modules.repository';
 import { CoursesRepository } from '../../courses/application/repositories/courses.repository';
-import { ProgressStatus } from '../../../common/enums';
 
 export interface ResumeInfo {
   canResume: boolean;
@@ -65,6 +64,13 @@ export interface ModuleExerciseSummary {
   completedLessonsCount: number;
   totalLessonsCount: number;
   moduleSets: ExerciseSetProgress[];
+}
+
+export interface CourseExerciseSummary {
+  eligible: boolean;
+  completedModulesCount: number;
+  totalModulesCount: number;
+  courseSets: ExerciseSetProgress[];
 }
 
 @Injectable()
@@ -343,6 +349,68 @@ export class ExerciseSetService {
     const set = await this.exerciseSetsRepository.create(setData);
 
     return { set };
+  }
+
+  async findByCourseId(
+    courseId: string,
+    userId: string,
+  ): Promise<CourseExerciseSummary> {
+    const course = await this.coursesRepository.findById(courseId);
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${courseId} not found`);
+    }
+
+    const moduleIds = (course.modules || []).map((m: any) => m.id);
+    const totalModulesCount = moduleIds.length;
+
+    const completedModuleProgress =
+      await this.moduleProgressRepository.findCompletedByUserInModules(
+        userId,
+        moduleIds,
+      );
+    const completedModulesCount = completedModuleProgress.length;
+    const eligible = completedModulesCount > 0;
+
+    const sets =
+      await this.exerciseSetsRepository.findActiveCustomSetsByCourse(courseId);
+    const courseSets: ExerciseSetProgress[] = [];
+
+    for (const set of sets) {
+      const exercises = await this.exercisesRepository.findBySetId(set.id);
+      const exerciseIds = exercises.map((e) => e.id);
+      const totalExercises = exerciseIds.length;
+
+      let attempted = 0;
+      let correct = 0;
+
+      if (totalExercises > 0 && userId) {
+        const results =
+          await this.userExerciseResultsRepository.findByUserAndExerciseIds(
+            userId,
+            exerciseIds,
+          );
+        attempted = results.length;
+        correct = results.filter((r) => r.isCorrect).length;
+      }
+
+      const percentComplete =
+        totalExercises > 0 ? (attempted / totalExercises) * 100 : 0;
+      const percentCorrect = attempted > 0 ? (correct / attempted) * 100 : 0;
+
+      courseSets.push({
+        setId: set.id,
+        title: set.title,
+        isCustom: set.isCustom,
+        isAIGenerated: set.isAIGenerated,
+        totalExercises,
+        attempted,
+        correct,
+        percentCorrect: Math.round(percentCorrect * 100) / 100,
+        percentComplete: Math.round(percentComplete * 100) / 100,
+      });
+    }
+
+    return { eligible, completedModulesCount, totalModulesCount, courseSets };
   }
 
   async deleteCustom(setId: string): Promise<void> {

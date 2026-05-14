@@ -30,6 +30,7 @@ describe('ExerciseSetService', () => {
       softDelete: jest.fn(),
       findActiveByLessonId: jest.fn(),
       findActiveCustomSetsByModule: jest.fn(),
+      findActiveCustomSetsByCourse: jest.fn(),
     } as any;
 
     exercisesRepo = {
@@ -412,6 +413,53 @@ describe('ExerciseSetService', () => {
         service.createCustom({ moduleId: 'module-1' }, validConfig, 'user-1'),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it('creates custom set with courseId when eligible', async () => {
+      coursesRepo.findById.mockResolvedValue({
+        id: 'course-1',
+        title: 'Course 1',
+        modules: [{ id: 'module-1' }, { id: 'module-2' }],
+      } as any);
+      moduleProgressRepo.findCompletedByUserInModules.mockResolvedValue([
+        { moduleId: 'module-1' },
+      ] as any);
+      exerciseSetsRepo.create.mockResolvedValue({
+        id: 'custom-set-1',
+        courseId: 'course-1',
+        isCustom: true,
+        customConfig: validConfig,
+      } as any);
+
+      const result = await service.createCustom(
+        { courseId: 'course-1' },
+        validConfig,
+        'user-1',
+      );
+
+      expect(coursesRepo.findById).toHaveBeenCalledWith('course-1');
+      expect(
+        moduleProgressRepo.findCompletedByUserInModules,
+      ).toHaveBeenCalledWith('user-1', ['module-1', 'module-2']);
+      expect(exerciseSetsRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          courseId: 'course-1',
+        }),
+      );
+      expect(result.set.id).toBe('custom-set-1');
+    });
+
+    it('throws 400 when no completed modules in course', async () => {
+      coursesRepo.findById.mockResolvedValue({
+        id: 'course-1',
+        title: 'Course 1',
+        modules: [{ id: 'module-1' }],
+      } as any);
+      moduleProgressRepo.findCompletedByUserInModules.mockResolvedValue([]);
+
+      await expect(
+        service.createCustom({ courseId: 'course-1' }, validConfig, 'user-1'),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
   describe('findByModuleId', () => {
@@ -468,6 +516,65 @@ describe('ExerciseSetService', () => {
       modulesRepo.findById.mockResolvedValue(null);
 
       await expect(service.findByModuleId('missing', 'user-1')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('findByCourseId', () => {
+    it('returns eligible=false when no completed modules', async () => {
+      coursesRepo.findById.mockResolvedValue({
+        id: 'course-1',
+        modules: [{ id: 'module-1' }, { id: 'module-2' }],
+      } as any);
+      moduleProgressRepo.findCompletedByUserInModules.mockResolvedValue([]);
+      exerciseSetsRepo.findActiveCustomSetsByCourse.mockResolvedValue([]);
+
+      const result = await service.findByCourseId('course-1', 'user-1');
+
+      expect(result.eligible).toBe(false);
+      expect(result.completedModulesCount).toBe(0);
+      expect(result.totalModulesCount).toBe(2);
+      expect(result.courseSets).toHaveLength(0);
+    });
+
+    it('returns eligible=true and sets when completed modules exist', async () => {
+      coursesRepo.findById.mockResolvedValue({
+        id: 'course-1',
+        modules: [{ id: 'module-1' }, { id: 'module-2' }],
+      } as any);
+      moduleProgressRepo.findCompletedByUserInModules.mockResolvedValue([
+        { moduleId: 'module-1' },
+      ] as any);
+      exerciseSetsRepo.findActiveCustomSetsByCourse.mockResolvedValue([
+        {
+          id: 'set-1',
+          title: 'Course Review',
+          isCustom: true,
+          isAIGenerated: true,
+        },
+      ] as any);
+      exercisesRepo.findBySetId.mockResolvedValue([
+        { id: 'ex-1' },
+        { id: 'ex-2' },
+      ] as any);
+      resultsRepo.findByUserAndExerciseIds.mockResolvedValue([
+        { exerciseId: 'ex-1', isCorrect: true },
+      ] as any);
+
+      const result = await service.findByCourseId('course-1', 'user-1');
+
+      expect(result.eligible).toBe(true);
+      expect(result.completedModulesCount).toBe(1);
+      expect(result.totalModulesCount).toBe(2);
+      expect(result.courseSets).toHaveLength(1);
+      expect(result.courseSets[0].totalExercises).toBe(2);
+    });
+
+    it('throws NotFoundException when course not found', async () => {
+      coursesRepo.findById.mockResolvedValue(null);
+
+      await expect(service.findByCourseId('missing', 'user-1')).rejects.toThrow(
         NotFoundException,
       );
     });

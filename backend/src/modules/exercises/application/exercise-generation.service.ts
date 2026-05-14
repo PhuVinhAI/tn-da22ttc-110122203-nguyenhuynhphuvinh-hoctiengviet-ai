@@ -17,6 +17,7 @@ import type {
 import { ProgressRepository } from '../../progress/application/progress.repository';
 import { ModuleProgressRepository } from '../../progress/application/module-progress.repository';
 import { ModulesRepository } from '../../courses/application/repositories/modules.repository';
+import { CoursesRepository } from '../../courses/application/repositories/courses.repository';
 
 const DEFAULT_GUIDELINES = {
   questionCount: 10,
@@ -251,6 +252,7 @@ export class ExerciseGenerationService {
     private readonly progressRepository: ProgressRepository,
     private readonly moduleProgressRepository: ModuleProgressRepository,
     private readonly modulesRepository: ModulesRepository,
+    private readonly coursesRepository: CoursesRepository,
   ) {}
 
   async generate(
@@ -404,7 +406,44 @@ export class ExerciseGenerationService {
     let lessonContextForExercises: LessonContext | null = null;
     let mergedContextForExercises: MergedContext | null = null;
 
-    if (set.moduleId) {
+    if (set.courseId) {
+      const course = await this.coursesRepository.findById(set.courseId);
+      if (!course) {
+        throw new BadRequestException(`Course ${set.courseId} not found`);
+      }
+
+      const moduleIds = (course.modules || []).map((m: any) => m.id);
+      const completedModuleProgress =
+        await this.moduleProgressRepository.findCompletedByUserInModules(
+          userId,
+          moduleIds,
+        );
+      const completedModuleIds = completedModuleProgress.map(
+        (mp: any) => mp.moduleId,
+      );
+
+      const completedLessonIds = (course.modules || [])
+        .filter((m: any) => completedModuleIds.includes(m.id))
+        .flatMap((m: any) => (m.lessons || []).map((l: any) => l.id));
+
+      mergedContextForExercises =
+        await this.exerciseContextLoader.loadCourseContext(completedLessonIds);
+
+      const lessonContextsStr = this.formatMergedContext(
+        mergedContextForExercises,
+      );
+
+      prompt = this.genaiService.renderPrompt('exercise-generation-course', {
+        questionCount: String(guidelines.questionCount),
+        label,
+        focusAreaDescription: guidelines.description,
+        preferredTypes: guidelines.preferredTypes.join(', '),
+        courseTitle: course.title,
+        moduleCount: String(completedModuleIds.length),
+        lessonContexts: lessonContextsStr,
+        userPromptSection,
+      });
+    } else if (set.moduleId) {
       const module = await this.modulesRepository.findById(set.moduleId);
       if (!module) {
         throw new BadRequestException(`Module ${set.moduleId} not found`);
@@ -456,7 +495,7 @@ export class ExerciseGenerationService {
       });
     } else {
       throw new BadRequestException(
-        'ExerciseSet must have either lessonId or moduleId for generation',
+        'ExerciseSet must have either lessonId, moduleId, or courseId for generation',
       );
     }
 

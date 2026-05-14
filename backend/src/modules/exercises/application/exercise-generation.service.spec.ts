@@ -8,6 +8,7 @@ import { ExerciseContextLoader } from './exercise-context-loader';
 import { ExerciseType } from '../../../common/enums';
 import { ProgressRepository } from '../../progress/application/progress.repository';
 import { ModuleProgressRepository } from '../../progress/application/module-progress.repository';
+import { CoursesRepository } from '../../courses/application/repositories/courses.repository';
 import { ModulesRepository } from '../../courses/application/repositories/modules.repository';
 
 describe('ExerciseGenerationService', () => {
@@ -19,6 +20,7 @@ describe('ExerciseGenerationService', () => {
   let progressRepo: jest.Mocked<ProgressRepository>;
   let moduleProgressRepo: jest.Mocked<ModuleProgressRepository>;
   let modulesRepo: jest.Mocked<ModulesRepository>;
+  let coursesRepo: jest.Mocked<CoursesRepository>;
 
   const validAiResponse = JSON.stringify({
     title: 'Greetings Practice',
@@ -92,6 +94,10 @@ describe('ExerciseGenerationService', () => {
       findById: jest.fn(),
     } as any;
 
+    coursesRepo = {
+      findById: jest.fn(),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExerciseGenerationService,
@@ -102,6 +108,7 @@ describe('ExerciseGenerationService', () => {
         { provide: ProgressRepository, useValue: progressRepo },
         { provide: ModuleProgressRepository, useValue: moduleProgressRepo },
         { provide: ModulesRepository, useValue: modulesRepo },
+        { provide: CoursesRepository, useValue: coursesRepo },
       ],
     }).compile();
 
@@ -493,6 +500,159 @@ describe('ExerciseGenerationService', () => {
       exerciseSetsRepo.findById.mockResolvedValue(moduleSet as any);
       exercisesRepo.findBySetId.mockResolvedValue([]);
       modulesRepo.findById.mockResolvedValue(null);
+      exerciseSetsRepo.update.mockResolvedValue({} as any);
+      exerciseSetsRepo.softDelete.mockResolvedValue(undefined as any);
+
+      await expect(service.generateCustom('set-1', 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
+  describe('course-level generation', () => {
+    const mockMergedContext = {
+      vocabularies: [
+        {
+          word: 'Xin chào',
+          translation: 'Hello',
+          partOfSpeech: 'interjection',
+        },
+      ],
+      grammarRules: [
+        {
+          title: 'Basic greetings',
+          explanation: 'How to greet',
+          examples: [{ vi: 'Xin chào', en: 'Hello' }],
+        },
+      ],
+    };
+
+    it('uses loadCourseContext for course-level set', async () => {
+      const courseSet = {
+        id: 'set-1',
+        courseId: 'course-1',
+        moduleId: null,
+        lessonId: null,
+        isCustom: true,
+        customConfig: {
+          questionCount: 5,
+          exerciseTypes: [ExerciseType.MATCHING],
+          focusArea: 'both',
+        },
+        title: 'Custom Practice',
+        userPrompt: 'Course-wide review',
+      };
+      exerciseSetsRepo.findById.mockResolvedValue(courseSet as any);
+      exercisesRepo.findBySetId.mockResolvedValue([]);
+      exercisesRepo.create.mockResolvedValue({ id: 'ex-1' } as any);
+      exerciseSetsRepo.update.mockResolvedValue({} as any);
+
+      coursesRepo.findById.mockResolvedValue({
+        id: 'course-1',
+        title: 'A1 Course',
+        modules: [
+          {
+            id: 'module-1',
+            lessons: [{ id: 'lesson-1' }, { id: 'lesson-2' }],
+          },
+          {
+            id: 'module-2',
+            lessons: [{ id: 'lesson-3' }],
+          },
+        ],
+      } as any);
+      moduleProgressRepo.findCompletedByUserInModules.mockResolvedValue([
+        { moduleId: 'module-1' },
+      ] as any);
+      contextLoader.loadCourseContext.mockResolvedValue(mockMergedContext);
+
+      genaiService.chatStructured.mockResolvedValue({
+        text: validAiResponse,
+      } as any);
+
+      await service.generateCustom('set-1', 'user-1');
+
+      expect(contextLoader.loadCourseContext).toHaveBeenCalledWith([
+        'lesson-1',
+        'lesson-2',
+      ]);
+      expect(genaiService.renderPrompt).toHaveBeenCalledWith(
+        'exercise-generation-course',
+        expect.objectContaining({
+          courseTitle: 'A1 Course',
+          moduleCount: '1',
+          userPromptSection: '\n### User Request\nCourse-wide review\n',
+        }),
+      );
+    });
+
+    it('only includes lessons from completed modules', async () => {
+      const courseSet = {
+        id: 'set-1',
+        courseId: 'course-1',
+        moduleId: null,
+        lessonId: null,
+        isCustom: true,
+        customConfig: {
+          questionCount: 5,
+          exerciseTypes: [ExerciseType.MATCHING],
+          focusArea: 'both',
+        },
+        title: 'Custom Practice',
+      };
+      exerciseSetsRepo.findById.mockResolvedValue(courseSet as any);
+      exercisesRepo.findBySetId.mockResolvedValue([]);
+      exercisesRepo.create.mockResolvedValue({ id: 'ex-1' } as any);
+      exerciseSetsRepo.update.mockResolvedValue({} as any);
+
+      coursesRepo.findById.mockResolvedValue({
+        id: 'course-1',
+        title: 'A1 Course',
+        modules: [
+          {
+            id: 'module-1',
+            lessons: [{ id: 'lesson-1' }, { id: 'lesson-2' }],
+          },
+          {
+            id: 'module-2',
+            lessons: [{ id: 'lesson-3' }],
+          },
+        ],
+      } as any);
+      moduleProgressRepo.findCompletedByUserInModules.mockResolvedValue([
+        { moduleId: 'module-1' },
+      ] as any);
+      contextLoader.loadCourseContext.mockResolvedValue(mockMergedContext);
+
+      genaiService.chatStructured.mockResolvedValue({
+        text: validAiResponse,
+      } as any);
+
+      await service.generateCustom('set-1', 'user-1');
+
+      expect(contextLoader.loadCourseContext).toHaveBeenCalledWith([
+        'lesson-1',
+        'lesson-2',
+      ]);
+    });
+
+    it('throws when courseId set has no course found', async () => {
+      const courseSet = {
+        id: 'set-1',
+        courseId: 'course-1',
+        moduleId: null,
+        lessonId: null,
+        isCustom: true,
+        customConfig: {
+          questionCount: 5,
+          exerciseTypes: [ExerciseType.MATCHING],
+          focusArea: 'both',
+        },
+        title: 'Custom Practice',
+      };
+      exerciseSetsRepo.findById.mockResolvedValue(courseSet as any);
+      exercisesRepo.findBySetId.mockResolvedValue([]);
+      coursesRepo.findById.mockResolvedValue(null);
       exerciseSetsRepo.update.mockResolvedValue({} as any);
       exerciseSetsRepo.softDelete.mockResolvedValue(undefined as any);
 

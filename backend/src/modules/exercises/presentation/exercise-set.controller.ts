@@ -97,6 +97,34 @@ export class ExerciseSetController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @Get('course/:courseId')
+  @ApiOperation({
+    summary: 'Get custom practice sets for a course',
+    description:
+      'Returns eligibility (≥1 completed module), module counts, and custom practice sets for the course',
+  })
+  @ApiParam({ name: 'courseId', description: 'ID của course' })
+  @ApiResponse({
+    status: 200,
+    description: 'Course custom practice info',
+    schema: {
+      example: {
+        eligible: true,
+        completedModulesCount: 2,
+        totalModulesCount: 5,
+        courseSets: [],
+      },
+    },
+  })
+  async findByCourse(
+    @Param('courseId') courseId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.exerciseSetService.findByCourseId(courseId, user.id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get('lesson/:lessonId')
   @ApiOperation({
     summary: 'Lấy exercise sets theo lesson',
