@@ -105,15 +105,81 @@ final lessonExercisesProvider =
   return repo.getExercisesByLesson(lessonId);
 });
 
-final exerciseSetsProvider =
-    FutureProvider.family<LessonTierSummary, String>((ref, lessonId) async {
-  final repo = ref.watch(lessonRepositoryProvider);
-  return repo.getExerciseSetsByLesson(lessonId);
-});
+class ExerciseSetsNotifier extends CachedRepository<LessonTierSummary>
+    with DataChangeBusSubscriber<LessonTierSummary> {
+  ExerciseSetsNotifier(this.lessonId);
 
-final moduleTierSummariesProvider =
-    FutureProvider.family<Map<String, TierSummary>, String>(
-        (ref, moduleId) async {
-  final repo = ref.watch(lessonRepositoryProvider);
-  return repo.getModuleTierSummaries(moduleId);
-});
+  final String lessonId;
+
+  @override
+  Duration get ttl => const Duration(minutes: 1);
+
+  @override
+  Future<LessonTierSummary> fetchFromApi() async {
+    final repo = ref.read(lessonRepositoryProvider);
+    return repo.getExerciseSetsByLesson(lessonId);
+  }
+
+  @override
+  Future<LessonTierSummary> build() async {
+    watchTags({'exercise-set', 'lesson-$lessonId'});
+    return super.build();
+  }
+
+  Future<void> generateTier(String tier) async {
+    final repo = ref.read(lessonRepositoryProvider);
+    await repo.generateExercisesForTier(lessonId, tier);
+    ref.read(dataChangeBusProvider.notifier).emit({'exercise-set', 'lesson-$lessonId'});
+  }
+
+  Future<void> regenerateSet(String setId) async {
+    final repo = ref.read(lessonRepositoryProvider);
+    await repo.regenerateExercises(setId);
+    ref.read(dataChangeBusProvider.notifier).emit({'exercise-set', 'lesson-$lessonId'});
+  }
+
+  Future<void> deleteSet(String setId) async {
+    final repo = ref.read(lessonRepositoryProvider);
+    await repo.deleteCustomExerciseSet(setId);
+    ref.read(dataChangeBusProvider.notifier).emit({'exercise-set', 'lesson-$lessonId'});
+  }
+
+  Future<void> createCustomSet(CustomSetConfig config) async {
+    final repo = ref.read(lessonRepositoryProvider);
+    await repo.createCustomSet(lessonId, config);
+    ref.read(dataChangeBusProvider.notifier).emit({'exercise-set', 'lesson-$lessonId'});
+  }
+}
+
+final exerciseSetsProvider =
+    AsyncNotifierProvider.family<ExerciseSetsNotifier, LessonTierSummary, String>(
+  (arg) => ExerciseSetsNotifier(arg),
+);
+
+class ModuleTierSummariesNotifier
+    extends CachedRepository<Map<String, TierSummary>>
+    with DataChangeBusSubscriber<Map<String, TierSummary>> {
+  ModuleTierSummariesNotifier(this.moduleId);
+
+  final String moduleId;
+
+  @override
+  Duration get ttl => Duration.zero;
+
+  @override
+  Future<Map<String, TierSummary>> fetchFromApi() async {
+    final repo = ref.read(lessonRepositoryProvider);
+    return repo.getModuleTierSummaries(moduleId);
+  }
+
+  @override
+  Future<Map<String, TierSummary>> build() async {
+    watchTags({'exercise-set'});
+    return super.build();
+  }
+}
+
+final moduleTierSummariesProvider = AsyncNotifierProvider.family<
+    ModuleTierSummariesNotifier, Map<String, TierSummary>, String>(
+  (arg) => ModuleTierSummariesNotifier(arg),
+);

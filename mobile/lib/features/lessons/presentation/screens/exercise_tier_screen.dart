@@ -44,7 +44,7 @@ class _ExerciseTierScreenState extends ConsumerState<ExerciseTierScreen> {
                 AppButton(
                   label: 'Retry',
                   variant: AppButtonVariant.primary,
-                  onPressed: () => ref.invalidate(exerciseSetsProvider(widget.lessonId)),
+                  onPressed: () => ref.read(exerciseSetsProvider(widget.lessonId).notifier).refresh(),
                 ),
               ],
             ),
@@ -125,14 +125,13 @@ class _ExerciseTierScreenState extends ConsumerState<ExerciseTierScreen> {
     });
 
     try {
-      final repo = ref.read(lessonRepositoryProvider);
-      await repo.generateExercisesForTier(widget.lessonId, tier.value);
+      final notifier = ref.read(exerciseSetsProvider(widget.lessonId).notifier);
+      await notifier.generateTier(tier.value);
       if (mounted) {
         setState(() {
           _generatingTier = null;
           _generationError = null;
         });
-        ref.invalidate(exerciseSetsProvider(widget.lessonId));
       }
     } catch (e) {
       if (mounted) {
@@ -151,13 +150,12 @@ class _ExerciseTierScreenState extends ConsumerState<ExerciseTierScreen> {
     });
 
     try {
-      final repo = ref.read(lessonRepositoryProvider);
-      await repo.regenerateExercises(setId);
+      final notifier = ref.read(exerciseSetsProvider(widget.lessonId).notifier);
+      await notifier.regenerateSet(setId);
       if (mounted) {
         setState(() {
           _busyCustomSetId = null;
         });
-        ref.invalidate(exerciseSetsProvider(widget.lessonId));
       }
     } catch (e) {
       if (mounted) {
@@ -176,13 +174,12 @@ class _ExerciseTierScreenState extends ConsumerState<ExerciseTierScreen> {
     });
 
     try {
-      final repo = ref.read(lessonRepositoryProvider);
-      await repo.deleteCustomExerciseSet(setId);
+      final notifier = ref.read(exerciseSetsProvider(widget.lessonId).notifier);
+      await notifier.deleteSet(setId);
       if (mounted) {
         setState(() {
           _busyCustomSetId = null;
         });
-        ref.invalidate(exerciseSetsProvider(widget.lessonId));
       }
     } catch (e) {
       if (mounted) {
@@ -232,11 +229,10 @@ class _ExerciseTierScreenState extends ConsumerState<ExerciseTierScreen> {
             _customError = null;
           });
           try {
-            final repo = ref.read(lessonRepositoryProvider);
-            await repo.createCustomSet(widget.lessonId, config);
+            final notifier = ref.read(exerciseSetsProvider(widget.lessonId).notifier);
+            await notifier.createCustomSet(config);
             if (mounted) {
               setState(() => _isCreatingCustom = false);
-              ref.invalidate(exerciseSetsProvider(widget.lessonId));
             }
           } catch (e) {
             if (mounted) {
