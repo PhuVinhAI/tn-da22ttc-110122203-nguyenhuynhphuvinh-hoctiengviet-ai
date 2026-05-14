@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
-import { DataSource } from 'typeorm';
 import { ExerciseGenerationService } from './exercise-generation.service';
 import { GenaiService } from '../../../infrastructure/genai/genai.service';
 import { ExerciseSetsRepository } from './repositories/exercise-sets.repository';
 import { ExercisesRepository } from './repositories/exercises.repository';
+import { ExerciseContextLoader } from './exercise-context-loader';
 import { ExerciseType } from '../../../common/enums';
 
 describe('ExerciseGenerationService', () => {
@@ -12,7 +12,7 @@ describe('ExerciseGenerationService', () => {
   let genaiService: jest.Mocked<GenaiService>;
   let exerciseSetsRepo: jest.Mocked<ExerciseSetsRepository>;
   let exercisesRepo: jest.Mocked<ExercisesRepository>;
-  let dataSource: { getRepository: jest.Mock };
+  let contextLoader: jest.Mocked<ExerciseContextLoader>;
 
   const validAiResponse = JSON.stringify({
     exercises: [
@@ -38,6 +38,14 @@ describe('ExerciseGenerationService', () => {
     ],
   });
 
+  const mockLessonContext = {
+    lessonTitle: 'Greetings',
+    contents: [],
+    vocabularies: [],
+    grammarRules: [],
+    existingExercises: [],
+  };
+
   beforeEach(async () => {
     genaiService = {
       chatStructured: jest.fn(),
@@ -57,9 +65,11 @@ describe('ExerciseGenerationService', () => {
       softDeleteBySetId: jest.fn(),
     } as any;
 
-    dataSource = {
-      getRepository: jest.fn(),
-    };
+    contextLoader = {
+      loadLessonContext: jest.fn(),
+      loadModuleContext: jest.fn(),
+      loadCourseContext: jest.fn(),
+    } as any;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -67,7 +77,7 @@ describe('ExerciseGenerationService', () => {
         { provide: GenaiService, useValue: genaiService },
         { provide: ExerciseSetsRepository, useValue: exerciseSetsRepo },
         { provide: ExercisesRepository, useValue: exercisesRepo },
-        { provide: DataSource, useValue: dataSource },
+        { provide: ExerciseContextLoader, useValue: contextLoader },
       ],
     }).compile();
 
@@ -91,18 +101,7 @@ describe('ExerciseGenerationService', () => {
       exercisesRepo.findBySetId.mockResolvedValue([]);
       exercisesRepo.create.mockResolvedValue({ id: 'ex-1' } as any);
       exerciseSetsRepo.update.mockResolvedValue({} as any);
-
-      const lessonRepo = {
-        findOne: jest.fn().mockResolvedValue({
-          id: 'lesson-1',
-          title: 'Greetings',
-          contents: [],
-          vocabularies: [],
-          grammarRules: [],
-        }),
-      };
-      dataSource.getRepository.mockReturnValue(lessonRepo);
-      exerciseSetsRepo.findActiveByLessonId.mockResolvedValue([]);
+      contextLoader.loadLessonContext.mockResolvedValue(mockLessonContext);
 
       genaiService.chatStructured.mockResolvedValue({
         text: validAiResponse,
@@ -158,18 +157,7 @@ describe('ExerciseGenerationService', () => {
       exercisesRepo.findBySetId.mockResolvedValue([]);
       exercisesRepo.create.mockResolvedValue({ id: 'ex-1' } as any);
       exerciseSetsRepo.update.mockResolvedValue({} as any);
-
-      const lessonRepo = {
-        findOne: jest.fn().mockResolvedValue({
-          id: 'lesson-1',
-          title: 'Greetings',
-          contents: [],
-          vocabularies: [],
-          grammarRules: [],
-        }),
-      };
-      dataSource.getRepository.mockReturnValue(lessonRepo);
-      exerciseSetsRepo.findActiveByLessonId.mockResolvedValue([]);
+      contextLoader.loadLessonContext.mockResolvedValue(mockLessonContext);
 
       genaiService.chatStructured.mockResolvedValue({
         text: validAiResponse,
@@ -194,10 +182,12 @@ describe('ExerciseGenerationService', () => {
   });
 
   describe('regenerate', () => {
-    it('soft-deletes existing and generates new exercises', async () => {
+    it('creates regenerated set with new fields', async () => {
       const originalSet = {
         id: 'set-1',
         lessonId: 'lesson-1',
+        moduleId: null,
+        courseId: null,
         isCustom: true,
         customConfig: {
           questionCount: 5,
@@ -205,134 +195,27 @@ describe('ExerciseGenerationService', () => {
           focusArea: 'vocabulary',
         },
         title: 'Custom Practice',
+        description: 'A practice set',
+        userPrompt: 'Focus on greetings',
         orderIndex: 1,
       };
       const newSet = { ...originalSet, id: 'set-2' };
 
       exerciseSetsRepo.findById.mockResolvedValue(originalSet as any);
-      exerciseSetsRepo.softDelete.mockResolvedValue(undefined);
-      exercisesRepo.softDeleteBySetId.mockResolvedValue(undefined);
       exerciseSetsRepo.create.mockResolvedValue(newSet as any);
-      exercisesRepo.create.mockResolvedValue({ id: 'ex-1' } as any);
-      exerciseSetsRepo.update.mockResolvedValue({} as any);
-
-      const lessonRepo = {
-        findOne: jest.fn().mockResolvedValue({
-          id: 'lesson-1',
-          title: 'Greetings',
-          contents: [],
-          vocabularies: [],
-          grammarRules: [],
-        }),
-      };
-      dataSource.getRepository.mockReturnValue(lessonRepo);
-      exerciseSetsRepo.findActiveByLessonId.mockResolvedValue([]);
-
-      genaiService.chatStructured.mockResolvedValue({
-        text: validAiResponse,
-      } as any);
 
       const result = await service.createRegeneratedSet('set-1');
 
       expect(result.lessonId).toBe('lesson-1');
-      expect(exerciseSetsRepo.create).toHaveBeenCalled();
-    });
-  });
-
-  describe('loadLessonContext', () => {
-    it('loads lesson with related data', async () => {
-      const lesson = {
-        id: 'lesson-1',
-        title: 'Greetings',
-        contents: [
-          {
-            contentType: 'text',
-            vietnameseText: 'Xin chào',
-            translation: 'Hello',
-            phonetic: 'sin chow',
-          },
-        ],
-        vocabularies: [
-          {
-            word: 'Xin chào',
-            translation: 'Hello',
-            phonetic: 'sin chow',
-            partOfSpeech: 'noun',
-            exampleSentence: 'Xin chào bạn!',
-            exampleTranslation: 'Hello friend!',
-          },
-        ],
-        grammarRules: [
-          {
-            title: 'Basic greeting',
-            explanation: 'Use "Xin chào" for hello',
-            structure: 'Xin chào + pronoun',
-            examples: [{ vi: 'Xin chào anh', en: 'Hello brother' }],
-          },
-        ],
-      };
-
-      const lessonRepo = {
-        findOne: jest.fn().mockResolvedValue(lesson),
-      };
-      dataSource.getRepository.mockReturnValue(lessonRepo);
-      exerciseSetsRepo.findActiveByLessonId.mockResolvedValue([]);
-
-      const context = await service.loadLessonContext('lesson-1');
-
-      expect(context.lessonTitle).toBe('Greetings');
-      expect(context.contents).toHaveLength(1);
-      expect(context.vocabularies).toHaveLength(1);
-      expect(context.grammarRules).toHaveLength(1);
-      expect(context.existingExercises).toEqual([]);
-    });
-
-    it('collects existing exercises from all sets', async () => {
-      const lesson = {
-        id: 'lesson-1',
-        title: 'Greetings',
-        contents: [],
-        vocabularies: [],
-        grammarRules: [],
-      };
-
-      const lessonRepo = {
-        findOne: jest.fn().mockResolvedValue(lesson),
-      };
-      dataSource.getRepository.mockReturnValue(lessonRepo);
-
-      exerciseSetsRepo.findActiveByLessonId.mockResolvedValue([
-        { id: 'set-1' },
-        { id: 'set-2' },
-      ] as any);
-
-      exercisesRepo.findBySetId.mockImplementation(async (setId: string) => {
-        if (setId === 'set-1') {
-          return [
-            {
-              exerciseType: 'multiple_choice',
-              question: 'Q1',
-              correctAnswer: { selectedChoice: 'A' },
-            },
-          ] as any;
-        }
-        return [];
-      });
-
-      const context = await service.loadLessonContext('lesson-1');
-
-      expect(context.existingExercises).toHaveLength(1);
-      expect(context.existingExercises[0].question).toBe('Q1');
-    });
-
-    it('throws when lesson not found', async () => {
-      const lessonRepo = {
-        findOne: jest.fn().mockResolvedValue(null),
-      };
-      dataSource.getRepository.mockReturnValue(lessonRepo);
-
-      await expect(service.loadLessonContext('missing')).rejects.toThrow(
-        BadRequestException,
+      expect(exerciseSetsRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lessonId: 'lesson-1',
+          moduleId: null,
+          courseId: null,
+          description: 'A practice set',
+          userPrompt: 'Focus on greetings',
+          replacesSetId: 'set-1',
+        }),
       );
     });
   });

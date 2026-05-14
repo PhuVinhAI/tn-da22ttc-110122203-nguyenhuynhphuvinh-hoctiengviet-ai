@@ -1,5 +1,4 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { DataSource } from 'typeorm';
 import { z } from 'zod';
 import {
   GenaiService,
@@ -7,41 +6,14 @@ import {
 } from '../../../infrastructure/genai/genai.service';
 import { ExerciseSetsRepository } from './repositories/exercise-sets.repository';
 import { ExercisesRepository } from './repositories/exercises.repository';
+import { ExerciseContextLoader } from './exercise-context-loader';
+import type { LessonContext } from './exercise-context-loader';
 import { ExerciseType } from '../../../common/enums';
 import { Exercise } from '../domain/exercise.entity';
 import type {
   ExerciseOptions,
   ExerciseAnswer,
 } from '../domain/exercise-options.types';
-
-interface LessonContext {
-  lessonTitle: string;
-  contents: Array<{
-    contentType: string;
-    vietnameseText: string;
-    translation?: string;
-    phonetic?: string;
-  }>;
-  vocabularies: Array<{
-    word: string;
-    translation: string;
-    phonetic?: string;
-    partOfSpeech: string;
-    exampleSentence?: string;
-    exampleTranslation?: string;
-  }>;
-  grammarRules: Array<{
-    title: string;
-    explanation: string;
-    structure?: string;
-    examples: Array<{ vi: string; en: string }>;
-  }>;
-  existingExercises: Array<{
-    exerciseType: string;
-    question: string;
-    correctAnswer: any;
-  }>;
-}
 
 const DEFAULT_GUIDELINES = {
   questionCount: 10,
@@ -258,7 +230,7 @@ export class ExerciseGenerationService {
     private readonly genaiService: GenaiService,
     private readonly exerciseSetsRepository: ExerciseSetsRepository,
     private readonly exercisesRepository: ExercisesRepository,
-    private readonly dataSource: DataSource,
+    private readonly exerciseContextLoader: ExerciseContextLoader,
   ) {}
 
   async generate(setId: string, userId: string): Promise<Exercise[]> {
@@ -304,10 +276,14 @@ export class ExerciseGenerationService {
       import('../domain/exercise-set.entity').ExerciseSet
     > = {
       lessonId: set.lessonId,
+      moduleId: set.moduleId,
+      courseId: set.courseId,
       isCustom: set.isCustom,
       customConfig: set.customConfig,
       isAIGenerated: false,
       title: set.isCustom ? 'Custom Practice' : set.title,
+      description: set.description,
+      userPrompt: set.userPrompt,
       orderIndex: set.orderIndex,
       generationStatus: 'generating' as any,
       replacesSetId: setId,
@@ -364,7 +340,9 @@ export class ExerciseGenerationService {
     set: import('../domain/exercise-set.entity').ExerciseSet,
     userId: string,
   ): Promise<Exercise[]> {
-    const context = await this.loadLessonContext(set.lessonId);
+    const context = await this.exerciseContextLoader.loadLessonContext(
+      set.lessonId!,
+    );
 
     let guidelines: {
       questionCount: number;
@@ -410,63 +388,6 @@ export class ExerciseGenerationService {
     );
 
     return exercises;
-  }
-
-  async loadLessonContext(lessonId: string): Promise<LessonContext> {
-    const lessonRepo = this.dataSource.getRepository('Lesson');
-    const lesson = await lessonRepo.findOne({
-      where: { id: lessonId },
-      relations: ['contents', 'vocabularies', 'grammarRules'],
-    });
-
-    if (!lesson) {
-      throw new BadRequestException(`Lesson ${lessonId} not found`);
-    }
-
-    const existingSets =
-      await this.exerciseSetsRepository.findActiveByLessonId(lessonId);
-
-    const existingExercises: Array<{
-      exerciseType: string;
-      question: string;
-      correctAnswer: any;
-    }> = [];
-
-    for (const s of existingSets) {
-      const exercises = await this.exercisesRepository.findBySetId(s.id);
-      existingExercises.push(
-        ...exercises.map((e) => ({
-          exerciseType: e.exerciseType,
-          question: e.question,
-          correctAnswer: e.correctAnswer,
-        })),
-      );
-    }
-
-    return {
-      lessonTitle: lesson.title,
-      contents: (lesson.contents || []).map((c: any) => ({
-        contentType: c.contentType,
-        vietnameseText: c.vietnameseText,
-        translation: c.translation,
-        phonetic: c.phonetic,
-      })),
-      vocabularies: (lesson.vocabularies || []).map((v: any) => ({
-        word: v.word,
-        translation: v.translation,
-        phonetic: v.phonetic,
-        partOfSpeech: v.partOfSpeech,
-        exampleSentence: v.exampleSentence,
-        exampleTranslation: v.exampleTranslation,
-      })),
-      grammarRules: (lesson.grammarRules || []).map((g: any) => ({
-        title: g.title,
-        explanation: g.explanation,
-        structure: g.structure,
-        examples: g.examples,
-      })),
-      existingExercises,
-    };
   }
 
   buildPrompt(

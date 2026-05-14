@@ -6,6 +6,7 @@ import { UserExerciseResult } from './domain/user-exercise-result.entity';
 import { ExercisesService } from './application/exercises.service';
 import { ExerciseSetService } from './application/exercise-set.service';
 import { ExerciseGenerationService } from './application/exercise-generation.service';
+import { ExerciseContextLoader } from './application/exercise-context-loader';
 
 import { AnswerAssessment } from './application/answer-assessment.service';
 import { AnswerNormalizer } from './application/answer-normalizer';
@@ -24,6 +25,7 @@ import { ExerciseSetController } from './presentation/exercise-set.controller';
     ExercisesService,
     ExerciseSetService,
     ExerciseGenerationService,
+    ExerciseContextLoader,
     AnswerAssessment,
     AnswerNormalizer,
     ExercisesRepository,
@@ -34,6 +36,7 @@ import { ExerciseSetController } from './presentation/exercise-set.controller';
     ExercisesService,
     ExerciseSetService,
     ExerciseGenerationService,
+    ExerciseContextLoader,
     ExercisesRepository,
     UserExerciseResultsRepository,
   ],

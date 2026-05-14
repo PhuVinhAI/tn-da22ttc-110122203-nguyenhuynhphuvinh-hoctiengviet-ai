@@ -17,12 +17,32 @@ export interface CustomSetConfig {
 
 @Entity('exercise_sets')
 export class ExerciseSet extends BaseEntity {
-  @Column({ name: 'lesson_id' })
-  lessonId: string;
+  @Column({ name: 'lesson_id', nullable: true })
+  lessonId?: string;
 
   @ManyToOne('Lesson', 'exerciseSets', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'lesson_id' })
   lesson: any;
+
+  @Column({ name: 'module_id', nullable: true })
+  moduleId?: string;
+
+  @ManyToOne('Module', 'lessons', { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'module_id' })
+  module: any;
+
+  @Column({ name: 'course_id', nullable: true })
+  courseId?: string;
+
+  @ManyToOne('Course', 'modules', { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'course_id' })
+  course: any;
+
+  @Column({ type: 'text', nullable: true })
+  description?: string;
+
+  @Column({ name: 'user_prompt', type: 'varchar', length: 500, nullable: true })
+  userPrompt?: string;
 
   @Column({ name: 'is_custom', default: false })
   isCustom: boolean;

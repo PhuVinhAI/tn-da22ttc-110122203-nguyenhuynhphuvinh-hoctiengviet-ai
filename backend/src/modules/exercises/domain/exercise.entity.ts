@@ -33,8 +33,8 @@ export class Exercise extends BaseEntity {
   @Column({ name: 'difficulty_level', default: 1 })
   difficultyLevel: number;
 
-  @Column({ name: 'lesson_id' })
-  lessonId: string;
+  @Column({ name: 'lesson_id', nullable: true })
+  lessonId?: string;
 
   @ManyToOne('Lesson', 'exercises', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'lesson_id' })
