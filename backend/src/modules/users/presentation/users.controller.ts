@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -7,17 +7,23 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { UsersService } from '../application/users.service';
+import { ProgressService } from '../../progress/application/progress.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators';
 import { User } from '../domain/user.entity';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { OnboardingDto } from '../dto/onboarding.dto';
+import { isLevelHigher } from '../../progress/application/progress-transaction.service';
 
 @ApiTags('Users')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly progressService: ProgressService,
+  ) {}
 
   @Get('me')
   @ApiOperation({
@@ -77,6 +83,51 @@ export class UsersController {
     @CurrentUser() user: User,
     @Body() updateData: UpdateUserDto,
   ) {
-    return this.usersService.update(user.id, updateData);
+    const previousLevel = user.currentLevel;
+    const updatedUser = await this.usersService.update(user.id, updateData);
+
+    if (
+      updateData.currentLevel &&
+      isLevelHigher(updateData.currentLevel, previousLevel)
+    ) {
+      await this.progressService.completeAllLowerCourses(
+        updatedUser.id,
+        updatedUser.currentLevel,
+      );
+    }
+
+    return updatedUser;
+  }
+
+  @Post('onboarding')
+  @ApiOperation({
+    summary: 'Hoàn thành onboarding',
+    description:
+      'Cập nhật level, dialect, và tuỳ chọn đánh dấu hoàn thành các course thấp hơn',
+  })
+  @ApiBody({ type: OnboardingDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Onboarding thành công',
+  })
+  @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  async onboarding(
+    @CurrentUser() user: User,
+    @Body() onboardingData: OnboardingDto,
+  ) {
+    const updatedUser = await this.usersService.update(user.id, {
+      currentLevel: onboardingData.currentLevel,
+      preferredDialect: onboardingData.preferredDialect,
+      onboardingCompleted: true,
+    });
+
+    if (onboardingData.completeLowerCourses) {
+      await this.progressService.completeAllLowerCourses(
+        updatedUser.id,
+        updatedUser.currentLevel,
+      );
+    }
+
+    return updatedUser;
   }
 }

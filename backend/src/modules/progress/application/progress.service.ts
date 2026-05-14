@@ -8,10 +8,14 @@ import { ModuleProgressRepository } from './module-progress.repository';
 import { CourseProgressRepository } from './course-progress.repository';
 import { ModulesRepository } from '../../courses/application/repositories/modules.repository';
 import { CoursesRepository } from '../../courses/application/repositories/courses.repository';
+import {
+  ProgressTransactionService,
+  isLevelHigher,
+} from './progress-transaction.service';
 import { UserProgress } from '../domain/user-progress.entity';
 import { ModuleProgress } from '../domain/module-progress.entity';
 import { CourseProgress } from '../domain/course-progress.entity';
-import { ProgressStatus } from '../../../common/enums';
+import { ProgressStatus, UserLevel } from '../../../common/enums';
 
 @Injectable()
 export class ProgressService {
@@ -21,6 +25,7 @@ export class ProgressService {
     private readonly courseProgressRepository: CourseProgressRepository,
     private readonly modulesRepository: ModulesRepository,
     private readonly coursesRepository: CoursesRepository,
+    private readonly progressTransactionService: ProgressTransactionService,
   ) {}
 
   async startLesson(userId: string, lessonId: string): Promise<UserProgress> {
@@ -289,5 +294,39 @@ export class ProgressService {
       incompleteSetAttempted: 0,
       incompleteSetTotal: 0,
     };
+  }
+
+  async completeAllCourseProgress(
+    userId: string,
+    courseId: string,
+    userLevel: UserLevel,
+  ): Promise<void> {
+    await this.progressTransactionService.completeAllCourseProgress(
+      userId,
+      courseId,
+      userLevel,
+    );
+  }
+
+  async resetCourseProgress(userId: string, courseId: string): Promise<void> {
+    await this.progressTransactionService.resetCourseProgress(userId, courseId);
+  }
+
+  async completeAllLowerCourses(
+    userId: string,
+    userLevel: UserLevel,
+  ): Promise<void> {
+    const courses = await this.coursesRepository.findAll();
+    const lowerCourses = courses.filter((c) =>
+      isLevelHigher(userLevel, c.level),
+    );
+
+    for (const course of lowerCourses) {
+      await this.progressTransactionService.completeAllCourseProgress(
+        userId,
+        course.id,
+        userLevel,
+      );
+    }
   }
 }

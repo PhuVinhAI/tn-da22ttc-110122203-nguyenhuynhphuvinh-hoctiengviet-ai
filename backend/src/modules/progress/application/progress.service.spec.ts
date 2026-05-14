@@ -4,7 +4,12 @@ import { ModuleProgressRepository } from './module-progress.repository';
 import { CourseProgressRepository } from './course-progress.repository';
 import { ModulesRepository } from '../../courses/application/repositories/modules.repository';
 import { CoursesRepository } from '../../courses/application/repositories/courses.repository';
-import { ProgressStatus } from '../../../common/enums';
+import { ProgressTransactionService } from './progress-transaction.service';
+import { ProgressStatus, UserLevel } from '../../../common/enums';
+import {
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 
 describe('ProgressService', () => {
   let service: ProgressService;
@@ -13,6 +18,7 @@ describe('ProgressService', () => {
   let courseProgressRepo: jest.Mocked<CourseProgressRepository>;
   let modulesRepo: jest.Mocked<ModulesRepository>;
   let coursesRepo: jest.Mocked<CoursesRepository>;
+  let transactionService: jest.Mocked<ProgressTransactionService>;
 
   beforeEach(() => {
     progressRepo = {
@@ -41,6 +47,12 @@ describe('ProgressService', () => {
 
     coursesRepo = {
       findById: jest.fn(),
+      findAll: jest.fn(),
+    } as any;
+
+    transactionService = {
+      completeAllCourseProgress: jest.fn(),
+      resetCourseProgress: jest.fn(),
     } as any;
 
     service = new ProgressService(
@@ -49,6 +61,7 @@ describe('ProgressService', () => {
       courseProgressRepo,
       modulesRepo,
       coursesRepo,
+      transactionService,
     );
   });
 
@@ -551,6 +564,141 @@ describe('ProgressService', () => {
       await expect(
         service.getCourseProgress('user-1', 'course-1'),
       ).rejects.toThrow('Course progress not found');
+    });
+  });
+
+  describe('completeAllCourseProgress', () => {
+    it('delegates to transaction service', async () => {
+      transactionService.completeAllCourseProgress.mockResolvedValue(undefined);
+
+      await service.completeAllCourseProgress(
+        'user-1',
+        'course-1',
+        UserLevel.B1,
+      );
+
+      expect(transactionService.completeAllCourseProgress).toHaveBeenCalledWith(
+        'user-1',
+        'course-1',
+        UserLevel.B1,
+      );
+    });
+
+    it('propagates NotFoundException from transaction service', async () => {
+      transactionService.completeAllCourseProgress.mockRejectedValue(
+        new NotFoundException('Course not found'),
+      );
+
+      await expect(
+        service.completeAllCourseProgress('user-1', 'course-x', UserLevel.B1),
+      ).rejects.toThrow('Course not found');
+    });
+
+    it('propagates ForbiddenException when user level too low', async () => {
+      transactionService.completeAllCourseProgress.mockRejectedValue(
+        new ForbiddenException('User level must be higher than course level'),
+      );
+
+      await expect(
+        service.completeAllCourseProgress('user-1', 'course-1', UserLevel.A1),
+      ).rejects.toThrow('User level must be higher than course level');
+    });
+  });
+
+  describe('resetCourseProgress', () => {
+    it('delegates to transaction service', async () => {
+      transactionService.resetCourseProgress.mockResolvedValue(undefined);
+
+      await service.resetCourseProgress('user-1', 'course-1');
+
+      expect(transactionService.resetCourseProgress).toHaveBeenCalledWith(
+        'user-1',
+        'course-1',
+      );
+    });
+
+    it('propagates NotFoundException when course not found', async () => {
+      transactionService.resetCourseProgress.mockRejectedValue(
+        new NotFoundException('Course not found'),
+      );
+
+      await expect(
+        service.resetCourseProgress('user-1', 'course-x'),
+      ).rejects.toThrow('Course not found');
+    });
+
+    it('can be called multiple times idempotently', async () => {
+      transactionService.resetCourseProgress.mockResolvedValue(undefined);
+
+      await service.resetCourseProgress('user-1', 'course-1');
+      await service.resetCourseProgress('user-1', 'course-1');
+
+      expect(transactionService.resetCourseProgress).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('completeAllLowerCourses', () => {
+    it('completes all courses below user level', async () => {
+      coursesRepo.findAll.mockResolvedValue([
+        { id: 'c-a1', level: UserLevel.A1 },
+        { id: 'c-a2', level: UserLevel.A2 },
+        { id: 'c-b1', level: UserLevel.B1 },
+      ] as any);
+      transactionService.completeAllCourseProgress.mockResolvedValue(undefined);
+
+      await service.completeAllLowerCourses('user-1', UserLevel.B1);
+
+      expect(
+        transactionService.completeAllCourseProgress,
+      ).toHaveBeenCalledTimes(2);
+      expect(transactionService.completeAllCourseProgress).toHaveBeenCalledWith(
+        'user-1',
+        'c-a1',
+        UserLevel.B1,
+      );
+      expect(transactionService.completeAllCourseProgress).toHaveBeenCalledWith(
+        'user-1',
+        'c-a2',
+        UserLevel.B1,
+      );
+    });
+
+    it('skips when no lower courses exist', async () => {
+      coursesRepo.findAll.mockResolvedValue([
+        { id: 'c-b1', level: UserLevel.B1 },
+        { id: 'c-b2', level: UserLevel.B2 },
+      ] as any);
+
+      await service.completeAllLowerCourses('user-1', UserLevel.A1);
+
+      expect(
+        transactionService.completeAllCourseProgress,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when there are no courses at all', async () => {
+      coursesRepo.findAll.mockResolvedValue([]);
+
+      await service.completeAllLowerCourses('user-1', UserLevel.B2);
+
+      expect(
+        transactionService.completeAllCourseProgress,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('completes only courses strictly below user level', async () => {
+      coursesRepo.findAll.mockResolvedValue([
+        { id: 'c-a1', level: UserLevel.A1 },
+        { id: 'c-a2', level: UserLevel.A2 },
+        { id: 'c-b1', level: UserLevel.B1 },
+      ] as any);
+      transactionService.completeAllCourseProgress.mockResolvedValue(undefined);
+
+      await service.completeAllLowerCourses('user-1', UserLevel.B1);
+
+      expect(
+        transactionService.completeAllCourseProgress,
+      ).toHaveBeenCalledTimes(2);
     });
   });
 });

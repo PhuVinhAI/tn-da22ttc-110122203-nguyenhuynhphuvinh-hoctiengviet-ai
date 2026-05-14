@@ -1,10 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource, EntityManager, QueryRunner } from 'typeorm';
-import { ProgressTransactionService } from './progress-transaction.service';
+import {
+  ProgressTransactionService,
+  isLevelHigher,
+} from './progress-transaction.service';
 import { ProgressRepository } from './progress.repository';
 import { UserExerciseResultsRepository } from '../../exercises/application/repositories/user-exercise-results.repository';
 import { UserProgress } from '../domain/user-progress.entity';
-import { ProgressStatus } from '../../../common/enums';
+import { ModuleProgress } from '../domain/module-progress.entity';
+import { CourseProgress } from '../domain/course-progress.entity';
+import { ExerciseSet } from '../../exercises/domain/exercise-set.entity';
+import { ProgressStatus, UserLevel } from '../../../common/enums';
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
 
 describe('ProgressTransactionService', () => {
   let service: ProgressTransactionService;
@@ -30,12 +37,16 @@ describe('ProgressTransactionService', () => {
   beforeEach(async () => {
     mockManager = {
       findOne: jest.fn().mockResolvedValue(existingProgress),
+      find: jest.fn().mockResolvedValue([]),
       save: jest
         .fn()
         .mockImplementation((_entity, data) =>
           Promise.resolve({ ...existingProgress, ...data }),
         ),
-      update: jest.fn().mockResolvedValue({ affected: 1 }),
+      update: jest.fn().mockResolvedValue({ affected: 0 }),
+      delete: jest.fn().mockResolvedValue({ affected: 0 }),
+      upsert: jest.fn().mockResolvedValue({ generatedMaps: [] }),
+      create: jest.fn().mockImplementation((_entity, data) => data),
     } as any;
 
     mockQueryRunner = {
@@ -238,6 +249,293 @@ describe('ProgressTransactionService', () => {
 
       expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
       expect(mockQueryRunner.commitTransaction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('completeAllCourseProgress', () => {
+    const courseId = 'course-1';
+    const userId = 'user-1';
+
+    const mockCourse = {
+      id: courseId,
+      level: UserLevel.A1,
+      modules: [
+        {
+          id: 'mod-1',
+          lessons: [{ id: 'lesson-1' }, { id: 'lesson-2' }],
+        },
+        {
+          id: 'mod-2',
+          lessons: [{ id: 'lesson-3' }],
+        },
+      ],
+    };
+
+    it('throws NotFoundException when course not found', async () => {
+      (mockManager.findOne as jest.Mock).mockResolvedValue(null);
+
+      await expect(
+        service.completeAllCourseProgress(userId, courseId, UserLevel.B1),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
+    });
+
+    it('throws ForbiddenException when user level not higher than course level', async () => {
+      (mockManager.findOne as jest.Mock).mockResolvedValue({
+        ...mockCourse,
+        level: UserLevel.B1,
+      });
+
+      await expect(
+        service.completeAllCourseProgress(userId, courseId, UserLevel.A2),
+      ).rejects.toThrow(ForbiddenException);
+
+      expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
+    });
+
+    it('creates CourseProgress, ModuleProgress, and UserProgress with score=null', async () => {
+      (mockManager.findOne as jest.Mock)
+        .mockResolvedValueOnce(mockCourse)
+        .mockResolvedValue(null);
+
+      await service.completeAllCourseProgress(userId, courseId, UserLevel.B1);
+
+      expect(mockManager.upsert).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          userId,
+          courseId,
+          status: ProgressStatus.COMPLETED,
+          score: null,
+          completedModulesCount: 2,
+          totalModulesCount: 2,
+        }),
+        ['userId', 'courseId'],
+      );
+
+      expect(mockManager.upsert).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          userId,
+          moduleId: 'mod-1',
+          status: ProgressStatus.COMPLETED,
+          score: null,
+          completedLessonsCount: 2,
+          totalLessonsCount: 2,
+        }),
+        ['userId', 'moduleId'],
+      );
+
+      expect(mockManager.upsert).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          userId,
+          moduleId: 'mod-2',
+          status: ProgressStatus.COMPLETED,
+          score: null,
+          completedLessonsCount: 1,
+          totalLessonsCount: 1,
+        }),
+        ['userId', 'moduleId'],
+      );
+
+      expect(mockManager.save).toHaveBeenCalledWith(
+        UserProgress,
+        expect.objectContaining({
+          userId,
+          lessonId: 'lesson-1',
+          status: ProgressStatus.COMPLETED,
+          score: null,
+          contentViewed: true,
+        }),
+      );
+      expect(mockManager.save).toHaveBeenCalledWith(
+        UserProgress,
+        expect.objectContaining({
+          userId,
+          lessonId: 'lesson-2',
+          status: ProgressStatus.COMPLETED,
+          score: null,
+          contentViewed: true,
+        }),
+      );
+      expect(mockManager.save).toHaveBeenCalledWith(
+        UserProgress,
+        expect.objectContaining({
+          userId,
+          lessonId: 'lesson-3',
+          status: ProgressStatus.COMPLETED,
+          score: null,
+          contentViewed: true,
+        }),
+      );
+    });
+
+    it('updates existing UserProgress instead of creating new', async () => {
+      const existingProgress = {
+        id: 'up-1',
+        userId,
+        lessonId: 'lesson-1',
+        status: ProgressStatus.IN_PROGRESS,
+      };
+
+      (mockManager.findOne as jest.Mock)
+        .mockResolvedValueOnce(mockCourse)
+        .mockResolvedValueOnce(existingProgress)
+        .mockResolvedValue(null);
+
+      await service.completeAllCourseProgress(userId, courseId, UserLevel.B1);
+
+      expect(mockManager.update).toHaveBeenCalledWith(
+        UserProgress,
+        'up-1',
+        expect.objectContaining({
+          status: ProgressStatus.COMPLETED,
+          score: null,
+          contentViewed: true,
+        }),
+      );
+    });
+
+    it('commits transaction on success', async () => {
+      (mockManager.findOne as jest.Mock)
+        .mockResolvedValueOnce(mockCourse)
+        .mockResolvedValue(null);
+
+      await service.completeAllCourseProgress(userId, courseId, UserLevel.B1);
+
+      expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
+      expect(mockQueryRunner.rollbackTransaction).not.toHaveBeenCalled();
+    });
+
+    it('rolls back transaction on error', async () => {
+      (mockManager.findOne as jest.Mock).mockResolvedValueOnce(mockCourse);
+      (mockManager.upsert as jest.Mock).mockRejectedValue(
+        new Error('DB error'),
+      );
+
+      await expect(
+        service.completeAllCourseProgress(userId, courseId, UserLevel.B1),
+      ).rejects.toThrow('DB error');
+
+      expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
+      expect(mockQueryRunner.commitTransaction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('resetCourseProgress', () => {
+    const courseId = 'course-1';
+    const userId = 'user-1';
+
+    const mockCourse = {
+      id: courseId,
+      modules: [
+        {
+          id: 'mod-1',
+          lessons: [{ id: 'lesson-1' }, { id: 'lesson-2' }],
+        },
+      ],
+    };
+
+    it('throws NotFoundException when course not found', async () => {
+      (mockManager.findOne as jest.Mock).mockResolvedValue(null);
+
+      await expect(
+        service.resetCourseProgress(userId, courseId),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('deletes CourseProgress, ModuleProgress, UserProgress, UserExerciseResults, and soft-deletes custom ExerciseSets', async () => {
+      (mockManager.findOne as jest.Mock).mockResolvedValue(mockCourse);
+      (mockManager.find as jest.Mock).mockResolvedValue([
+        { id: 'ex-1' },
+        { id: 'ex-2' },
+      ]);
+
+      await service.resetCourseProgress(userId, courseId);
+
+      expect(mockManager.delete).toHaveBeenCalledWith(CourseProgress, {
+        userId,
+        courseId,
+      });
+
+      expect(mockManager.delete).toHaveBeenCalledWith(ModuleProgress, {
+        userId,
+        moduleId: expect.anything(),
+      });
+
+      expect(mockManager.delete).toHaveBeenCalledWith(UserProgress, {
+        userId,
+        lessonId: expect.anything(),
+      });
+
+      expect(mockManager.delete).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          userId,
+        }),
+      );
+
+      expect(mockManager.update).toHaveBeenCalledWith(
+        ExerciseSet,
+        { isCustom: true, courseId },
+        expect.objectContaining({ deletedAt: expect.any(Date) }),
+      );
+    });
+
+    it('handles course with no modules gracefully', async () => {
+      (mockManager.findOne as jest.Mock).mockResolvedValue({
+        id: courseId,
+        modules: [],
+      });
+
+      await service.resetCourseProgress(userId, courseId);
+
+      expect(mockManager.delete).toHaveBeenCalledWith(CourseProgress, {
+        userId,
+        courseId,
+      });
+      expect(mockManager.delete).toHaveBeenCalledTimes(1);
+    });
+
+    it('commits transaction on success', async () => {
+      (mockManager.findOne as jest.Mock).mockResolvedValue(mockCourse);
+      (mockManager.find as jest.Mock).mockResolvedValue([]);
+
+      await service.resetCourseProgress(userId, courseId);
+
+      expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
+    });
+
+    it('rolls back transaction on error', async () => {
+      (mockManager.findOne as jest.Mock).mockResolvedValue(mockCourse);
+      (mockManager.delete as jest.Mock).mockRejectedValue(
+        new Error('Delete failed'),
+      );
+
+      await expect(
+        service.resetCourseProgress(userId, courseId),
+      ).rejects.toThrow('Delete failed');
+
+      expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
+    });
+  });
+
+  describe('isLevelHigher', () => {
+    it('returns true when user level is higher', () => {
+      expect(isLevelHigher(UserLevel.B1, UserLevel.A1)).toBe(true);
+      expect(isLevelHigher(UserLevel.C2, UserLevel.C1)).toBe(true);
+    });
+
+    it('returns false when levels are equal', () => {
+      expect(isLevelHigher(UserLevel.A1, UserLevel.A1)).toBe(false);
+      expect(isLevelHigher(UserLevel.B2, UserLevel.B2)).toBe(false);
+    });
+
+    it('returns false when user level is lower', () => {
+      expect(isLevelHigher(UserLevel.A1, UserLevel.B1)).toBe(false);
+      expect(isLevelHigher(UserLevel.A2, UserLevel.C2)).toBe(false);
     });
   });
 });

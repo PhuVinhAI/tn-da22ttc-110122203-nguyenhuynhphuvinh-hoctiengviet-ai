@@ -19,7 +19,6 @@ import { ProgressService } from '../application/progress.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators';
 import { User } from '../../users/domain/user.entity';
-
 @ApiTags('Progress')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -295,5 +294,53 @@ export class ProgressController {
     @Param('courseId') courseId: string,
   ) {
     return this.progressService.getCourseProgress(user.id, courseId);
+  }
+
+  @Post('course/:courseId/complete-all')
+  @ApiOperation({
+    summary: 'Bypass hoàn thành toàn bộ course',
+    description:
+      'Đánh dấu hoàn thành tất cả lessons/modules trong course. Yêu cầu user level cao hơn course level.',
+  })
+  @ApiParam({ name: 'courseId', description: 'ID của course' })
+  @ApiResponse({
+    status: 200,
+    description: 'Hoàn thành toàn bộ course thành công',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'User level không cao hơn course level',
+  })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy course' })
+  async completeAllCourseProgress(
+    @CurrentUser() user: User,
+    @Param('courseId') courseId: string,
+  ) {
+    await this.progressService.completeAllCourseProgress(
+      user.id,
+      courseId,
+      user.currentLevel,
+    );
+    return { success: true };
+  }
+
+  @Post('course/:courseId/reset')
+  @ApiOperation({
+    summary: 'Reset toàn bộ tiến độ course',
+    description:
+      'Xoá tất cả tiến độ, kết quả bài tập, và custom practice sets của course.',
+  })
+  @ApiParam({ name: 'courseId', description: 'ID của course' })
+  @ApiResponse({
+    status: 200,
+    description: 'Reset course thành công',
+  })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy course' })
+  async resetCourseProgress(
+    @CurrentUser() user: User,
+    @Param('courseId') courseId: string,
+  ) {
+    await this.progressService.resetCourseProgress(user.id, courseId);
+    return { success: true };
   }
 }
