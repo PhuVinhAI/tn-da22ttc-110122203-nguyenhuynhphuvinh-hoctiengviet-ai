@@ -150,11 +150,15 @@ class LessonRepository {
 
   Future<List<dynamic>> generateExercises(
     String setId, {
+    String? userPrompt,
     CancelToken? cancelToken,
   }) async {
     try {
+      final data = <String, dynamic>{};
+      if (userPrompt != null) data['userPrompt'] = userPrompt;
       final response = await _dio.post<dynamic>(
         '/exercise-sets/$setId/generate',
+        data: data.isNotEmpty ? data : null,
         options: _aiGenerationRequestOptions,
         cancelToken: cancelToken,
       );
@@ -175,6 +179,7 @@ class LessonRepository {
         data: {
           'lessonId': lessonId,
           'config': config.toJson(),
+          if (config.userPrompt != null) 'userPrompt': config.userPrompt,
         },
         cancelToken: cancelToken,
       );
@@ -188,11 +193,15 @@ class LessonRepository {
 
   Future<String> regenerateExercises(
     String setId, {
+    String? userPrompt,
     CancelToken? cancelToken,
   }) async {
     try {
+      final data = <String, dynamic>{};
+      if (userPrompt != null) data['userPrompt'] = userPrompt;
       final response = await _dio.post<Map<String, dynamic>>(
         '/exercise-sets/$setId/regenerate',
+        data: data.isNotEmpty ? data : null,
         options: _aiGenerationRequestOptions,
         cancelToken: cancelToken,
       );

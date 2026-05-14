@@ -6,8 +6,8 @@ import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../data/lesson_providers.dart';
-import '../../domain/exercise_models.dart';
 import '../../domain/exercise_set_models.dart';
+import '../widgets/custom_practice_bottom_sheet.dart';
 
 class ExerciseHubScreen extends ConsumerStatefulWidget {
   const ExerciseHubScreen({super.key, required this.lessonId});
@@ -85,7 +85,7 @@ class _ExerciseHubScreenState extends ConsumerState<ExerciseHubScreen>
     await ref.read(exerciseSetsProvider(widget.lessonId).notifier).refresh();
   }
 
-  Future<void> _handleRegenerate(String setId) async {
+  Future<void> _handleRegenerate(String setId, {String? userPrompt}) async {
     setState(() {
       _busySetId = setId;
       _busyAction = _BusyAction.regenerate;
@@ -95,11 +95,11 @@ class _ExerciseHubScreenState extends ConsumerState<ExerciseHubScreen>
     String? newSetId;
     try {
       final notifier = ref.read(exerciseSetsProvider(widget.lessonId).notifier);
-      newSetId = await notifier.regenerateSet(setId);
+      newSetId = await notifier.regenerateSet(setId, userPrompt: userPrompt);
       _regeneratingNewSetId = newSetId;
 
       final token = _newAiCancelToken();
-      await notifier.generateSet(newSetId, cancelToken: token);
+      await notifier.generateSet(newSetId, userPrompt: userPrompt, cancelToken: token);
       _regeneratingNewSetId = null;
       if (mounted) {
         setState(() {
@@ -196,7 +196,7 @@ class _ExerciseHubScreenState extends ConsumerState<ExerciseHubScreen>
       _creatingSetId = setId;
 
       final token = _newAiCancelToken();
-      await notifier.generateSet(setId, cancelToken: token);
+      await notifier.generateSet(setId, userPrompt: config.userPrompt, cancelToken: token);
       _creatingSetId = null;
       if (mounted) {
         setState(() {
@@ -233,16 +233,46 @@ class _ExerciseHubScreenState extends ConsumerState<ExerciseHubScreen>
     }
   }
 
-  void _showCustomConfigForm() {
+  void _showCreationForm({String? initialUserPrompt}) {
     AppBottomSheet.show(
       context,
       isScrollControlled: true,
-      builder: (ctx) => _CustomConfigForm(
-        lessonId: widget.lessonId,
+      builder: (ctx) => CustomPracticeBottomSheet.creation(
+        initialUserPrompt: initialUserPrompt,
         onSubmit: (config) async {
           Navigator.of(ctx).pop();
           await _handleCreateCustom(config);
         },
+      ),
+    );
+  }
+
+  void _showInfoSheet(SetProgress set) {
+    final isRegenerating = _busySetId == set.setId &&
+        _busyAction == _BusyAction.regenerate;
+
+    AppBottomSheet.show(
+      context,
+      isScrollControlled: true,
+      builder: (ctx) => CustomPracticeBottomSheet.info(
+        progress: set,
+        onPlay: () {
+          Navigator.of(ctx).pop();
+          _pushExercisePlay(set.setId);
+        },
+        onRegenerate: () {
+          Navigator.of(ctx).pop();
+          _confirmRegenerate(set.setId, set.title, set.userPrompt);
+        },
+        onReset: () {
+          Navigator.of(ctx).pop();
+          _confirmReset(set.setId, set.title);
+        },
+        onDelete: () {
+          Navigator.of(ctx).pop();
+          _confirmDelete(set.setId);
+        },
+        onCancel: isRegenerating ? () => _aiCancelToken?.cancel() : null,
       ),
     );
   }
@@ -290,6 +320,31 @@ class _ExerciseHubScreenState extends ConsumerState<ExerciseHubScreen>
             onPressed: () {
               Navigator.pop(dialogCtx);
               _handleReset(setId);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmRegenerate(String setId, String title, String? userPrompt) {
+    AppDialog.show(
+      context,
+      builder: (dialogCtx) => AppDialog(
+        title: 'Regenerate exercises?',
+        content:
+            'This will create a new set replacing "$title" with fresh AI-generated questions.',
+        actions: [
+          AppDialogAction(
+            label: 'Cancel',
+            onPressed: () => Navigator.pop(dialogCtx),
+          ),
+          AppDialogAction(
+            label: 'Regenerate',
+            isPrimary: true,
+            onPressed: () {
+              Navigator.pop(dialogCtx);
+              _handleRegenerate(setId, userPrompt: userPrompt);
             },
           ),
         ],
@@ -396,7 +451,7 @@ class _ExerciseHubScreenState extends ConsumerState<ExerciseHubScreen>
                   child: AppButton(
                     label: 'Create custom set',
                     variant: AppButtonVariant.primary,
-                    onPressed: _showCustomConfigForm,
+                    onPressed: _showCreationForm,
                     icon: const Icon(Icons.add),
                   ),
                 ),
@@ -410,12 +465,13 @@ class _ExerciseHubScreenState extends ConsumerState<ExerciseHubScreen>
                 isBusy: _busySetId == set.setId,
                 onPlay: () => _pushExercisePlay(set.setId),
                 onReset: () => _confirmReset(set.setId, set.title),
-                onRegenerate: () => _handleRegenerate(set.setId),
+                onRegenerate: () => _confirmRegenerate(set.setId, set.title, set.userPrompt),
                 onDelete: () => _confirmDelete(set.setId),
                 onCancel: (_busySetId == set.setId &&
                         _busyAction == _BusyAction.regenerate)
                     ? () => _aiCancelToken?.cancel()
                     : null,
+                onInfo: () => _showInfoSheet(set),
                 isCustom: true,
               )),
               if (customSets.isEmpty && defaultSets.isEmpty)
@@ -446,6 +502,7 @@ class _SetCard extends StatelessWidget {
     this.onRegenerate,
     this.onDelete,
     this.onCancel,
+    this.onInfo,
     this.isCustom = false,
   });
 
@@ -456,6 +513,7 @@ class _SetCard extends StatelessWidget {
   final VoidCallback? onRegenerate;
   final VoidCallback? onDelete;
   final VoidCallback? onCancel;
+  final VoidCallback? onInfo;
   final bool isCustom;
 
   void _openActionsMenu(BuildContext context) {
@@ -565,7 +623,7 @@ class _SetCard extends StatelessWidget {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: onPlay,
+                  onTap: isCustom ? onInfo : onPlay,
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -595,7 +653,19 @@ class _SetCard extends StatelessWidget {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              if (progress.description != null &&
+                                  progress.description!.isNotEmpty)
+                                Text(
+                                  progress.description!,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: c.mutedForeground,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                              else
+                                const SizedBox(height: 4),
+                              const SizedBox(height: 2),
                               Text(
                                 progress.isCompleted
                                     ? '${progress.percentCorrect.round()}%'
@@ -668,180 +738,5 @@ class _SetCard extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _CustomConfigForm extends StatefulWidget {
-  const _CustomConfigForm({
-    required this.lessonId,
-    required this.onSubmit,
-  });
-
-  final String lessonId;
-  final Future<void> Function(CustomSetConfig config) onSubmit;
-
-  @override
-  State<_CustomConfigForm> createState() => _CustomConfigFormState();
-}
-
-class _CustomConfigFormState extends State<_CustomConfigForm> {
-  double _questionCount = 10;
-  final Set<String> _selectedTypes = {ExerciseType.multipleChoice.value, ExerciseType.matching.value};
-  FocusArea _focusArea = FocusArea.both;
-  bool _isSubmitting = false;
-
-  static const _allExerciseTypes = ExerciseType.values;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppTheme.colors(context);
-    final theme = Theme.of(context);
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottomInset),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.md,
-                AppSpacing.sm,
-                AppSpacing.sm,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Configure custom practice',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: c.foreground,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Close',
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.close, color: c.mutedForeground),
-                    style: IconButton.styleFrom(
-                      foregroundColor: c.mutedForeground,
-                      minimumSize: const Size(48, 48),
-                      fixedSize: const Size(48, 48),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Divider(height: 1, color: c.border),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.lg,
-                AppSpacing.lg,
-                AppSpacing.md,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Number of questions: ${_questionCount.round()}',
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  AppSlider(
-                    value: _questionCount,
-                    min: 1,
-                    max: 30,
-                    divisions: 29,
-                    label: _questionCount.round().toString(),
-                    onChanged: (v) => setState(() => _questionCount = v),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'Exercise types',
-                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: _allExerciseTypes.map((type) {
-                      final selected = _selectedTypes.contains(type.value);
-                      return AppChip(
-                        label: _typeDisplayName(type),
-                        isSelected: selected,
-                        onTap: () {
-                          setState(() {
-                            if (!selected) {
-                              _selectedTypes.add(type.value);
-                            } else if (_selectedTypes.length > 1) {
-                              _selectedTypes.remove(type.value);
-                            }
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'Focus',
-                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: FocusArea.values.map((fa) {
-                      final selected = _focusArea == fa;
-                      return AppChip(
-                        label: fa.displayName,
-                        isSelected: selected,
-                        color: c.accent,
-                        onTap: () => setState(() => _focusArea = fa),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  AppButton(
-                    label: _isSubmitting ? 'Creating...' : 'Create exercises',
-                    variant: AppButtonVariant.primary,
-                    onPressed: _selectedTypes.isEmpty || _isSubmitting ? null : _handleSubmit,
-                    icon: const Icon(Icons.auto_awesome),
-                    isFullWidth: true,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _typeDisplayName(ExerciseType type) {
-    return switch (type) {
-      ExerciseType.multipleChoice => 'Multiple choice',
-      ExerciseType.fillBlank => 'Fill in the blank',
-      ExerciseType.matching => 'Matching',
-      ExerciseType.ordering => 'Ordering',
-      ExerciseType.translation => 'Translation',
-      ExerciseType.listening => 'Listening',
-    };
-  }
-
-  Future<void> _handleSubmit() async {
-    setState(() => _isSubmitting = true);
-    final config = CustomSetConfig(
-      questionCount: _questionCount.round(),
-      exerciseTypes: _selectedTypes.toList(),
-      focusArea: _focusArea,
-    );
-    await widget.onSubmit(config);
-    if (mounted) setState(() => _isSubmitting = false);
   }
 }

@@ -27,6 +27,7 @@ class CustomSetConfig {
     required this.questionCount,
     required this.exerciseTypes,
     required this.focusArea,
+    this.userPrompt,
   });
 
   factory CustomSetConfig.fromJson(Map<String, dynamic> json) {
@@ -37,6 +38,7 @@ class CustomSetConfig {
               .toList() ??
           const [],
       focusArea: FocusArea.fromString(json['focusArea'] as String? ?? 'both'),
+      userPrompt: json['userPrompt'] as String?,
     );
   }
 
@@ -44,11 +46,13 @@ class CustomSetConfig {
         'questionCount': questionCount,
         'exerciseTypes': exerciseTypes,
         'focusArea': focusArea.value,
+        if (userPrompt != null) 'userPrompt': userPrompt,
       };
 
   final int questionCount;
   final List<String> exerciseTypes;
   final FocusArea focusArea;
+  final String? userPrompt;
 }
 
 class ExerciseSetModel {
@@ -56,6 +60,8 @@ class ExerciseSetModel {
     required this.id,
     required this.lessonId,
     required this.title,
+    this.description,
+    this.userPrompt,
     this.isCustom = false,
     this.isAIGenerated = false,
     this.orderIndex = 0,
@@ -67,6 +73,8 @@ class ExerciseSetModel {
       id: json['id'] as String,
       lessonId: json['lessonId'] as String,
       title: json['title'] as String,
+      description: json['description'] as String?,
+      userPrompt: json['userPrompt'] as String?,
       isCustom: json['isCustom'] as bool? ?? false,
       isAIGenerated: json['isAIGenerated'] as bool? ?? false,
       orderIndex: (json['orderIndex'] as num?)?.toInt() ?? 0,
@@ -80,6 +88,8 @@ class ExerciseSetModel {
   final String id;
   final String lessonId;
   final String title;
+  final String? description;
+  final String? userPrompt;
   final bool isCustom;
   final bool isAIGenerated;
   final int orderIndex;
@@ -90,6 +100,8 @@ class SetProgress {
   const SetProgress({
     required this.setId,
     required this.title,
+    this.description,
+    this.userPrompt,
     this.isCustom = false,
     this.isAIGenerated = false,
     this.totalExercises = 0,
@@ -103,6 +115,8 @@ class SetProgress {
     return SetProgress(
       setId: json['setId'] as String? ?? '',
       title: json['title'] as String,
+      description: json['description'] as String?,
+      userPrompt: json['userPrompt'] as String?,
       isCustom: json['isCustom'] as bool? ?? false,
       isAIGenerated: json['isAIGenerated'] as bool? ?? false,
       totalExercises: (json['totalExercises'] as num?)?.toInt() ?? 0,
@@ -115,6 +129,8 @@ class SetProgress {
 
   final String setId;
   final String title;
+  final String? description;
+  final String? userPrompt;
   final bool isCustom;
   final bool isAIGenerated;
   final int totalExercises;

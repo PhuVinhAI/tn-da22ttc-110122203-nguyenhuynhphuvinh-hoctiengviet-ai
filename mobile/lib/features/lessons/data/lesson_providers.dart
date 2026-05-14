@@ -177,9 +177,9 @@ class ExerciseSetsNotifier extends CachedRepository<LessonExerciseSummary>
     return super.build();
   }
 
-  Future<String> regenerateSet(String setId, {CancelToken? cancelToken}) async {
+  Future<String> regenerateSet(String setId, {String? userPrompt, CancelToken? cancelToken}) async {
     final repo = ref.read(lessonRepositoryProvider);
-    final newSetId = await repo.regenerateExercises(setId, cancelToken: cancelToken);
+    final newSetId = await repo.regenerateExercises(setId, userPrompt: userPrompt, cancelToken: cancelToken);
     ref.read(dataChangeBusProvider.notifier).emit({'exercise-set'});
     return newSetId;
   }
@@ -196,9 +196,9 @@ class ExerciseSetsNotifier extends CachedRepository<LessonExerciseSummary>
     return set;
   }
 
-  Future<void> generateSet(String setId, {CancelToken? cancelToken}) async {
+  Future<void> generateSet(String setId, {String? userPrompt, CancelToken? cancelToken}) async {
     final repo = ref.read(lessonRepositoryProvider);
-    await repo.generateExercises(setId, cancelToken: cancelToken);
+    await repo.generateExercises(setId, userPrompt: userPrompt, cancelToken: cancelToken);
     ref.read(dataChangeBusProvider.notifier).emit({'exercise-set'});
   }
 
