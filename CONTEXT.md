@@ -59,6 +59,24 @@ _Avoid_: Assessment, Grading
 Bản ghi **Câu trả lời** và **Kết quả đánh giá** của một **Học viên** cho một **Bài tập** cụ thể.
 _Avoid_: UserExerciseResult, Exercise result
 
+### Mục tiêu
+
+**Mục tiêu ngày**:
+Mục tiêu học tập preset mà **Học viên** đặt cho mỗi ngày. Có 3 loại: bài tập hoàn thành, phút truy cập app, bài học hoàn thành. Học viên có thể có nhiều mục tiêu hoạt động cùng lúc và CRUD tự do. Mục tiêu lặp lại mỗi ngày, xoá vĩnh viễn khi xoá. Hoàn thành khi đã thực hiện bất kể đúng sai.
+_Avoid_: Daily goal, Daily target
+
+**Phút truy cập app**:
+Tổng thời gian app foreground trong một ngày lịch (0:00–23:59 giờ Việt Nam). Dùng làm đơn vị đo cho loại mục tiêu "phút học/ngày".
+_Avoid_: Study time, Session time
+
+**Chuỗi mục tiêu**:
+Số ngày liên tiếp **Học viên** đạt TẤT CẢ **Mục tiêu ngày**. Được tính theo ngày lịch giờ Việt Nam. Hiện trên home và profile.
+_Avoid_: Streak, Daily streak
+
+**Nhắc mục tiêu**:
+Thông báo cục bộ trên thiết bị, nhắc 1 lần/ngày vào giờ cố định nếu chưa đạt **Mục tiêu ngày**. Học viên bật/tắt và chọn giờ trong profile.
+_Avoid_: Goal reminder, Daily notification
+
 ### Tiến trình
 
 **Tiến trình bài học**:
@@ -122,6 +140,9 @@ _Avoid_: AI-generated exercise set
 - Một **Học viên** có **Tiến trình bài học** cho mỗi **Bài học**, **Tiến trình chủ đề** cho mỗi **Chủ đề**, và **Tiến trình khóa học** cho mỗi **Khóa học**
 - Một **Học viên** có **Kết quả bài tập** cho mỗi **Bài tập** đã làm
 - Một **Học viên** có **Yêu sách** cho các **Từ vựng** muốn lưu lại
+- Một **Học viên** có nhiều **Mục tiêu ngày** hoạt động cùng lúc (CRUD tự do, lặp lại mỗi ngày)
+- Một **Học viên** có **Chuỗi mục tiêu** — số ngày liên tiếp đạt tất cả mục tiêu
+- Một **Học viên** có cài đặt **Nhắc mục tiêu** (bật/tắt + giờ nhắc)
 - Một **Học viên** có nhiều **Hội thoại**; mỗi **Hội thoại** có nhiều **Tin nhắn**
 - Một **Hội thoại** có thể gắn với một **Bài học** hoặc **Khóa học** (tùy chọn). Không cho đổi bài gắn — phải tạo hội thoại mới. Học viên có thể tạo nhiều hội thoại cùng gắn một bài.
 - **Quyền hạn** gán cho **Vai trò**; **Vai trò** gán cho người dùng
@@ -157,3 +178,7 @@ _Avoid_: AI-generated exercise set
 - ~~SSE streaming endpoint gọi AI trực tiếp không qua agent loop — không hỗ trợ **Công cụ AI** trong chế độ streaming.~~ **Đã xác nhận là bug:** Streaming cần gọi **Công cụ AI** qua agent loop như non-streaming. Cần sửa khi bổ sung tool thật.
 - ~~`AI_GENERATE_EXERCISE` và `AI_CORRECT_GRAMMAR` có permission enum nhưng chưa có endpoint triển khai.~~ **Đã xác nhận:** `AI_GENERATE_EXERCISE` đáng lẽ phải guard endpoint sinh bài tập hiện tại (thiếu). `AI_CORRECT_GRAMMAR` là tính năng tương lai cho AI chat sửa ngữ pháp.
 - ~~`embed()`, `uploadFile()`, `generateImage()` trên `IAiProvider` khai báo nhưng chưa implement.~~ **Đã xác nhận:** Placeholder cho tương lai, có config sẵn (imagen-4.0-generate-001, text-embedding-004). Chưa có kế hoạch triển khai sớm.
+- **Mục tiêu ngày dùng preset, không tự do** — 3 loại: bài tập hoàn thành, phút truy cập app, bài học hoàn thành. Không cho tự viết tên/loại goal vì mỗi loại cần aggregation logic riêng trên backend.
+- **Chuỗi mục tiêu yêu cầu đạt TẤT CẢ** — đạt 1 trong 3 goal không tính chuỗi. Tiêu chuẩn rõ ràng, tránh mơ hồ.
+- **Phút truy cập app = thời gian app foreground toàn bộ** — không phân biệt screen. Đếm khi app foreground, pause khi minimize/lock. Mobile đếm timer, sync tổng phút hôm nay lên backend khi có event.
+- **Timezone hardcode Asia/Ho_Chi_Minh** — app học tiếng Việt, user đa số ở VN. Không cần timezone picker cho MVP.
