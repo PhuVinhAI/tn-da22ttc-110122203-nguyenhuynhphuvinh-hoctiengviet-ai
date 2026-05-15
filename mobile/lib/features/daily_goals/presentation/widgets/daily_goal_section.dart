@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/providers.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
+import '../../../profile/data/profile_providers.dart';
 import '../../data/daily_goals_providers.dart';
 import '../../data/daily_goal_progress_providers.dart';
+import '../../data/notification_service.dart';
 import '../../domain/daily_goal_models.dart';
 
 class DailyGoalSection extends ConsumerWidget {
@@ -133,6 +136,8 @@ class _GoalsCard extends ConsumerWidget {
             ),
             onTap: () => _showAddGoalDialog(context, ref),
           ),
+          AppDivider(),
+          const _NotificationSettings(),
         ],
       ),
     );
@@ -417,5 +422,128 @@ class _TargetSlider extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _NotificationSettings extends ConsumerWidget {
+  const _NotificationSettings();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = AppTheme.colors(context);
+    final theme = Theme.of(context);
+    final profileAsync = ref.watch(userProfileProvider);
+
+    return profileAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (profile) {
+        return Column(
+          children: [
+            AppListItem(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.sm,
+              ),
+              leading: Icon(Icons.notifications_outlined,
+                  color: c.primary, size: 20),
+              titleWidget: Text(
+                'Nhắc mục tiêu',
+                style: theme.textTheme.bodyMedium,
+              ),
+              trailing: Switch(
+                value: profile.notificationEnabled,
+                onChanged: (value) => _onToggle(context, ref, value),
+              ),
+            ),
+            if (profile.notificationEnabled) ...[
+              AppDivider(),
+              AppListItem(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
+                ),
+                leading:
+                    Icon(Icons.access_time, color: c.primary, size: 20),
+                titleWidget: Text(
+                  'Giờ nhắc',
+                  style: theme.textTheme.bodyMedium,
+                ),
+                subtitleWidget: Text(
+                  profile.notificationTime,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: c.mutedForeground,
+                  ),
+                ),
+                onTap: () => _showTimePicker(context, ref, profile),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _onToggle(
+      BuildContext context, WidgetRef ref, bool value) async {
+    if (value) {
+      final granted = await NotificationService.requestPermissions();
+      if (!granted) {
+        if (context.mounted) {
+          AppToast.show(
+            context,
+            message: 'Cần cho phép thông báo trong cài đặt thiết bị',
+            type: AppToastType.error,
+          );
+        }
+        return;
+      }
+    }
+    try {
+      await ref.read(userProfileProvider.notifier).updateProfile(
+            notificationEnabled: value,
+          );
+      final prefs = await ref.read(preferencesProvider.future);
+      await prefs.setNotificationEnabled(value);
+      if (!value) {
+        await NotificationService.cancelDailyReminder();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppToast.show(context,
+            message: 'Lỗi: $e', type: AppToastType.error);
+      }
+    }
+  }
+
+  Future<void> _showTimePicker(
+      BuildContext context, WidgetRef ref, profile) async {
+    final parts = profile.notificationTime.split(':');
+    final initial = TimeOfDay(
+      hour: int.parse(parts[0]),
+      minute: int.parse(parts[1]),
+    );
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+    );
+    if (picked == null) return;
+
+    final hour = picked.hour.toString().padLeft(2, '0');
+    final minute = picked.minute.toString().padLeft(2, '0');
+    final time = '$hour:$minute';
+
+    try {
+      await ref.read(userProfileProvider.notifier).updateProfile(
+            notificationTime: time,
+          );
+      final prefs = await ref.read(preferencesProvider.future);
+      await prefs.setNotificationTime(time);
+    } catch (e) {
+      if (context.mounted) {
+        AppToast.show(context,
+            message: 'Lỗi: $e', type: AppToastType.error);
+      }
+    }
   }
 }

@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/widgets/widgets.dart';
 import '../../features/daily_goals/data/app_session_timer.dart';
+import '../../features/daily_goals/data/notification_service.dart';
+import '../../features/daily_goals/data/daily_goal_progress_providers.dart';
+import '../../features/profile/data/profile_providers.dart';
 
 class ShellScreen extends ConsumerStatefulWidget {
   const ShellScreen({super.key, required this.child});
@@ -31,11 +34,31 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
     switch (state) {
       case AppLifecycleState.resumed:
         _sessionTimer.onAppResumed();
+        _updateNotificationSchedule();
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
       case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
         _sessionTimer.onAppPaused();
+    }
+  }
+
+  void _updateNotificationSchedule() {
+    final profile = ref.read(userProfileProvider).value;
+    final progress = ref.read(dailyGoalProgressProvider).value;
+    if (profile == null) return;
+
+    if (profile.notificationEnabled) {
+      if (progress != null &&
+          (progress.goals.isEmpty || progress.allGoalsMet)) {
+        NotificationService.cancelDailyReminder();
+      } else {
+        NotificationService.scheduleDailyReminder(
+          notificationTime: profile.notificationTime,
+        );
+      }
+    } else {
+      NotificationService.cancelDailyReminder();
     }
   }
 
@@ -69,6 +92,9 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(userProfileProvider, (_, __) => _updateNotificationSchedule());
+    ref.listen(dailyGoalProgressProvider, (_, __) => _updateNotificationSchedule());
+
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: AppNavBar(

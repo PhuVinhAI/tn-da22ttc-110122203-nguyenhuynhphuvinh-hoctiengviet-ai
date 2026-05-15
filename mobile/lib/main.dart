@@ -4,11 +4,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/providers/providers.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/storage/preferences_service.dart';
+import 'features/daily_goals/data/notification_service.dart';
 import 'features/lessons/data/exercise_session_service.dart';
 import 'features/lessons/data/lesson_providers.dart';
 
@@ -31,6 +33,9 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final preferencesService = PreferencesService(prefs);
+
+  tz_data.initializeTimeZones();
+  await NotificationService.initialize();
 
   runApp(ProviderScope(
     overrides: [
