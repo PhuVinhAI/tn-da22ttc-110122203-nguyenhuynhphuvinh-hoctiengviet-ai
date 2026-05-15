@@ -21,7 +21,7 @@ class ModuleDetailScreen extends ConsumerStatefulWidget {
       _ModuleDetailScreenState();
 }
 
-enum _BusyAction { none, create, regenerate, delete, reset }
+enum _BusyAction { none, create, regenerate, delete, reset, completeAll, resetModule }
 
 class _ModuleDetailScreenState extends ConsumerState<ModuleDetailScreen>
     with WidgetsBindingObserver {
@@ -96,6 +96,14 @@ class _ModuleDetailScreenState extends ConsumerState<ModuleDetailScreen>
           },
         ) ??
         {};
+  }
+
+  bool _moduleHasAnyProgress(
+      CourseModule module, Map<String, UserProgress> progressMap) {
+    for (final lesson in module.lessons) {
+      if (progressMap.containsKey(lesson.id)) return true;
+    }
+    return false;
   }
 
   Future<void> _pushExercisePlay(String setId) async {
@@ -260,6 +268,56 @@ class _ModuleDetailScreenState extends ConsumerState<ModuleDetailScreen>
     }
   }
 
+  Future<void> _handleCompleteAll() async {
+    setState(() {
+      _busyAction = _BusyAction.completeAll;
+      _error = null;
+    });
+    try {
+      final notifier =
+          ref.read(moduleExerciseSetsProvider(widget.moduleId).notifier);
+      await notifier.completeAllModuleProgress();
+      ref.invalidate(userProgressProvider);
+      ref.invalidate(moduleDetailProvider(widget.moduleId));
+      if (mounted) {
+        setState(() {
+          _busyAction = _BusyAction.none;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _busyAction = _BusyAction.none;
+        _error = e.toString();
+      });
+    }
+  }
+
+  Future<void> _handleResetModule() async {
+    setState(() {
+      _busyAction = _BusyAction.resetModule;
+      _error = null;
+    });
+    try {
+      final notifier =
+          ref.read(moduleExerciseSetsProvider(widget.moduleId).notifier);
+      await notifier.resetModuleProgress();
+      ref.invalidate(userProgressProvider);
+      ref.invalidate(moduleDetailProvider(widget.moduleId));
+      if (mounted) {
+        setState(() {
+          _busyAction = _BusyAction.none;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _busyAction = _BusyAction.none;
+        _error = e.toString();
+      });
+    }
+  }
+
   void _showCreationForm({String? initialUserPrompt}) {
     AppBottomSheet.show(
       context,
@@ -379,6 +437,56 @@ class _ModuleDetailScreenState extends ConsumerState<ModuleDetailScreen>
     );
   }
 
+  void _confirmCompleteAll() {
+    AppDialog.show(
+      context,
+      builder: (dialogCtx) => AppDialog(
+        title: 'Mark all lessons as completed?',
+        content:
+            'All lessons in this module will be marked as completed. You can reset later if needed.',
+        actions: [
+          AppDialogAction(
+            label: 'Cancel',
+            onPressed: () => Navigator.pop(dialogCtx),
+          ),
+          AppDialogAction(
+            label: 'Complete All',
+            isPrimary: true,
+            onPressed: () {
+              Navigator.pop(dialogCtx);
+              _handleCompleteAll();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmResetModule() {
+    AppDialog.show(
+      context,
+      builder: (dialogCtx) => AppDialog(
+        title: 'Reset all progress?',
+        content:
+            'Reset all progress? This cannot be undone. All lesson progress, exercise results, and custom practice sets in this module will be removed.',
+        actions: [
+          AppDialogAction(
+            label: 'Cancel',
+            onPressed: () => Navigator.pop(dialogCtx),
+          ),
+          AppDialogAction(
+            label: 'Reset',
+            isPrimary: true,
+            onPressed: () {
+              Navigator.pop(dialogCtx);
+              _handleResetModule();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final moduleAsync = ref.watch(moduleDetailProvider(widget.moduleId));
@@ -394,6 +502,7 @@ class _ModuleDetailScreenState extends ConsumerState<ModuleDetailScreen>
         ),
         data: (module) {
           final progressMap = _buildProgressMap(progressAsync);
+          final hasProgress = _moduleHasAnyProgress(module, progressMap);
           return CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -401,7 +510,7 @@ class _ModuleDetailScreenState extends ConsumerState<ModuleDetailScreen>
                 title: Text(module.title),
               ),
               SliverToBoxAdapter(child: _ModuleInfoSection(module: module)),
-              _buildCustomPracticeSliver(context, exerciseSetsAsync),
+              _buildCustomPracticeSliver(context, exerciseSetsAsync, hasProgress),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(AppSpacing.lg,
@@ -436,18 +545,17 @@ class _ModuleDetailScreenState extends ConsumerState<ModuleDetailScreen>
   Widget _buildCustomPracticeSliver(
     BuildContext context,
     AsyncValue<ModuleExerciseSummary> exerciseSetsAsync,
+    bool hasProgress,
   ) {
     return exerciseSetsAsync.when(
       loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
       error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
       data: (summary) {
-        if (!summary.eligible) {
-          return const SliverToBoxAdapter(child: SizedBox.shrink());
-        }
-
         final c = AppTheme.colors(context);
         final theme = Theme.of(context);
         final customSets = summary.moduleSets;
+        final hasBypassProgress = summary.completedLessonsCount > 0;
+        final shouldShowReset = hasProgress || hasBypassProgress;
 
         return SliverToBoxAdapter(
           child: Padding(
@@ -475,40 +583,42 @@ class _ModuleDetailScreenState extends ConsumerState<ModuleDetailScreen>
                       color: c.mutedForeground),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                if (_isCreatingCustom) ...[
-                  SizedBox(
-                    width: double.infinity,
-                    child: AppButton(
-                      label: 'Generating exercises...',
-                      variant: AppButtonVariant.secondary,
-                      onPressed: null,
-                      icon: const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child:
-                            CircularProgressIndicator(strokeWidth: 2),
+                if (summary.eligible) ...[
+                  if (_isCreatingCustom) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: AppButton(
+                        label: 'Generating exercises...',
+                        variant: AppButtonVariant.secondary,
+                        onPressed: null,
+                        icon: const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child:
+                              CircularProgressIndicator(strokeWidth: 2),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  SizedBox(
-                    width: double.infinity,
-                    child: AppButton(
-                      label: 'Cancel',
-                      variant: AppButtonVariant.outline,
-                      onPressed: () => _aiCancelToken?.cancel(),
+                    const SizedBox(height: AppSpacing.sm),
+                    SizedBox(
+                      width: double.infinity,
+                      child: AppButton(
+                        label: 'Cancel',
+                        variant: AppButtonVariant.outline,
+                        onPressed: () => _aiCancelToken?.cancel(),
+                      ),
                     ),
-                  ),
-                ] else
-                  SizedBox(
-                    width: double.infinity,
-                    child: AppButton(
-                      label: 'Create Custom Practice',
-                      variant: AppButtonVariant.primary,
-                      onPressed: _showCreationForm,
-                      icon: const Icon(Icons.add),
+                  ] else
+                    SizedBox(
+                      width: double.infinity,
+                      child: AppButton(
+                        label: 'Create Custom Practice',
+                        variant: AppButtonVariant.primary,
+                        onPressed: _showCreationForm,
+                        icon: const Icon(Icons.add),
+                      ),
                     ),
-                  ),
+                ],
                 if (_error != null) ...[
                   const SizedBox(height: AppSpacing.sm),
                   Text(
@@ -526,6 +636,50 @@ class _ModuleDetailScreenState extends ConsumerState<ModuleDetailScreen>
                       onTap: () => _showInfoSheet(set),
                       onCancel: () => _aiCancelToken?.cancel(),
                     )),
+                const SizedBox(height: AppSpacing.sm),
+                SizedBox(
+                  width: double.infinity,
+                  child: AppButton(
+                    label: _busyAction == _BusyAction.completeAll
+                        ? 'Completing all...'
+                        : 'Complete All',
+                    variant: AppButtonVariant.secondary,
+                    onPressed: _busyAction == _BusyAction.completeAll
+                        ? null
+                        : _confirmCompleteAll,
+                    icon: _busyAction == _BusyAction.completeAll
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2),
+                          )
+                        : const Icon(Icons.done_all),
+                  ),
+                ),
+                if (shouldShowReset) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  SizedBox(
+                    width: double.infinity,
+                    child: AppButton(
+                      label: _busyAction == _BusyAction.resetModule
+                          ? 'Resetting...'
+                          : 'Reset',
+                      variant: AppButtonVariant.outline,
+                      onPressed: _busyAction == _BusyAction.resetModule
+                          ? null
+                          : _confirmResetModule,
+                      icon: _busyAction == _BusyAction.resetModule
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2),
+                            )
+                          : const Icon(Icons.restart_alt),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

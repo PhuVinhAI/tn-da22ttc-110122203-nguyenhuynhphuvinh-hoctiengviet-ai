@@ -271,6 +271,18 @@ class ModuleExerciseSetsNotifier extends CachedRepository<ModuleExerciseSummary>
     await repo.resetExerciseSetProgress(setId);
     ref.read(dataChangeBusProvider.notifier).emit({'exercise-set'});
   }
+
+  Future<void> completeAllModuleProgress() async {
+    final repo = ref.read(lessonRepositoryProvider);
+    await repo.completeAllModuleProgress(moduleId);
+    ref.read(dataChangeBusProvider.notifier).emit({'progress', 'exercise-set'});
+  }
+
+  Future<void> resetModuleProgress() async {
+    final repo = ref.read(lessonRepositoryProvider);
+    await repo.resetModuleProgress(moduleId);
+    ref.read(dataChangeBusProvider.notifier).emit({'progress', 'exercise-set'});
+  }
 }
 
 final moduleExerciseSetsProvider = AsyncNotifierProvider.family<

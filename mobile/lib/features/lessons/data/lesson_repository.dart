@@ -309,6 +309,26 @@ class LessonRepository {
     }
   }
 
+  Future<void> completeAllModuleProgress(String moduleId) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        '/progress/module/$moduleId/complete-all',
+      );
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  Future<void> resetModuleProgress(String moduleId) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        '/progress/module/$moduleId/reset',
+      );
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
   Future<void> completeAllCourseProgress(String courseId) async {
     try {
       await _dio.post<Map<String, dynamic>>(

@@ -296,6 +296,45 @@ export class ProgressController {
     return this.progressService.getCourseProgress(user.id, courseId);
   }
 
+  @Post('module/:moduleId/complete-all')
+  @ApiOperation({
+    summary: 'Bypass hoàn thành toàn bộ module',
+    description: 'Đánh dấu hoàn thành tất cả lessons trong module.',
+  })
+  @ApiParam({ name: 'moduleId', description: 'ID của module' })
+  @ApiResponse({
+    status: 200,
+    description: 'Hoàn thành toàn bộ module thành công',
+  })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy module' })
+  async completeAllModuleProgress(
+    @CurrentUser() user: User,
+    @Param('moduleId') moduleId: string,
+  ) {
+    await this.progressService.completeAllModuleProgress(user.id, moduleId);
+    return { success: true };
+  }
+
+  @Post('module/:moduleId/reset')
+  @ApiOperation({
+    summary: 'Reset toàn bộ tiến độ module',
+    description:
+      'Xoá tất cả tiến độ, kết quả bài tập, và custom practice sets của module.',
+  })
+  @ApiParam({ name: 'moduleId', description: 'ID của module' })
+  @ApiResponse({
+    status: 200,
+    description: 'Reset module thành công',
+  })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy module' })
+  async resetModuleProgress(
+    @CurrentUser() user: User,
+    @Param('moduleId') moduleId: string,
+  ) {
+    await this.progressService.resetModuleProgress(user.id, moduleId);
+    return { success: true };
+  }
+
   @Post('course/:courseId/complete-all')
   @ApiOperation({
     summary: 'Bypass hoàn thành toàn bộ course',

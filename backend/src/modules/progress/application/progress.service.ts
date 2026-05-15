@@ -299,6 +299,20 @@ export class ProgressService {
     };
   }
 
+  async completeAllModuleProgress(
+    userId: string,
+    moduleId: string,
+  ): Promise<void> {
+    await this.progressTransactionService.completeAllModuleProgress(
+      userId,
+      moduleId,
+    );
+  }
+
+  async resetModuleProgress(userId: string, moduleId: string): Promise<void> {
+    await this.progressTransactionService.resetModuleProgress(userId, moduleId);
+  }
+
   async completeAllCourseProgress(
     userId: string,
     courseId: string,
