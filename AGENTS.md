@@ -1,92 +1,92 @@
 # AGENTS.md
 
-LUÔN LUÔN PHẢN HỒI BẰNG TIẾNG VIỆT!
+Always respond to the user in Vietnamese. All documentation, sub-agent interactions, and internal agent communication must be in English.
 
-## Cấu trúc Monorepo
+## Monorepo Structure
 
-Ba app độc lập, mỗi app cài riêng:
+Three independent apps, each installed separately:
 
-- **`backend/`** — NestJS v11 API (nằm trong bun workspace)
-- **`admin/`** — Electron + React + Vite admin panel desktop/web (**không** nằm trong bun workspace; cài riêng từ `admin/`)
-- **`mobile/`** — Flutter app (dùng `flutter pub get`, không phải bun)
+- **`backend/`** — NestJS v11 API (part of bun workspace)
+- **`admin/`** — Electron + React + Vite admin panel desktop/web (**not** in bun workspace; install separately from `admin/`)
+- **`mobile/`** — Flutter app (uses `flutter pub get`, not bun)
 
-Root `package.json` workspaces chỉ gồm `backend` và `packages/*` (chưa có thư mục `packages/`).
+Root `package.json` workspaces only include `backend` and `packages/*` (no `packages/` directory yet).
 
-## Lệnh
+## Commands
 
-**Mọi lệnh backend chạy từ `backend/`, không phải root** (script root như `bun run backend:dev` chỉ cd vào backend).
+**All backend commands run from `backend/`, not root** (root scripts like `bun run backend:dev` just cd into backend).
 
 ```
-# Hạ tầng (từ root)
+# Infrastructure (from root)
 bun run db:up          # docker-compose up (postgres:16 + redis:7)
 bun run db:down
 
-# Backend (từ backend/)
+# Backend (from backend/)
 bun run start:dev      # watch mode
 bun run build          # nest build
 bun run typecheck      # tsc --noEmit
 bun run lint           # eslint --fix
 bun run test           # jest unit tests (*.spec.ts)
 bun run test:e2e       # jest e2e tests (*.e2e-spec.ts)
-bun run test:integration  # custom bun scripts (KHÔNG phải jest)
-bun run test:integration:auth   # chạy 1 suite integration
-bun run admin:create   # tạo admin user
+bun run test:integration  # custom bun scripts (NOT jest)
+bun run test:integration:auth   # run a single integration suite
+bun run admin:create   # create admin user
 
-# Admin (từ admin/)
+# Admin (from admin/)
 bun run dev            # electron-vite dev (desktop)
-bun run dev:web        # vite dev (chỉ web)
+bun run dev:web        # vite dev (web only)
 bun run typecheck
 bun run lint
 ```
 
-**Thứ tự kiểm tra:** `lint -> typecheck -> test`
+**Check order:** `lint -> typecheck -> test`
 
-## Kiến trúc Backend
+## Backend Architecture
 
-- API prefix: `/api/v1` — Swagger tại `/api/v1/docs` (không phải `/api/docs`)
-- Config dùng `registerAs` theo namespace: `app`, `database`, `jwt`, `redis`, `mail` — truy cập bằng `configService.get('database.host')` v.v.
-- `synchronize: true` ở dev (TypeORM tự đồng bộ schema; không cần chạy migration thủ công)
-- Mọi entity extend `BaseEntity` → uuid `id`, `createdAt`, `updatedAt`, soft-delete `deletedAt`
-- Mọi response được wrap trong `{ data: T }` bởi `TransformInterceptor`
+- API prefix: `/api/v1` — Swagger at `/api/v1/docs` (not `/api/docs`)
+- Config uses `registerAs` per namespace: `app`, `database`, `jwt`, `redis`, `mail` — access via `configService.get('database.host')` etc.
+- `synchronize: true` in dev (TypeORM auto-syncs schema; no manual migration needed)
+- All entities extend `BaseEntity` → uuid `id`, `createdAt`, `updatedAt`, soft-delete `deletedAt`
+- All responses are wrapped in `{ data: T }` by `TransformInterceptor`
 
-## Auth & Guards (áp dụng toàn cục)
+## Auth & Guards (applied globally)
 
-- **JwtAuthGuard** mặc định bảo vệ mọi endpoint. Dùng `@Public()` để bỏ auth.
-- **ThrottlerGuard** — giới hạn 1000 req/60s (giới hạn cao để tương thích test).
-- **RolesGuard** — dùng `@Roles('admin')` để giới hạn.
-- **PermissionsGuard** — dùng `@RequirePermissions(Permission.X)` từ `common/enums`.
-- **@CurrentUser()** — param decorator lấy `request.user`.
-- **@Transactional()** — method decorator cho DB transaction (yêu cầu inject `DataSource` dưới tên `this.dataSource`).
+- **JwtAuthGuard** protects all endpoints by default. Use `@Public()` to skip auth.
+- **ThrottlerGuard** — rate limit 1000 req/60s (high limit for test compatibility).
+- **RolesGuard** — use `@Roles('admin')` to restrict.
+- **PermissionsGuard** — use `@RequirePermissions(Permission.X)` from `common/enums`.
+- **@CurrentUser()** — param decorator to get `request.user`.
+- **@Transactional()** — method decorator for DB transactions (requires injecting `DataSource` as `this.dataSource`).
 
 ## Style & Lint
 
 - **Backend prettier:** single quotes, trailing commas `"all"`
-- **Admin prettier:** single quotes, **không chấm phẩy**, trailing commas `"es5"`, printWidth 120
-- **Backend eslint:** `@typescript-eslint/no-explicit-any` là **OFF**; tsconfig `noImplicitAny` là **false**
-- **Backend tsconfig:** `removeComments: true` — comment bị xoá ở build output
+- **Admin prettier:** single quotes, **no semicolons**, trailing commas `"es5"`, printWidth 120
+- **Backend eslint:** `@typescript-eslint/no-explicit-any` is **OFF**; tsconfig `noImplicitAny` is **false**
+- **Backend tsconfig:** `removeComments: true` — comments are stripped from build output
 
 ## Testing
 
-- Unit tests: jest, file khớp `*.spec.ts` trong `src/`
-- E2E tests: jest với `test/jest-e2e.json`, file khớp `*.e2e-spec.ts` trong `test/`
-- Integration tests: custom bun scripts trong `scripts/test/suites/` — **không phải jest**, chạy bằng `bun run test:integration:*`
-- Integration và e2e tests cần `db:up` (postgres + redis đang chạy)
+- Unit tests: jest, files matching `*.spec.ts` in `src/`
+- E2E tests: jest with `test/jest-e2e.json`, files matching `*.e2e-spec.ts` in `test/`
+- Integration tests: custom bun scripts in `scripts/test/suites/` — **not jest**, run via `bun run test:integration:*`
+- Integration and e2e tests require `db:up` (postgres + redis running)
 
-## Môi trường
+## Environment
 
-- Copy `backend/.env.example` → `backend/.env` (đầy đủ hơn root `.env.example` — gồm JWT, Redis, Mail, Google OAuth)
-- Admin: copy `admin/.env.example` → `admin/.env` (chỉ có `VITE_API_BASE_URL`)
+- Copy `backend/.env.example` → `backend/.env` (more complete than root `.env.example` — includes JWT, Redis, Mail, Google OAuth)
+- Admin: copy `admin/.env.example` → `admin/.env` (only has `VITE_API_BASE_URL`)
 
 ## Agent skills
 
 ### Issue tracker
 
-Issues và PRDs sống trong `.scratch/` dưới dạng markdown. Xem `docs/agents/issue-tracker.md`.
+Issues and PRDs live in `.scratch/` as markdown. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-Năm role triage dùng label mặc định (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). Xem `docs/agents/triage-labels.md`.
+Five triage roles use default labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-Single-context repo. Đọc `CONTEXT.md` (nếu có) ở root và `docs/adr/`. Xem `docs/agents/domain.md`.
+Single-context repo. Read `CONTEXT.md` (if any) at root and `docs/adr/`. See `docs/agents/domain.md`.

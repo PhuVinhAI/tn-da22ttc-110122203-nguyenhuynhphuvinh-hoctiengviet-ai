@@ -6,30 +6,30 @@ Status: done
 
 ## What to build
 
-Học viên có thể tạo, xem, sửa, xoá mục tiêu ngày preset (EXERCISES, STUDY_MINUTES, LESSONS) qua backend API và mobile profile UI. Backend lưu DailyGoal entity với unique constraint (userId, goalType). Xoá dead field `dailyGoal` khỏi OnboardingDto. Thêm `notificationEnabled` + `notificationTime` vào User entity và DTOs. Mobile có đủ data/domain/presentation layer cho daily_goals feature, gồm CRUD trong profile section và DataChangeBus tag `daily-goal`.
+Learners can create, view, edit, and delete preset daily goals (EXERCISES, STUDY_MINUTES, LESSONS) via backend API and mobile profile UI. Backend stores DailyGoal entity with unique constraint (userId, goalType). Remove dead field `dailyGoal` from OnboardingDto. Add `notificationEnabled` + `notificationTime` to User entity and DTOs. Mobile has full data/domain/presentation layer for daily_goals feature, including CRUD in profile section and DataChangeBus tag `daily-goal`.
 
 ## Acceptance criteria
 
-- [x] `DailyGoal` entity extends `BaseEntity`, có `userId`, `goalType` (enum EXERCISES | STUDY_MINUTES | LESSONS), `targetValue`, unique constraint `(userId, goalType)`
-- [x] CRUD endpoints `/api/v1/daily-goals`: GET /, POST /, PATCH /:id, DELETE /:id — tất cả guard bằng JwtAuthGuard
-- [x] POST validate: không trùng goalType cho user, targetValue trong range hợp lệ (EXERCISES 1-50, STUDY_MINUTES 5-120, LESSONS 1-10)
-- [x] PATCH chỉ cho sửa `targetValue`, không đổi goalType
-- [x] DELETE xoá vĩnh viễn (hard delete, không soft-delete vì goal lặp lại mỗi ngày)
-- [x] User entity thêm `notificationEnabled: boolean` (default false), `notificationTime: string` (default '20:00', format HH:mm)
-- [x] `UpdateUserDto` + `UserResponseDto` thêm 2 field mới
-- [x] `OnboardingDto` xoá field `dailyGoal`
-- [x] Backend unit tests cho DailyGoalsService: CRUD logic, duplicate validation, range validation
-- [x] Mobile: `daily_goals/` feature directory với data/domain/presentation layers
-- [x] Mobile: repository gọi `/daily-goals` endpoints qua Dio
+- [x] `DailyGoal` entity extends `BaseEntity`, has `userId`, `goalType` (enum EXERCISES | STUDY_MINUTES | LESSONS), `targetValue`, unique constraint `(userId, goalType)`
+- [x] CRUD endpoints `/api/v1/daily-goals`: GET /, POST /, PATCH /:id, DELETE /:id — all guarded by JwtAuthGuard
+- [x] POST validation: no duplicate goalType for user, targetValue within valid range (EXERCISES 1-50, STUDY_MINUTES 5-120, LESSONS 1-10)
+- [x] PATCH only allows updating `targetValue`, not goalType
+- [x] DELETE permanently removes (hard delete, not soft-delete since goals repeat daily)
+- [x] User entity adds `notificationEnabled: boolean` (default false), `notificationTime: string` (default '20:00', format HH:mm)
+- [x] `UpdateUserDto` + `UserResponseDto` add 2 new fields
+- [x] `OnboardingDto` removes `dailyGoal` field
+- [x] Backend unit tests for DailyGoalsService: CRUD logic, duplicate validation, range validation
+- [x] Mobile: `daily_goals/` feature directory with data/domain/presentation layers
+- [x] Mobile: repository calling `/daily-goals` endpoints via Dio
 - [x] Mobile: models `DailyGoal` (id, goalType, targetValue)
-- [x] Mobile: providers cho goals list (CachedRepository + DataChangeBusSubscriber)
-- [x] Mobile: profile section "Mục tiêu hàng ngày" — danh sách goals, sửa target slider, xoá, thêm mới (picker goalType + slider)
-- [x] Mobile: DataChangeBus emit tag `daily-goal` khi CRUD goals
+- [x] Mobile: providers for goals list (CachedRepository + DataChangeBusSubscriber)
+- [x] Mobile: profile section "Daily Goals" — goal list, edit target slider, delete, add new (picker goalType + slider)
+- [x] Mobile: DataChangeBus emit tag `daily-goal` on goal CRUD
 - [x] Lint + typecheck + unit test pass
 
 ## Blocked by
 
-None — có thể bắt đầu ngay
+None — can start immediately
 
 ## Implementation notes
 
@@ -37,7 +37,7 @@ None — có thể bắt đầu ngay
 
 - `backend/src/common/enums/goal-type.enum.ts` — GoalType enum (EXERCISES, STUDY_MINUTES, LESSONS)
 - `backend/src/modules/daily-goals/domain/daily-goal.entity.ts` — DailyGoal entity extends BaseEntity, unique (userId, goalType), cascade delete on User
-- `backend/src/modules/daily-goals/application/daily-goals.repository.ts` — TypeORM repository với CRUD + findByUserIdAndGoalType
+- `backend/src/modules/daily-goals/application/daily-goals.repository.ts` — TypeORM repository with CRUD + findByUserIdAndGoalType
 - `backend/src/modules/daily-goals/application/daily-goals.service.ts` — Business logic: duplicate check, range validation, hard delete
 - `backend/src/modules/daily-goals/application/daily-goals.service.spec.ts` — 14 unit tests covering CRUD, duplicate, range validation per type
 - `backend/src/modules/daily-goals/dto/create-daily-goal.dto.ts` — CreateDailyGoalDto (goalType + targetValue)

@@ -6,19 +6,19 @@ Status: ready-for-agent
 
 ## What to build
 
-Học viên bật/tắt nhắc mục tiêu cục bộ và chọn giờ nhắc trong profile. Khi bật: lên lịch notification hàng ngày lúc notificationTime (VN timezone) nếu chưa đạt tất cả mục tiêu. Nếu đã đạt tất cả trước giờ nhắc → huỷ notification. Re-schedule khi app mở dựa trên trạng thái goal hiện tại. PreferencesService lưu offline keys cho scheduling.
+Learners toggle local goal reminders on/off and choose reminder time in profile. When enabled: schedule a daily notification at notificationTime (VN timezone) if not all goals are met. If all goals are met before the reminder time → cancel notification. Re-schedule when app opens based on current goal state. PreferencesService stores offline keys for scheduling.
 
 ## Acceptance criteria
 
-- [ ] Mobile: khởi tạo `flutter_local_notifications` trong app startup (channel + initialization settings)
-- [ ] Khi `notificationEnabled` = true: schedule notification hàng ngày lúc `notificationTime` (VN timezone)
-- [ ] Notification chỉ gửi nếu chưa đạt tất cả mục tiêu hôm nay (check allGoalsMet)
-- [ ] Nếu allGoalsMet trước giờ nhắc → huỷ scheduled notification
-- [ ] Re-schedule khi app mở (check current goal state + time)
-- [ ] Profile section "Mục tiêu hàng ngày" có notification toggle + time picker (visible khi enabled)
-- [ ] Toggle/time cập nhật cả backend (User entity) và PreferencesService (offline access)
-- [ ] PreferencesService thêm keys `notification_enabled` (bool, default false), `notification_time` (String, default '20:00')
-- [ ] Notification content hợp lý (vd: "Chưa đạt mục tiêu hôm nay! Hãy tiếp tục học nhé.")
+- [ ] Mobile: initialize `flutter_local_notifications` in app startup (channel + initialization settings)
+- [ ] When `notificationEnabled` = true: schedule daily notification at `notificationTime` (VN timezone)
+- [ ] Notification only sent if not all goals met today (check allGoalsMet)
+- [ ] If allGoalsMet before scheduled time → cancel scheduled notification
+- [ ] Re-schedule when app opens (check current goal state + time)
+- [ ] Profile section "Daily Goals" has notification toggle + time picker (visible when enabled)
+- [ ] Toggle/time updates both backend (User entity) and PreferencesService (offline access)
+- [ ] PreferencesService adds keys `notification_enabled` (bool, default false), `notification_time` (String, default '20:00')
+- [ ] Notification content is reasonable (e.g., "You haven't met your goals today! Keep studying.")
 - [ ] Lint + typecheck pass
 
 ## Blocked by

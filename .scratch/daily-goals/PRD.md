@@ -1,44 +1,44 @@
 Status: ready-for-agent
 
-# PRD: Mục tiêu hàng ngày
+# PRD: Daily Goals
 
 ## Problem Statement
 
-Học viên không có cách theo dõi tiến trình học tập mỗi ngày. Mục tiêu hàng ngày (`dailyGoal`) hiện là tính năng ma — onboarding DTO nhận giá trị nhưng backend không lưu, mobile lưu SharedPreferences nhưng không ai đọc. Không có progress theo ngày, chuỗi ngày đạt mục tiêu, hay nhắc nhở. Học viên không có động lực duy trì thói quen học đều đặn.
+Learners have no way to track daily study progress. The `dailyGoal` feature is currently a ghost — onboarding DTO accepts the value but the backend doesn't store it, mobile saves to SharedPreferences but nothing reads it. There is no per-day progress tracking, streak for days meeting goals, or reminders. Learners lack motivation to maintain a consistent study habit.
 
 ## Solution
 
-Xây dựng hệ thống mục tiêu ngày hoàn chỉnh: học viên đặt 1–3 preset mục tiêu (bài tập hoàn thành, phút truy cập app, bài học hoàn thành), xem tiến trình hôm nay trên home card, quản lý CRUD trong profile, và nhận nhắc cục bộ nếu chưa đạt goal. Theo dõi chuỗi ngày liên tiếp đạt tất cả mục tiêu để tạo động lực duy trì thói quen.
+Build a complete daily goal system: learners set 1–3 preset goals (exercises completed, app access minutes, lessons completed), view today's progress on a home card, manage CRUD in profile, and receive local reminders if goals aren't met. Track consecutive days meeting all goals to create motivation for maintaining the habit.
 
 ## User Stories
 
-1. As a Học viên, I want to set a daily goal for exercises completed, so that I have a clear target to work towards each day
-2. As a Học viên, I want to set a daily goal for minutes spent in the app, so that I build a consistent study habit
-3. As a Học viên, I want to set a daily goal for lessons completed, so that I make steady progress through my course
-4. As a Học viên, I want to have multiple active goals at the same time, so that I can track different aspects of my daily learning
-5. As a Học viên, I want my goals to repeat every day automatically, so that I don't have to re-set them each morning
-6. As a Học viên, I want to add a new goal from my profile at any time, so that I can adjust my targets as my routine changes
-7. As a Học viên, I want to edit the target value of an existing goal, so that I can make it easier or harder
-8. As a Học viên, I want to delete a goal permanently, so that I can remove targets I no longer care about
-9. As a Học viên, I want to see a "Tiến trình hôm nay" card on my home screen, so that I know how close I am to completing my daily goals
-10. As a Học viên, I want to see progress for each individual goal inside the home card, so that I know which goals are done and which need more effort
-11. As a Học viên, I want to see my current streak on the home card, so that I feel motivated to keep my chain going
-12. As a Học viên, I want to see a celebratory state when all goals are met, so that I feel a sense of achievement
-13. As a Học viên, I want to see a "Mục tiêu hàng ngày" section in my profile, so that I can manage my goals in one place
-14. As a Học viên, I want to toggle a daily reminder notification on or off, so that I can choose whether to be nudged
-15. As a Học viên, I want to choose what time the reminder arrives, so that it fits my schedule
-16. As a Học viên, I want to receive a local notification at my chosen time if I haven't met my goals, so that I don't forget to study
-17. As a Học viên, I want to NOT receive a notification if I've already met all my goals, so that I'm not bothered unnecessarily
-18. As a Học viên, I want to set goals during onboarding, so that I start with a target from day one
-19. As a Học viên, I want onboarding to pre-select default goals with reasonable values, so that I can accept defaults quickly or customize them
-20. As a Học viên, I want each goal type to have a sensible range and default, so that I don't set impossible or trivial targets
-21. As a Học viên, I want my streak to increase only when ALL my active goals are met, so that the streak represents full commitment
-22. As a Học viên, I want to see my longest streak ever in my profile, so that I can aim to beat my record
-23. As a Học viên, I want the app to count an exercise as progress regardless of correct/incorrect, so that effort is rewarded even when I make mistakes
-24. As a Học viên, I want the app to count minutes whenever the app is in the foreground, so that all my app usage contributes to my time goal
-25. As a Học viên, I want the daily period to be a calendar day in Vietnam time, so that my "today" matches my lived experience
-26. As a Học viên, I want my goal settings to persist on the server, so that they survive app reinstall or device change
-27. As a Học viên, I want my progress to update when I return to the home screen, so that I see fresh data after studying
+1. As a learner, I want to set a daily goal for exercises completed, so that I have a clear target to work towards each day
+2. As a learner, I want to set a daily goal for minutes spent in the app, so that I build a consistent study habit
+3. As a learner, I want to set a daily goal for lessons completed, so that I make steady progress through my course
+4. As a learner, I want to have multiple active goals at the same time, so that I can track different aspects of my daily learning
+5. As a learner, I want my goals to repeat every day automatically, so that I don't have to re-set them each morning
+6. As a learner, I want to add a new goal from my profile at any time, so that I can adjust my targets as my routine changes
+7. As a learner, I want to edit the target value of an existing goal, so that I can make it easier or harder
+8. As a learner, I want to delete a goal permanently, so that I can remove targets I no longer care about
+9. As a learner, I want to see a "Today's Progress" card on my home screen, so that I know how close I am to completing my daily goals
+10. As a learner, I want to see progress for each individual goal inside the home card, so that I know which goals are done and which need more effort
+11. As a learner, I want to see my current streak on the home card, so that I feel motivated to keep my chain going
+12. As a learner, I want to see a celebratory state when all goals are met, so that I feel a sense of achievement
+13. As a learner, I want to see a "Daily Goals" section in my profile, so that I can manage my goals in one place
+14. As a learner, I want to toggle a daily reminder notification on or off, so that I can choose whether to be nudged
+15. As a learner, I want to choose what time the reminder arrives, so that it fits my schedule
+16. As a learner, I want to receive a local notification at my chosen time if I haven't met my goals, so that I don't forget to study
+17. As a learner, I want to NOT receive a notification if I've already met all my goals, so that I'm not bothered unnecessarily
+18. As a learner, I want to set goals during onboarding, so that I start with a target from day one
+19. As a learner, I want onboarding to pre-select default goals with reasonable values, so that I can accept defaults quickly or customize them
+20. As a learner, I want each goal type to have a sensible range and default, so that I don't set impossible or trivial targets
+21. As a learner, I want my streak to increase only when ALL my active goals are met, so that the streak represents full commitment
+22. As a learner, I want to see my longest streak ever in my profile, so that I can aim to beat my record
+23. As a learner, I want the app to count an exercise as progress regardless of correct/incorrect, so that effort is rewarded even when I make mistakes
+24. As a learner, I want the app to count minutes whenever the app is in the foreground, so that all my app usage contributes to my time goal
+25. As a learner, I want the daily period to be a calendar day in Vietnam time, so that my "today" matches my lived experience
+26. As a learner, I want my goal settings to persist on the server, so that they survive app reinstall or device change
+27. As a learner, I want my progress to update when I return to the home screen, so that I see fresh data after studying
 
 ## Implementation Decisions
 
@@ -48,9 +48,9 @@ Three preset goal types with fixed ranges and defaults:
 
 | goalType | Unit | Range | Default |
 |---|---|---|---|
-| `EXERCISES` | bài tập | 1–50 | 10 |
-| `STUDY_MINUTES` | phút | 5–120 | 15 |
-| `LESSONS` | bài học | 1–10 | 2 |
+| `EXERCISES` | exercises | 1–50 | 10 |
+| `STUDY_MINUTES` | minutes | 5–120 | 15 |
+| `LESSONS` | lessons | 1–10 | 2 |
 
 No custom goal names or custom goal types. Each type requires its own backend aggregation logic, so the set is controlled.
 
@@ -72,7 +72,7 @@ Active goals carry forward to the next day automatically. Deleting a goal remove
 
 ### Study minutes — app foreground time
 
-"Phút truy cập app" = total time the app is in the foreground (not minimized, not locked). A global `WidgetsBindingObserver` starts/stops a timer on app lifecycle changes. The accumulated minutes for today are synced to the backend on events (exercise completed, screen change, app paused). The backend stores a single `studyMinutes` value per user per date — it does not track sessions.
+"App access minutes" = total time the app is in the foreground (not minimized, not locked). A global `WidgetsBindingObserver` starts/stops a timer on app lifecycle changes. The accumulated minutes for today are synced to the backend on events (exercise completed, screen change, app paused). The backend stores a single `studyMinutes` value per user per date — it does not track sessions.
 
 ### New backend module: DailyGoals
 
@@ -158,7 +158,7 @@ New feature directory `mobile/lib/features/daily_goals/`:
 - `daily_streak.dart` — model: currentStreak, longestStreak
 
 **Presentation layer:**
-- `widgets/daily_goal_progress_card.dart` — home screen card "Tiến trình hôm nay"
+- `widgets/daily_goal_progress_card.dart` — home screen card "Today's Progress"
 - `widgets/daily_goal_section.dart` — profile section with CRUD + notification settings
 - `widgets/daily_goal_toggle_tile.dart` — reusable tile for onboarding and profile
 
@@ -166,16 +166,16 @@ New feature directory `mobile/lib/features/daily_goals/`:
 
 Insert `DailyGoalProgressCard` between ContinueCard and Courses section. The card shows:
 - Streak badge (if streak > 0)
-- Per-goal progress bar/ring with label (e.g., "8/10 bài tập")
+- Per-goal progress bar/ring with label (e.g., "8/10 exercises")
 - Celebratory state when all goals met
 
 Watch `dailyGoalProgressProvider` which subscribes to `{'daily-goal', 'exercise', 'progress'}` tags on DataChangeBus.
 
 ### Profile screen modification
 
-Add "Mục tiêu hàng ngày" section between ProfileInfoCard and ThemeSection. Contains:
+Add "Daily Goals" section between ProfileInfoCard and ThemeSection. Contains:
 - List of active goals with edit (target slider) and delete
-- "Thêm mục tiêu" button — picker for goal type + slider
+- "Add goal" button — picker for goal type + slider
 - Notification toggle + time picker (if enabled)
 
 ### Onboarding screen modification
