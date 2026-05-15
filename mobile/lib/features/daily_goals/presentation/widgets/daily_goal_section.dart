@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../data/daily_goals_providers.dart';
+import '../../data/daily_goal_progress_providers.dart';
 import '../../domain/daily_goal_models.dart';
 
 class DailyGoalSection extends ConsumerWidget {
@@ -61,6 +62,7 @@ class _GoalsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = AppTheme.colors(context);
+    final progressAsync = ref.watch(dailyGoalProgressProvider);
 
     return AppCard(
       variant: AppCardVariant.outlined,
@@ -82,6 +84,39 @@ class _GoalsCard extends ConsumerWidget {
             )
           else
             ...goals.map((goal) => _GoalTile(goal: goal)),
+          progressAsync.when(
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (progress) {
+              if (progress.longestStreak <= 0) return const SizedBox.shrink();
+              return Column(
+                children: [
+                  AppDivider(),
+                  AppListItem(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.sm,
+                    ),
+                    leading: Icon(
+                      Icons.emoji_events,
+                      color: c.primary,
+                      size: 20,
+                    ),
+                    titleWidget: Text(
+                      'Kỷ lục chuỗi',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    subtitleWidget: Text(
+                      '${progress.longestStreak} ngày liên tiếp',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
           AppDivider(),
           AppListItem(
             padding: const EdgeInsets.symmetric(

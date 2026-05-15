@@ -45,6 +45,8 @@ class DailyGoalProgress {
     required this.lessonsCompleted,
     required this.allGoalsMet,
     required this.goals,
+    required this.currentStreak,
+    required this.longestStreak,
   });
 
   factory DailyGoalProgress.fromJson(Map<String, dynamic> json) {
@@ -57,6 +59,8 @@ class DailyGoalProgress {
       goals: (json['goals'] as List<dynamic>)
           .map((e) => GoalProgress.fromJson(e as Map<String, dynamic>))
           .toList(),
+      currentStreak: (json['currentStreak'] as num?)?.toInt() ?? 0,
+      longestStreak: (json['longestStreak'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -66,6 +70,8 @@ class DailyGoalProgress {
   final int lessonsCompleted;
   final bool allGoalsMet;
   final List<GoalProgress> goals;
+  final int currentStreak;
+  final int longestStreak;
 
   Map<String, dynamic> toJson() {
     return {
@@ -75,6 +81,8 @@ class DailyGoalProgress {
       'lessonsCompleted': lessonsCompleted,
       'allGoalsMet': allGoalsMet,
       'goals': goals.map((g) => g.toJson()).toList(),
+      'currentStreak': currentStreak,
+      'longestStreak': longestStreak,
     };
   }
 }

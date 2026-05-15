@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DailyGoalProgressRepository } from './daily-goal-progress.repository';
 import { DailyGoalsRepository } from './daily-goals.repository';
+import { DailyStreakService } from './daily-streak.service';
 import { UserExerciseResultsRepository } from '../../exercises/application/repositories/user-exercise-results.repository';
 import { ProgressRepository } from '../../progress/application/progress.repository';
 import { GoalType } from '../../../common/enums';
@@ -16,6 +17,7 @@ export class DailyGoalProgressService {
   constructor(
     private readonly progressRepository: DailyGoalProgressRepository,
     private readonly goalsRepository: DailyGoalsRepository,
+    private readonly streakService: DailyStreakService,
     private readonly exerciseResultsRepository: UserExerciseResultsRepository,
     private readonly userProgressRepository: ProgressRepository,
   ) {}
@@ -63,6 +65,12 @@ export class DailyGoalProgressService {
 
     const allGoalsMet = goals.length > 0 && goalProgresses.every((g) => g.met);
 
+    const streak = await this.streakService.updateStreak(
+      userId,
+      allGoalsMet,
+      today,
+    );
+
     return {
       date: today,
       exercisesCompleted,
@@ -70,6 +78,8 @@ export class DailyGoalProgressService {
       lessonsCompleted,
       allGoalsMet,
       goals: goalProgresses,
+      currentStreak: streak?.currentStreak ?? 0,
+      longestStreak: streak?.longestStreak ?? 0,
     };
   }
 

@@ -46,4 +46,12 @@ export class DailyGoalProgressResponseDto {
   @Expose()
   @ApiProperty({ type: [GoalProgressDto] })
   goals: GoalProgressDto[];
+
+  @Expose()
+  @ApiProperty()
+  currentStreak: number;
+
+  @Expose()
+  @ApiProperty()
+  longestStreak: number;
 }

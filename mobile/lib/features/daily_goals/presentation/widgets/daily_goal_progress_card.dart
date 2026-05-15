@@ -81,6 +81,10 @@ class _ProgressData extends StatelessWidget {
     final c = AppTheme.colors(context);
     final theme = Theme.of(context);
 
+    if (progress.allGoalsMet) {
+      return _CelebratoryState(progress: progress);
+    }
+
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -95,15 +99,78 @@ class _ProgressData extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              if (progress.allGoalsMet)
+              if (progress.currentStreak > 0)
                 AppBadge(
-                  label: 'Hoàn thành!',
-                  color: c.success,
+                  label: '${progress.currentStreak} ngày liên tiếp',
+                  color: c.primary,
                 ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
           ...progress.goals.map((goal) => _GoalProgressRow(goal: goal)),
+        ],
+      ),
+    );
+  }
+}
+
+class _CelebratoryState extends StatelessWidget {
+  const _CelebratoryState({required this.progress});
+  final DailyGoalProgress progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Tiến trình hôm nay',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              AppBadge(
+                label: 'Hoàn thành!',
+                color: c.success,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Icon(Icons.celebration, size: 48, color: c.success),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Tuyệt vời! Bạn đã hoàn thành tất cả mục tiêu hôm nay!',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: c.success,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          if (progress.currentStreak > 0) ...[
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.local_fire_department, color: c.primary, size: 20),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  '${progress.currentStreak} ngày liên tiếp',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: c.primary,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
