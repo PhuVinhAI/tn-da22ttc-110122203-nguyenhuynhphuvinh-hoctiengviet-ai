@@ -12,19 +12,25 @@ class DailyGoalProgressCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final progressAsync = ref.watch(dailyGoalProgressProvider);
 
-    return AppCard(
-      variant: AppCardVariant.outlined,
-      borderRadius: AppRadius.lg,
-      clipBehavior: Clip.antiAlias,
-      padding: EdgeInsets.zero,
-      child: progressAsync.when(
-        loading: () => const _ProgressShimmer(),
-        error: (_, __) => const SizedBox.shrink(),
-        data: (progress) {
-          if (progress.goals.isEmpty) return const SizedBox.shrink();
-          return _ProgressData(progress: progress);
-        },
+    return progressAsync.when(
+      loading: () => AppCard(
+        variant: AppCardVariant.outlined,
+        borderRadius: AppRadius.lg,
+        clipBehavior: Clip.antiAlias,
+        padding: EdgeInsets.zero,
+        child: const _ProgressShimmer(),
       ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (progress) {
+        if (progress.goals.isEmpty) return const SizedBox.shrink();
+        return AppCard(
+          variant: AppCardVariant.outlined,
+          borderRadius: AppRadius.lg,
+          clipBehavior: Clip.antiAlias,
+          padding: EdgeInsets.zero,
+          child: _ProgressData(progress: progress),
+        );
+      },
     );
   }
 }
@@ -92,6 +98,8 @@ class _ProgressData extends StatelessWidget {
         children: [
           Row(
             children: [
+              Icon(Icons.flag, size: 18, color: c.primary),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 'Tiến trình hôm nay',
                 style: theme.textTheme.titleSmall?.copyWith(
@@ -99,11 +107,7 @@ class _ProgressData extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              if (progress.currentStreak > 0)
-                AppBadge(
-                  label: '${progress.currentStreak} ngày liên tiếp',
-                  color: c.primary,
-                ),
+              _StreakBadge(streak: progress.currentStreak),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -130,6 +134,8 @@ class _CelebratoryState extends StatelessWidget {
         children: [
           Row(
             children: [
+              Icon(Icons.flag, size: 18, color: c.primary),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 'Tiến trình hôm nay',
                 style: theme.textTheme.titleSmall?.copyWith(
@@ -154,23 +160,8 @@ class _CelebratoryState extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          if (progress.currentStreak > 0) ...[
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.local_fire_department, color: c.primary, size: 20),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  '${progress.currentStreak} ngày liên tiếp',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: c.primary,
-                  ),
-                ),
-              ],
-            ),
-          ],
+          const SizedBox(height: AppSpacing.md),
+          _StreakBadge(streak: progress.currentStreak, centered: true),
         ],
       ),
     );
@@ -220,6 +211,49 @@ class _GoalProgressRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _StreakBadge extends StatelessWidget {
+  const _StreakBadge({required this.streak, this.centered = false});
+  final int streak;
+  final bool centered;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    final theme = Theme.of(context);
+    final child = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.local_fire_department, color: c.primary, size: 16),
+        const SizedBox(width: AppSpacing.xs),
+        Text(
+          '$streak',
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: c.primary,
+          ),
+        ),
+      ],
+    );
+
+    if (centered) {
+      return Center(child: child);
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: c.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        border: Border.all(color: c.primary.withValues(alpha: 0.3), width: 1),
+      ),
+      child: child,
     );
   }
 }
