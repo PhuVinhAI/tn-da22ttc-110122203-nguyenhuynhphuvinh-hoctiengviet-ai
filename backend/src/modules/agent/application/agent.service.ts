@@ -238,6 +238,14 @@ export class AgentService {
       activeConversationId = created.id;
     }
 
+    // Announce the resolved conversation id as the first event so mobile
+    // clients can persist it for follow-up "Soạn tiếp" messages and
+    // distinguish from a "Reset"-triggered fresh conversation.
+    yield {
+      type: 'conversation_started',
+      conversationId: activeConversationId,
+    };
+
     const conversation =
       await this.conversationService.findById(activeConversationId);
     const user = await this.usersService.findById(conversation.userId);

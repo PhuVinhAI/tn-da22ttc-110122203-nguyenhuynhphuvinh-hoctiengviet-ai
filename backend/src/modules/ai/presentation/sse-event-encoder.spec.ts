@@ -8,6 +8,19 @@ describe('SseEventEncoder', () => {
     encoder = new SseEventEncoder();
   });
 
+  it('encodes conversation_started with conversationId', () => {
+    const out = encoder.encode({
+      type: 'conversation_started',
+      conversationId: 'conv-abc',
+    });
+
+    expect(out.type).toBe('conversation_started');
+    expect(typeof out.data).toBe('string');
+    expect(JSON.parse(out.data as string)).toEqual({
+      conversationId: 'conv-abc',
+    });
+  });
+
   it('encodes tool_start with name, displayName, args', () => {
     const event: StreamEvent = {
       type: 'tool_start',

@@ -586,7 +586,7 @@ describe('AgentService', () => {
       } as any);
     });
 
-    it('yields text_chunk + done for a plain text response (no tool calls)', async () => {
+    it('yields conversation_started + text_chunk + done for a plain text response (no tool calls)', async () => {
       aiProvider.chat.mockResolvedValue({
         text: 'Bạn đang học rất tốt!',
         usageMetadata: { promptTokenCount: 5, candidatesTokenCount: 3 },
@@ -597,9 +597,26 @@ describe('AgentService', () => {
       );
 
       expect(events).toEqual([
+        { type: 'conversation_started', conversationId },
         { type: 'text_chunk', text: 'Bạn đang học rất tốt!' },
         expect.objectContaining({ type: 'done', interrupted: false }),
       ]);
+    });
+
+    it('emits conversation_started as the very first event for a lazily-created conversation', async () => {
+      aiProvider.chat.mockResolvedValue({
+        text: 'hi',
+        usageMetadata: { promptTokenCount: 1, candidatesTokenCount: 1 },
+      });
+
+      const events = await collect(
+        service.runTurnStream('user-1', null, userMessage, screenContext),
+      );
+
+      expect(events[0]).toEqual({
+        type: 'conversation_started',
+        conversationId: 'conv-new',
+      });
     });
 
     it('persists the user message before invoking the AI provider', async () => {
@@ -663,6 +680,7 @@ describe('AgentService', () => {
       );
 
       expect(events).toEqual([
+        { type: 'conversation_started', conversationId },
         {
           type: 'tool_start',
           name: 'mock_tool',

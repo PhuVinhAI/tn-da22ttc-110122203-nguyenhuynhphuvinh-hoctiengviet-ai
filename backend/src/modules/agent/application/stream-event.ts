@@ -9,12 +9,25 @@
  * "Streaming protocol — single SSE endpoint with typed events").
  */
 export type StreamEvent =
+  | ConversationStartedEvent
   | ToolStartEvent
   | ToolResultEvent
   | TextChunkEvent
   | ProposeEvent
   | ErrorEvent
   | DoneEvent;
+
+/**
+ * Emitted exactly once per turn, as the very first event after the
+ * agent has resolved (or lazy-created) the target conversation. Mobile
+ * clients persist this so subsequent "Soạn tiếp" follow-ups can reuse
+ * the same `conversationId`, and so a "Reset" can drop it to spin up
+ * a fresh conversation with the current `screenContext`.
+ */
+export interface ConversationStartedEvent {
+  type: 'conversation_started';
+  conversationId: string;
+}
 
 export interface ToolStartEvent {
   type: 'tool_start';

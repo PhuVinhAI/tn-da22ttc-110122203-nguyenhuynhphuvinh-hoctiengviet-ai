@@ -16,6 +16,11 @@ import { StreamEvent } from '../../agent/application/stream-event';
 export class SseEventEncoder {
   encode(event: StreamEvent): MessageEvent {
     switch (event.type) {
+      case 'conversation_started':
+        return {
+          type: 'conversation_started',
+          data: JSON.stringify({ conversationId: event.conversationId }),
+        };
       case 'tool_start':
         return {
           type: 'tool_start',

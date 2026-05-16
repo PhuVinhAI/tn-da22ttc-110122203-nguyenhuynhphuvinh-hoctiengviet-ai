@@ -162,25 +162,28 @@ describe('POST /ai/chat/stream (e2e)', () => {
 
     const packets = parseSse(res.body as unknown as string);
     expect(packets.map((p) => p.event)).toEqual([
+      'conversation_started',
       'tool_start',
       'tool_result',
       'text_chunk',
       'done',
     ]);
 
-    expect(packets[0].data).toEqual({
+    expect(typeof packets[0].data.conversationId).toBe('string');
+    expect((packets[0].data.conversationId as string).length).toBeGreaterThan(0);
+    expect(packets[1].data).toEqual({
       name: 'get_user_summary',
       displayName: 'Đang tóm tắt thông tin của bạn...',
       args: {},
     });
-    expect(packets[1].data).toEqual({
+    expect(packets[2].data).toEqual({
       name: 'get_user_summary',
       ok: true,
     });
-    expect(packets[2].data.text).toContain('Bạn đã học liên tục');
-    expect(packets[3].data.interrupted).toBe(false);
-    expect(typeof packets[3].data.messageId).toBe('string');
-    expect(packets[3].data.messageId.length).toBeGreaterThan(0);
+    expect(packets[3].data.text).toContain('Bạn đã học liên tục');
+    expect(packets[4].data.interrupted).toBe(false);
+    expect(typeof packets[4].data.messageId).toBe('string');
+    expect(packets[4].data.messageId.length).toBeGreaterThan(0);
   });
 
   it('uses the rendered assistant-tutor system instruction when screenContext is non-empty', async () => {
