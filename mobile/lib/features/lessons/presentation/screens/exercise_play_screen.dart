@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/sync/sync.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
+import '../../../assistant/data/current_exercise_attempt_provider.dart';
 import '../../data/lesson_providers.dart';
 import '../../domain/exercise_models.dart';
 import '../../domain/exercise_session.dart';
@@ -66,6 +67,18 @@ class _ExercisePlayScreenState extends ConsumerState<ExercisePlayScreen> {
       _submitting = false;
       _submitError = null;
     }
+  }
+
+  @override
+  void dispose() {
+    // Clear the in-flight attempt snapshot so the assistant bar stops
+    // exposing a stale exercise context after the learner navigates away.
+    try {
+      ref.read(currentExerciseAttemptProvider.notifier).clear();
+    } catch (_) {
+      // Provider container may already be disposed (e.g. on app exit).
+    }
+    super.dispose();
   }
 
   /// Syncs `_currentAnswer`, `_submitted`, `_result` from `_answers` / `_results`.
@@ -354,10 +367,38 @@ class _ExercisePlayScreenState extends ConsumerState<ExercisePlayScreen> {
     );
   }
 
+  void _syncAssistantContext() {
+    if (!mounted) return;
+    final exercise = _currentExercise;
+    final notifier = ref.read(currentExerciseAttemptProvider.notifier);
+    if (exercise == null || _exercises.isEmpty) {
+      notifier.clear();
+      return;
+    }
+    notifier.update(
+      CurrentExerciseAttempt(
+        setId: widget.setId,
+        lessonId: widget.lessonId,
+        moduleId: widget.moduleId,
+        courseId: widget.courseId,
+        exerciseId: exercise.id,
+        exerciseType: exercise.exerciseType.value,
+        question: exercise.question,
+        userAnswer: _currentAnswer,
+        exerciseIndex: _currentIndex,
+        totalExercises: _exercises.length,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
     final theme = Theme.of(context);
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _syncAssistantContext(),
+    );
 
     final exercisesAsync = ref.watch(lessonExercisesProvider(_args));
 

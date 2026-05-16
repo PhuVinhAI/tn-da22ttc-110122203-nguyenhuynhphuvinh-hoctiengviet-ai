@@ -10,6 +10,7 @@ import 'core/router/app_router.dart';
 import 'core/providers/providers.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/storage/preferences_service.dart';
+import 'features/assistant/presentation/global_assistant_shell.dart';
 import 'features/daily_goals/data/notification_service.dart';
 import 'features/lessons/data/exercise_session_service.dart';
 import 'features/lessons/data/lesson_providers.dart';
@@ -62,6 +63,8 @@ class LinVNixApp extends ConsumerWidget {
       darkTheme: AppTheme.dark(),
       themeMode: themeMode,
       routerConfig: router,
+      builder: (context, child) =>
+          GlobalAssistantShell(child: child ?? const SizedBox.shrink()),
     );
   }
 }
