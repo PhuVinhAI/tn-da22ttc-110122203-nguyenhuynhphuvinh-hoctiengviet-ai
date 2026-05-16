@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:integration": "bun run scripts/test/run-all-tests.ts",
     "test:integration:auth": "bun run scripts/test/suites/auth.test.ts",
+    "test:integration:bookmarks": "bun run scripts/test/suites/bookmarks.test.ts",
     "test:integration:courses": "bun run scripts/test/suites/courses.test.ts",
     "test:integration:vocabularies": "bun run scripts/test/suites/vocabularies.test.ts",
     "test:integration:dialect": "bun run scripts/test/run-dialect-test.ts",

@@ -39,6 +39,66 @@ describe('UserExerciseResultsRepository', () => {
     );
   });
 
+  describe('findByUserId', () => {
+    it('queries by userId ordered by attemptedAt DESC with no limit by default', async () => {
+      mockRepo.find.mockResolvedValue([]);
+
+      await repository.findByUserId('user-1');
+
+      expect(mockRepo.find).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        order: { attemptedAt: 'DESC' },
+      });
+    });
+
+    it('applies the provided limit when within [1..50]', async () => {
+      mockRepo.find.mockResolvedValue([]);
+
+      await repository.findByUserId('user-1', { limit: 5 });
+
+      expect(mockRepo.find).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        order: { attemptedAt: 'DESC' },
+        take: 5,
+      });
+    });
+
+    it('clamps limit > 50 down to 50 (the hard upper bound)', async () => {
+      mockRepo.find.mockResolvedValue([]);
+
+      await repository.findByUserId('user-1', { limit: 999 });
+
+      expect(mockRepo.find).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        order: { attemptedAt: 'DESC' },
+        take: 50,
+      });
+    });
+
+    it('coerces limit < 1 up to 1 (no negative/zero takes hitting the DB)', async () => {
+      mockRepo.find.mockResolvedValue([]);
+
+      await repository.findByUserId('user-1', { limit: 0 });
+
+      expect(mockRepo.find).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        order: { attemptedAt: 'DESC' },
+        take: 1,
+      });
+    });
+
+    it('treats limit=undefined as "no limit" (forward compat with callers that pass {})', async () => {
+      mockRepo.find.mockResolvedValue([]);
+
+      await repository.findByUserId('user-1', {});
+
+      expect(mockRepo.find).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        order: { attemptedAt: 'DESC' },
+      });
+    });
+  });
+
   describe('upsertResult', () => {
     it('inserts new exercise result when no conflict', async () => {
       await repository.upsertResult(

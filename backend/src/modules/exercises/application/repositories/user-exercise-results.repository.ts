@@ -15,11 +15,26 @@ export class UserExerciseResultsRepository {
     return this.repository.save(result);
   }
 
-  async findByUserId(userId: string): Promise<UserExerciseResult[]> {
-    return this.repository.find({
+  async findByUserId(
+    userId: string,
+    opts?: { limit?: number },
+  ): Promise<UserExerciseResult[]> {
+    const options: {
+      where: { userId: string };
+      order: { attemptedAt: 'DESC' };
+      take?: number;
+    } = {
       where: { userId },
       order: { attemptedAt: 'DESC' },
-    });
+    };
+
+    if (opts && opts.limit !== undefined) {
+      // Clamp to [1..50] so a misbehaving caller (or a hostile tool input
+      // that slipped past Zod) cannot ask for unlimited rows.
+      options.take = Math.max(1, Math.min(50, opts.limit));
+    }
+
+    return this.repository.find(options);
   }
 
   async findByUserAndExercise(

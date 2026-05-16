@@ -124,8 +124,11 @@ export class ExercisesService implements ExerciseStatsPort {
     return result;
   }
 
-  async getUserResults(userId: string): Promise<UserExerciseResult[]> {
-    return this.userExerciseResultsRepository.findByUserId(userId);
+  async getUserResults(
+    userId: string,
+    opts?: { limit?: number },
+  ): Promise<UserExerciseResult[]> {
+    return this.userExerciseResultsRepository.findByUserId(userId, opts);
   }
 
   async getUserStats(userId: string) {
