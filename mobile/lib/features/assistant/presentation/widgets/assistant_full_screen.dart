@@ -12,6 +12,7 @@ import '../../data/conversation_model.dart';
 import '../../data/screen_context_provider.dart';
 import '../../domain/assistant_state.dart';
 import 'conversation_drawer.dart';
+import 'proposal_card.dart';
 
 /// Full-screen chat view. Shows the complete conversation history with
 /// user bubbles (right-aligned) and AI messages (full-width markdown).
@@ -172,14 +173,45 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
       );
     }
 
+    // Watch for proposals from the current streaming state.
+    final assistantState = ref.watch(assistantStateMachineProvider);
+    final proposals = assistantState is AssistantMidReading
+        ? assistantState.proposals
+        : <ProposalState>[];
+
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.md,
       ),
-      itemCount: _messages.length,
-      itemBuilder: (ctx, i) => _MessageBubble(message: _messages[i]),
+      itemCount: _messages.length + (proposals.isNotEmpty ? 1 : 0),
+      itemBuilder: (ctx, i) {
+        if (i < _messages.length) {
+          return _MessageBubble(message: _messages[i]);
+        }
+        // Render proposal cards after the last message.
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var j = 0; j < proposals.length; j++)
+              ProposalCard(
+                proposal: proposals[j],
+                index: j,
+                onDecline: (idx) => ref
+                    .read(assistantChatNotifierProvider)
+                    .dismissProposal(idx),
+                onSuccess: (idx) => ref
+                    .read(assistantChatNotifierProvider)
+                    .updateProposal(
+                      idx,
+                      proposals[idx]
+                          .copyWith(status: ProposalCardStatus.success),
+                    ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

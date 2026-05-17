@@ -115,6 +115,8 @@ class ProposeEvent extends AssistantEvent {
     required this.description,
     required this.endpoint,
     this.payload = const {},
+    this.confirmLabel = 'Có',
+    this.declineLabel = 'Không',
   });
 
   final String kind;
@@ -122,6 +124,8 @@ class ProposeEvent extends AssistantEvent {
   final String description;
   final String endpoint;
   final Map<String, dynamic> payload;
+  final String confirmLabel;
+  final String declineLabel;
 
   @override
   bool operator ==(Object other) =>
@@ -131,10 +135,13 @@ class ProposeEvent extends AssistantEvent {
           title == other.title &&
           description == other.description &&
           endpoint == other.endpoint &&
+          confirmLabel == other.confirmLabel &&
+          declineLabel == other.declineLabel &&
           mapEquals(payload, other.payload);
 
   @override
-  int get hashCode => Object.hash(kind, title, description, endpoint);
+  int get hashCode =>
+      Object.hash(kind, title, description, endpoint, confirmLabel, declineLabel);
 
   @override
   String toString() =>

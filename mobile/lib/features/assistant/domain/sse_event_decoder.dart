@@ -175,6 +175,15 @@ class SseEventDecoder {
           );
         }
         final rawPayload = data['payload'];
+        final rawLabels = data['labels'];
+        String confirmLabel = 'Có';
+        String declineLabel = 'Không';
+        if (rawLabels is Map<String, dynamic>) {
+          final c = rawLabels['confirm'];
+          final d = rawLabels['decline'];
+          if (c is String) confirmLabel = c;
+          if (d is String) declineLabel = d;
+        }
         return ProposeEvent(
           kind: kind,
           title: title,
@@ -183,6 +192,8 @@ class SseEventDecoder {
           payload: rawPayload is Map<String, dynamic>
               ? rawPayload
               : <String, dynamic>{},
+          confirmLabel: confirmLabel,
+          declineLabel: declineLabel,
         );
 
       case 'error':

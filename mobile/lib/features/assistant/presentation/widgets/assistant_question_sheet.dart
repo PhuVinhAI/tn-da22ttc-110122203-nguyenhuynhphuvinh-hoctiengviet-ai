@@ -10,6 +10,7 @@ import '../../application/assistant_state_machine.dart';
 import '../../data/screen_context_provider.dart';
 import '../../domain/assistant_state.dart';
 import 'assistant_full_screen.dart';
+import 'proposal_card.dart';
 
 /// The Mid (Hỏi) bottom-sheet surface. Renders three phases driven by
 /// [assistantStateMachineProvider]:
@@ -230,11 +231,13 @@ class _Body extends ConsumerWidget {
         :final partial,
         :final streaming,
         :final interrupted,
+        :final proposals,
       ) =>
         _ReadingBody(
           partial: partial,
           streaming: streaming,
           interrupted: interrupted,
+          proposals: proposals,
         ),
       AssistantMidError(:final message) => _ErrorBody(message: message),
     };
@@ -322,11 +325,13 @@ class _ReadingBody extends ConsumerWidget {
     required this.partial,
     required this.streaming,
     required this.interrupted,
+    this.proposals = const [],
   });
 
   final String partial;
   final bool streaming;
   final bool interrupted;
+  final List<ProposalState> proposals;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -343,9 +348,29 @@ class _ReadingBody extends ConsumerWidget {
         ConstrainedBox(
           constraints: BoxConstraints(maxHeight: maxBodyHeight),
           child: SingleChildScrollView(
-            child: MarkdownBody(
-              data: partial.isEmpty ? '_(không có phản hồi)_' : partial,
-              selectable: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                MarkdownBody(
+                  data: partial.isEmpty ? '_(không có phản hồi)_' : partial,
+                  selectable: true,
+                ),
+                for (var i = 0; i < proposals.length; i++)
+                  ProposalCard(
+                    proposal: proposals[i],
+                    index: i,
+                    onDecline: (idx) => ref
+                        .read(assistantChatNotifierProvider)
+                        .dismissProposal(idx),
+                    onSuccess: (idx) => ref
+                        .read(assistantChatNotifierProvider)
+                        .updateProposal(
+                          idx,
+                          proposals[idx]
+                              .copyWith(status: ProposalCardStatus.success),
+                        ),
+                  ),
+              ],
             ),
           ),
         ),

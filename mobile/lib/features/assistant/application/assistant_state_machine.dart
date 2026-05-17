@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../domain/assistant_event.dart';
 import '../domain/assistant_state.dart';
 
 /// Pure-logic Riverpod notifier encoding the PRD's "Mobile UI state
@@ -61,10 +62,36 @@ class AssistantStateMachine extends Notifier<AssistantState> {
       state = AssistantMidReading(
         partial: s.partial + text,
         streaming: true,
+        proposals: s.proposals,
       );
       return;
     }
     throw _invalid('onTextChunk');
+  }
+
+  /// `propose` event arrived. Appends a new [ProposalState] to the
+  /// current MidReading state's proposals list. Valid while streaming
+  /// (the propose event arrives mid-stream, before `done`).
+  void onPropose(ProposeEvent event) {
+    final s = state;
+    if (s is AssistantMidReading && s.streaming) {
+      final proposal = ProposalState(
+        kind: event.kind,
+        title: event.title,
+        description: event.description,
+        endpoint: event.endpoint,
+        payload: event.payload,
+        confirmLabel: event.confirmLabel,
+        declineLabel: event.declineLabel,
+      );
+      state = AssistantMidReading(
+        partial: s.partial,
+        streaming: true,
+        proposals: [...s.proposals, proposal],
+      );
+      return;
+    }
+    throw _invalid('onPropose');
   }
 
   /// `error` event arrived. From MidLoading (no token yet) transitions
@@ -83,6 +110,7 @@ class AssistantStateMachine extends Notifier<AssistantState> {
         streaming: false,
         interrupted: true,
         messageId: s.messageId,
+        proposals: s.proposals,
       );
       return;
     }
@@ -109,6 +137,7 @@ class AssistantStateMachine extends Notifier<AssistantState> {
         streaming: false,
         interrupted: interrupted,
         messageId: messageId,
+        proposals: s.proposals,
       );
       return;
     }
@@ -135,6 +164,7 @@ class AssistantStateMachine extends Notifier<AssistantState> {
         streaming: false,
         interrupted: true,
         messageId: s.messageId,
+        proposals: s.proposals,
       );
       return;
     }
@@ -188,6 +218,48 @@ class AssistantStateMachine extends Notifier<AssistantState> {
       throw _invalid('exitFull');
     }
     state = s.priorState ?? const AssistantCollapsed();
+  }
+
+  /// Updates a single proposal's status within the current MidReading
+  /// state. Used by the ProposalCard to reflect confirm/decline/error
+  /// transitions.
+  void updateProposal(int index, ProposalState updated) {
+    final s = state;
+    if (s is! AssistantMidReading) {
+      throw _invalid('updateProposal');
+    }
+    final proposals = List<ProposalState>.from(s.proposals);
+    if (index < 0 || index >= proposals.length) {
+      throw RangeError.index(index, proposals, 'proposals');
+    }
+    proposals[index] = updated;
+    state = AssistantMidReading(
+      partial: s.partial,
+      streaming: s.streaming,
+      interrupted: s.interrupted,
+      messageId: s.messageId,
+      proposals: proposals,
+    );
+  }
+
+  /// Removes a proposal (decline). The card is dismissed.
+  void dismissProposal(int index) {
+    final s = state;
+    if (s is! AssistantMidReading) {
+      throw _invalid('dismissProposal');
+    }
+    final proposals = List<ProposalState>.from(s.proposals);
+    if (index < 0 || index >= proposals.length) {
+      throw RangeError.index(index, proposals, 'proposals');
+    }
+    proposals.removeAt(index);
+    state = AssistantMidReading(
+      partial: s.partial,
+      streaming: s.streaming,
+      interrupted: s.interrupted,
+      messageId: s.messageId,
+      proposals: proposals,
+    );
   }
 
   StateError _invalid(String op) => StateError(

@@ -75,6 +75,96 @@ class AssistantMidLoading extends AssistantState {
       'AssistantMidLoading(statusText: $statusText, lastInput: $lastInput)';
 }
 
+/// Lifecycle state of a single proposal card.
+enum ProposalCardStatus {
+  /// Waiting for user action (Có / Không).
+  pending,
+
+  /// REST call in flight — both buttons disabled.
+  loading,
+
+  /// REST call succeeded — show success feedback + optional deep-link.
+  success,
+
+  /// REST call failed — show inline error + retry (except 403).
+  error,
+}
+
+/// Tracks the state of a single inline proposal card rendered below the
+/// AI message. Created when a `propose` SSE event arrives; mutated as
+/// the user interacts (confirm / decline / retry).
+@immutable
+class ProposalState {
+  const ProposalState({
+    required this.kind,
+    required this.title,
+    required this.description,
+    required this.endpoint,
+    required this.payload,
+    this.confirmLabel = 'Có',
+    this.declineLabel = 'Không',
+    this.status = ProposalCardStatus.pending,
+    this.errorMessage,
+  });
+
+  final String kind;
+  final String title;
+  final String description;
+  final String endpoint;
+  final Map<String, dynamic> payload;
+  final String confirmLabel;
+  final String declineLabel;
+  final ProposalCardStatus status;
+  final String? errorMessage;
+
+  ProposalState copyWith({
+    ProposalCardStatus? status,
+    String? errorMessage,
+  }) {
+    return ProposalState(
+      kind: kind,
+      title: title,
+      description: description,
+      endpoint: endpoint,
+      payload: payload,
+      confirmLabel: confirmLabel,
+      declineLabel: declineLabel,
+      status: status ?? this.status,
+      errorMessage: errorMessage,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ProposalState &&
+          kind == other.kind &&
+          title == other.title &&
+          description == other.description &&
+          endpoint == other.endpoint &&
+          confirmLabel == other.confirmLabel &&
+          declineLabel == other.declineLabel &&
+          status == other.status &&
+          errorMessage == other.errorMessage &&
+          mapEquals(payload, other.payload);
+
+  @override
+  int get hashCode => Object.hash(
+        kind,
+        title,
+        description,
+        endpoint,
+        confirmLabel,
+        declineLabel,
+        status,
+        errorMessage,
+      );
+
+  @override
+  String toString() =>
+      'ProposalState(kind: $kind, status: $status, endpoint: $endpoint)';
+}
+
 /// Reading phase — partial markdown response shown. `streaming` is true
 /// while text chunks are still arriving; false after `done` (or after
 /// Stop / mid-stream error).
@@ -84,12 +174,17 @@ class AssistantMidReading extends AssistantState {
     required this.streaming,
     this.interrupted = false,
     this.messageId,
+    this.proposals = const [],
   });
 
   final String partial;
   final bool streaming;
   final bool interrupted;
   final String? messageId;
+
+  /// Inline proposal cards emitted by `propose` SSE events during this
+  /// turn. Rendered below the AI markdown in both Mid and Full modes.
+  final List<ProposalState> proposals;
 
   /// True once `done` has been received (or Stop / error has terminated
   /// the stream). Useful for UI predicates: "show Soạn tiếp button only
@@ -103,16 +198,18 @@ class AssistantMidReading extends AssistantState {
           partial == other.partial &&
           streaming == other.streaming &&
           interrupted == other.interrupted &&
-          messageId == other.messageId;
+          messageId == other.messageId &&
+          listEquals(proposals, other.proposals);
 
   @override
   int get hashCode =>
-      Object.hash(partial, streaming, interrupted, messageId);
+      Object.hash(partial, streaming, interrupted, messageId, Object.hashAll(proposals));
 
   @override
   String toString() =>
       'AssistantMidReading(streaming: $streaming, interrupted: $interrupted, '
-      'messageId: $messageId, partialLength: ${partial.length})';
+      'messageId: $messageId, partialLength: ${partial.length}, '
+      'proposals: ${proposals.length})';
 }
 
 /// Pre-token error state — backend returned an error before any
