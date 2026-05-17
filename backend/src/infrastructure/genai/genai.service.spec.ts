@@ -185,8 +185,9 @@ describe('GenaiService', () => {
       });
 
       expect(result.functionCalls).toEqual([
-        { name: 'get_user_summary', arguments: {} },
+        { id: 'call-1', name: 'get_user_summary', arguments: {} },
         {
+          id: 'call-2',
           name: 'search_vocabulary',
           arguments: { query: 'xin chào', dialect: 'NORTHERN' },
         },
@@ -233,7 +234,7 @@ describe('GenaiService', () => {
 
       expect(result.text).toBe('Let me look that up.');
       expect(result.functionCalls).toEqual([
-        { name: 'search_vocabulary', arguments: { query: 'xin chào' } },
+        { id: 'call-1', name: 'search_vocabulary', arguments: { query: 'xin chào' } },
       ]);
     });
   });

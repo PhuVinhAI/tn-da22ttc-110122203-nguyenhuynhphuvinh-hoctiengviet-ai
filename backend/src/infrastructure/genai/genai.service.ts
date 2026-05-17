@@ -14,8 +14,15 @@ import {
 } from './ai.exceptions';
 import { KeyPool } from './key-pool';
 
+interface AiChatMessage {
+  role: 'user' | 'assistant' | 'system' | 'function';
+  content: string;
+  functionCall?: { id?: string; name: string; arguments: Record<string, any> };
+  functionResult?: { callId?: string; name: string; result: any };
+}
+
 interface AiChatRequest {
-  messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+  messages: AiChatMessage[];
   systemInstruction?: string;
   tools?: Array<{
     name: string;
@@ -33,6 +40,7 @@ interface AiChatStructuredRequest {
 }
 
 interface AiFunctionCall {
+  id?: string;
   name: string;
   arguments: Record<string, any>;
 }
@@ -312,19 +320,26 @@ export class GenaiService implements IAiProvider, OnModuleInit {
     const model = req.model || this.config.models.chat;
     const steps = this.mapMessagesToSteps(req.messages);
 
+    this.logger.debug(
+      `chat() called with ${steps.length} steps, tools=${req.tools?.length ?? 0}, step types: ${steps.map((s) => s.type).join(', ')}`,
+    );
+
     return this.executeWithRetry(async (client) => {
       const response = await client.interactions.create({
         model,
         input: steps,
-        store: false,
         stream: false,
         system_instruction: req.systemInstruction,
-        tools: req.tools?.map((t) => ({
-          type: 'function' as const,
-          name: t.name,
-          description: t.description,
-          parameters: t.parameters,
-        })),
+        ...(req.tools?.length
+          ? {
+              tools: req.tools.map((t) => ({
+                type: 'function' as const,
+                name: t.name,
+                description: t.description,
+                parameters: t.parameters,
+              })),
+            }
+          : {}),
       });
 
       return this.mapResponseToAiChatResponse(response);
@@ -470,15 +485,71 @@ export class GenaiService implements IAiProvider, OnModuleInit {
   private mapMessagesToSteps(
     messages: AiChatRequest['messages'],
   ): Interactions.Step[] {
-    return messages.map((msg) => ({
-      type: msg.role === 'user' ? 'user_input' : 'model_output',
-      content: [
-        {
-          type: 'text',
-          text: msg.content,
-        },
-      ],
-    }));
+    const steps: Interactions.Step[] = [];
+
+    for (const msg of messages) {
+      if (msg.functionCall) {
+        steps.push({
+          type: 'user_input',
+          content: [
+            {
+              type: 'text',
+              text: `[Tool call: ${msg.functionCall.name}(${JSON.stringify(msg.functionCall.arguments)})]`,
+            },
+          ],
+        } as any);
+        continue;
+      }
+      if (msg.functionResult) {
+        steps.push({
+          type: 'user_input',
+          content: [
+            {
+              type: 'text',
+              text: `[Tool result for ${msg.functionResult.name}]: ${this.truncateFunctionResult(msg.functionResult.result)}`,
+            },
+          ],
+        } as any);
+        continue;
+      }
+      steps.push({
+        type: msg.role === 'user' ? 'user_input' : 'model_output',
+        content: [
+          {
+            type: 'text',
+            text: msg.content,
+          },
+        ],
+      } as any);
+    }
+    return steps;
+  }
+
+  private sanitizeForGemini(value: any): any {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    if (Array.isArray(value)) {
+      const sanitized = value
+        .map((v) => this.sanitizeForGemini(v))
+        .filter((v) => v !== null && v !== undefined);
+      return sanitized.length > 0 ? sanitized : null;
+    }
+    if (typeof value === 'object') {
+      const entries = Object.entries(value)
+        .map(([k, v]) => [k, this.sanitizeForGemini(v)])
+        .filter(([, v]) => v !== null && v !== undefined);
+      return entries.length > 0 ? Object.fromEntries(entries) : null;
+    }
+    return value;
+  }
+
+  private truncateFunctionResult(result: any): string {
+    const sanitized = this.sanitizeForGemini(result);
+    if (sanitized === null || sanitized === undefined) {
+      return 'Tool returned empty result';
+    }
+    return JSON.stringify(sanitized);
   }
 
   private mapMessagesToContents(
@@ -503,6 +574,7 @@ export class GenaiService implements IAiProvider, OnModuleInit {
     for (const step of steps) {
       if (step?.type === 'function_call' && typeof step.name === 'string') {
         functionCalls.push({
+          id: step.id,
           name: step.name,
           arguments: (step.arguments ?? {}) as Record<string, any>,
         });

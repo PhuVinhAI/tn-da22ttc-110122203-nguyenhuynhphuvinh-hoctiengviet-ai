@@ -68,26 +68,7 @@ export class AgentService {
       tokenCount: 0,
     });
 
-    const aiMessages: AiMessage[] = [
-      ...messages.map((msg) => {
-        let role: 'user' | 'assistant' | 'system' | 'function';
-        switch (msg.role) {
-          case ConversationMessageRole.USER:
-            role = 'user';
-            break;
-          case ConversationMessageRole.ASSISTANT:
-            role = 'assistant';
-            break;
-          case ConversationMessageRole.TOOL:
-            role = 'function';
-            break;
-          default:
-            role = 'system';
-        }
-        return { role, content: msg.content };
-      }),
-      { role: 'user', content: userMessage },
-    ];
+    const aiMessages = this.mapHistoryToAiMessages(messages, userMessage);
 
     const toolDeclarations = this.tools.map((tool) => tool.toDeclaration());
 
@@ -100,7 +81,7 @@ export class AgentService {
       const request: AiChatRequest = {
         messages: aiMessages,
         systemInstruction,
-        tools: toolDeclarations,
+        ...(iterations === 1 ? { tools: toolDeclarations } : {}),
       };
 
       const response = await this.aiProvider.chat(request);
@@ -275,26 +256,10 @@ export class AgentService {
       });
     }
 
-    const aiMessages: AiMessage[] = [
-      ...(conversation.messages || []).map((msg) => {
-        let role: 'user' | 'assistant' | 'system' | 'function';
-        switch (msg.role) {
-          case ConversationMessageRole.USER:
-            role = 'user';
-            break;
-          case ConversationMessageRole.ASSISTANT:
-            role = 'assistant';
-            break;
-          case ConversationMessageRole.TOOL:
-            role = 'function';
-            break;
-          default:
-            role = 'system';
-        }
-        return { role, content: msg.content };
-      }),
-      { role: 'user', content: userMessage },
-    ];
+    const aiMessages = this.mapHistoryToAiMessages(
+      conversation.messages || [],
+      userMessage,
+    );
 
     const toolDeclarations = this.tools.map((tool) => tool.toDeclaration());
 
@@ -311,7 +276,7 @@ export class AgentService {
       const request: AiChatRequest = {
         messages: aiMessages,
         systemInstruction,
-        tools: toolDeclarations,
+        ...(iterations === 1 ? { tools: toolDeclarations } : {}),
       };
 
       const response = await this.aiProvider.chat(request);
@@ -479,6 +444,59 @@ export class AgentService {
       messageId: finalAssistantMessage.id,
       interrupted,
     };
+  }
+
+  private mapHistoryToAiMessages(
+    messages: ConversationMessage[],
+    userMessage: string,
+  ): AiMessage[] {
+    const aiMessages: AiMessage[] = [];
+    for (const msg of messages) {
+      if (msg.role === ConversationMessageRole.TOOL) {
+        const toolCalls = msg.toolCalls || [];
+        const toolResults = msg.toolResults || [];
+        for (let i = 0; i < toolCalls.length; i++) {
+          const callId = `hist_${msg.id}_${i}`;
+          aiMessages.push({
+            role: 'assistant',
+            content: '',
+            functionCall: {
+              id: callId,
+              name: toolCalls[i].name,
+              arguments: toolCalls[i].arguments,
+            },
+          });
+        }
+        for (let i = 0; i < toolResults.length; i++) {
+          const callId = `hist_${msg.id}_${i}`;
+          aiMessages.push({
+            role: 'function',
+            content: '',
+            functionResult: {
+              callId,
+              name: toolResults[i].name,
+              result: toolResults[i].result,
+            },
+          });
+        }
+        continue;
+      }
+
+      let role: 'user' | 'assistant' | 'system';
+      switch (msg.role) {
+        case ConversationMessageRole.USER:
+          role = 'user';
+          break;
+        case ConversationMessageRole.ASSISTANT:
+          role = 'assistant';
+          break;
+        default:
+          role = 'system';
+      }
+      aiMessages.push({ role, content: msg.content });
+    }
+    aiMessages.push({ role: 'user', content: userMessage });
+    return aiMessages;
   }
 
   private buildSystemInstruction(

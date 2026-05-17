@@ -94,36 +94,36 @@ class _AssistantQuestionSheetState
     final c = AppTheme.colors(context);
     final mq = MediaQuery.of(context);
     final keyboardInset = mq.viewInsets.bottom;
+    final maxSheetHeight = mq.size.height * 0.5;
     final displayName = ref.watch(
       currentScreenContextProvider.select((s) => s.displayName),
     );
 
     return Padding(
-      padding: EdgeInsets.only(bottom: keyboardInset),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.sm,
-            AppSpacing.lg,
-            AppSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _DragHandle(color: c.border),
-              _Header(displayName: displayName, state: state),
-              const SizedBox(height: AppSpacing.sm),
-              _Body(
-                state: state,
-                controller: _controller,
-                focusNode: _focusNode,
-                onSend: _onSend,
-              ),
-            ],
-          ),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        (state is AssistantMidCompose
+            ? (keyboardInset > 0 ? keyboardInset - 24 : AppSpacing.md)
+            : keyboardInset + AppSpacing.md),
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxSheetHeight),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _DragHandle(color: c.border),
+            _Header(displayName: displayName, state: state),
+            const SizedBox(height: AppSpacing.sm),
+            _Body(
+              state: state,
+              controller: _controller,
+              focusNode: _focusNode,
+              onSend: _onSend,
+            ),
+          ],
         ),
       ),
     );
@@ -257,24 +257,68 @@ class _ComposeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        AppInput(
-          controller: controller,
-          focusNode: focusNode,
-          hint: 'Hỏi gì đi nào?',
-          maxLines: 5,
-          textCapitalization: TextCapitalization.sentences,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        AppButton(
-          onPressed: onSend,
-          label: 'Gửi',
-          isFullWidth: true,
-        ),
-      ],
+    final c = AppTheme.colors(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: c.muted.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      padding: const EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.sm,
+        top: AppSpacing.sm,
+        bottom: AppSpacing.sm,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: 5,
+            minLines: 1,
+            textCapitalization: TextCapitalization.sentences,
+            style: GoogleFonts.inter(
+              fontSize: AppTypography.bodyMedium,
+              color: c.foreground,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Hỏi gì đi nào?',
+              hintStyle: GoogleFonts.inter(
+                fontSize: AppTypography.bodyMedium,
+                color: c.mutedForeground,
+              ),
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+              isDense: true,
+              filled: false,
+              fillColor: Colors.transparent,
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: onSend,
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: c.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_upward_rounded,
+                  color: c.primaryForeground,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -287,35 +331,62 @@ class _LoadingBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = AppTheme.colors(context);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-          child: Row(
-            children: [
-              const AppSpinner(),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  statusText,
-                  style: GoogleFonts.inter(
-                    fontSize: AppTypography.bodyMedium,
-                    color: c.mutedForeground,
+    return Container(
+      decoration: BoxDecoration(
+        color: c.muted.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      padding: const EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.sm,
+        top: AppSpacing.lg,
+        bottom: AppSpacing.sm,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const AppSpinner(),
+                const SizedBox(width: AppSpacing.md),
+                Flexible(
+                  child: Text(
+                    statusText,
+                    style: GoogleFonts.inter(
+                      fontSize: AppTypography.bodyMedium,
+                      color: c.mutedForeground,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        AppButton(
-          onPressed: () => ref.read(assistantChatNotifierProvider).stop(),
-          label: 'Dừng',
-          variant: AppButtonVariant.outline,
-          isFullWidth: true,
-        ),
-      ],
+          Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: () =>
+                  ref.read(assistantChatNotifierProvider).stop(),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: c.error,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.stop_rounded,
+                  color: c.errorForeground,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -339,7 +410,7 @@ class _ReadingBody extends ConsumerWidget {
     final mq = MediaQuery.of(context);
     // Cap the markdown body at ~75% of the screen height so the sheet
     // doesn't push the bottom buttons off-screen for long answers.
-    final maxBodyHeight = mq.size.height * 0.75;
+    final maxBodyHeight = mq.size.height * 0.3;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

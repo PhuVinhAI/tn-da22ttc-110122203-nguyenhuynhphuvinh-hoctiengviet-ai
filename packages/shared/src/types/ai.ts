@@ -6,11 +6,13 @@ export interface AiMessage {
 }
 
 export interface AiFunctionCall {
+  id?: string;
   name: string;
   arguments: Record<string, any>;
 }
 
 export interface AiFunctionResult {
+  callId?: string;
   name: string;
   result: any;
 }
