@@ -79,9 +79,7 @@ void main() {
     api = AiApi(dio);
 
     container = ProviderContainer(
-      overrides: [
-        aiApiProvider.overrideWithValue(api),
-      ],
+      overrides: [aiApiProvider.overrideWithValue(api)],
     );
     notifier = container.read(assistantChatNotifierProvider);
   });
@@ -103,12 +101,11 @@ void main() {
       // Give the request a tick to land on the adapter.
       await Future<void>.delayed(const Duration(milliseconds: 10));
       adapter.controller
-        ..add(_frame('conversation_started', {'conversationId': conversationId}))
+        ..add(
+          _frame('conversation_started', {'conversationId': conversationId}),
+        )
         ..add(_frame('text_chunk', {'text': text}))
-        ..add(_frame('done', {
-          'messageId': messageId,
-          'interrupted': false,
-        }));
+        ..add(_frame('done', {'messageId': messageId, 'interrupted': false}));
       await adapter.controller.close();
     });
   }
@@ -124,8 +121,7 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(adapter.capturedRequests, hasLength(1));
-      final body =
-          adapter.capturedRequests.single.data as Map<String, dynamic>;
+      final body = adapter.capturedRequests.single.data as Map<String, dynamic>;
       expect(body.containsKey('conversationId'), isFalse);
       expect(body['message'], 'How am I doing?');
       expect(notifier.conversationIdForTesting, 'conv-new-1');
@@ -156,127 +152,174 @@ void main() {
   );
 
   test(
-    'Reset drops the conversationId so the next send creates a new '
-    'Conversation with the now-current screenContext',
+    'Full mode sends a follow-up through the active conversation and stays Full',
     () async {
-      scriptHappyPath(conversationId: 'conv-A');
+      scriptHappyPath(conversationId: 'conv-full', messageId: 'msg-1');
       notifier.openBar();
-      await notifier.sendMessage('first on screen A');
+      await notifier.sendMessage('first');
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
-      // Simulate route change → currentScreenContextProvider re-resolves.
-      // Because we don't register any builders, the fallback uses
-      // location for displayName, which is fine for assertion.
-      container.read(currentRouteMatchProvider.notifier).update(
-            const RouteMatch(
-              routePattern: '/lessons/:id',
-              location: '/lessons/xyz',
-              pathParameters: {'id': 'xyz'},
-            ),
-          );
-
-      await notifier.reset();
-      expect(notifier.conversationIdForTesting, isNull);
+      notifier.enterFull();
 
       adapter.prepareNext();
-      scriptHappyPath(conversationId: 'conv-B');
-      await notifier.sendMessage('second on screen B');
+      scriptHappyPath(
+        conversationId: 'conv-full',
+        messageId: 'msg-2',
+        text: 'full answer',
+      );
+      await notifier.sendMessage('second from full');
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(adapter.capturedRequests, hasLength(2));
       final secondBody =
           adapter.capturedRequests[1].data as Map<String, dynamic>;
+      expect(secondBody['conversationId'], 'conv-full');
+      expect(secondBody['message'], 'second from full');
+      expect(notifier.conversationIdForTesting, 'conv-full');
+
+      final fullState =
+          container.read(assistantStateMachineProvider) as AssistantFull;
+      final turn = fullState.priorState as AssistantMidReading;
+      expect(turn.partial, 'full answer');
+      expect(turn.isDone, isTrue);
+      expect(turn.messageId, 'msg-2');
+    },
+  );
+
+  test(
+    'collapse callback from the dismissed Mid sheet is ignored after entering Full',
+    () async {
+      scriptHappyPath(conversationId: 'conv-full', messageId: 'msg-1');
+      notifier.openBar();
+      await notifier.sendMessage('first');
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      notifier.enterFull();
+      await notifier.collapse();
+
+      expect(notifier.conversationIdForTesting, 'conv-full');
       expect(
-        secondBody.containsKey('conversationId'),
-        isFalse,
-        reason: 'Reset must drop conversationId so the server creates a '
-            'fresh Conversation with the current screenContext',
+        container.read(assistantStateMachineProvider),
+        isA<AssistantFull>(),
       );
-      final screenContext =
-          secondBody['screenContext'] as Map<String, dynamic>;
-      expect(screenContext['route'], '/lessons/xyz');
-      expect(notifier.conversationIdForTesting, 'conv-B');
     },
   );
 
-  test(
-    'rapid send: a second sendMessage cancels the in-flight stream without '
-    'emitting an error to the state machine',
-    () async {
-      // First send — emit conversation_started + first text_chunk, then
-      // stall (don't close).
-      scheduleMicrotask(() async {
-        await Future<void>.delayed(const Duration(milliseconds: 10));
-        adapter.controller
-          ..add(_frame('conversation_started', {'conversationId': 'c1'}))
-          ..add(_frame('text_chunk', {'text': 'in flight'}));
-      });
+  test('Reset drops the conversationId so the next send creates a new '
+      'Conversation with the now-current screenContext', () async {
+    scriptHappyPath(conversationId: 'conv-A');
+    notifier.openBar();
+    await notifier.sendMessage('first on screen A');
+    await Future<void>.delayed(const Duration(milliseconds: 50));
 
-      notifier.openBar();
-      final firstSend = notifier.sendMessage('first');
-      await Future<void>.delayed(const Duration(milliseconds: 60));
+    // Simulate route change → currentScreenContextProvider re-resolves.
+    // Because we don't register any builders, the fallback uses
+    // location for displayName, which is fine for assertion.
+    container
+        .read(currentRouteMatchProvider.notifier)
+        .update(
+          const RouteMatch(
+            routePattern: '/lessons/:id',
+            location: '/lessons/xyz',
+            pathParameters: {'id': 'xyz'},
+          ),
+        );
 
-      // We should be in MidReading(streaming) at this point.
-      final midStream = container.read(assistantStateMachineProvider);
-      expect(midStream, isA<AssistantMidReading>());
-      expect((midStream as AssistantMidReading).streaming, isTrue);
+    await notifier.reset();
+    expect(notifier.conversationIdForTesting, isNull);
 
-      // Now issue a rapid second send.
-      adapter.prepareNext();
-      scriptHappyPath(conversationId: 'c1', messageId: 'msg-2');
-      await notifier.sendMessage('second');
-      await Future<void>.delayed(const Duration(milliseconds: 60));
+    adapter.prepareNext();
+    scriptHappyPath(conversationId: 'conv-B');
+    await notifier.sendMessage('second on screen B');
+    await Future<void>.delayed(const Duration(milliseconds: 50));
 
-      // Done with the original send future too.
-      await firstSend;
+    expect(adapter.capturedRequests, hasLength(2));
+    final secondBody = adapter.capturedRequests[1].data as Map<String, dynamic>;
+    expect(
+      secondBody.containsKey('conversationId'),
+      isFalse,
+      reason:
+          'Reset must drop conversationId so the server creates a '
+          'fresh Conversation with the current screenContext',
+    );
+    final screenContext = secondBody['screenContext'] as Map<String, dynamic>;
+    expect(screenContext['route'], '/lessons/xyz');
+    expect(notifier.conversationIdForTesting, 'conv-B');
+  });
 
-      expect(adapter.capturedRequests, hasLength(2));
-      final finalState = container.read(assistantStateMachineProvider)
-          as AssistantMidReading;
-      expect(finalState.streaming, isFalse,
-          reason: 'second stream must reach done');
-      expect(finalState.interrupted, isFalse);
-    },
-  );
+  test('rapid send: a second sendMessage cancels the in-flight stream without '
+      'emitting an error to the state machine', () async {
+    // First send — emit conversation_started + first text_chunk, then
+    // stall (don't close).
+    scheduleMicrotask(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      adapter.controller
+        ..add(_frame('conversation_started', {'conversationId': 'c1'}))
+        ..add(_frame('text_chunk', {'text': 'in flight'}));
+    });
 
-  test(
-    'pre-token error transitions to MidError; retry re-issues the same '
-    'message',
-    () async {
-      // Don't send any events — close the stream after emitting an
-      // `error` frame, which decodes to AssistantErrorEvent.
-      scheduleMicrotask(() async {
-        await Future<void>.delayed(const Duration(milliseconds: 10));
-        adapter.controller.add(_frame('error', {
-          'code': 'AI_X',
-          'message': 'Server fell over',
-        }));
-        await adapter.controller.close();
-      });
+    notifier.openBar();
+    final firstSend = notifier.sendMessage('first');
+    await Future<void>.delayed(const Duration(milliseconds: 60));
 
-      notifier.openBar();
-      await notifier.sendMessage('please answer');
-      await Future<void>.delayed(const Duration(milliseconds: 60));
+    // We should be in MidReading(streaming) at this point.
+    final midStream = container.read(assistantStateMachineProvider);
+    expect(midStream, isA<AssistantMidReading>());
+    expect((midStream as AssistantMidReading).streaming, isTrue);
 
-      final errState = container.read(assistantStateMachineProvider)
-          as AssistantMidError;
-      expect(errState.message, 'Server fell over');
-      expect(errState.lastInput, 'please answer');
+    // Now issue a rapid second send.
+    adapter.prepareNext();
+    scriptHappyPath(conversationId: 'c1', messageId: 'msg-2');
+    await notifier.sendMessage('second');
+    await Future<void>.delayed(const Duration(milliseconds: 60));
 
-      adapter.prepareNext();
-      scriptHappyPath(conversationId: 'c-retry');
-      await notifier.retry();
-      await Future<void>.delayed(const Duration(milliseconds: 60));
+    // Done with the original send future too.
+    await firstSend;
 
-      expect(adapter.capturedRequests, hasLength(2));
-      final retryBody =
-          adapter.capturedRequests[1].data as Map<String, dynamic>;
-      expect(retryBody['message'], 'please answer');
-      final final_ = container.read(assistantStateMachineProvider)
-          as AssistantMidReading;
-      expect(final_.isDone, isTrue);
-    },
-  );
+    expect(adapter.capturedRequests, hasLength(2));
+    final finalState =
+        container.read(assistantStateMachineProvider) as AssistantMidReading;
+    expect(
+      finalState.streaming,
+      isFalse,
+      reason: 'second stream must reach done',
+    );
+    expect(finalState.interrupted, isFalse);
+  });
+
+  test('pre-token error transitions to MidError; retry re-issues the same '
+      'message', () async {
+    // Don't send any events — close the stream after emitting an
+    // `error` frame, which decodes to AssistantErrorEvent.
+    scheduleMicrotask(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      adapter.controller.add(
+        _frame('error', {'code': 'AI_X', 'message': 'Server fell over'}),
+      );
+      await adapter.controller.close();
+    });
+
+    notifier.openBar();
+    await notifier.sendMessage('please answer');
+    await Future<void>.delayed(const Duration(milliseconds: 60));
+
+    final errState =
+        container.read(assistantStateMachineProvider) as AssistantMidError;
+    expect(errState.message, 'Server fell over');
+    expect(errState.lastInput, 'please answer');
+
+    adapter.prepareNext();
+    scriptHappyPath(conversationId: 'c-retry');
+    await notifier.retry();
+    await Future<void>.delayed(const Duration(milliseconds: 60));
+
+    expect(adapter.capturedRequests, hasLength(2));
+    final retryBody = adapter.capturedRequests[1].data as Map<String, dynamic>;
+    expect(retryBody['message'], 'please answer');
+    final final_ =
+        container.read(assistantStateMachineProvider) as AssistantMidReading;
+    expect(final_.isDone, isTrue);
+  });
 
   test(
     'Stop tapped mid-stream cancels Dio and transitions to interrupted done',
@@ -297,8 +340,8 @@ void main() {
       notifier.stop();
       await Future<void>.delayed(const Duration(milliseconds: 30));
 
-      final s = container.read(assistantStateMachineProvider)
-          as AssistantMidReading;
+      final s =
+          container.read(assistantStateMachineProvider) as AssistantMidReading;
       expect(s.isDone, isTrue);
       expect(s.interrupted, isTrue);
       expect(s.partial, 'partial');

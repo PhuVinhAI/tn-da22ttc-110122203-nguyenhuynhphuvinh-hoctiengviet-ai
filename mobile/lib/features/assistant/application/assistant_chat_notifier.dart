@@ -69,7 +69,8 @@ class AssistantChatNotifier {
     await _cancelInFlight();
 
     final sm = _ref.read(assistantStateMachineProvider.notifier);
-    final current = _ref.read(assistantStateMachineProvider);
+    final rawState = _ref.read(assistantStateMachineProvider);
+    final current = _activeState(rawState);
 
     // Bring the state machine to a `send()`-accepting state (Compose or
     // Error). Rapid send from a still-streaming reply synthesizes the
@@ -83,7 +84,11 @@ class AssistantChatNotifier {
       sm.composeAgain();
     } else if (current is AssistantCollapsed) {
       // Defensive: allow programmatic send to also open the sheet.
-      sm.openBar();
+      if (rawState is AssistantFull) {
+        sm.reset();
+      } else {
+        sm.openBar();
+      }
     }
 
     sm.send(trimmed);
@@ -153,6 +158,9 @@ class AssistantChatNotifier {
   /// Drops `conversationId` per PRD §"Conversation lifecycle" — each
   /// new bar-open session starts a fresh Conversation on first send.
   Future<void> collapse() async {
+    if (_ref.read(assistantStateMachineProvider) is AssistantFull) {
+      return;
+    }
     await _cancelInFlight();
     _conversationId = null;
     _ref.read(assistantStateMachineProvider.notifier).collapse();
@@ -193,14 +201,16 @@ class AssistantChatNotifier {
   /// User tapped "Thử lại" on a pre-token error. Re-sends the cached
   /// `lastInput` so the learner doesn't lose their question.
   Future<void> retry() async {
-    final s = _ref.read(assistantStateMachineProvider);
+    final s = _activeState(_ref.read(assistantStateMachineProvider));
     if (s is! AssistantMidError) return;
     await sendMessage(s.lastInput);
   }
 
   /// Updates a proposal's status (e.g. loading → success/error).
   void updateProposal(int index, ProposalState updated) {
-    _ref.read(assistantStateMachineProvider.notifier).updateProposal(index, updated);
+    _ref
+        .read(assistantStateMachineProvider.notifier)
+        .updateProposal(index, updated);
   }
 
   /// Dismisses a proposal card (decline).
@@ -210,7 +220,7 @@ class AssistantChatNotifier {
 
   void _handleEvent(AssistantEvent event) {
     final sm = _ref.read(assistantStateMachineProvider.notifier);
-    final current = _ref.read(assistantStateMachineProvider);
+    final current = _activeState(_ref.read(assistantStateMachineProvider));
 
     switch (event) {
       case ConversationStartedEvent(:final conversationId):
@@ -230,7 +240,7 @@ class AssistantChatNotifier {
           sm.onTextChunk(text);
         }
       case ProposeEvent():
-        final current = _ref.read(assistantStateMachineProvider);
+        final current = _activeState(_ref.read(assistantStateMachineProvider));
         if (current is AssistantMidReading && current.streaming) {
           sm.onPropose(event);
         }
@@ -263,7 +273,7 @@ class AssistantChatNotifier {
 
     final message = _humanReadableError(error);
     final sm = _ref.read(assistantStateMachineProvider.notifier);
-    final current = _ref.read(assistantStateMachineProvider);
+    final current = _activeState(_ref.read(assistantStateMachineProvider));
     if (current is AssistantMidLoading ||
         (current is AssistantMidReading && current.streaming)) {
       sm.onError(message: message);
@@ -273,7 +283,7 @@ class AssistantChatNotifier {
   }
 
   void _handleStreamDone() {
-    final current = _ref.read(assistantStateMachineProvider);
+    final current = _activeState(_ref.read(assistantStateMachineProvider));
     // Server should have sent a `done` event; if not, defensively
     // terminate the stream so the UI does not stay stuck in Loading.
     if (current is AssistantMidLoading ||
@@ -282,6 +292,13 @@ class AssistantChatNotifier {
     }
     _subscription = null;
     _cancelToken = null;
+  }
+
+  AssistantState _activeState(AssistantState state) {
+    if (state is AssistantFull) {
+      return state.priorState ?? const AssistantCollapsed();
+    }
+    return state;
   }
 
   String _humanReadableError(Object error) {

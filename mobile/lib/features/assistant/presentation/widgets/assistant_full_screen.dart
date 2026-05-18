@@ -32,6 +32,8 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
 
   List<ConversationMessage> _messages = [];
   bool _loadingMessages = false;
+  bool _fullTurnInFlight = false;
+  bool _reloadAfterTurnScheduled = false;
   String? _loadedConversationId;
 
   @override
@@ -49,10 +51,12 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
     super.dispose();
   }
 
-  Future<void> _loadCurrentConversation() async {
+  Future<bool> _loadCurrentConversation({bool force = false}) async {
     final notifier = ref.read(assistantChatNotifierProvider);
     final convId = notifier.conversationId;
-    if (convId == null || convId == _loadedConversationId) return;
+    if (convId == null || (!force && convId == _loadedConversationId)) {
+      return false;
+    }
 
     setState(() => _loadingMessages = true);
     try {
@@ -67,17 +71,18 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
           _loadedConversationId = convId;
         });
         _scrollToBottom();
+        return true;
       }
     } catch (_) {
       if (mounted) setState(() => _loadingMessages = false);
     }
+    return false;
   }
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
-        _scrollController
-            .jumpTo(_scrollController.position.maxScrollExtent);
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       }
     });
   }
@@ -90,6 +95,7 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
 
     // Add the user message to local list immediately for display.
     setState(() {
+      _fullTurnInFlight = true;
       _messages = [
         ..._messages,
         ConversationMessage(
@@ -101,17 +107,51 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
     });
     _scrollToBottom();
 
-    await notifier.sendMessage(text);
-    // Reload to get the full conversation including the new messages.
-    _loadedConversationId = null;
-    await _loadCurrentConversation();
+    try {
+      await notifier.sendMessage(text);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _fullTurnInFlight = false);
+    }
   }
 
   void _onConversationTap(String conversationId) {
     final notifier = ref.read(assistantChatNotifierProvider);
     notifier.openExistingConversation(conversationId);
-    _loadedConversationId = null;
+    setState(() {
+      _fullTurnInFlight = false;
+      _reloadAfterTurnScheduled = false;
+      _loadedConversationId = null;
+    });
     _loadCurrentConversation();
+  }
+
+  Future<void> _onReset() async {
+    await ref.read(assistantChatNotifierProvider).reset();
+    if (!mounted) return;
+    setState(() {
+      _messages = [];
+      _fullTurnInFlight = false;
+      _reloadAfterTurnScheduled = false;
+      _loadedConversationId = null;
+    });
+  }
+
+  void _reloadAfterCurrentTurn() {
+    if (_reloadAfterTurnScheduled) return;
+    _reloadAfterTurnScheduled = true;
+    _loadedConversationId = null;
+    _loadCurrentConversation(force: true).then((loaded) {
+      if (!mounted) return;
+      setState(() {
+        _reloadAfterTurnScheduled = false;
+        if (loaded) {
+          _fullTurnInFlight = false;
+        } else {
+          _scrollToBottom();
+        }
+      });
+    });
   }
 
   @override
@@ -126,6 +166,16 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
       if (prev is AssistantFull && next is! AssistantFull) {
         Navigator.of(context).maybePop();
       }
+      if (next is AssistantFull) {
+        final activeState = next.priorState;
+        if (_fullTurnInFlight &&
+            activeState is AssistantMidReading &&
+            activeState.isDone) {
+          _reloadAfterCurrentTurn();
+        } else if (_fullTurnInFlight) {
+          _scrollToBottom();
+        }
+      }
     });
 
     return Scaffold(
@@ -137,19 +187,13 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
           children: [
             _Header(
               displayName: displayName,
-              onDrawerTap: () =>
-                  _scaffoldKey.currentState?.openDrawer(),
-              onClose: () =>
-                  ref.read(assistantChatNotifierProvider).exitFull(),
-              onReset: () =>
-                  ref.read(assistantChatNotifierProvider).reset(),
+              onDrawerTap: () => _scaffoldKey.currentState?.openDrawer(),
+              onClose: () => ref.read(assistantChatNotifierProvider).exitFull(),
+              onReset: _onReset,
             ),
             Divider(color: c.border, height: 1),
             Expanded(child: _buildBody(c)),
-            _ComposeBar(
-              controller: _controller,
-              onSend: _onSend,
-            ),
+            _ComposeBar(controller: _controller, onSend: _onSend),
           ],
         ),
       ),
@@ -157,11 +201,21 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
   }
 
   Widget _buildBody(AppColors c) {
-    if (_loadingMessages && _messages.isEmpty) {
+    final assistantState = ref.watch(assistantStateMachineProvider);
+    final activeFullState = assistantState is AssistantFull
+        ? assistantState.priorState
+        : null;
+    final showLiveTurn =
+        _fullTurnInFlight &&
+        (activeFullState is AssistantMidLoading ||
+            activeFullState is AssistantMidReading ||
+            activeFullState is AssistantMidError);
+
+    if (_loadingMessages && _messages.isEmpty && !showLiveTurn) {
       return const Center(child: AppSpinner());
     }
 
-    if (_messages.isEmpty) {
+    if (_messages.isEmpty && !showLiveTurn) {
       return Center(
         child: Text(
           'Bắt đầu cuộc trò chuyện',
@@ -173,43 +227,28 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
       );
     }
 
-    // Watch for proposals from the current streaming state.
-    final assistantState = ref.watch(assistantStateMachineProvider);
-    final proposals = assistantState is AssistantMidReading
-        ? assistantState.proposals
-        : <ProposalState>[];
-
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.md,
       ),
-      itemCount: _messages.length + (proposals.isNotEmpty ? 1 : 0),
+      itemCount: _messages.length + (showLiveTurn ? 1 : 0),
       itemBuilder: (ctx, i) {
         if (i < _messages.length) {
           return _MessageBubble(message: _messages[i]);
         }
-        // Render proposal cards after the last message.
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var j = 0; j < proposals.length; j++)
-              ProposalCard(
-                proposal: proposals[j],
-                index: j,
-                onDecline: (idx) => ref
-                    .read(assistantChatNotifierProvider)
-                    .dismissProposal(idx),
-                onSuccess: (idx) => ref
-                    .read(assistantChatNotifierProvider)
-                    .updateProposal(
-                      idx,
-                      proposals[idx]
-                          .copyWith(status: ProposalCardStatus.success),
-                    ),
+        return _LiveAssistantTurn(
+          state: activeFullState!,
+          onDeclineProposal: (idx) =>
+              ref.read(assistantChatNotifierProvider).dismissProposal(idx),
+          onProposalSuccess: (idx, proposal) => ref
+              .read(assistantChatNotifierProvider)
+              .updateProposal(
+                idx,
+                proposal.copyWith(status: ProposalCardStatus.success),
               ),
-          ],
+          onRetry: () => ref.read(assistantChatNotifierProvider).retry(),
         );
       },
     );
@@ -352,11 +391,115 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
-class _ComposeBar extends StatelessWidget {
-  const _ComposeBar({
-    required this.controller,
-    required this.onSend,
+class _LiveAssistantTurn extends StatelessWidget {
+  const _LiveAssistantTurn({
+    required this.state,
+    required this.onDeclineProposal,
+    required this.onProposalSuccess,
+    required this.onRetry,
   });
+
+  final AssistantState state;
+  final ValueChanged<int> onDeclineProposal;
+  final void Function(int index, ProposalState proposal) onProposalSuccess;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+        child: switch (state) {
+          AssistantMidLoading(:final statusText) => Row(
+            children: [
+              const AppSpinner(),
+              const SizedBox(width: AppSpacing.md),
+              Flexible(
+                child: Text(
+                  statusText,
+                  style: GoogleFonts.inter(
+                    fontSize: AppTypography.bodyMedium,
+                    color: c.mutedForeground,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          AssistantMidReading(
+            :final partial,
+            :final interrupted,
+            :final proposals,
+          ) =>
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MarkdownBody(
+                  data: partial.isEmpty
+                      ? '_(khÃ´ng cÃ³ pháº£n há»“i)_'
+                      : partial,
+                  selectable: true,
+                ),
+                if (interrupted)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xs),
+                    child: Text(
+                      'ÄÃ£ dá»«ng',
+                      style: GoogleFonts.inter(
+                        fontSize: AppTypography.caption,
+                        color: c.mutedForeground,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                for (var i = 0; i < proposals.length; i++)
+                  ProposalCard(
+                    proposal: proposals[i],
+                    index: i,
+                    onDecline: onDeclineProposal,
+                    onSuccess: (idx) => onProposalSuccess(idx, proposals[idx]),
+                  ),
+              ],
+            ),
+          AssistantMidError(:final message) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.error_outline, color: c.error),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      message,
+                      style: GoogleFonts.inter(
+                        fontSize: AppTypography.bodyMedium,
+                        color: c.foreground,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppButton(
+                onPressed: onRetry,
+                label: 'Thá»­ láº¡i',
+                isFullWidth: true,
+              ),
+            ],
+          ),
+          _ => const SizedBox.shrink(),
+        },
+      ),
+    );
+  }
+}
+
+class _ComposeBar extends StatelessWidget {
+  const _ComposeBar({required this.controller, required this.onSend});
 
   final TextEditingController controller;
   final VoidCallback onSend;
@@ -389,9 +532,7 @@ class _ComposeBar extends StatelessWidget {
               ),
               decoration: InputDecoration(
                 hintText: 'Nhập tin nhắn...',
-                hintStyle: GoogleFonts.inter(
-                  color: c.mutedForeground,
-                ),
+                hintStyle: GoogleFonts.inter(color: c.mutedForeground),
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,

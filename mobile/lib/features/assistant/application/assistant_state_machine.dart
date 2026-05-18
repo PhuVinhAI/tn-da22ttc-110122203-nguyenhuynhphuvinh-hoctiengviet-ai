@@ -28,11 +28,11 @@ class AssistantStateMachine extends Notifier<AssistantState> {
   /// MidError so the chat notifier can re-issue with the cached input
   /// without manually clearing the error state first.
   void send(String input) {
-    final s = state;
+    final s = _activeState;
     if (s is! AssistantMidCompose && s is! AssistantMidError) {
       throw _invalid('send');
     }
-    state = AssistantMidLoading(lastInput: input);
+    _setActiveState(AssistantMidLoading(lastInput: input));
   }
 
   /// `tool_start` event arrived. Updates the loading-phase status text.
@@ -40,29 +40,30 @@ class AssistantStateMachine extends Notifier<AssistantState> {
   /// declaration (e.g. "Đang tóm tắt thông tin của bạn..."), not a
   /// generic fallback.
   void onToolStart({required String displayName}) {
-    final s = state;
+    final s = _activeState;
     if (s is! AssistantMidLoading) {
       throw _invalid('onToolStart');
     }
-    state = AssistantMidLoading(
-      lastInput: s.lastInput,
-      statusText: displayName,
+    _setActiveState(
+      AssistantMidLoading(lastInput: s.lastInput, statusText: displayName),
     );
   }
 
   /// `text_chunk` event arrived. From MidLoading this transitions into
   /// MidReading(streaming); subsequent chunks append to `partial`.
   void onTextChunk(String text) {
-    final s = state;
+    final s = _activeState;
     if (s is AssistantMidLoading) {
-      state = AssistantMidReading(partial: text, streaming: true);
+      _setActiveState(AssistantMidReading(partial: text, streaming: true));
       return;
     }
     if (s is AssistantMidReading && s.streaming) {
-      state = AssistantMidReading(
-        partial: s.partial + text,
-        streaming: true,
-        proposals: s.proposals,
+      _setActiveState(
+        AssistantMidReading(
+          partial: s.partial + text,
+          streaming: true,
+          proposals: s.proposals,
+        ),
       );
       return;
     }
@@ -73,7 +74,7 @@ class AssistantStateMachine extends Notifier<AssistantState> {
   /// current MidReading state's proposals list. Valid while streaming
   /// (the propose event arrives mid-stream, before `done`).
   void onPropose(ProposeEvent event) {
-    final s = state;
+    final s = _activeState;
     if (s is AssistantMidReading && s.streaming) {
       final proposal = ProposalState(
         kind: event.kind,
@@ -84,10 +85,12 @@ class AssistantStateMachine extends Notifier<AssistantState> {
         confirmLabel: event.confirmLabel,
         declineLabel: event.declineLabel,
       );
-      state = AssistantMidReading(
-        partial: s.partial,
-        streaming: true,
-        proposals: [...s.proposals, proposal],
+      _setActiveState(
+        AssistantMidReading(
+          partial: s.partial,
+          streaming: true,
+          proposals: [...s.proposals, proposal],
+        ),
       );
       return;
     }
@@ -99,18 +102,22 @@ class AssistantStateMachine extends Notifier<AssistantState> {
   /// MidReading, the partial text is preserved and the stream is
   /// considered done with `interrupted=true`.
   void onError({required String message}) {
-    final s = state;
+    final s = _activeState;
     if (s is AssistantMidLoading) {
-      state = AssistantMidError(message: message, lastInput: s.lastInput);
+      _setActiveState(
+        AssistantMidError(message: message, lastInput: s.lastInput),
+      );
       return;
     }
     if (s is AssistantMidReading && s.streaming) {
-      state = AssistantMidReading(
-        partial: s.partial,
-        streaming: false,
-        interrupted: true,
-        messageId: s.messageId,
-        proposals: s.proposals,
+      _setActiveState(
+        AssistantMidReading(
+          partial: s.partial,
+          streaming: false,
+          interrupted: true,
+          messageId: s.messageId,
+          proposals: s.proposals,
+        ),
       );
       return;
     }
@@ -121,23 +128,27 @@ class AssistantStateMachine extends Notifier<AssistantState> {
   /// (server skipped any text — unusual but possible for tool-only
   /// turns) transitions to MidReading(done) with an empty partial.
   void onDone({required String messageId, required bool interrupted}) {
-    final s = state;
+    final s = _activeState;
     if (s is AssistantMidLoading) {
-      state = AssistantMidReading(
-        partial: '',
-        streaming: false,
-        interrupted: interrupted,
-        messageId: messageId,
+      _setActiveState(
+        AssistantMidReading(
+          partial: '',
+          streaming: false,
+          interrupted: interrupted,
+          messageId: messageId,
+        ),
       );
       return;
     }
     if (s is AssistantMidReading && s.streaming) {
-      state = AssistantMidReading(
-        partial: s.partial,
-        streaming: false,
-        interrupted: interrupted,
-        messageId: messageId,
-        proposals: s.proposals,
+      _setActiveState(
+        AssistantMidReading(
+          partial: s.partial,
+          streaming: false,
+          interrupted: interrupted,
+          messageId: messageId,
+          proposals: s.proposals,
+        ),
       );
       return;
     }
@@ -149,22 +160,22 @@ class AssistantStateMachine extends Notifier<AssistantState> {
   /// "interrupted done" UI state so the user immediately sees "Đã dừng"
   /// and "Soạn tiếp" instead of staring at a frozen spinner.
   void stop() {
-    final s = state;
+    final s = _activeState;
     if (s is AssistantMidLoading) {
-      state = AssistantMidReading(
-        partial: '',
-        streaming: false,
-        interrupted: true,
+      _setActiveState(
+        AssistantMidReading(partial: '', streaming: false, interrupted: true),
       );
       return;
     }
     if (s is AssistantMidReading && s.streaming) {
-      state = AssistantMidReading(
-        partial: s.partial,
-        streaming: false,
-        interrupted: true,
-        messageId: s.messageId,
-        proposals: s.proposals,
+      _setActiveState(
+        AssistantMidReading(
+          partial: s.partial,
+          streaming: false,
+          interrupted: true,
+          messageId: s.messageId,
+          proposals: s.proposals,
+        ),
       );
       return;
     }
@@ -175,11 +186,11 @@ class AssistantStateMachine extends Notifier<AssistantState> {
   /// Compose. Server-side conversation is preserved by the chat
   /// notifier (which keeps the cached `conversationId`).
   void composeAgain() {
-    final s = state;
+    final s = _activeState;
     if (s is! AssistantMidReading || s.streaming) {
       throw _invalid('composeAgain');
     }
-    state = const AssistantMidCompose();
+    _setActiveState(const AssistantMidCompose());
   }
 
   /// "Reset" button — drops the current conversation and returns to
@@ -189,7 +200,7 @@ class AssistantStateMachine extends Notifier<AssistantState> {
     if (state is AssistantCollapsed) {
       throw _invalid('reset');
     }
-    state = const AssistantMidCompose();
+    _setActiveState(const AssistantMidCompose());
   }
 
   /// Backdrop tap, "−" button, drag-down — back to Collapsed.
@@ -224,7 +235,7 @@ class AssistantStateMachine extends Notifier<AssistantState> {
   /// state. Used by the ProposalCard to reflect confirm/decline/error
   /// transitions.
   void updateProposal(int index, ProposalState updated) {
-    final s = state;
+    final s = _activeState;
     if (s is! AssistantMidReading) {
       throw _invalid('updateProposal');
     }
@@ -233,18 +244,20 @@ class AssistantStateMachine extends Notifier<AssistantState> {
       throw RangeError.index(index, proposals, 'proposals');
     }
     proposals[index] = updated;
-    state = AssistantMidReading(
-      partial: s.partial,
-      streaming: s.streaming,
-      interrupted: s.interrupted,
-      messageId: s.messageId,
-      proposals: proposals,
+    _setActiveState(
+      AssistantMidReading(
+        partial: s.partial,
+        streaming: s.streaming,
+        interrupted: s.interrupted,
+        messageId: s.messageId,
+        proposals: proposals,
+      ),
     );
   }
 
   /// Removes a proposal (decline). The card is dismissed.
   void dismissProposal(int index) {
-    final s = state;
+    final s = _activeState;
     if (s is! AssistantMidReading) {
       throw _invalid('dismissProposal');
     }
@@ -253,22 +266,41 @@ class AssistantStateMachine extends Notifier<AssistantState> {
       throw RangeError.index(index, proposals, 'proposals');
     }
     proposals.removeAt(index);
-    state = AssistantMidReading(
-      partial: s.partial,
-      streaming: s.streaming,
-      interrupted: s.interrupted,
-      messageId: s.messageId,
-      proposals: proposals,
+    _setActiveState(
+      AssistantMidReading(
+        partial: s.partial,
+        streaming: s.streaming,
+        interrupted: s.interrupted,
+        messageId: s.messageId,
+        proposals: proposals,
+      ),
     );
   }
 
+  AssistantState get _activeState {
+    final s = state;
+    if (s is AssistantFull) {
+      return s.priorState ?? const AssistantCollapsed();
+    }
+    return s;
+  }
+
+  void _setActiveState(AssistantState next) {
+    final s = state;
+    if (s is AssistantFull) {
+      state = AssistantFull(priorState: next);
+      return;
+    }
+    state = next;
+  }
+
   StateError _invalid(String op) => StateError(
-        'AssistantStateMachine.$op called in invalid state: '
-        '${state.runtimeType}',
-      );
+    'AssistantStateMachine.$op called in invalid state: '
+    '${state.runtimeType}',
+  );
 }
 
 final assistantStateMachineProvider =
     NotifierProvider<AssistantStateMachine, AssistantState>(
-  AssistantStateMachine.new,
-);
+      AssistantStateMachine.new,
+    );
