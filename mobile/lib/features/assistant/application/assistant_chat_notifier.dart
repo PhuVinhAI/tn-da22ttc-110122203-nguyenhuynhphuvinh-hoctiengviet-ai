@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/ai_api.dart';
 import '../data/ai_api_provider.dart';
 import '../data/conversation_list_provider.dart';
+import '../data/go_router_effective_route.dart';
+import '../data/screen_context_for_api.dart';
 import '../data/screen_context_provider.dart';
 import '../data/screen_ui_snapshot_provider.dart';
 import '../domain/assistant_event.dart';
@@ -99,8 +101,11 @@ class AssistantChatNotifier {
     _cancelToken = cancelToken;
     _userCancelled = false;
 
-    _refreshScreenUiSnapshot();
-    final screenContext = _ref.read(currentScreenContextProvider);
+    syncCurrentRouteMatch(_ref);
+    _refreshScreenUiSnapshotIfNeeded();
+    final screenContext = screenContextForApi(
+      _ref.read(currentScreenContextProvider),
+    );
     final api = _ref.read(aiApiProvider);
 
     try {
@@ -323,6 +328,16 @@ class AssistantChatNotifier {
       return 'Mất kết nối. Vui lòng thử lại.';
     }
     return 'Đã xảy ra lỗi. Vui lòng thử lại.';
+  }
+
+  void _refreshScreenUiSnapshotIfNeeded() {
+    final match = _ref.read(currentRouteMatchProvider);
+    final registry = _ref.read(screenContextRegistryProvider);
+    if (match != null && registry.hasBuilderForLocation(match.location)) {
+      _ref.read(currentScreenUiSnapshotProvider.notifier).clear();
+      return;
+    }
+    _refreshScreenUiSnapshot();
   }
 
   void _refreshScreenUiSnapshot() {

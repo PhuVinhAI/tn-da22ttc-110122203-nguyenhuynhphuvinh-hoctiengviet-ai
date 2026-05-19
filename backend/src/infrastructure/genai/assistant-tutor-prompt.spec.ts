@@ -110,6 +110,7 @@ describe('assistant-tutor prompt template', () => {
   it('explains the runtime Flutter uiSnapshot contract to the model', () => {
     const out = service.renderPrompt('assistant-tutor', {});
     expect(out).toContain('screenContext.data.uiSnapshot');
+    expect(out).toContain('screenType');
     expect(out).toContain('texts');
     expect(out).toContain('structure');
   });

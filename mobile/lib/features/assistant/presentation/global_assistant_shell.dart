@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/app_router.dart';
 import '../application/assistant_state_machine.dart';
-import '../data/route_match.dart' as assistant;
+import '../data/go_router_effective_route.dart';
+import '../data/route_match.dart' as assistant_route;
 import '../data/screen_context_provider.dart';
 import '../data/screen_ui_snapshot_provider.dart';
 import '../domain/assistant_state.dart';
@@ -47,6 +48,7 @@ class _GlobalAssistantShellState extends ConsumerState<GlobalAssistantShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _router.routeInformationProvider.addListener(_scheduleRouteSync);
+      _router.routerDelegate.addListener(_scheduleRouteSync);
       _listening = true;
       _handleRouteChange();
     });
@@ -71,29 +73,28 @@ class _GlobalAssistantShellState extends ConsumerState<GlobalAssistantShell> {
 
   void _handleRouteChange() {
     if (!mounted) return;
-    final RouteMatchList config;
     try {
-      config = _router.routerDelegate.currentConfiguration;
+      _router.routerDelegate.currentConfiguration;
     } catch (_) {
       // Router not yet initialised (race during first frame of a test).
       return;
     }
-    final fullPath = config.fullPath;
-    final location = config.uri.toString();
-    if (location.isEmpty) return;
-    final pathParameters = config.pathParameters;
-    final queryParameters = config.uri.queryParameters;
 
-    final next = assistant.RouteMatch(
-      routePattern: fullPath.isEmpty ? location : fullPath,
-      location: location,
-      pathParameters: Map<String, String>.from(pathParameters),
-      queryParameters: Map<String, String>.from(queryParameters),
-    );
+    final next = effectiveRouteMatchFromGoRouter(_router);
+    if (next.location.isEmpty) return;
 
     final current = ref.read(currentRouteMatchProvider);
     if (current != next) {
       ref.read(currentRouteMatchProvider.notifier).update(next);
+    }
+    _syncScreenUiSnapshotIfNeeded(next);
+  }
+
+  void _syncScreenUiSnapshotIfNeeded(assistant_route.RouteMatch match) {
+    final registry = ref.read(screenContextRegistryProvider);
+    if (registry.hasBuilderForLocation(match.location)) {
+      ref.read(currentScreenUiSnapshotProvider.notifier).clear();
+      return;
     }
     _syncScreenUiSnapshotNow();
   }
@@ -146,7 +147,14 @@ class _GlobalAssistantShellState extends ConsumerState<GlobalAssistantShell> {
             ),
           ),
         ),
-        AssistantBar(onOpen: _syncScreenUiSnapshotNow),
+        AssistantBar(onOpen: () {
+          final match = ref.read(currentRouteMatchProvider);
+          if (match != null) {
+            _syncScreenUiSnapshotIfNeeded(match);
+          } else {
+            _syncScreenUiSnapshotNow();
+          }
+        }),
       ],
     );
   }

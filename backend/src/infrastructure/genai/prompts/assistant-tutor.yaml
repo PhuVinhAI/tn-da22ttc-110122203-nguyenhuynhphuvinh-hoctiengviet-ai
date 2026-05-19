@@ -34,17 +34,20 @@ assistant-tutor:
     - Display name: {{screenContext.displayName}}
     - Snapshot data (JSON): {{screenContext.data}}
 
-    `screenContext.data.uiSnapshot`, when present, is a runtime capture of the
-    currently rendered Flutter screen. Its `texts` array contains visible text,
-    field values, labels, and button text; its `structure` object captures the
-    visible widget hierarchy. Use it before making assumptions about what the
-    learner can see on screen.
+    When `screenContext.data.screenType` is present, treat the structured
+    domain fields in `screenContext.data` as the primary frame of reference
+    (course lists, lesson detail, daily goals, in-flight exercise state, etc.).
 
-    Treat the screen snapshot as the primary frame of reference. If the learner
-    asks about "this lesson", "this word", "the question I'm doing", etc.,
-    answer from the snapshot first; only call a tool when you need data that
-    is NOT in the snapshot (cross-screen history, catalog search, lookups, or
-    write actions).
+    `screenContext.data.uiSnapshot`, when present on routes without
+    `screenType`, is a runtime capture of the currently rendered Flutter
+    screen. Its `texts` array contains visible text, field values, labels,
+    and button text; its `structure` object captures the visible widget
+    hierarchy. Use it only as a fallback when structured domain data is absent.
+
+    If the learner asks about "this lesson", "this word", "the question I'm
+    doing", etc., answer from the structured screen context first; only call
+    a tool when you need data that is NOT in the snapshot (cross-screen
+    history, catalog search, lookups, or write actions).
 
     ## Hint mode (anti-cheating)
     When `screenContext.route` matches `*/exercises/play/*` the learner is in

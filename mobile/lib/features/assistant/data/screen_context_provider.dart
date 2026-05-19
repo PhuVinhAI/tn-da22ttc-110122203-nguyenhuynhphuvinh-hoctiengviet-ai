@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/screen_context.dart';
+import 'builders/course_detail_screen_context_builder.dart';
+import 'builders/courses_screen_context_builder.dart';
 import 'builders/exercise_play_screen_context_builder.dart';
 import 'builders/home_screen_context_builder.dart';
 import 'builders/lesson_screen_context_builder.dart';
+import 'builders/module_detail_screen_context_builder.dart';
 import 'route_match.dart';
 import 'screen_context_registry.dart';
 import 'screen_ui_snapshot_provider.dart';
@@ -30,6 +33,9 @@ final currentRouteMatchProvider =
 final screenContextRegistryProvider = Provider<ScreenContextRegistry>((ref) {
   return ScreenContextRegistry()
     ..register('/', homeScreenContextBuilder)
+    ..register('/courses', coursesScreenContextBuilder)
+    ..register('/courses/:id', courseDetailScreenContextBuilder)
+    ..register('/modules/:id', moduleDetailScreenContextBuilder)
     ..register('/lessons/:id', lessonScreenContextBuilder)
     ..register(
       '/courses/:id/exercises/play/:setId',
@@ -54,7 +60,10 @@ final currentScreenContextProvider = Provider<ScreenContext>((ref) {
   final registry = ref.watch(screenContextRegistryProvider);
   final base = registry.resolve(ref, match);
   final uiSnapshot = ref.watch(currentScreenUiSnapshotProvider);
-  if (uiSnapshot.isEmpty) return base;
+  final usesDomainInjection =
+      base.data.containsKey('screenType') ||
+      (match != null && registry.hasBuilderForLocation(match.location));
+  if (uiSnapshot.isEmpty || usesDomainInjection) return base;
 
   return base.copyWithData({...base.data, 'uiSnapshot': uiSnapshot});
 });

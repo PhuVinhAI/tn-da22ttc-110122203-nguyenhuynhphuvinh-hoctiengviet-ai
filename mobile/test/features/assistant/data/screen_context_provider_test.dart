@@ -121,7 +121,8 @@ void main() {
       expect(next.displayName, 'updated');
     });
 
-    test('merges the current Flutter UI snapshot into data.uiSnapshot', () {
+    test('merges the current Flutter UI snapshot into data.uiSnapshot '
+        'only for unregistered routes', () {
       final registry = ScreenContextRegistry()
         ..register(
           '/widgets/:id',
@@ -160,10 +161,46 @@ void main() {
       final ctx = container.read(currentScreenContextProvider);
 
       expect(ctx.data['widgetId'], 'abc');
+      expect(ctx.data.containsKey('uiSnapshot'), isFalse);
+    });
+
+    test('does not attach uiSnapshot when a domain builder is registered',
+        () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      container.read(currentRouteMatchProvider.notifier).update(
+            const RouteMatch(routePattern: '/', location: '/'),
+          );
+      container.read(currentScreenUiSnapshotProvider.notifier).update(const {
+        'texts': ['Trợ lý AI · Trang chủ'],
+        'structure': {'type': 'Column'},
+      });
+
+      final ctx = container.read(currentScreenContextProvider);
+
+      expect(ctx.data['screenType'], 'home');
+      expect(ctx.data.containsKey('uiSnapshot'), isFalse);
+    });
+
+    test('merges uiSnapshot for routes without a registered builder', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      container.read(currentRouteMatchProvider.notifier).update(
+            const RouteMatch(
+              routePattern: '/profile',
+              location: '/profile',
+            ),
+          );
+      container.read(currentScreenUiSnapshotProvider.notifier).update(const {
+        'texts': ['Profile'],
+        'structure': {'type': 'Column'},
+      });
+
+      final ctx = container.read(currentScreenContextProvider);
+
       expect(ctx.data['uiSnapshot'], isA<Map<String, dynamic>>());
-      final uiSnapshot = ctx.data['uiSnapshot'] as Map<String, dynamic>;
-      expect(uiSnapshot['texts'], contains('Screen title'));
-      expect(uiSnapshot['structure'], containsPair('type', 'Column'));
     });
   });
 }

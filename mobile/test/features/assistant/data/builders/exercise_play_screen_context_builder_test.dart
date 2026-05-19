@@ -47,6 +47,7 @@ void main() {
         expect(ctx.displayName, isNotEmpty);
         expect(ctx.barPlaceholder, isNotEmpty);
         expect(ctx.data.keys, containsAll(<String>[
+          'screenType',
           'setId',
           'lessonId',
           'exerciseId',
@@ -55,6 +56,7 @@ void main() {
           'exerciseIndex',
           'totalExercises',
         ]));
+        expect(ctx.data['screenType'], 'exercisePlay');
         expect(ctx.data['setId'], 'set-1');
         expect(ctx.data['lessonId'], 'lesson-1');
         expect(ctx.data['exerciseId'], 'ex-3');

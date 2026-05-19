@@ -11,6 +11,7 @@ import 'package:linvnix/features/assistant/data/ai_api.dart';
 import 'package:linvnix/features/assistant/data/ai_api_provider.dart';
 import 'package:linvnix/features/assistant/data/route_match.dart';
 import 'package:linvnix/features/assistant/data/screen_context_provider.dart';
+import 'package:linvnix/features/assistant/data/screen_ui_snapshot_provider.dart';
 import 'package:linvnix/features/assistant/domain/assistant_state.dart';
 
 /// Fake Dio adapter wired to a `StreamController<List<int>>` that the
@@ -281,6 +282,30 @@ void main() {
     final screenContext = secondBody['screenContext'] as Map<String, dynamic>;
     expect(screenContext['route'], '/lessons/xyz');
     expect(notifier.conversationIdForTesting, 'conv-B');
+  });
+
+  test('sendMessage omits uiSnapshot from the API payload on domain routes',
+      () async {
+    container.read(currentRouteMatchProvider.notifier).update(
+          const RouteMatch(routePattern: '/', location: '/'),
+        );
+    container.read(currentScreenUiSnapshotProvider.notifier).update(const {
+      'texts': ['Trợ lý AI · Trang chủ'],
+      'structure': {'type': 'Column'},
+    });
+
+    scriptHappyPath();
+    notifier.openBar();
+    await notifier.sendMessage('chào');
+    await waitFor(() => adapter.capturedRequests.isNotEmpty);
+
+    final body = adapter.capturedRequests.first.data as Map<String, dynamic>;
+    final data =
+        (body['screenContext'] as Map<String, dynamic>)['data']
+            as Map<String, dynamic>;
+
+    expect(data['screenType'], 'home');
+    expect(data.containsKey('uiSnapshot'), isFalse);
   });
 
   test('rapid send: a second sendMessage cancels the in-flight stream without '

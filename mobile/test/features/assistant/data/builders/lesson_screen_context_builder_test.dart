@@ -82,6 +82,8 @@ void main() {
         expect(ctx.displayName, contains('Greetings'));
         expect(ctx.barPlaceholder, isNotEmpty);
         expect(ctx.data.keys, containsAll(<String>[
+          'screenType',
+          'status',
           'lessonId',
           'title',
           'description',
@@ -89,6 +91,8 @@ void main() {
           'grammarRuleIds',
           'contentSummary',
         ]));
+        expect(ctx.data['screenType'], 'lessonDetail');
+        expect(ctx.data['status'], 'data');
         expect(ctx.data['lessonId'], lessonId);
         expect(ctx.data['title'], 'Greetings');
         expect(ctx.data['vocabularyIds'], ['v1', 'v2']);
@@ -117,6 +121,8 @@ void main() {
         final ctx = container.read(currentScreenContextProvider);
 
         expect(ctx.route, '/lessons/$lessonId');
+        expect(ctx.data['screenType'], 'lessonDetail');
+        expect(ctx.data['status'], 'loading');
         expect(ctx.data['lessonId'], lessonId);
         expect(ctx.data['vocabularyIds'], isEmpty);
         expect(ctx.data['grammarRuleIds'], isEmpty);

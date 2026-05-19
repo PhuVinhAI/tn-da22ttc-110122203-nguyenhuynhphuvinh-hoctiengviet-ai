@@ -32,6 +32,7 @@ ScreenContext exercisePlayScreenContextBuilder(Ref ref, RouteMatch match) {
     displayName: 'Bài tập',
     barPlaceholder: 'Cần gợi ý?',
     data: <String, dynamic>{
+      'screenType': 'exercisePlay',
       'setId': setId,
       'lessonId': ?lessonId,
       'moduleId': ?moduleId,

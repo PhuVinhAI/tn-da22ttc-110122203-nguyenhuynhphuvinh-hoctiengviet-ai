@@ -78,17 +78,18 @@ void main() {
         expect(ctx.displayName, isNotEmpty);
         expect(ctx.barPlaceholder, isNotEmpty);
         expect(ctx.data.keys, containsAll(<String>[
+          'screenType',
+          'status',
           'goals',
           'streak',
-          'studyMinutes',
-          'exercisesCompleted',
           'allGoalsMet',
         ]));
+        expect(ctx.data['screenType'], 'home');
+        expect(ctx.data['status'], 'data');
         expect(ctx.data['streak'], 5);
-        expect(ctx.data['studyMinutes'], 12);
-        expect(ctx.data['exercisesCompleted'], 7);
         expect(ctx.data['allGoalsMet'], false);
         expect(ctx.data['goals'], hasLength(2));
+        expect(ctx.data.containsKey('uiSnapshot'), isFalse);
         expect(
           (ctx.data['goals'] as List).first,
           containsPair('goalType', 'EXERCISES'),
@@ -113,10 +114,11 @@ void main() {
         final ctx = container.read(currentScreenContextProvider);
 
         expect(ctx.route, '/');
-        // Defensive: while AsyncValue is loading, the data map must still
-        // expose its expected keys (callers should not crash on null).
+        expect(ctx.data['screenType'], 'home');
+        expect(ctx.data['status'], 'loading');
         expect(ctx.data['streak'], 0);
         expect(ctx.data['goals'], isEmpty);
+        expect(ctx.data.containsKey('uiSnapshot'), isFalse);
       },
     );
   });
