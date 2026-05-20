@@ -40,8 +40,8 @@ describe('FindLessonsTool', () => {
       expect(tool.name).toBe('find_lessons');
     });
 
-    it('declares the Vietnamese displayName for the mobile loading state', () => {
-      expect(tool.displayName).toBe('Đang tìm bài học phù hợp...');
+    it('declares the English displayName for the mobile loading state', () => {
+      expect(tool.displayName).toBe('Finding relevant lessons...');
     });
 
     it('declares a non-empty description for the model', () => {

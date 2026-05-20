@@ -40,8 +40,8 @@ describe('ListRecentExerciseResultsTool', () => {
       expect(tool.name).toBe('list_recent_exercise_results');
     });
 
-    it('declares the Vietnamese displayName for the mobile loading state', () => {
-      expect(tool.displayName).toBe('Đang xem kết quả bài tập gần đây...');
+    it('declares the English displayName for the mobile loading state', () => {
+      expect(tool.displayName).toBe('Reviewing recent exercise results...');
     });
 
     it('declares a non-empty description for the model', () => {

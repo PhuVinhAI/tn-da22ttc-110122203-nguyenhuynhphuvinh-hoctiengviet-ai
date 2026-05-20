@@ -92,8 +92,8 @@ describe('GetProgressOverviewTool', () => {
       expect(tool.name).toBe('get_progress_overview');
     });
 
-    it('declares the Vietnamese displayName for the mobile loading state', () => {
-      expect(tool.displayName).toBe('Đang xem tiến trình của bạn...');
+    it('declares the English displayName for the mobile loading state', () => {
+      expect(tool.displayName).toBe('Reviewing your progress...');
     });
 
     it('declares a non-empty description for the model', () => {

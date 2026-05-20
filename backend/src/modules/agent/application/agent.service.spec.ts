@@ -1231,6 +1231,5 @@ describe('AgentService', () => {
       expect(typeof done.messageId).toBe('string');
       expect(done.messageId.length).toBeGreaterThan(0);
     });
-
   });
 });

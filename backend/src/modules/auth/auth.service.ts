@@ -238,8 +238,7 @@ export class AuthService {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       return {
-        message:
-          'If the email exists, you will receive a password reset code.',
+        message: 'If the email exists, you will receive a password reset code.',
       };
     }
 

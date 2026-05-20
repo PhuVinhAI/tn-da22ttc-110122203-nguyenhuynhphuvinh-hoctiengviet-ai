@@ -41,8 +41,8 @@ describe('GetLessonDetailTool', () => {
       expect(tool.name).toBe('get_lesson_detail');
     });
 
-    it('declares the Vietnamese displayName for the mobile loading state', () => {
-      expect(tool.displayName).toBe('Đang đọc nội dung bài học...');
+    it('declares the English displayName for the mobile loading state', () => {
+      expect(tool.displayName).toBe('Reading lesson content...');
     });
 
     it('declares a non-empty description for the model', () => {

@@ -40,8 +40,8 @@ describe('SearchVocabularyTool', () => {
       expect(tool.name).toBe('search_vocabulary');
     });
 
-    it('declares the Vietnamese displayName for the mobile loading state', () => {
-      expect(tool.displayName).toBe('Đang tra cứu từ vựng...');
+    it('declares the English displayName for the mobile loading state', () => {
+      expect(tool.displayName).toBe('Looking up vocabulary...');
     });
 
     it('declares a non-empty description for the model', () => {

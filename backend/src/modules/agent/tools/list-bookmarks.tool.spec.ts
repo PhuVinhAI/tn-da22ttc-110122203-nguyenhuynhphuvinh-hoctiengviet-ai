@@ -41,8 +41,8 @@ describe('ListBookmarksTool', () => {
       expect(tool.name).toBe('list_bookmarks');
     });
 
-    it('declares the Vietnamese displayName for the mobile loading state', () => {
-      expect(tool.displayName).toBe('Đang xem từ bạn đã yêu sách...');
+    it('declares the English displayName for the mobile loading state', () => {
+      expect(tool.displayName).toBe('Checking your saved words...');
     });
 
     it('declares a non-empty description for the model', () => {

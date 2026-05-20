@@ -40,8 +40,8 @@ describe('SearchGrammarRulesTool', () => {
       expect(tool.name).toBe('search_grammar_rules');
     });
 
-    it('declares the Vietnamese displayName for the mobile loading state', () => {
-      expect(tool.displayName).toBe('Đang tra cứu ngữ pháp...');
+    it('declares the English displayName for the mobile loading state', () => {
+      expect(tool.displayName).toBe('Looking up grammar...');
     });
 
     it('declares a non-empty description for the model', () => {
