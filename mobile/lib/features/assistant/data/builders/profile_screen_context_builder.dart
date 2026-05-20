@@ -49,8 +49,8 @@ ScreenContext profileScreenContextBuilder(Ref ref, RouteMatch match) {
 
   return ScreenContext(
     route: match.location,
-    displayName: fullName != null ? 'Hồ sơ · $fullName' : 'Hồ sơ',
-    barPlaceholder: 'Hỏi về tài khoản?',
+    displayName: fullName != null ? 'Profile · $fullName' : 'Profile',
+    barPlaceholder: 'Ask about your account?',
     data: data,
   );
 }

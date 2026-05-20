@@ -594,7 +594,7 @@ export class AgentService {
       // string before substitution (see prompts/assistant-tutor.yaml).
       return this.genaiService.renderPrompt('assistant-tutor', {
         user: {
-          nativeLanguage: user?.nativeLanguage ?? '',
+          nativeLanguage: user?.nativeLanguage?.trim() || 'English',
           currentLevel: user?.currentLevel ?? '',
           preferredDialect: user?.preferredDialect ?? '',
         },

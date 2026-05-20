@@ -29,8 +29,8 @@ ScreenContext exercisePlayScreenContextBuilder(Ref ref, RouteMatch match) {
 
   return ScreenContext(
     route: match.location,
-    displayName: 'Bài tập',
-    barPlaceholder: 'Cần gợi ý?',
+    displayName: 'Exercise',
+    barPlaceholder: 'Need a hint?',
     data: <String, dynamic>{
       'screenType': 'exercisePlay',
       'setId': setId,

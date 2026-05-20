@@ -72,7 +72,7 @@ export class GetProgressOverviewTool extends BaseTool<
   GetProgressOverviewOutput
 > {
   readonly name = 'get_progress_overview';
-  readonly displayName = 'Đang xem tiến trình của bạn...';
+  readonly displayName = 'Reviewing your progress...';
   readonly description =
     "Returns a CEFR-aware overview of the learner's progression: their " +
     "current level, the courses they're actively working on with completion " +

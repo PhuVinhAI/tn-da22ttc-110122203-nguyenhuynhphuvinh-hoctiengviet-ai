@@ -37,7 +37,7 @@ export class ListBookmarksTool extends BaseTool<
   ListBookmarksResult
 > {
   readonly name = 'list_bookmarks';
-  readonly displayName = 'Đang xem từ bạn đã yêu sách...';
+  readonly displayName = 'Checking your saved words...';
   readonly description =
     "Lists the learner's bookmarked vocabulary, newest first. Useful when " +
     'they ask "what words have I bookmarked?". Supports an optional `search` ' +

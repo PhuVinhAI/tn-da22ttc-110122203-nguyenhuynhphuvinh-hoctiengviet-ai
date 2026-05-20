@@ -34,7 +34,7 @@ ScreenContext flashcardScreenContextBuilder(Ref ref, RouteMatch match) {
   return ScreenContext(
     route: match.location,
     displayName: 'Flashcards',
-    barPlaceholder: 'Hỏi về thẻ từ?',
+    barPlaceholder: 'Ask about flashcards?',
     data: data,
   );
 }

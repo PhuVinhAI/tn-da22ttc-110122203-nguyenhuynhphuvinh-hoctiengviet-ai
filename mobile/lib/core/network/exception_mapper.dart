@@ -33,7 +33,7 @@ AppException _mapBadResponse(DioException error) {
     case 403:
       if (data is Map<String, dynamic> && data['emailNotVerified'] == true) {
         return EmailNotVerifiedException(
-          _extractMessage(data) ?? 'Email chưa được xác thực',
+          _extractMessage(data) ?? 'Email is not verified',
           email: data['email'] as String? ?? '',
           statusCode: statusCode,
         );

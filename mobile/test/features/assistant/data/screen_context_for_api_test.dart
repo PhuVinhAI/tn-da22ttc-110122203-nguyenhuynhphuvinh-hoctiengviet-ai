@@ -7,8 +7,8 @@ void main() {
     test('strips uiSnapshot when screenType is present', () {
       const context = ScreenContext(
         route: '/',
-        displayName: 'Trang chủ',
-        barPlaceholder: 'Hôm nay học gì nhỉ?',
+        displayName: 'Home',
+        barPlaceholder: 'What should I study today?',
         data: {
           'screenType': 'home',
           'status': 'data',
@@ -30,7 +30,7 @@ void main() {
       const context = ScreenContext(
         route: '/profile',
         displayName: '/profile',
-        barPlaceholder: 'Hỏi gì đi nào?',
+        barPlaceholder: 'Ask anything...',
         data: {
           'uiSnapshot': {
             'texts': ['Profile'],

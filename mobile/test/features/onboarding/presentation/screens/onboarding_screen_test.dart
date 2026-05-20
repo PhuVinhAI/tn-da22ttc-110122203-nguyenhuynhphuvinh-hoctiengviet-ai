@@ -188,14 +188,14 @@ void main() {
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Đặt mục tiêu hàng ngày'), findsOneWidget);
-      expect(find.text('Bài tập'), findsOneWidget);
-      expect(find.text('Phút học'), findsOneWidget);
-      expect(find.text('Bài học'), findsOneWidget);
+      expect(find.text('Set daily goals'), findsOneWidget);
+      expect(find.text('Exercises'), findsOneWidget);
+      expect(find.text('Study minutes'), findsOneWidget);
+      expect(find.text('Lessons'), findsOneWidget);
       expect(find.byType(AppSwitch), findsNWidgets(3));
       expect(find.byType(Slider), findsNWidgets(2));
-      expect(find.text('10 bài tập/ngày'), findsOneWidget);
-      expect(find.text('15 phút/ngày'), findsOneWidget);
+      expect(find.text('10 exercises/day'), findsOneWidget);
+      expect(find.text('15 minutes/day'), findsOneWidget);
     });
 
     testWidgets(

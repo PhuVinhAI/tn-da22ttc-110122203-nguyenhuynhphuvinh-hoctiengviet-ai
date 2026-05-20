@@ -20,7 +20,7 @@ class ConversationSummary {
     );
   }
 
-  String get displayTitle => title.isEmpty ? 'Hội thoại mới' : title;
+  String get displayTitle => title.isEmpty ? 'New conversation' : title;
 
   @override
   bool operator ==(Object other) =>

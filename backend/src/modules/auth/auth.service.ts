@@ -48,7 +48,7 @@ export class AuthService {
         registerDto.email,
       );
       if (existingUser) {
-        throw new ConflictException('Email đã được đăng ký');
+        throw new ConflictException('Email is already registered');
       }
 
       // Tạo user mới
@@ -80,7 +80,7 @@ export class AuthService {
 
       return {
         message:
-          'Đăng ký thành công! Vui lòng kiểm tra email để nhận mã xác thực.',
+          'Registration successful! Check your email for a verification code.',
         email: user.email,
       };
     } catch (error) {
@@ -123,7 +123,7 @@ export class AuthService {
           'AuthService',
         );
         throw new ForbiddenException({
-          message: 'Email chưa được xác thực',
+          message: 'Email is not verified',
           emailNotVerified: true,
           email: user.email,
         });
@@ -162,7 +162,7 @@ export class AuthService {
     const result = await this.tokenLifecycle.verifyEmailToken(token);
 
     if (!result) {
-      throw new BadRequestException('Token không hợp lệ hoặc đã hết hạn');
+      throw new BadRequestException('Token is invalid or has expired');
     }
 
     await this.usersService.update(result.userId, {
@@ -178,7 +178,7 @@ export class AuthService {
     this.loggingService.log(`Email verified: ${result.email}`, 'AuthService');
 
     return {
-      message: 'Email đã được xác thực thành công!',
+      message: 'Email verified successfully!',
     };
   }
 
@@ -190,13 +190,15 @@ export class AuthService {
   ) {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      throw new BadRequestException('Email không tồn tại');
+      throw new BadRequestException('Email does not exist');
     }
 
     const result = await this.tokenLifecycle.verifyEmailCode(code, user.id);
 
     if (!result) {
-      throw new BadRequestException('Mã xác thực không hợp lệ hoặc đã hết hạn');
+      throw new BadRequestException(
+        'Verification code is invalid or has expired',
+      );
     }
 
     await this.usersService.update(result.userId, {
@@ -226,7 +228,7 @@ export class AuthService {
       access_token: tokens.accessToken,
       refresh_token: tokens.refreshToken,
       expires_in: 900,
-      message: 'Email đã được xác thực thành công!',
+      message: 'Email verified successfully!',
     };
   }
 
@@ -236,7 +238,8 @@ export class AuthService {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       return {
-        message: 'Nếu email tồn tại, bạn sẽ nhận được mã đặt lại mật khẩu.',
+        message:
+          'If the email exists, you will receive a password reset code.',
       };
     }
 
@@ -257,7 +260,7 @@ export class AuthService {
     );
 
     return {
-      message: 'Nếu email tồn tại, bạn sẽ nhận được mã đặt lại mật khẩu.',
+      message: 'If the email exists, you will receive a password reset code.',
     };
   }
 
@@ -267,7 +270,7 @@ export class AuthService {
     const result = await this.tokenLifecycle.verifyPasswordResetToken(token);
 
     if (!result) {
-      throw new BadRequestException('Token không hợp lệ hoặc đã hết hạn');
+      throw new BadRequestException('Token is invalid or has expired');
     }
 
     await this.usersService.update(result.userId, {
@@ -287,27 +290,29 @@ export class AuthService {
     );
 
     return {
-      message: 'Mật khẩu đã được đặt lại thành công!',
+      message: 'Password reset successfully!',
     };
   }
 
   async verifyResetCode(email: string, code: string) {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      throw new BadRequestException('Email không tồn tại');
+      throw new BadRequestException('Email does not exist');
     }
 
     const result = await this.tokenLifecycle.verifyResetCode(code, email);
 
     if (!result) {
-      throw new BadRequestException('Mã xác thực không hợp lệ hoặc đã hết hạn');
+      throw new BadRequestException(
+        'Verification code is invalid or has expired',
+      );
     }
 
     this.loggingService.log(`Reset code verified: ${email}`, 'AuthService');
 
     return {
       reset_token: result.resetToken,
-      message: 'Mã xác thực hợp lệ. Vui lòng đặt lại mật khẩu.',
+      message: 'Verification code accepted. Please reset your password.',
     };
   }
 
@@ -315,11 +320,11 @@ export class AuthService {
     const user = await this.usersService.findByEmail(email);
 
     if (!user) {
-      throw new NotFoundException('User không tồn tại');
+      throw new NotFoundException('User not found');
     }
 
     if (user.emailVerified) {
-      throw new BadRequestException('Email đã được xác thực');
+      throw new BadRequestException('Email is already verified');
     }
 
     const verificationToken = await this.tokenLifecycle.createVerificationToken(
@@ -334,7 +339,7 @@ export class AuthService {
     );
 
     return {
-      message: 'Email xác thực đã được gửi lại!',
+      message: 'Verification email sent again!',
     };
   }
 
@@ -495,7 +500,7 @@ export class AuthService {
       });
       payload = ticket.getPayload()!;
     } catch {
-      throw new UnauthorizedException('Google ID token không hợp lệ');
+      throw new UnauthorizedException('Invalid Google ID token');
     }
 
     const oauthUser: OAuthUserDto = {
@@ -591,7 +596,7 @@ export class AuthService {
     this.loggingService.log(`User logged out: ${userId}`, 'AuthService');
 
     return {
-      message: 'Đăng xuất thành công',
+      message: 'Logged out successfully',
     };
   }
 

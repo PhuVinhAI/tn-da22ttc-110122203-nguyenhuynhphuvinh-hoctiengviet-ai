@@ -290,7 +290,7 @@ void main() {
           const RouteMatch(routePattern: '/', location: '/'),
         );
     container.read(currentScreenUiSnapshotProvider.notifier).update(const {
-      'texts': ['Trợ lý AI · Trang chủ'],
+      'texts': ['AI Assistant · Home'],
       'structure': {'type': 'Column'},
     });
 

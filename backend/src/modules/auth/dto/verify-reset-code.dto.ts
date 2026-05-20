@@ -6,7 +6,7 @@ export class VerifyResetCodeDto {
     example: 'user@example.com',
     description: 'Email của tài khoản cần đặt lại mật khẩu',
   })
-  @IsEmail({}, { message: 'Email không hợp lệ' })
+  @IsEmail({}, { message: 'Invalid email address' })
   email: string;
 
   @ApiProperty({
@@ -14,6 +14,6 @@ export class VerifyResetCodeDto {
     description: 'Mã OTP 6 chữ số từ email',
   })
   @IsString()
-  @Length(6, 6, { message: 'Mã OTP phải có đúng 6 chữ số' })
+  @Length(6, 6, { message: 'OTP must be exactly 6 digits' })
   code: string;
 }

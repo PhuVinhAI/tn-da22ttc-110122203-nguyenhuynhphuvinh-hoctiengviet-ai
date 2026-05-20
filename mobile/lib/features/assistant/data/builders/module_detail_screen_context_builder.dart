@@ -39,7 +39,7 @@ ScreenContext moduleDetailScreenContextBuilder(Ref ref, RouteMatch match) {
   return ScreenContext(
     route: match.location,
     displayName: moduleTitle != null ? 'Module · $moduleTitle' : 'Module',
-    barPlaceholder: 'Hỏi về module này?',
+    barPlaceholder: 'Ask about this module?',
     data: data,
   );
 }

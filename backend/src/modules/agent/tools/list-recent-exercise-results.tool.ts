@@ -38,7 +38,7 @@ export class ListRecentExerciseResultsTool extends BaseTool<
   ListRecentExerciseResultsOutput
 > {
   readonly name = 'list_recent_exercise_results';
-  readonly displayName = 'Đang xem kết quả bài tập gần đây...';
+  readonly displayName = 'Reviewing recent exercise results...';
   readonly description =
     "Returns the learner's most recent exercise results (correct/incorrect, " +
     'score, attemptedAt), newest first. Useful when the learner asks "what ' +

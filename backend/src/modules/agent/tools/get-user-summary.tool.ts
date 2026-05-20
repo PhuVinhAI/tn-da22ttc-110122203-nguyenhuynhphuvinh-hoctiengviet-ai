@@ -46,7 +46,7 @@ export class GetUserSummaryTool extends BaseTool<
   GetUserSummaryResult
 > {
   readonly name = 'get_user_summary';
-  readonly displayName = 'Đang tóm tắt thông tin của bạn...';
+  readonly displayName = 'Summarizing your profile...';
   readonly description =
     'Returns a snapshot of the current learner: CEFR level, native language, ' +
     'preferred Vietnamese dialect, their current daily goals, and their ' +

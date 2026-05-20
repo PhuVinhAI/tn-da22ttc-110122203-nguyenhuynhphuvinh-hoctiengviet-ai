@@ -34,7 +34,8 @@ void main() {
             requestOptions: RequestOptions(path: '/auth/register'),
             statusCode: 201,
             data: {
-              'message': 'Đăng ký thành công! Vui lòng kiểm tra email để nhận mã xác thực.',
+              'message':
+                  'Registration successful! Check your email for a verification code.',
               'email': 'test@example.com',
             },
           ),
@@ -46,7 +47,7 @@ void main() {
           fullName: 'Test User',
         );
 
-        expect(result.message, contains('Đăng ký thành công'));
+        expect(result.message, contains('Registration successful'));
       });
 
       test('throws ValidationException on 422 response', () async {

@@ -32,7 +32,7 @@ ScreenContext coursesScreenContextBuilder(Ref ref, RouteMatch match) {
   return ScreenContext(
     route: match.location,
     displayName: 'Courses',
-    barPlaceholder: 'Hỏi về khóa học?',
+    barPlaceholder: 'Ask about courses?',
     data: data,
   );
 }

@@ -63,7 +63,7 @@ describe('assistant-tutor prompt template', () => {
     // Sanity check: the loader read it. Render with no vars and confirm
     // the persona header is present.
     const out = service.renderPrompt('assistant-tutor', {});
-    expect(out).toContain('Trợ lý AI');
+    expect(out).toContain('AI Assistant');
   });
 
   it('substitutes all documented placeholders from a nested variable object', () => {
@@ -75,7 +75,7 @@ describe('assistant-tutor prompt template', () => {
       },
       screenContext: {
         route: '/courses/c1/modules/m1/lessons/l1',
-        displayName: 'Bài học: Chào hỏi',
+        displayName: 'Lesson: Greetings',
         data: JSON.stringify({ lessonId: 'l1', body: 'Xin chào' }),
       },
     });
@@ -84,7 +84,7 @@ describe('assistant-tutor prompt template', () => {
     expect(out).toContain('CEFR level: B1');
     expect(out).toContain('Preferred Vietnamese dialect: NORTHERN');
     expect(out).toContain('Route: /courses/c1/modules/m1/lessons/l1');
-    expect(out).toContain('Display name: Bài học: Chào hỏi');
+    expect(out).toContain('Display name: Lesson: Greetings');
     expect(out).toContain('"lessonId":"l1"');
   });
 
@@ -100,6 +100,13 @@ describe('assistant-tutor prompt template', () => {
     });
     expect(out).toContain('ALWAYS write your reply in the learner');
     expect(out).toContain('English');
+  });
+
+  it('defaults to English when nativeLanguage is empty', () => {
+    const out = service.renderPrompt('assistant-tutor', {
+      user: { nativeLanguage: '' },
+    });
+    expect(out).toContain('If that field is empty, use English');
   });
 
   it('enables markdown rendering in the persona', () => {

@@ -101,7 +101,7 @@ class _ProgressData extends StatelessWidget {
               Icon(Icons.flag, size: 18, color: c.primary),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'Tiến trình hôm nay',
+                'Today\'s progress',
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -137,14 +137,14 @@ class _CelebratoryState extends StatelessWidget {
               Icon(Icons.flag, size: 18, color: c.primary),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'Tiến trình hôm nay',
+                'Today\'s progress',
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const Spacer(),
               AppBadge(
-                label: 'Hoàn thành!',
+                label: 'Complete!',
                 color: c.success,
               ),
             ],
@@ -153,7 +153,7 @@ class _CelebratoryState extends StatelessWidget {
           Icon(Icons.celebration, size: 48, color: c.success),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Tuyệt vời! Bạn đã hoàn thành tất cả mục tiêu hôm nay!',
+            'Great job! You completed all of today\'s goals!',
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: c.success,
@@ -188,7 +188,7 @@ class _GoalProgressRow extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  goal.goalType.viLabel,
+                  goal.goalType.label,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),

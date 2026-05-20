@@ -170,7 +170,7 @@ class _Header extends ConsumerWidget {
       children: [
         Expanded(
           child: Text(
-            'Trợ lý AI · $displayName',
+            'AI Assistant · $displayName',
             style: GoogleFonts.inter(
               fontSize: AppTypography.bodySmall,
               fontWeight: FontWeight.w600,
@@ -184,7 +184,7 @@ class _Header extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.open_in_full),
             color: c.mutedForeground,
-            tooltip: 'Toàn màn hình',
+            tooltip: 'Full screen',
             onPressed: () =>
                 ref.read(assistantChatNotifierProvider).enterFull(),
           ),
@@ -192,13 +192,13 @@ class _Header extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             color: c.mutedForeground,
-            tooltip: 'Reset hội thoại',
+            tooltip: 'Reset conversation',
             onPressed: () => ref.read(assistantChatNotifierProvider).reset(),
           ),
         IconButton(
           icon: const Icon(Icons.remove),
           color: c.mutedForeground,
-          tooltip: 'Đóng',
+          tooltip: 'Close',
           onPressed: () => Navigator.of(context).maybePop(),
         ),
       ],
@@ -289,7 +289,7 @@ class _ComposeBody extends StatelessWidget {
               color: c.foreground,
             ),
             decoration: InputDecoration(
-              hintText: 'Hỏi gì đi nào?',
+              hintText: 'Ask anything...',
               hintStyle: GoogleFonts.inter(
                 fontSize: AppTypography.bodyMedium,
                 color: c.mutedForeground,
@@ -427,7 +427,7 @@ class _ReadingBody extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 MarkdownBody(
-                  data: partial.isEmpty ? '_(không có phản hồi)_' : partial,
+                  data: partial.isEmpty ? '_(no response)_' : partial,
                   selectable: true,
                 ),
               ],
@@ -438,7 +438,7 @@ class _ReadingBody extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(top: AppSpacing.sm),
             child: Text(
-              'Đã dừng',
+              'Stopped',
               style: GoogleFonts.inter(
                 fontSize: AppTypography.bodySmall,
                 color: c.mutedForeground,
@@ -466,7 +466,7 @@ class _ReadingBody extends ConsumerWidget {
         else if (streaming)
           AppButton(
             onPressed: () => ref.read(assistantChatNotifierProvider).stop(),
-            label: 'Dừng',
+            label: 'Stop',
             variant: AppButtonVariant.outline,
             isFullWidth: true,
           )
@@ -474,7 +474,7 @@ class _ReadingBody extends ConsumerWidget {
           AppButton(
             onPressed: () =>
                 ref.read(assistantChatNotifierProvider).composeAgain(),
-            label: 'Soạn tiếp',
+            label: 'Compose again',
             isFullWidth: true,
           ),
       ],
@@ -515,7 +515,7 @@ class _ErrorBody extends ConsumerWidget {
         ),
         AppButton(
           onPressed: () => ref.read(assistantChatNotifierProvider).retry(),
-          label: 'Thử lại',
+          label: 'Retry',
           isFullWidth: true,
         ),
       ],

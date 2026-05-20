@@ -35,7 +35,7 @@ export class GetLessonDetailTool extends BaseTool<
   GetLessonDetailOutput
 > {
   readonly name = 'get_lesson_detail';
-  readonly displayName = 'Đang đọc nội dung bài học...';
+  readonly displayName = 'Reading lesson content...';
   readonly description =
     'Returns the full content of a single lesson by id: contents (slides), ' +
     'vocabulary list, grammar rules, exercises, and exercise sets. Use this ' +

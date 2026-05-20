@@ -45,8 +45,8 @@ ScreenContext homeScreenContextBuilder(Ref ref, RouteMatch match) {
 
   return ScreenContext(
     route: match.location,
-    displayName: 'Trang chủ',
-    barPlaceholder: 'Hôm nay học gì nhỉ?',
+    displayName: 'Home',
+    barPlaceholder: 'What should I study today?',
     data: data,
   );
 }

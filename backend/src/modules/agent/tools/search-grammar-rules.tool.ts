@@ -40,7 +40,7 @@ export class SearchGrammarRulesTool extends BaseTool<
   SearchGrammarRulesOutput
 > {
   readonly name = 'search_grammar_rules';
-  readonly displayName = 'Đang tra cứu ngữ pháp...';
+  readonly displayName = 'Looking up grammar...';
   readonly description =
     'Searches the grammar-rule catalog by title or explanation text. Useful ' +
     'when the learner asks about a grammar concept by name or by example ' +

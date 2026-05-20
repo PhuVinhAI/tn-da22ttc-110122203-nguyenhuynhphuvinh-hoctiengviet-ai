@@ -50,7 +50,7 @@ class AssistantMidLoading extends AssistantState {
     this.statusText = defaultStatusText,
   });
 
-  static const String defaultStatusText = 'Đang suy nghĩ...';
+  static const String defaultStatusText = 'Thinking...';
 
   /// The message the learner just sent. Retained so `MidError → retry`
   /// can re-issue the same request without re-prompting.

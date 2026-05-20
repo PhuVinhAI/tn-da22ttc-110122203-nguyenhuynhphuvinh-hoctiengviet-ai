@@ -21,7 +21,7 @@ void main() {
 
       final ctx = container.read(currentScreenContextProvider);
       expect(ctx.route, '/');
-      expect(ctx.barPlaceholder, 'Hỏi gì đi nào?');
+      expect(ctx.barPlaceholder, 'Ask anything...');
       expect(ctx.data, isEmpty);
     });
 
@@ -41,7 +41,7 @@ void main() {
       final ctx = container.read(currentScreenContextProvider);
       expect(ctx.route, '/something');
       expect(ctx.displayName, '/something');
-      expect(ctx.barPlaceholder, 'Hỏi gì đi nào?');
+      expect(ctx.barPlaceholder, 'Ask anything...');
       expect(ctx.data, isEmpty);
     });
 
@@ -173,7 +173,7 @@ void main() {
             const RouteMatch(routePattern: '/', location: '/'),
           );
       container.read(currentScreenUiSnapshotProvider.notifier).update(const {
-        'texts': ['Trợ lý AI · Trang chủ'],
+        'texts': ['AI Assistant · Home'],
         'structure': {'type': 'Column'},
       });
 

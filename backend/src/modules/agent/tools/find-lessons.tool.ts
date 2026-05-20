@@ -43,7 +43,7 @@ export class FindLessonsTool extends BaseTool<
   FindLessonsOutput
 > {
   readonly name = 'find_lessons';
-  readonly displayName = 'Đang tìm bài học phù hợp...';
+  readonly displayName = 'Finding relevant lessons...';
   readonly description =
     'Finds lessons in the catalog by topic (matched against module title), ' +
     'CEFR level (A1..C2), and/or lesson type (vocabulary, grammar, ' +

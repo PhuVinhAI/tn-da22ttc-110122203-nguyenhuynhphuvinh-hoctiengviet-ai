@@ -44,7 +44,7 @@ ScreenContext bookmarksScreenContextBuilder(Ref ref, RouteMatch match) {
   return ScreenContext(
     route: match.location,
     displayName: 'Bookmarks',
-    barPlaceholder: 'Hỏi về từ đã lưu?',
+    barPlaceholder: 'Ask about saved words?',
     data: data,
   );
 }

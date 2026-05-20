@@ -307,10 +307,12 @@ class AssistantChatNotifier {
   String _humanReadableError(Object error) {
     if (error is DioException) {
       final status = error.response?.statusCode;
-      if (status != null) return 'Lỗi máy chủ ($status). Vui lòng thử lại.';
-      return 'Mất kết nối. Vui lòng thử lại.';
+      if (status != null) {
+        return 'Server error ($status). Please try again.';
+      }
+      return 'Connection lost. Please try again.';
     }
-    return 'Đã xảy ra lỗi. Vui lòng thử lại.';
+    return 'Something went wrong. Please try again.';
   }
 
   void _refreshScreenUiSnapshotIfNeeded() {

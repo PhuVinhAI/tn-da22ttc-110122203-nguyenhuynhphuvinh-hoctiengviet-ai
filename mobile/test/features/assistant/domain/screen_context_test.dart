@@ -7,13 +7,13 @@ void main() {
       const ctx = ScreenContext(
         route: '/lessons/abc',
         displayName: 'Lesson · Greetings',
-        barPlaceholder: 'Hỏi về bài học?',
+        barPlaceholder: 'Ask about this lesson?',
         data: {'lessonId': 'abc'},
       );
 
       expect(ctx.route, '/lessons/abc');
       expect(ctx.displayName, 'Lesson · Greetings');
-      expect(ctx.barPlaceholder, 'Hỏi về bài học?');
+      expect(ctx.barPlaceholder, 'Ask about this lesson?');
       expect(ctx.data, {'lessonId': 'abc'});
     });
 
@@ -21,7 +21,7 @@ void main() {
       const ctx = ScreenContext(
         route: '/',
         displayName: 'Home',
-        barPlaceholder: 'Hỏi gì đi nào?',
+        barPlaceholder: 'Ask anything...',
       );
       expect(ctx.data, isEmpty);
     });
@@ -30,19 +30,19 @@ void main() {
       const a = ScreenContext(
         route: '/',
         displayName: 'Home',
-        barPlaceholder: 'Hỏi gì đi nào?',
+        barPlaceholder: 'Ask anything...',
         data: {'goals': 3, 'streak': 5},
       );
       const b = ScreenContext(
         route: '/',
         displayName: 'Home',
-        barPlaceholder: 'Hỏi gì đi nào?',
+        barPlaceholder: 'Ask anything...',
         data: {'goals': 3, 'streak': 5},
       );
       const c = ScreenContext(
         route: '/',
         displayName: 'Home',
-        barPlaceholder: 'Hỏi gì đi nào?',
+        barPlaceholder: 'Ask anything...',
         data: {'goals': 3, 'streak': 6},
       );
 

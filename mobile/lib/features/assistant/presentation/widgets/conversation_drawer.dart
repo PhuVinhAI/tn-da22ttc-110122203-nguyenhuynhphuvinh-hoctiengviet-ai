@@ -52,7 +52,7 @@ class _ConversationDrawerState extends ConsumerState<ConversationDrawer> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Hội thoại',
+                      'Conversations',
                       style: GoogleFonts.inter(
                         fontSize: AppTypography.titleSmall,
                         fontWeight: FontWeight.w600,
@@ -64,7 +64,7 @@ class _ConversationDrawerState extends ConsumerState<ConversationDrawer> {
                     onPressed: () => _createNew(context),
                     icon: const Icon(Icons.add, size: 18),
                     label: Text(
-                      'Mới',
+                      'New',
                       style: GoogleFonts.inter(
                         fontSize: AppTypography.bodySmall,
                         fontWeight: FontWeight.w600,
@@ -87,7 +87,7 @@ class _ConversationDrawerState extends ConsumerState<ConversationDrawer> {
                         Icon(Icons.error_outline, color: c.error, size: 32),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
-                          'Không thể tải danh sách',
+                          'Could not load conversations',
                           style: GoogleFonts.inter(
                             fontSize: AppTypography.bodySmall,
                             color: c.mutedForeground,
@@ -97,7 +97,7 @@ class _ConversationDrawerState extends ConsumerState<ConversationDrawer> {
                         TextButton(
                           onPressed: () =>
                               ref.invalidate(conversationListProvider),
-                          child: const Text('Thử lại'),
+                          child: const Text('Retry'),
                         ),
                       ],
                     ),
@@ -107,7 +107,7 @@ class _ConversationDrawerState extends ConsumerState<ConversationDrawer> {
                   if (list.isEmpty) {
                     return Center(
                       child: Text(
-                        'Chưa có hội thoại nào',
+                        'No conversations yet',
                         style: GoogleFonts.inter(
                           fontSize: AppTypography.bodySmall,
                           color: c.mutedForeground,
@@ -174,19 +174,19 @@ class _ConversationDrawerState extends ConsumerState<ConversationDrawer> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Xóa hội thoại'),
-        content: Text('Bạn có chắc muốn xóa "${conv.displayTitle}"?'),
+        title: const Text('Delete conversation'),
+        content: Text('Are you sure you want to delete "${conv.displayTitle}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Hủy'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: TextButton.styleFrom(
               foregroundColor: AppTheme.colors(context).error,
             ),
-            child: const Text('Xóa'),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -286,12 +286,12 @@ class _ConversationRow extends StatelessWidget {
         children: [
           IconButton(
             icon: Icon(Icons.edit, size: 16, color: c.mutedForeground),
-            tooltip: 'Đổi tên',
+            tooltip: 'Rename',
             onPressed: onRename,
           ),
           IconButton(
             icon: Icon(Icons.delete_outline, size: 16, color: c.error),
-            tooltip: 'Xóa',
+            tooltip: 'Delete',
             onPressed: onDelete,
           ),
         ],
@@ -303,10 +303,19 @@ class _ConversationRow extends StatelessWidget {
   String _formatDate(DateTime dt) {
     final now = DateTime.now();
     final diff = now.difference(dt);
-    if (diff.inMinutes < 1) return 'Vừa xong';
-    if (diff.inHours < 1) return '${diff.inMinutes} phút trước';
-    if (diff.inDays < 1) return '${diff.inHours} giờ trước';
-    if (diff.inDays < 7) return '${diff.inDays} ngày trước';
+    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inHours < 1) {
+      final m = diff.inMinutes;
+      return '$m ${m == 1 ? 'minute' : 'minutes'} ago';
+    }
+    if (diff.inDays < 1) {
+      final h = diff.inHours;
+      return '$h ${h == 1 ? 'hour' : 'hours'} ago';
+    }
+    if (diff.inDays < 7) {
+      final d = diff.inDays;
+      return '$d ${d == 1 ? 'day' : 'days'} ago';
+    }
     return '${dt.day}/${dt.month}/${dt.year}';
   }
 }

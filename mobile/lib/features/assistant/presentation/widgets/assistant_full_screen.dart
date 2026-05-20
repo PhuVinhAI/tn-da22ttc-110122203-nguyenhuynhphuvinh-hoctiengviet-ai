@@ -303,7 +303,7 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
     if (_messages.isEmpty && !showLiveTurn) {
       return Center(
         child: Text(
-          'Bắt đầu cuộc trò chuyện',
+          'Start a conversation',
           style: GoogleFonts.inter(
             fontSize: AppTypography.bodyMedium,
             color: c.mutedForeground,
@@ -360,12 +360,12 @@ class _Header extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.menu),
             color: c.mutedForeground,
-            tooltip: 'Danh sách hội thoại',
+            tooltip: 'Conversation list',
             onPressed: onDrawerTap,
           ),
           Expanded(
             child: Text(
-              'Trợ lý AI · $displayName',
+              'AI Assistant · $displayName',
               style: GoogleFonts.inter(
                 fontSize: AppTypography.bodySmall,
                 fontWeight: FontWeight.w600,
@@ -378,13 +378,13 @@ class _Header extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             color: c.mutedForeground,
-            tooltip: 'Reset hội thoại',
+            tooltip: 'Reset conversation',
             onPressed: onReset,
           ),
           IconButton(
             icon: const Icon(Icons.close),
             color: c.mutedForeground,
-            tooltip: 'Đóng',
+            tooltip: 'Close',
             onPressed: onClose,
           ),
         ],
@@ -442,7 +442,7 @@ class _MessageBubble extends StatelessWidget {
               MarkdownBody(data: message.content, selectable: true)
             else if (!message.interrupted)
               Text(
-                '_(không có phản hồi)_',
+                '_(no response)_',
                 style: GoogleFonts.inter(
                   fontSize: AppTypography.bodySmall,
                   color: c.mutedForeground,
@@ -453,7 +453,7 @@ class _MessageBubble extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
-                  'Đã dừng',
+                  'Stopped',
                   style: GoogleFonts.inter(
                     fontSize: AppTypography.caption,
                     color: c.mutedForeground,
@@ -516,7 +516,7 @@ class _LiveAssistantTurn extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: AppSpacing.xs),
                     child: Text(
-                      'Đã dừng',
+                      'Stopped',
                       style: GoogleFonts.inter(
                         fontSize: AppTypography.caption,
                         color: c.mutedForeground,
@@ -567,7 +567,7 @@ class _LiveAssistantTurn extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               AppButton(
                 onPressed: onRetry,
-                label: 'Thá»­ láº¡i',
+                label: 'Retry',
                 isFullWidth: true,
               ),
             ],
@@ -619,7 +619,7 @@ class _ComposeBar extends StatelessWidget {
                 color: c.foreground,
               ),
               decoration: InputDecoration(
-                hintText: 'Nhập tin nhắn...',
+                hintText: 'Type a message...',
                 hintStyle: GoogleFonts.inter(color: c.mutedForeground),
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(
@@ -648,7 +648,7 @@ class _ComposeBar extends StatelessWidget {
               inFlight ? Icons.stop_rounded : Icons.send,
               color: inFlight ? c.error : c.primary,
             ),
-            tooltip: inFlight ? 'Dừng' : 'Gửi',
+            tooltip: inFlight ? 'Stop' : 'Send',
             onPressed: inFlight ? onStop : onSend,
           ),
         ],

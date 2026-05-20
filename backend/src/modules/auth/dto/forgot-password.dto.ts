@@ -6,6 +6,6 @@ export class ForgotPasswordDto {
     example: 'user@example.com',
     description: 'Email của tài khoản cần đặt lại mật khẩu',
   })
-  @IsEmail({}, { message: 'Email không hợp lệ' })
+  @IsEmail({}, { message: 'Invalid email address' })
   email: string;
 }

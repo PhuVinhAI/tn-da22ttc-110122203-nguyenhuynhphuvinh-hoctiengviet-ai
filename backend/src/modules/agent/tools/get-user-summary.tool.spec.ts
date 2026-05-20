@@ -64,7 +64,7 @@ describe('GetUserSummaryTool', () => {
     });
 
     it('declares a Vietnamese displayName for the mobile loading state', () => {
-      expect(tool.displayName).toBe('Đang tóm tắt thông tin của bạn...');
+      expect(tool.displayName).toBe('Summarizing your profile...');
     });
 
     it('declares a non-empty description for the model', () => {

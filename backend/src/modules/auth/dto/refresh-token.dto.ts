@@ -6,7 +6,7 @@ export class RefreshTokenDto {
     description: 'Refresh token nhận được từ login/register',
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
-  @IsNotEmpty({ message: 'Refresh token không được để trống' })
-  @IsString({ message: 'Refresh token phải là chuỗi' })
+  @IsNotEmpty({ message: 'Refresh token is required' })
+  @IsString({ message: 'Refresh token must be a string' })
   refreshToken: string;
 }

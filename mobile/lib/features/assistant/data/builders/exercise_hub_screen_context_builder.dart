@@ -56,9 +56,9 @@ ScreenContext exerciseHubScreenContextBuilder(Ref ref, RouteMatch match) {
   return ScreenContext(
     route: match.location,
     displayName: lessonTitle != null
-        ? 'Luyện tập · $lessonTitle'
-        : 'Luyện tập',
-    barPlaceholder: 'Hỏi về bài tập?',
+        ? 'Practice · $lessonTitle'
+        : 'Practice',
+    barPlaceholder: 'Ask about practice?',
     data: data,
   );
 }

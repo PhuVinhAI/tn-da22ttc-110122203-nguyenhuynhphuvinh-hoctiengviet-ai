@@ -147,7 +147,7 @@ void main() {
 
     expect(find.text('Hello'), findsOneWidget);
     expect(find.text('partial answer'), findsOneWidget);
-    expect(find.text('Đã dừng'), findsOneWidget);
+    expect(find.text('Stopped'), findsOneWidget);
 
     fixture.dispose();
   });
@@ -169,8 +169,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.text('Hello'), findsOneWidget);
-    expect(find.text('Đã dừng'), findsOneWidget);
-    expect(find.text('_(không có phản hồi)_'), findsNothing);
+    expect(find.text('Stopped'), findsOneWidget);
+    expect(find.text('_(no response)_'), findsNothing);
 
     fixture.dispose();
   });

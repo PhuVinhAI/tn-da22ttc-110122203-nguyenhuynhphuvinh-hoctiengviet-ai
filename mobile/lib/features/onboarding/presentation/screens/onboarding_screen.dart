@@ -38,10 +38,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const _levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
   static const _a1Index = 0;
   static const _dialects = [
-    _DialectOption('STANDARD', 'Standard', 'Chuẩn chung'),
-    _DialectOption('NORTHERN', 'Northern', 'Miền Bắc (Hà Nội)'),
-    _DialectOption('CENTRAL', 'Central', 'Miền Trung (Huế, Đà Nẵng)'),
-    _DialectOption('SOUTHERN', 'Southern', 'Miền Nam (Sài Gòn)'),
+    _DialectOption('STANDARD', 'Standard', 'General standard'),
+    _DialectOption('NORTHERN', 'Northern', 'Northern Vietnam (Hanoi)'),
+    _DialectOption('CENTRAL', 'Central', 'Central Vietnam (Hue, Da Nang)'),
+    _DialectOption('SOUTHERN', 'Southern', 'Southern Vietnam (Ho Chi Minh City)'),
   ];
 
   bool get _canProceed {
@@ -456,7 +456,7 @@ class _DailyGoalStep extends StatelessWidget {
         children: [
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Đặt mục tiêu hàng ngày',
+            'Set daily goals',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: -0.5,
@@ -464,7 +464,7 @@ class _DailyGoalStep extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Chọn mục tiêu bạn muốn theo dõi. Có thể thay đổi sau trong Profile.',
+            'Choose the goals you want to track. You can change them later in Profile.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: c.mutedForeground,
               height: 1.5,
@@ -520,7 +520,7 @@ class _GoalToggleTile extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
-                    goalType.viLabel,
+                    goalType.label,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: enabled ? c.foreground : c.mutedForeground,
@@ -537,7 +537,7 @@ class _GoalToggleTile extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               Center(
                 child: Text(
-                  '$targetValue ${goalType.unit}/ngày',
+                  '$targetValue ${goalType.unit}/day',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: c.primary,

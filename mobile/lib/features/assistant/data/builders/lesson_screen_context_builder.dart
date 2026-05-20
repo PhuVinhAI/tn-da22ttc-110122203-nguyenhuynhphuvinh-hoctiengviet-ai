@@ -53,8 +53,8 @@ ScreenContext lessonScreenContextBuilder(Ref ref, RouteMatch match) {
   return ScreenContext(
     route: match.location,
     displayName:
-        detail != null ? 'Bài học · ${detail.title}' : 'Bài học',
-    barPlaceholder: 'Hỏi về bài học?',
+        detail != null ? 'Lesson · ${detail.title}' : 'Lesson',
+    barPlaceholder: 'Ask about this lesson?',
     data: data,
   );
 }

@@ -15,16 +15,16 @@ enum GoalType {
     );
   }
 
-  String get viLabel => switch (this) {
-        GoalType.exercises => 'Bài tập',
-        GoalType.studyMinutes => 'Phút học',
-        GoalType.lessons => 'Bài học',
+  String get label => switch (this) {
+        GoalType.exercises => 'Exercises',
+        GoalType.studyMinutes => 'Study minutes',
+        GoalType.lessons => 'Lessons',
       };
 
   String get unit => switch (this) {
-        GoalType.exercises => 'bài tập',
-        GoalType.studyMinutes => 'phút',
-        GoalType.lessons => 'bài học',
+        GoalType.exercises => 'exercises',
+        GoalType.studyMinutes => 'minutes',
+        GoalType.lessons => 'lessons',
       };
 
   int get defaultTarget => switch (this) {

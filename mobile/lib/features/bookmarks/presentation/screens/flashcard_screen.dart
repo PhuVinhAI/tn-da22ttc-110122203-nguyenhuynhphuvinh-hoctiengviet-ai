@@ -75,7 +75,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen>
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => context.pop(),
-          tooltip: 'Thoát',
+          tooltip: 'Exit',
         ),
         title: Text(
           _items.isNotEmpty ? '${_currentIndex + 1}/${_items.length}' : '',
@@ -103,7 +103,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen>
               Text(e.toString(), textAlign: TextAlign.center),
               const SizedBox(height: 16),
                 AppButton(
-                label: 'Thử lại',
+                label: 'Retry',
                 variant: AppButtonVariant.primary,
                 onPressed: () => ref.read(flashcardBookmarksProvider.notifier).refresh(),
               ),
@@ -122,14 +122,14 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen>
           Icon(Icons.bookmark_border, size: 64, color: c.mutedForeground),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Chưa lưu từ nào',
+            'No saved words yet',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: c.mutedForeground,
                 ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Lưu từ yêu thích để học bằng flashcard',
+            'Save favorite words to study with flashcards',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: c.mutedForeground,
                 ),
@@ -235,12 +235,12 @@ class _Flashcard extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.volume_up, size: 32, color: c.primary),
               onPressed: onPlayAudio,
-              tooltip: 'Nghe phát âm',
+              tooltip: 'Play pronunciation',
             ),
           ],
           const SizedBox(height: AppSpacing.xl),
           Text(
-            'Chạm để lật',
+            'Tap to flip',
             style: theme.textTheme.bodySmall?.copyWith(
                   color: c.mutedForeground,
                 ),
@@ -275,14 +275,14 @@ class _Flashcard extends StatelessWidget {
             if (item.classifier != null) ...[
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Lượng từ: ${item.classifier}',
+                'Classifier: ${item.classifier}',
                 style: theme.textTheme.bodyMedium,
               ),
             ],
             if (item.exampleSentence != null) ...[
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'Ví dụ:',
+                'Example:',
                 style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -306,7 +306,7 @@ class _Flashcard extends StatelessWidget {
             ],
             const SizedBox(height: AppSpacing.xl),
             Text(
-              'Chạm để lật lại',
+              'Tap to flip back',
               style: theme.textTheme.bodySmall?.copyWith(
                     color: c.mutedForeground,
                   ),

@@ -21,7 +21,7 @@ class DailyGoalSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Mục tiêu hàng ngày',
+          'Daily goals',
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -39,11 +39,11 @@ class DailyGoalSection extends ConsumerWidget {
                 Icon(Icons.error_outline,
                     color: AppTheme.colors(context).error),
                 const SizedBox(height: 8),
-                const Text('Không tải được mục tiêu',
+                const Text('Could not load goals',
                     textAlign: TextAlign.center),
                 const SizedBox(height: 8),
                 AppButton(
-                  label: 'Thử lại',
+                  label: 'Retry',
                   variant: AppButtonVariant.outline,
                   onPressed: () =>
                       ref.read(dailyGoalsProvider.notifier).refresh(),
@@ -77,7 +77,7 @@ class _GoalsCard extends ConsumerWidget {
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Center(
                 child: Text(
-                  'Chưa có mục tiêu nào. Thêm mục tiêu để theo dõi tiến trình!',
+                  'No goals yet. Add a goal to track your progress!',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: c.mutedForeground,
                       ),
@@ -106,11 +106,11 @@ class _GoalsCard extends ConsumerWidget {
                       size: 20,
                     ),
                     titleWidget: Text(
-                      'Kỷ lục chuỗi',
+                      'Longest streak',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     subtitleWidget: Text(
-                      '${progress.longestStreak} ngày liên tiếp',
+                      '${progress.longestStreak} days in a row',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -128,7 +128,7 @@ class _GoalsCard extends ConsumerWidget {
             ),
             leading: Icon(Icons.add, color: c.primary),
             titleWidget: Text(
-              'Thêm mục tiêu',
+              'Add goal',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: c.primary,
                     fontWeight: FontWeight.w600,
@@ -152,7 +152,7 @@ class _GoalsCard extends ConsumerWidget {
 
     if (availableTypes.isEmpty) {
       AppToast.show(context,
-          message: 'Đã có đủ 3 loại mục tiêu', type: AppToastType.info);
+          message: 'You already have all 3 goal types', type: AppToastType.info);
       return;
     }
 
@@ -171,15 +171,15 @@ class _GoalsCard extends ConsumerWidget {
       context,
       builder: (dialogCtx) => StatefulBuilder(
         builder: (context, setState) => AppDialog(
-          title: 'Thêm mục tiêu',
+          title: 'Add goal',
           contentWidget: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               AppDropdownField<GoalType>(
-                label: 'Loại mục tiêu',
+                label: 'Goal type',
                 value: selectedType,
                 items: availableTypes,
-                itemLabelBuilder: (t) => t.viLabel,
+                itemLabelBuilder: (t) => t.label,
                 onChanged: (type) {
                   setState(() {
                     selectedType = type;
@@ -199,11 +199,11 @@ class _GoalsCard extends ConsumerWidget {
           ),
           actions: [
             AppDialogAction(
-              label: 'Huỷ',
+              label: 'Cancel',
               onPressed: () => Navigator.pop(context),
             ),
             AppDialogAction(
-              label: 'Thêm',
+              label: 'Add',
               isPrimary: true,
               onPressed: () async {
                 Navigator.pop(context);
@@ -214,7 +214,7 @@ class _GoalsCard extends ConsumerWidget {
                 } catch (e) {
                   if (context.mounted) {
                     AppToast.show(context,
-                        message: 'Lỗi: $e',
+                        message: 'Error: $e',
                         type: AppToastType.error);
                   }
                 }
@@ -243,11 +243,11 @@ class _GoalTile extends ConsumerWidget {
       ),
       leading: Icon(goal.goalType.icon, color: c.primary, size: 20),
       titleWidget: Text(
-        goal.goalType.viLabel,
+        goal.goalType.label,
         style: theme.textTheme.bodyMedium,
       ),
       subtitleWidget: Text(
-        '${goal.targetValue} ${goal.goalType.unit}/ngày',
+        '${goal.targetValue} ${goal.goalType.unit}/day',
         style: theme.textTheme.bodySmall?.copyWith(color: c.mutedForeground),
       ),
       trailing: Row(
@@ -275,7 +275,7 @@ class _GoalTile extends ConsumerWidget {
       context,
       builder: (dialogCtx) => StatefulBuilder(
         builder: (context, setState) => AppDialog(
-          title: 'Sửa ${goal.goalType.viLabel}',
+          title: 'Edit ${goal.goalType.label}',
           contentWidget: _TargetSlider(
             goalType: goal.goalType,
             value: targetValue,
@@ -283,11 +283,11 @@ class _GoalTile extends ConsumerWidget {
           ),
           actions: [
             AppDialogAction(
-              label: 'Huỷ',
+              label: 'Cancel',
               onPressed: () => Navigator.pop(context),
             ),
             AppDialogAction(
-              label: 'Lưu',
+              label: 'Save',
               isPrimary: true,
               onPressed: () async {
                 Navigator.pop(context);
@@ -298,7 +298,7 @@ class _GoalTile extends ConsumerWidget {
                 } catch (e) {
                   if (context.mounted) {
                     AppToast.show(context,
-                        message: 'Lỗi: $e',
+                        message: 'Error: $e',
                         type: AppToastType.error);
                   }
                 }
@@ -314,15 +314,15 @@ class _GoalTile extends ConsumerWidget {
     AppDialog.show(
       context,
       builder: (dialogCtx) => AppDialog(
-        title: 'Xoá mục tiêu',
-        content: 'Xoá mục tiêu "${goal.goalType.viLabel}" vĩnh viễn?',
+        title: 'Delete goal',
+        content: 'Delete the "${goal.goalType.label}" goal permanently?',
         actions: [
           AppDialogAction(
-            label: 'Huỷ',
+            label: 'Cancel',
             onPressed: () => Navigator.pop(dialogCtx),
           ),
           AppDialogAction(
-            label: 'Xoá',
+            label: 'Delete',
             isPrimary: true,
             onPressed: () async {
               Navigator.pop(dialogCtx);
@@ -333,7 +333,7 @@ class _GoalTile extends ConsumerWidget {
               } catch (e) {
                 if (dialogCtx.mounted) {
                   AppToast.show(dialogCtx,
-                      message: 'Lỗi: $e',
+                      message: 'Error: $e',
                       type: AppToastType.error);
                 }
               }
@@ -377,7 +377,7 @@ class _TargetSlider extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                '${goalType.unit}/ngày',
+                '${goalType.unit}/day',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: c.mutedForeground,
                 ),
@@ -434,7 +434,7 @@ class _NotificationSettings extends ConsumerWidget {
               leading: Icon(Icons.notifications_outlined,
                   color: c.primary, size: 20),
               titleWidget: Text(
-                'Nhắc mục tiêu',
+                'Goal reminders',
                 style: theme.textTheme.bodyMedium,
               ),
               trailing: AppSwitch(
@@ -452,7 +452,7 @@ class _NotificationSettings extends ConsumerWidget {
                 leading:
                     Icon(Icons.access_time, color: c.primary, size: 20),
                 titleWidget: Text(
-                  'Giờ nhắc',
+                  'Reminder time',
                   style: theme.textTheme.bodyMedium,
                 ),
                 subtitleWidget: Text(
@@ -479,7 +479,7 @@ class _NotificationSettings extends ConsumerWidget {
         if (context.mounted) {
           AppToast.show(
             context,
-            message: 'Cần cho phép thông báo trong cài đặt thiết bị',
+            message: 'Please enable notifications in device settings',
             type: AppToastType.error,
           );
         }
@@ -505,7 +505,7 @@ class _NotificationSettings extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         AppToast.show(context,
-            message: 'Lỗi: $e', type: AppToastType.error);
+            message: 'Error: $e', type: AppToastType.error);
       }
     }
   }
@@ -542,7 +542,7 @@ class _NotificationSettings extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         AppToast.show(context,
-            message: 'Lỗi: $e', type: AppToastType.error);
+            message: 'Error: $e', type: AppToastType.error);
       }
     }
   }

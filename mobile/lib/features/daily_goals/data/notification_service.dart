@@ -7,8 +7,8 @@ class NotificationService {
 
   static final _plugin = FlutterLocalNotificationsPlugin();
   static const _channelId = 'daily_goal_reminders';
-  static const _channelName = 'Nhắc mục tiêu hàng ngày';
-  static const _channelDescription = 'Nhắc nhở mục tiêu học tập hàng ngày';
+  static const _channelName = 'Daily goal reminders';
+  static const _channelDescription = 'Reminders for your daily learning goals';
   static const _notificationId = 0;
 
   static Future<void> initialize() async {
@@ -81,8 +81,8 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       id: _notificationId,
-      title: 'Mục tiêu hàng ngày',
-      body: 'Bạn chưa đạt mục tiêu hôm nay! Hãy tiếp tục học nhé.',
+      title: 'Daily goals',
+      body: 'You have not met your goals today. Keep learning!',
       scheduledDate: scheduled,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(

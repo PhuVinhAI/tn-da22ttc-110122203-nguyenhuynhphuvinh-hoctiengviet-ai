@@ -42,7 +42,7 @@ export class SearchVocabularyTool extends BaseTool<
   SearchVocabularyOutput
 > {
   readonly name = 'search_vocabulary';
-  readonly displayName = 'Đang tra cứu từ vựng...';
+  readonly displayName = 'Looking up vocabulary...';
   readonly description =
     'Searches the vocabulary catalog by Vietnamese word, English ' +
     'translation, or phonetic spelling. Returns up to 50 entries. The ' +

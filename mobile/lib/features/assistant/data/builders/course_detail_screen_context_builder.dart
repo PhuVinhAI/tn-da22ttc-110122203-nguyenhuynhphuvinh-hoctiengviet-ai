@@ -35,8 +35,8 @@ ScreenContext courseDetailScreenContextBuilder(Ref ref, RouteMatch match) {
 
   return ScreenContext(
     route: match.location,
-    displayName: courseTitle != null ? 'Khóa học · $courseTitle' : 'Khóa học',
-    barPlaceholder: 'Hỏi về khóa học này?',
+    displayName: courseTitle != null ? 'Course · $courseTitle' : 'Course',
+    barPlaceholder: 'Ask about this course?',
     data: data,
   );
 }
