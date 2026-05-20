@@ -39,6 +39,14 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
   @override
   void initState() {
     super.initState();
+    // If we entered Full while a turn was already in-flight from Mid
+    // (e.g. user tapped the expand button while AI was thinking), the
+    // local _fullTurnInFlight flag must be true so _buildBody renders
+    // _LiveAssistantTurn immediately instead of showing an empty screen.
+    final initialState = ref.read(assistantStateMachineProvider);
+    if (_isTurnInFlight(initialState)) {
+      _fullTurnInFlight = true;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadCurrentConversation();
     });
@@ -194,6 +202,17 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
     };
   }
 
+  /// Returns true when the state machine has an active in-flight AI turn
+  /// (Loading or streaming Reading), regardless of whether we are in
+  /// Full or Mid wrapper state.
+  bool _isTurnInFlight(AssistantState state) {
+    final active = state is AssistantFull
+        ? (state.priorState ?? const AssistantCollapsed())
+        : state;
+    return active is AssistantMidLoading ||
+        (active is AssistantMidReading && active.streaming);
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
@@ -213,6 +232,12 @@ class _AssistantFullScreenState extends ConsumerState<AssistantFullScreen> {
       }
       if (next is AssistantFull) {
         final activeState = next.priorState;
+        // If a turn just became in-flight (e.g. user entered Full while
+        // Mid was already loading), sync the local flag.
+        if (_isTurnInFlight(next) && !_fullTurnInFlight) {
+          setState(() => _fullTurnInFlight = true);
+          _scrollToBottom();
+        }
         if (_fullTurnInFlight &&
             activeState is AssistantMidReading &&
             activeState.isDone) {

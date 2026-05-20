@@ -104,7 +104,9 @@ class _AssistantQuestionSheetState
         AppSpacing.sm,
         AppSpacing.lg,
         (state is AssistantMidCompose
-            ? (keyboardInset > 0 ? keyboardInset - 24 : AppSpacing.md)
+            ? (keyboardInset > 0
+                ? (keyboardInset - 24).clamp(0.0, double.infinity)
+                : AppSpacing.md)
             : keyboardInset + AppSpacing.md),
       ),
       child: ConstrainedBox(

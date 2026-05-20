@@ -5,7 +5,9 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../application/assistant_chat_notifier.dart';
+import '../../application/assistant_state_machine.dart';
 import '../../data/screen_context_provider.dart';
+import '../../domain/assistant_state.dart';
 import 'assistant_question_sheet.dart';
 
 /// Thin always-visible entry-point to the Trợ lý AI. Tapping it opens
@@ -67,6 +69,13 @@ class AssistantBar extends ConsumerWidget {
   }
 
   void _openSheet(BuildContext context, WidgetRef ref) {
+    // Guard: if the state machine is not Collapsed the sheet is already open
+    // (or opening). Bail early to prevent multiple sheets stacking on rapid
+    // taps. openBar() inside the notifier is idempotent on its own, but
+    // AppBottomSheet.show must also be skipped.
+    final state = ref.read(assistantStateMachineProvider);
+    if (state is! AssistantCollapsed) return;
+
     onOpen?.call();
     final notifier = ref.read(assistantChatNotifierProvider);
     notifier.openBar();

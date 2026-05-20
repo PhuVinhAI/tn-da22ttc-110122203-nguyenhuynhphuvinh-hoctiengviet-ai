@@ -67,6 +67,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (location == '/splash') {
         if (!authState.isInitialized) return null;
         if (!authState.isAuthenticated) return '/login';
+        // If authenticated but the server profile is still loading, stay on
+        // splash to avoid a race where serverOnboarding=null causes a wrong
+        // redirect to /onboarding even though the user already completed it.
+        // If the profile fetch errors out, fall through using the local
+        // SharedPreferences value as a fallback (isOnboardingCompleted below).
+        if (profileAsync.isLoading) return null;
         if (!isOnboardingCompleted) return '/onboarding';
         return '/';
       }
