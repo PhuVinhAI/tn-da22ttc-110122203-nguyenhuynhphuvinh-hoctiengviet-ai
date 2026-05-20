@@ -36,20 +36,8 @@ class TextContentWidget extends StatelessWidget {
               ),
             ),
           ],
-          if (content.translation != null) ...[
-            const SizedBox(height: 16),
-            AppCard(
-              variant: AppCardVariant.muted,
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              borderRadius: AppRadius.lg,
-              child: Text(
-                content.translation!,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: c.mutedForeground,
-                ),
-              ),
-            ),
-          ],
+          if (content.translation != null)
+            _ContentTranslation(text: content.translation!),
           if (content.notes != null) ...[
             const SizedBox(height: 16),
             Text(
@@ -104,15 +92,8 @@ class _AudioContentWidgetState extends State<AudioContentWidget> {
               ),
             ),
           ],
-          if (widget.content.translation != null) ...[
-            const SizedBox(height: 16),
-            Text(
-              widget.content.translation!,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: c.mutedForeground,
-              ),
-            ),
-          ],
+          if (widget.content.translation != null)
+            _ContentTranslation(text: widget.content.translation!),
           const SizedBox(height: 24),
           if (widget.content.audioUrl != null) ...[
             AppCard(
@@ -207,15 +188,8 @@ class ImageContentWidget extends StatelessWidget {
               height: 1.6,
             ),
           ),
-          if (content.translation != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              content.translation!,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: c.mutedForeground,
-              ),
-            ),
-          ],
+          if (content.translation != null)
+            _ContentTranslation(text: content.translation!, topSpacing: 8),
         ],
       ),
     );
@@ -233,7 +207,6 @@ class VideoContentWidget extends StatefulWidget {
 class _VideoContentWidgetState extends State<VideoContentWidget> {
   @override
   Widget build(BuildContext context) {
-    final c = AppTheme.colors(context);
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
@@ -263,15 +236,11 @@ class _VideoContentWidgetState extends State<VideoContentWidget> {
               height: 1.6,
             ),
           ),
-          if (widget.content.translation != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              widget.content.translation!,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: c.mutedForeground,
-              ),
+          if (widget.content.translation != null)
+            _ContentTranslation(
+              text: widget.content.translation!,
+              topSpacing: 8,
             ),
-          ],
         ],
       ),
     );
@@ -432,6 +401,34 @@ class _ChatBubble extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// English translation line below Vietnamese lesson content (no card chrome).
+class _ContentTranslation extends StatelessWidget {
+  const _ContentTranslation({
+    required this.text,
+    this.topSpacing = 12,
+  });
+
+  final String text;
+  final double topSpacing;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: EdgeInsets.only(top: topSpacing),
+      child: Text(
+        text,
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: c.mutedForeground,
+          height: 1.5,
         ),
       ),
     );
