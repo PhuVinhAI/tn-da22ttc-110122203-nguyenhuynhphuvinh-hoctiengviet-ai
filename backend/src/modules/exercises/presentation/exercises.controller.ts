@@ -69,10 +69,11 @@ export class ExercisesController {
     schema: {
       example: {
         totalExercises: 100,
-        completedExercises: 75,
         correctAnswers: 60,
-        accuracy: 80,
-        totalTimeSpent: 3600,
+        incorrectAnswers: 40,
+        accuracy: 60,
+        completedExercises: 12,
+        totalTimeSpent: 7200,
       },
     },
   })

@@ -30,10 +30,11 @@ void main() {
             statusCode: 200,
             data: {
               'totalExercises': 100,
-              'completedExercises': 75,
               'correctAnswers': 60,
-              'accuracy': 80.0,
-              'totalTimeSpent': 3600,
+              'incorrectAnswers': 40,
+              'accuracy': 60.0,
+              'completedExercises': 12,
+              'totalTimeSpent': 7200,
             },
           ),
         );
@@ -41,10 +42,11 @@ void main() {
         final result = await repository.getMyStats();
 
         expect(result['totalExercises'], 100);
-        expect(result['completedExercises'], 75);
         expect(result['correctAnswers'], 60);
-        expect(result['accuracy'], 80.0);
-        expect(result['totalTimeSpent'], 3600);
+        expect(result['incorrectAnswers'], 40);
+        expect(result['accuracy'], 60.0);
+        expect(result['completedExercises'], 12);
+        expect(result['totalTimeSpent'], 7200);
       });
 
       test('throws AuthException on 401 response', () async {

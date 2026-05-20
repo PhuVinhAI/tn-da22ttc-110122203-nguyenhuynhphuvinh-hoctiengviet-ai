@@ -10,9 +10,7 @@ class ExerciseStats {
   factory ExerciseStats.fromJson(Map<String, dynamic> json) {
     return ExerciseStats(
       totalExercises: (json['totalExercises'] as num?)?.toInt() ?? 0,
-      completedExercises: (json['completedExercises'] as num?)?.toInt() ??
-          (json['correctAnswers'] as num?)?.toInt() ??
-          0,
+      completedExercises: (json['completedExercises'] as num?)?.toInt() ?? 0,
       correctAnswers: (json['correctAnswers'] as num?)?.toInt() ?? 0,
       accuracy: (json['accuracy'] as num?)?.toDouble() ?? 0.0,
       totalTimeSpent: (json['totalTimeSpent'] as num?)?.toInt() ?? 0,

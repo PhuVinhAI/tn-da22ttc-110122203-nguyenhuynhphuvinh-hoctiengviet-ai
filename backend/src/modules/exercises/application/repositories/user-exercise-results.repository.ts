@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { UserExerciseResult } from '../../domain/user-exercise-result.entity';
 
 @Injectable()
@@ -8,6 +8,7 @@ export class UserExerciseResultsRepository {
   constructor(
     @InjectRepository(UserExerciseResult)
     private readonly repository: Repository<UserExerciseResult>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(data: Partial<UserExerciseResult>): Promise<UserExerciseResult> {
@@ -77,15 +78,55 @@ export class UserExerciseResultsRepository {
     correctAnswers: number;
     incorrectAnswers: number;
     accuracy: number;
+    completedExercises: number;
+    totalTimeSpent: number;
   }> {
-    const results = await this.repository.find({ where: { userId } });
-    const totalExercises = results.length;
-    const correctAnswers = results.filter((r) => r.isCorrect).length;
+    // Exercise-level stats from user_exercise_results
+    const [exerciseRow]: {
+      totalExercises: string;
+      correctAnswers: string;
+      totalTimeTaken: string;
+    }[] = await this.dataSource.query(
+      `SELECT
+         COUNT(*) AS "totalExercises",
+         SUM(CASE WHEN is_correct = true THEN 1 ELSE 0 END) AS "correctAnswers",
+         COALESCE(SUM(time_taken), 0) AS "totalTimeTaken"
+       FROM user_exercise_results
+       WHERE user_id = $1`,
+      [userId],
+    );
+
+    // Lesson-level stats from user_progress
+    const [progressRow]: {
+      completedLessons: string;
+      totalLessonTime: string;
+    }[] = await this.dataSource.query(
+      `SELECT
+         COUNT(*) FILTER (WHERE status = 'completed') AS "completedLessons",
+         COALESCE(SUM(time_spent), 0) AS "totalLessonTime"
+       FROM user_progress
+       WHERE user_id = $1`,
+      [userId],
+    );
+
+    const totalExercises = parseInt(exerciseRow.totalExercises, 10) || 0;
+    const correctAnswers = parseInt(exerciseRow.correctAnswers, 10) || 0;
     const incorrectAnswers = totalExercises - correctAnswers;
     const accuracy =
       totalExercises > 0 ? (correctAnswers / totalExercises) * 100 : 0;
+    const completedExercises = parseInt(progressRow.completedLessons, 10) || 0;
+    const totalTimeSpent =
+      (parseInt(exerciseRow.totalTimeTaken, 10) || 0) +
+      (parseInt(progressRow.totalLessonTime, 10) || 0);
 
-    return { totalExercises, correctAnswers, incorrectAnswers, accuracy };
+    return {
+      totalExercises,
+      correctAnswers,
+      incorrectAnswers,
+      accuracy,
+      completedExercises,
+      totalTimeSpent,
+    };
   }
 
   async upsertResult(

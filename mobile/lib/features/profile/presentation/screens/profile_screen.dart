@@ -609,8 +609,8 @@ class _StatsSection extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: _StatCard(
-                      icon: Icons.menu_book,
-                      label: 'Words Learned',
+                      icon: Icons.task_alt,
+                      label: 'Correct Answers',
                       value: '${stats.correctAnswers}',
                       color: c.secondary,
                     ),

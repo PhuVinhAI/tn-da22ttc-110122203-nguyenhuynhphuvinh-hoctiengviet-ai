@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { UserExerciseResultsRepository } from './user-exercise-results.repository';
 import { UserExerciseResult } from '../../domain/user-exercise-result.entity';
 
@@ -8,6 +8,7 @@ describe('UserExerciseResultsRepository', () => {
   let repository: UserExerciseResultsRepository;
   let mockRepo: jest.Mocked<Repository<UserExerciseResult>>;
   let mockManager: jest.Mocked<EntityManager>;
+  let mockDataSource: jest.Mocked<DataSource>;
 
   beforeEach(async () => {
     mockRepo = {
@@ -24,12 +25,20 @@ describe('UserExerciseResultsRepository', () => {
       update: jest.fn().mockResolvedValue({ affected: 1 }),
     } as any;
 
+    mockDataSource = {
+      query: jest.fn(),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserExerciseResultsRepository,
         {
           provide: getRepositoryToken(UserExerciseResult),
           useValue: mockRepo,
+        },
+        {
+          provide: DataSource,
+          useValue: mockDataSource,
         },
       ],
     }).compile();
@@ -151,6 +160,84 @@ describe('UserExerciseResultsRepository', () => {
         UserExerciseResult,
         expect.any(Object),
         ['userId', 'exerciseId'],
+      );
+    });
+  });
+
+  describe('getStatsByUser', () => {
+    it('returns correct stats for user with both exercises and lesson progress', async () => {
+      mockDataSource.query
+        .mockResolvedValueOnce([
+          { totalExercises: '10', correctAnswers: '7', totalTimeTaken: '600' },
+        ])
+        .mockResolvedValueOnce([
+          { completedLessons: '3', totalLessonTime: '1800' },
+        ]);
+
+      const result = await repository.getStatsByUser('user-1');
+
+      expect(result.totalExercises).toBe(10);
+      expect(result.correctAnswers).toBe(7);
+      expect(result.incorrectAnswers).toBe(3);
+      expect(result.accuracy).toBeCloseTo(70);
+      expect(result.completedExercises).toBe(3);
+      expect(result.totalTimeSpent).toBe(2400); // 600 + 1800
+    });
+
+    it('returns zero stats for a brand-new user with no data', async () => {
+      mockDataSource.query
+        .mockResolvedValueOnce([
+          { totalExercises: '0', correctAnswers: null, totalTimeTaken: null },
+        ])
+        .mockResolvedValueOnce([
+          { completedLessons: '0', totalLessonTime: null },
+        ]);
+
+      const result = await repository.getStatsByUser('new-user');
+
+      expect(result.totalExercises).toBe(0);
+      expect(result.correctAnswers).toBe(0);
+      expect(result.incorrectAnswers).toBe(0);
+      expect(result.accuracy).toBe(0);
+      expect(result.completedExercises).toBe(0);
+      expect(result.totalTimeSpent).toBe(0);
+    });
+
+    it('computes accuracy as 100% when all exercises are correct', async () => {
+      mockDataSource.query
+        .mockResolvedValueOnce([
+          { totalExercises: '5', correctAnswers: '5', totalTimeTaken: '300' },
+        ])
+        .mockResolvedValueOnce([
+          { completedLessons: '2', totalLessonTime: '900' },
+        ]);
+
+      const result = await repository.getStatsByUser('user-2');
+
+      expect(result.accuracy).toBe(100);
+      expect(result.totalTimeSpent).toBe(1200); // 300 + 900
+    });
+
+    it('passes userId as parameterized argument to both queries', async () => {
+      mockDataSource.query
+        .mockResolvedValueOnce([
+          { totalExercises: '0', correctAnswers: null, totalTimeTaken: null },
+        ])
+        .mockResolvedValueOnce([
+          { completedLessons: '0', totalLessonTime: null },
+        ]);
+
+      await repository.getStatsByUser('target-user');
+
+      expect(mockDataSource.query).toHaveBeenNthCalledWith(
+        1,
+        expect.stringContaining('user_exercise_results'),
+        ['target-user'],
+      );
+      expect(mockDataSource.query).toHaveBeenNthCalledWith(
+        2,
+        expect.stringContaining('completed'),
+        ['target-user'],
       );
     });
   });
