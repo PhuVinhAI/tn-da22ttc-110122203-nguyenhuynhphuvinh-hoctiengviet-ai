@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'exercise_theme_tokens.dart';
 
 abstract class AppTypography {
   static const double caption = 11;
@@ -301,6 +302,10 @@ class AppTheme {
     return Theme.of(context).extension<VietnameseAccentTokens>()!;
   }
 
+  static ExerciseThemeTokens exerciseTokens(BuildContext context) {
+    return Theme.of(context).extension<ExerciseThemeTokens>()!;
+  }
+
   static TextStyle vnStyle({
     double? fontSize,
     FontWeight? fontWeight,
@@ -360,7 +365,7 @@ class AppTheme {
       colorScheme: colorScheme,
       textTheme: textTheme,
       scaffoldBackgroundColor: c.background,
-      extensions: const [AppColors.light, VietnameseAccentTokens.light],
+      extensions: const [AppColors.light, VietnameseAccentTokens.light, ExerciseThemeTokens.light],
       appBarTheme: AppBarTheme(
         backgroundColor: c.background,
         foregroundColor: c.foreground,
@@ -581,7 +586,7 @@ class AppTheme {
       colorScheme: colorScheme,
       textTheme: textTheme,
       scaffoldBackgroundColor: c.background,
-      extensions: const [AppColors.dark, VietnameseAccentTokens.dark],
+      extensions: const [AppColors.dark, VietnameseAccentTokens.dark, ExerciseThemeTokens.dark],
       appBarTheme: AppBarTheme(
         backgroundColor: c.background,
         foregroundColor: c.foreground,

@@ -10,6 +10,7 @@ import '../../data/lesson_providers.dart';
 import '../../domain/exercise_models.dart';
 import '../../domain/exercise_session.dart';
 import '../../domain/exercise_renderer_registry.dart';
+import '../../domain/exercise_theme_helper.dart';
 
 class ExercisePlayScreen extends ConsumerStatefulWidget {
   const ExercisePlayScreen({
@@ -629,12 +630,43 @@ class QuestionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final visuals = getExerciseVisuals(context, exercise.exerciseType);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppChip(
-          label: exercise.exerciseType.name,
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs + 2,
+          ),
+          decoration: BoxDecoration(
+            color: visuals.accent.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(AppRadius.full),
+            border: Border.all(
+              color: visuals.accent.withValues(alpha: 0.25),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                visuals.icon,
+                size: 14,
+                color: visuals.accent,
+              ),
+              const SizedBox(width: AppSpacing.xs + 2),
+              Text(
+                visuals.label,
+                style: theme.textTheme.labelSmall?.copyWith(
+                      color: visuals.accent,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         Text(
