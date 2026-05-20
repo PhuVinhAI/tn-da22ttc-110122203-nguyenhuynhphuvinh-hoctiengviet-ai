@@ -13,12 +13,6 @@ void main() {
         String screenType,
       })>[
         (
-          routePattern: '/courses',
-          location: '/courses',
-          pathParameters: {},
-          screenType: 'coursesList',
-        ),
-        (
           routePattern: '/courses/:id',
           location: '/courses/c1',
           pathParameters: {'id': 'c1'},
@@ -29,12 +23,6 @@ void main() {
           location: '/modules/m1',
           pathParameters: {'id': 'm1'},
           screenType: 'moduleDetail',
-        ),
-        (
-          routePattern: '/profile',
-          location: '/profile',
-          pathParameters: {},
-          screenType: 'profile',
         ),
         (
           routePattern: '/bookmarks',
@@ -90,7 +78,7 @@ void main() {
       expect(ctx.data['courseId'], 'c1');
     });
 
-    test('/courses resolves to coursesList screen type', () {
+    test('/courses without a builder falls back to generic context', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -99,11 +87,8 @@ void main() {
           );
 
       final ctx = container.read(currentScreenContextProvider);
-      expect(ctx.data['screenType'], 'coursesList');
-      expect(ctx.data['status'], 'loading');
-      expect(ctx.data['courseCount'], 0);
-      expect(ctx.data['courses'], isEmpty);
-      expect(ctx.data.containsKey('uiSnapshot'), isFalse);
+      expect(ctx.data.containsKey('screenType'), isFalse);
+      expect(ctx.route, '/courses');
     });
   });
 }

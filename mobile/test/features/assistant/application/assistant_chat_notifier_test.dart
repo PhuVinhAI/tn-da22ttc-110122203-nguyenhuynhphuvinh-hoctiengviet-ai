@@ -287,10 +287,14 @@ void main() {
   test('sendMessage omits uiSnapshot from the API payload on domain routes',
       () async {
     container.read(currentRouteMatchProvider.notifier).update(
-          const RouteMatch(routePattern: '/', location: '/'),
+          const RouteMatch(
+            routePattern: '/lessons/:id',
+            location: '/lessons/xyz',
+            pathParameters: {'id': 'xyz'},
+          ),
         );
     container.read(currentScreenUiSnapshotProvider.notifier).update(const {
-      'texts': ['AI Assistant · Home'],
+      'texts': ['Lesson snapshot'],
       'structure': {'type': 'Column'},
     });
 
@@ -304,7 +308,7 @@ void main() {
         (body['screenContext'] as Map<String, dynamic>)['data']
             as Map<String, dynamic>;
 
-    expect(data['screenType'], 'home');
+    expect(data['screenType'], 'lessonDetail');
     expect(data.containsKey('uiSnapshot'), isFalse);
   });
 

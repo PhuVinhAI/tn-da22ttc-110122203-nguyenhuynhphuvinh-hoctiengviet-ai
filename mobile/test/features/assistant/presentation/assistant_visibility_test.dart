@@ -12,6 +12,9 @@ void main() {
       '/reset-password',
       '/reset-password-otp',
       '/onboarding',
+      '/',
+      '/courses',
+      '/profile',
     ];
 
     for (final loc in hiddenLocations) {
@@ -21,8 +24,6 @@ void main() {
     }
 
     const visibleLocations = <String>[
-      '/',
-      '/courses',
       '/courses/c-1',
       '/courses/c-1/exercises/play/set-1',
       '/modules/m-1',
@@ -32,7 +33,6 @@ void main() {
       '/lessons/l-1/exercises/play/set-1',
       '/bookmarks',
       '/bookmarks/flashcard',
-      '/profile',
     ];
 
     for (final loc in visibleLocations) {

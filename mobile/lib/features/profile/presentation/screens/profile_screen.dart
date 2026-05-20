@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/providers/assistant_bar_provider.dart';
 import '../../../../core/providers/auth_state_provider.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -419,7 +420,47 @@ class _ThemeSection extends ConsumerWidget {
             ],
           ),
         ),
+        const SizedBox(height: AppSpacing.md),
+        const _AssistantBarSetting(),
       ],
+    );
+  }
+}
+
+class _AssistantBarSetting extends ConsumerWidget {
+  const _AssistantBarSetting();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = AppTheme.colors(context);
+    final theme = Theme.of(context);
+    final enabled = ref.watch(assistantBarEnabledProvider);
+
+    return AppCard(
+      variant: AppCardVariant.outlined,
+      padding: EdgeInsets.zero,
+      child: AppListItem(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        leading: Icon(Icons.auto_awesome, color: c.primary, size: 20),
+        titleWidget: Text(
+          'AI assistant bar',
+          style: theme.textTheme.bodyMedium,
+        ),
+        subtitleWidget: Text(
+          'Show on lesson and exercise screens',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: c.mutedForeground,
+          ),
+        ),
+        trailing: AppSwitch(
+          value: enabled,
+          onChanged: (value) =>
+              ref.read(assistantBarEnabledProvider.notifier).setEnabled(value),
+        ),
+      ),
     );
   }
 }

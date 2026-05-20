@@ -2,14 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/screen_context.dart';
 import 'builders/bookmarks_screen_context_builder.dart';
 import 'builders/course_detail_screen_context_builder.dart';
-import 'builders/courses_screen_context_builder.dart';
 import 'builders/exercise_hub_screen_context_builder.dart';
 import 'builders/exercise_play_screen_context_builder.dart';
 import 'builders/flashcard_screen_context_builder.dart';
-import 'builders/home_screen_context_builder.dart';
 import 'builders/lesson_screen_context_builder.dart';
 import 'builders/module_detail_screen_context_builder.dart';
-import 'builders/profile_screen_context_builder.dart';
 import 'route_match.dart';
 import 'screen_context_registry.dart';
 import 'screen_ui_snapshot_provider.dart';
@@ -36,8 +33,6 @@ final currentRouteMatchProvider =
 /// tests with `screenContextRegistryProvider.overrideWithValue(...)`.
 final screenContextRegistryProvider = Provider<ScreenContextRegistry>((ref) {
   return ScreenContextRegistry()
-    ..register('/', homeScreenContextBuilder)
-    ..register('/courses', coursesScreenContextBuilder)
     ..register('/courses/:id', courseDetailScreenContextBuilder)
     ..register('/modules/:id', moduleDetailScreenContextBuilder)
     ..register('/lessons/:id', lessonScreenContextBuilder)
@@ -53,7 +48,6 @@ final screenContextRegistryProvider = Provider<ScreenContextRegistry>((ref) {
       '/lessons/:id/exercises/play/:setId',
       exercisePlayScreenContextBuilder,
     )
-    ..register('/profile', profileScreenContextBuilder)
     ..register('/bookmarks', bookmarksScreenContextBuilder)
     ..register('/bookmarks/flashcard', flashcardScreenContextBuilder)
     ..register('/lessons/:id/exercises', exerciseHubScreenContextBuilder);

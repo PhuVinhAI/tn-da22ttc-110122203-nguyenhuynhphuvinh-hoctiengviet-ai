@@ -10,6 +10,7 @@ class PreferencesService {
   static const _themeModeKey = 'theme_mode';
   static const _notificationEnabledKey = 'notification_enabled';
   static const _notificationTimeKey = 'notification_time';
+  static const _assistantBarEnabledKey = 'assistant_bar_enabled';
 
   bool get isOnboardingCompleted =>
       _prefs.getBool(_onboardingCompletedKey) ?? false;
@@ -60,4 +61,10 @@ class PreferencesService {
     };
     return _prefs.setString(_themeModeKey, value);
   }
+
+  bool get assistantBarEnabled =>
+      _prefs.getBool(_assistantBarEnabledKey) ?? true;
+
+  Future<void> setAssistantBarEnabled(bool enabled) =>
+      _prefs.setBool(_assistantBarEnabledKey, enabled);
 }

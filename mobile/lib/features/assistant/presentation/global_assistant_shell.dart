@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/providers/assistant_bar_provider.dart';
 import '../../../core/router/app_router.dart';
 import '../application/assistant_state_machine.dart';
 import '../data/go_router_effective_route.dart';
@@ -120,7 +121,9 @@ class _GlobalAssistantShellState extends ConsumerState<GlobalAssistantShell> {
 
     final match = ref.watch(currentRouteMatchProvider);
     final assistantState = ref.watch(assistantStateMachineProvider);
+    final assistantBarEnabled = ref.watch(assistantBarEnabledProvider);
     final visible =
+        assistantBarEnabled &&
         isAssistantBarVisible(match?.location) &&
         assistantState is! AssistantFull;
 
