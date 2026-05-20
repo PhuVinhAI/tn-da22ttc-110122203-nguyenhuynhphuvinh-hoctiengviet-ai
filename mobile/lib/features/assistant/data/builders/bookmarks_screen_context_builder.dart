@@ -4,6 +4,7 @@ import '../../domain/screen_context.dart';
 import '../route_match.dart';
 import 'bookmark_context_summaries.dart';
 import 'course_context_summaries.dart';
+import '../../../profile/data/profile_providers.dart';
 
 /// `ScreenContext` builder for `/bookmarks`. Pulls the visible bookmark page,
 /// active sort, and search query so the AI can answer vocabulary review
@@ -13,6 +14,9 @@ ScreenContext bookmarksScreenContextBuilder(Ref ref, RouteMatch match) {
   final sort = ref.watch(bookmarkSortProvider);
   final search = ref.watch(bookmarkSearchProvider);
   final status = asyncLoadStatus(bookmarksAsync);
+
+  final profileAsync = ref.watch(userProfileProvider);
+  final preferredDialect = profileAsync.value?.preferredDialect;
 
   final data = <String, dynamic>{
     'screenType': 'bookmarksList',
@@ -37,7 +41,7 @@ ScreenContext bookmarksScreenContextBuilder(Ref ref, RouteMatch match) {
     data['page'] = page.page;
     data['totalPages'] = page.totalPages;
     data['bookmarks'] = page.items
-        .map(bookmarkContextSummary)
+        .map((b) => bookmarkContextSummary(b, preferredDialect: preferredDialect))
         .toList(growable: false);
   }
 

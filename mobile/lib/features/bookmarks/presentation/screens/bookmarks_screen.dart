@@ -6,6 +6,7 @@ import '../../../../core/theme/widgets/widgets.dart';
 import '../../data/bookmark_providers.dart';
 import '../../domain/bookmark_models.dart';
 import '../widgets/bookmark_icon_button.dart';
+import '../../../profile/data/profile_providers.dart';
 
 class BookmarksScreen extends ConsumerStatefulWidget {
   const BookmarksScreen({super.key});
@@ -87,11 +88,14 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
     }
   }
 
-  void _showDetail(BookmarkWithVocabulary item) {
+  void _showDetail(BookmarkWithVocabulary item, String? preferredDialect) {
     AppBottomSheet.show(
       context,
       isScrollControlled: true,
-      builder: (context) => _BookmarkDetailSheet(item: item),
+      builder: (context) => _BookmarkDetailSheet(
+        item: item,
+        preferredDialect: preferredDialect,
+      ),
     );
   }
 
@@ -100,6 +104,9 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
     final bookmarksAsync = ref.watch(bookmarksProvider);
     final currentSort = ref.watch(bookmarkSortProvider);
     final bookmarkIds = ref.watch(bookmarkIdsProvider).value;
+
+    final profileAsync = ref.watch(userProfileProvider);
+    final preferredDialect = profileAsync.value?.preferredDialect;
 
     return Scaffold(
       appBar: AppAppBar(
@@ -150,13 +157,17 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
               },
             ),
           ),
-          Expanded(child: _buildBody(bookmarksAsync, bookmarkIds)),
+          Expanded(child: _buildBody(bookmarksAsync, bookmarkIds, preferredDialect)),
         ],
       ),
     );
   }
 
-  Widget _buildBody(AsyncValue<BookmarksPage> asyncPage, Set<String>? bookmarkIds) {
+  Widget _buildBody(
+    AsyncValue<BookmarksPage> asyncPage,
+    Set<String>? bookmarkIds,
+    String? preferredDialect,
+  ) {
     final c = AppTheme.colors(context);
     return asyncPage.when(
       data: (page) {
@@ -206,7 +217,8 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
                 item: item,
                 isBookmarked: bookmarkIds?.contains(item.vocabularyId) ?? true,
                 onToggle: _onToggleBookmark,
-                onTap: () => _showDetail(item),
+                onTap: () => _showDetail(item, preferredDialect),
+                preferredDialect: preferredDialect,
               );
             },
           ),
@@ -242,16 +254,29 @@ class _BookmarkTile extends StatelessWidget {
     required this.isBookmarked,
     required this.onToggle,
     required this.onTap,
+    this.preferredDialect,
   });
 
   final BookmarkWithVocabulary item;
   final bool isBookmarked;
   final Future<void> Function(String vocabularyId) onToggle;
   final VoidCallback onTap;
+  final String? preferredDialect;
 
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
+
+    final String displayedWord;
+    if (preferredDialect != null &&
+        item.dialectVariants != null &&
+        item.dialectVariants![preferredDialect] != null &&
+        item.dialectVariants![preferredDialect]!.isNotEmpty) {
+      displayedWord = item.dialectVariants![preferredDialect]!;
+    } else {
+      displayedWord = item.word;
+    }
+
     return AppCard(
       variant: AppCardVariant.outlined,
       borderRadius: AppRadius.lg,
@@ -266,7 +291,7 @@ class _BookmarkTile extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      item.word,
+                      displayedWord,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -304,13 +329,27 @@ class _BookmarkTile extends StatelessWidget {
 }
 
 class _BookmarkDetailSheet extends StatelessWidget {
-  const _BookmarkDetailSheet({required this.item});
+  const _BookmarkDetailSheet({
+    required this.item,
+    this.preferredDialect,
+  });
 
   final BookmarkWithVocabulary item;
+  final String? preferredDialect;
 
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
+
+    final String displayedWord;
+    if (preferredDialect != null &&
+        item.dialectVariants != null &&
+        item.dialectVariants![preferredDialect] != null &&
+        item.dialectVariants![preferredDialect]!.isNotEmpty) {
+      displayedWord = item.dialectVariants![preferredDialect]!;
+    } else {
+      displayedWord = item.word;
+    }
 
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
@@ -336,7 +375,7 @@ class _BookmarkDetailSheet extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xl),
               Text(
-                item.word,
+                displayedWord,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               if (item.phonetic != null) ...[
@@ -391,23 +430,6 @@ class _BookmarkDetailSheet extends StatelessWidget {
                         ),
                   ),
                 ],
-              ],
-              if (item.dialectVariants != null &&
-                  item.dialectVariants!.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Dialect Variants:',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                ...item.dialectVariants!.entries.map(
-                  (e) => Text(
-                    '${e.key}: ${e.value}',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
               ],
             ],
           ),

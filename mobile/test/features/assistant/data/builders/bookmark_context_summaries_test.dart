@@ -25,6 +25,49 @@ void main() {
       expect(summary['phonetic'], 'sin chào');
       expect(summary['difficultyLevel'], 2);
     });
+
+    test('resolves preferred dialect variant word', () {
+      final summary = bookmarkContextSummary(
+        BookmarkWithVocabulary(
+          id: 'bm-1',
+          vocabularyId: 'v1',
+          word: 'xin chào',
+          translation: 'hello',
+          phonetic: 'sin chào',
+          partOfSpeech: 'phrase',
+          difficultyLevel: 2,
+          bookmarkedAt: DateTime.utc(2026, 5, 1),
+          dialectVariants: const {
+            'SOUTHERN': 'dô nè',
+            'NORTHERN': 'chào nhé',
+          },
+        ),
+        preferredDialect: 'SOUTHERN',
+      );
+
+      expect(summary['word'], 'dô nè');
+    });
+
+    test('falls back to standard word if dialect variant does not exist', () {
+      final summary = bookmarkContextSummary(
+        BookmarkWithVocabulary(
+          id: 'bm-1',
+          vocabularyId: 'v1',
+          word: 'xin chào',
+          translation: 'hello',
+          phonetic: 'sin chào',
+          partOfSpeech: 'phrase',
+          difficultyLevel: 2,
+          bookmarkedAt: DateTime.utc(2026, 5, 1),
+          dialectVariants: const {
+            'NORTHERN': 'chào nhé',
+          },
+        ),
+        preferredDialect: 'SOUTHERN',
+      );
+
+      expect(summary['word'], 'xin chào');
+    });
   });
 
   group('setProgressContextSummary', () {

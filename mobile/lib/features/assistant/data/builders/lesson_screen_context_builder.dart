@@ -4,6 +4,7 @@ import '../../../lessons/domain/lesson_models.dart';
 import '../../domain/screen_context.dart';
 import '../route_match.dart';
 import 'lesson_context_summaries.dart';
+import '../../../profile/data/profile_providers.dart';
 
 /// `ScreenContext` builder for `/lessons/:id`. Pulls lesson title, content
 /// summary, vocabulary, and grammar rules from the existing
@@ -30,6 +31,9 @@ ScreenContext lessonScreenContextBuilder(Ref ref, RouteMatch match) {
       detail?.vocabularies ??
       const <LessonVocabulary>[];
 
+  final profileAsync = ref.watch(userProfileProvider);
+  final preferredDialect = profileAsync.value?.preferredDialect;
+
   final data = <String, dynamic>{
     'screenType': 'lessonDetail',
     'status': status,
@@ -38,7 +42,7 @@ ScreenContext lessonScreenContextBuilder(Ref ref, RouteMatch match) {
     'description': detail?.description ?? '',
     'lessonType': detail?.lessonType ?? '',
     'vocabularies': vocabularies
-        .map(vocabularyContextSummary)
+        .map((v) => vocabularyContextSummary(v, preferredDialect: preferredDialect))
         .toList(growable: false),
     'grammarRules': detail?.grammarRules
             .map(grammarRuleContextSummary)

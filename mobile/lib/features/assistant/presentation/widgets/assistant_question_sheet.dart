@@ -98,16 +98,18 @@ class _AssistantQuestionSheetState
       currentScreenContextProvider.select((s) => s.displayName),
     );
 
+    final double bottomPadding = (state is AssistantMidCompose
+        ? (keyboardInset > 0
+            ? (keyboardInset - 24).clamp(0.0, double.infinity)
+            : AppSpacing.md)
+        : (keyboardInset + AppSpacing.md).clamp(0.0, double.infinity));
+
     return Padding(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.sm,
         AppSpacing.lg,
-        (state is AssistantMidCompose
-            ? (keyboardInset > 0
-                ? (keyboardInset - 24).clamp(0.0, double.infinity)
-                : AppSpacing.md)
-            : keyboardInset + AppSpacing.md),
+        bottomPadding,
       ),
       child: ConstrainedBox(
         constraints: BoxConstraints(maxHeight: maxSheetHeight),

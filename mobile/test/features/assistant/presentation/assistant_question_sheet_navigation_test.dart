@@ -81,7 +81,7 @@ void main() {
     await tester.pump();
 
     expect(find.byIcon(Icons.stop_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.send), findsNothing);
+    expect(find.byIcon(Icons.arrow_upward_rounded), findsNothing);
 
     container.dispose();
   });
@@ -131,7 +131,7 @@ void main() {
     await fixture.pump(tester);
 
     await tester.enterText(find.byType(TextField).last, 'Hello');
-    await tester.tap(find.byIcon(Icons.send));
+    await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
     await tester.pump();
     fixture.adapter.startStreaming();
 
@@ -159,7 +159,7 @@ void main() {
     await fixture.pump(tester);
 
     await tester.enterText(find.byType(TextField).last, 'Hello');
-    await tester.tap(find.byIcon(Icons.send));
+    await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
     await tester.pump();
     fixture.adapter.startLoadingOnly();
 

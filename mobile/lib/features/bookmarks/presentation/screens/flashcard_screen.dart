@@ -7,6 +7,7 @@ import '../../../../core/theme/widgets/widgets.dart';
 import '../../data/bookmark_providers.dart';
 import '../../domain/bookmark_models.dart';
 import '../../../../core/services/audio_player_service.dart';
+import '../../../profile/data/profile_providers.dart';
 
 class FlashcardScreen extends ConsumerStatefulWidget {
   const FlashcardScreen({super.key});
@@ -70,6 +71,9 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen>
     final c = AppTheme.colors(context);
     final bookmarksAsync = ref.watch(flashcardBookmarksProvider);
 
+    final profileAsync = ref.watch(userProfileProvider);
+    final preferredDialect = profileAsync.value?.preferredDialect;
+
     return Scaffold(
       appBar: AppAppBar(
         leading: IconButton(
@@ -91,7 +95,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen>
           if (_currentIndex >= items.length) {
             _currentIndex = 0;
           }
-          return _buildCardStack(items);
+          return _buildCardStack(items, preferredDialect);
         },
         loading: () => const Center(child: AppSpinner()),
         error: (e, _) => Center(
@@ -139,7 +143,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen>
     );
   }
 
-  Widget _buildCardStack(List<BookmarkWithVocabulary> items) {
+  Widget _buildCardStack(List<BookmarkWithVocabulary> items, String? preferredDialect) {
     return PageView.builder(
       controller: _pageController,
       itemCount: items.length,
@@ -153,6 +157,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen>
           isActive: index == _currentIndex,
           onFlip: _flip,
           onPlayAudio: item.audioUrl != null ? () => _playAudio(item.audioUrl!) : null,
+          preferredDialect: preferredDialect,
         );
       },
     );
@@ -167,6 +172,7 @@ class _Flashcard extends StatelessWidget {
     required this.isActive,
     required this.onFlip,
     this.onPlayAudio,
+    this.preferredDialect,
   });
 
   final BookmarkWithVocabulary item;
@@ -175,6 +181,7 @@ class _Flashcard extends StatelessWidget {
   final bool isActive;
   final VoidCallback onFlip;
   final VoidCallback? onPlayAudio;
+  final String? preferredDialect;
 
   @override
   Widget build(BuildContext context) {
@@ -209,6 +216,16 @@ class _Flashcard extends StatelessWidget {
     final c = AppTheme.colors(context);
     final theme = Theme.of(context);
 
+    final String displayedWord;
+    if (preferredDialect != null &&
+        item.dialectVariants != null &&
+        item.dialectVariants![preferredDialect] != null &&
+        item.dialectVariants![preferredDialect]!.isNotEmpty) {
+      displayedWord = item.dialectVariants![preferredDialect]!;
+    } else {
+      displayedWord = item.word;
+    }
+
     return AppCard(
       variant: AppCardVariant.outlined,
       padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -216,7 +233,7 @@ class _Flashcard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            item.word,
+            displayedWord,
             style: theme.textTheme.headlineLarge,
             textAlign: TextAlign.center,
           ),

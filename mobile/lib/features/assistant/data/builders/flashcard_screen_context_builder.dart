@@ -4,6 +4,7 @@ import '../../domain/screen_context.dart';
 import '../route_match.dart';
 import 'bookmark_context_summaries.dart';
 import 'course_context_summaries.dart';
+import '../../../profile/data/profile_providers.dart';
 
 /// `ScreenContext` builder for `/bookmarks/flashcard`. Pulls the full
 /// flashcard deck from `flashcardBookmarksProvider` so the AI can help with
@@ -11,6 +12,9 @@ import 'course_context_summaries.dart';
 ScreenContext flashcardScreenContextBuilder(Ref ref, RouteMatch match) {
   final bookmarksAsync = ref.watch(flashcardBookmarksProvider);
   final status = asyncLoadStatus(bookmarksAsync);
+
+  final profileAsync = ref.watch(userProfileProvider);
+  final preferredDialect = profileAsync.value?.preferredDialect;
 
   final data = <String, dynamic>{
     'screenType': 'bookmarksFlashcard',
@@ -27,8 +31,9 @@ ScreenContext flashcardScreenContextBuilder(Ref ref, RouteMatch match) {
   } else {
     final cards = bookmarksAsync.requireValue;
     data['cardCount'] = cards.length;
-    data['cards'] =
-        cards.map(bookmarkContextSummary).toList(growable: false);
+    data['cards'] = cards
+        .map((b) => bookmarkContextSummary(b, preferredDialect: preferredDialect))
+        .toList(growable: false);
   }
 
   return ScreenContext(

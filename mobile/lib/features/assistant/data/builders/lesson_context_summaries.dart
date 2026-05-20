@@ -3,10 +3,20 @@ import '../../../lessons/domain/lesson_models.dart';
 const _maxGrammarExplanationLength = 600;
 
 /// Compact vocabulary entry for assistant screen context.
-Map<String, dynamic> vocabularyContextSummary(LessonVocabulary vocabulary) {
+Map<String, dynamic> vocabularyContextSummary(LessonVocabulary vocabulary, {String? preferredDialect}) {
+  final String displayedWord;
+  if (preferredDialect != null &&
+      vocabulary.dialectVariants != null &&
+      vocabulary.dialectVariants![preferredDialect] != null &&
+      vocabulary.dialectVariants![preferredDialect]!.isNotEmpty) {
+    displayedWord = vocabulary.dialectVariants![preferredDialect]!;
+  } else {
+    displayedWord = vocabulary.word;
+  }
+
   return {
     'id': vocabulary.id,
-    'word': vocabulary.word,
+    'word': displayedWord,
     'translation': vocabulary.translation,
     if (vocabulary.phonetic != null) 'phonetic': vocabulary.phonetic,
     if (vocabulary.partOfSpeech != null) 'partOfSpeech': vocabulary.partOfSpeech,

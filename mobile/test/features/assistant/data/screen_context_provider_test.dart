@@ -166,7 +166,20 @@ void main() {
 
     test('does not attach uiSnapshot when a domain builder is registered',
         () {
-      final container = ProviderContainer();
+      final registry = ScreenContextRegistry()
+        ..register(
+          '/',
+          (ref, match) => const ScreenContext(
+            route: '/',
+            displayName: 'Home',
+            barPlaceholder: 'Ask anything...',
+            data: {'screenType': 'home'},
+          ),
+        );
+
+      final container = ProviderContainer(
+        overrides: [screenContextRegistryProvider.overrideWithValue(registry)],
+      );
       addTearDown(container.dispose);
 
       container.read(currentRouteMatchProvider.notifier).update(

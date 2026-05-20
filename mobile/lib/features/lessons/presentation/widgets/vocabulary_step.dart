@@ -5,6 +5,7 @@ import '../../../../core/theme/widgets/widgets.dart';
 import '../../domain/lesson_models.dart';
 import '../../../bookmarks/data/bookmark_providers.dart';
 import '../../../bookmarks/presentation/widgets/bookmark_icon_button.dart';
+import '../../../profile/data/profile_providers.dart';
 
 class VocabularyStepWidget extends ConsumerStatefulWidget {
   const VocabularyStepWidget({
@@ -46,6 +47,9 @@ class _VocabularyStepWidgetState extends ConsumerState<VocabularyStepWidget> {
     final bookmarkIdsAsync = ref.watch(bookmarkIdsProvider);
     final bookmarkIds = bookmarkIdsAsync.value;
 
+    final profileAsync = ref.watch(userProfileProvider);
+    final preferredDialect = profileAsync.value?.preferredDialect;
+
     if (widget.vocabularies.isEmpty) {
       return const Center(child: Text('No vocabulary for this lesson'));
     }
@@ -60,6 +64,7 @@ class _VocabularyStepWidgetState extends ConsumerState<VocabularyStepWidget> {
           isBookmarked: bookmarkIds?.contains(vocab.id) ?? vocab.isBookmarked,
           isPending: _pendingToggleIds.contains(vocab.id),
           onToggle: _toggleBookmark,
+          preferredDialect: preferredDialect,
         );
       },
     );
@@ -72,17 +77,29 @@ class _VocabularyCard extends StatelessWidget {
     required this.isBookmarked,
     required this.isPending,
     required this.onToggle,
+    this.preferredDialect,
   });
   final LessonVocabulary vocabulary;
   final bool isBookmarked;
   final bool isPending;
   final ValueChanged<String> onToggle;
+  final String? preferredDialect;
 
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
     final theme = Theme.of(context);
     final vocab = vocabulary;
+
+    final String displayedWord;
+    if (preferredDialect != null &&
+        vocab.dialectVariants != null &&
+        vocab.dialectVariants![preferredDialect] != null &&
+        vocab.dialectVariants![preferredDialect]!.isNotEmpty) {
+      displayedWord = vocab.dialectVariants![preferredDialect]!;
+    } else {
+      displayedWord = vocab.word;
+    }
 
     return AppCard(
       variant: AppCardVariant.outlined,
@@ -98,7 +115,7 @@ class _VocabularyCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      vocab.word,
+                      displayedWord,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -153,31 +170,6 @@ class _VocabularyCard extends StatelessWidget {
                 ),
             ],
           ),
-          if (vocab.dialectVariants != null &&
-              vocab.dialectVariants!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Dialect variants:',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: c.mutedForeground,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Wrap(
-              spacing: 12,
-              runSpacing: 10,
-              children: vocab.dialectVariants!.entries.map((e) {
-                return AppChip(
-                  label: '${e.key}: ${e.value}',
-                  fontSize: AppTypography.caption,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.sm + 2,
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
           if (vocab.exampleSentence != null) ...[
             const SizedBox(height: 8),
             AppCard(
