@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/network/exception_mapper.dart';
+import '../domain/create_session_response.dart';
 import '../domain/scenario_category.dart';
 import '../domain/scenario_detail.dart';
 import '../domain/scenario_summary.dart';
@@ -47,6 +48,30 @@ class SimulationRepository {
       final response =
           await _dio.get<Map<String, dynamic>>('/simulations/scenarios/$id');
       return ScenarioDetail.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  Future<CreateSessionResponse> createSession(
+    String scenarioId,
+    String chosenCharacterId,
+  ) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/simulations/sessions',
+        data: {
+          'scenarioId': scenarioId,
+          'chosenCharacterId': chosenCharacterId,
+        },
+        options: Options(
+          receiveTimeout: const Duration(seconds: 15),
+          sendTimeout: const Duration(seconds: 15),
+        ),
+      );
+      return CreateSessionResponse.fromJson(
+        response.data as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
       throw mapDioException(e);
     }
