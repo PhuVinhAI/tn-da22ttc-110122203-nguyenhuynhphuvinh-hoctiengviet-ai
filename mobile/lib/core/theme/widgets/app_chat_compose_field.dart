@@ -109,18 +109,6 @@ class _AppChatComposeFieldState extends State<AppChatComposeField> {
         fillColor: Colors.transparent,
       );
 
-  Widget _buildTextField(AppColors c) => TextField(
-        controller: widget.controller,
-        focusNode: widget.focusNode,
-        enabled: widget.enabled,
-        maxLines: widget.maxLines,
-        minLines: 1,
-        textCapitalization: TextCapitalization.sentences,
-        style: _textStyle(c),
-        decoration: _decoration(c),
-        onSubmitted: widget.enabled ? widget.onSubmitted : null,
-      );
-
   Widget _buildTrailing(AppColors c) {
     final canTap = widget.trailingEnabled && widget.onSend != null;
     final bg = widget.trailingColor ??
@@ -154,6 +142,18 @@ class _AppChatComposeFieldState extends State<AppChatComposeField> {
       builder: (context, constraints) {
         final multiline = _isMultiline(constraints.maxWidth);
         final trailing = _buildTrailing(c);
+        final textField = TextField(
+          key: const ValueKey('app_chat_compose_field'),
+          controller: widget.controller,
+          focusNode: widget.focusNode,
+          enabled: widget.enabled,
+          maxLines: widget.maxLines,
+          minLines: 1,
+          textCapitalization: TextCapitalization.sentences,
+          style: _textStyle(c),
+          decoration: _decoration(c),
+          onSubmitted: widget.enabled ? widget.onSubmitted : null,
+        );
 
         return Container(
           decoration: BoxDecoration(
@@ -168,26 +168,29 @@ class _AppChatComposeFieldState extends State<AppChatComposeField> {
             top: AppSpacing.sm,
             bottom: AppSpacing.sm,
           ),
-          child: multiline
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildTextField(c),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: trailing,
-                    ),
-                  ],
-                )
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(child: _buildTextField(c)),
+          // Keep the TextField in a stable Row slot so toggling multiline
+          // layout does not dispose it and dismiss the keyboard.
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: textField),
+                  if (!multiline) ...[
                     const SizedBox(width: AppChatComposeField._actionGap),
                     trailing,
                   ],
+                ],
+              ),
+              if (multiline)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: trailing,
                 ),
+            ],
+          ),
         );
       },
     );
