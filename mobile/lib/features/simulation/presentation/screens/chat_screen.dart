@@ -44,6 +44,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   @override
+  void didUpdateWidget(covariant ChatScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sessionId != widget.sessionId) {
+      _initialized = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _initSession());
+    }
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
     _inputController.dispose();
@@ -55,63 +64,44 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (_initialized) return;
     _initialized = true;
 
-    final sessionAsync = ref.read(simulationSessionProvider(widget.sessionId));
+    ref.invalidate(simulationSessionProvider(widget.sessionId));
 
-    await sessionAsync.when(
-      data: (data) async {
-        if (!mounted) return;
-        await _applySessionData(data);
-      },
-      loading: () async {
-        final repo = ref.read(simulationRepositoryProvider);
-        try {
-          final data = await repo.getSession(widget.sessionId);
-          if (!mounted) return;
-          await _applySessionData(data);
-        } catch (e) {
-          if (!mounted) return;
-          AppToast.show(
-            context,
-            message: 'Unable to load conversation session',
-            type: AppToastType.error,
-          );
-        }
-      },
-      error: (e, _) async {
-        final repo = ref.read(simulationRepositoryProvider);
-        try {
-          final data = await repo.getSession(widget.sessionId);
-          if (!mounted) return;
-          await _applySessionData(data);
-        } catch (_) {
-          if (!mounted) return;
-          AppToast.show(
-            context,
-            message: 'Unable to load conversation session',
-            type: AppToastType.error,
-          );
-        }
-      },
-    );
+    try {
+      final data = await ref
+          .read(simulationRepositoryProvider)
+          .getSession(widget.sessionId);
+      if (!mounted) return;
+      await _applySessionData(data);
+    } catch (_) {
+      if (!mounted) return;
+      AppToast.show(
+        context,
+        message: 'Unable to load conversation session',
+        type: AppToastType.error,
+      );
+    }
   }
 
   Future<void> _applySessionData(SessionWithMessages data) async {
-    final messages = await _enrichMessageSpeakerNames(
+    final enriched = await _enrichMessageSpeakerNames(
       data.messages,
       data.session.scenarioId,
+      data.session.chosenCharacterId,
     );
 
     final notifier = ref.read(simulationChatProvider.notifier);
     if (widget.isHistory) {
       notifier.loadExistingSession(
         session: data.session,
-        messages: messages,
+        messages: enriched.messages,
+        chosenCharacterName: enriched.chosenCharacterName,
       );
     } else {
       notifier.initSession(
         sessionId: data.session.id,
         chosenCharacterId: data.session.chosenCharacterId,
-        initialMessages: messages,
+        chosenCharacterName: enriched.chosenCharacterName,
+        initialMessages: enriched.messages,
         nextTurnCharacterId: data.session.nextTurnCharacterId,
         scenarioId: data.session.scenarioId,
       );
@@ -119,18 +109,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _scrollToBottom();
   }
 
-  Future<List<SimulationMessage>> _enrichMessageSpeakerNames(
+  Future<({List<SimulationMessage> messages, String chosenCharacterName})>
+      _enrichMessageSpeakerNames(
     List<SimulationMessage> messages,
     String scenarioId,
+    String chosenCharacterId,
   ) async {
-    final needsEnrichment = messages.any(
+    final needsMessageEnrichment = messages.any(
       (m) =>
-          !m.isLearner &&
           m.speakerCharacterId != null &&
           m.speakerCharacterId!.isNotEmpty &&
           m.speakerName.isEmpty,
     );
-    if (!needsEnrichment || scenarioId.isEmpty) return messages;
+    if (scenarioId.isEmpty || chosenCharacterId.isEmpty) {
+      return (
+        messages: messages,
+        chosenCharacterName: _characterNameFromMessages(
+          chosenCharacterId,
+          messages,
+        ),
+      );
+    }
 
     try {
       final scenario =
@@ -138,13 +137,50 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       final characterNames = {
         for (final character in scenario.characters) character.id: character.name,
       };
+      final chosenCharacterName = characterNames[chosenCharacterId] ?? '';
 
-      return messages
+      if (!needsMessageEnrichment) {
+        return (
+          messages: messages,
+          chosenCharacterName: chosenCharacterName.isNotEmpty
+              ? chosenCharacterName
+              : _characterNameFromMessages(chosenCharacterId, messages),
+        );
+      }
+
+      final enrichedMessages = messages
           .map((message) => _withResolvedSpeakerName(message, characterNames))
           .toList();
+
+      return (
+        messages: enrichedMessages,
+        chosenCharacterName: chosenCharacterName.isNotEmpty
+            ? chosenCharacterName
+            : _characterNameFromMessages(chosenCharacterId, enrichedMessages),
+      );
     } catch (_) {
-      return messages;
+      return (
+        messages: messages,
+        chosenCharacterName: _characterNameFromMessages(
+          chosenCharacterId,
+          messages,
+        ),
+      );
     }
+  }
+
+  String _characterNameFromMessages(
+    String characterId,
+    List<SimulationMessage> messages,
+  ) {
+    if (characterId.isEmpty) return '';
+    final match = messages
+        .where(
+          (m) =>
+              m.speakerCharacterId == characterId && m.speakerName.isNotEmpty,
+        )
+        .lastOrNull;
+    return match?.speakerName ?? '';
   }
 
   SimulationMessage _withResolvedSpeakerName(
@@ -191,11 +227,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   void _onBack() {
-    final chatState = ref.read(simulationChatProvider);
-    if (!chatState.sessionEnded && !widget.isHistory && chatState.sessionId.isNotEmpty) {
-      final notifier = ref.read(simulationChatProvider.notifier);
-      notifier.cancelSession();
-    }
     ref.invalidate(pausedSessionProvider);
     if (widget.fromCharacterSelection) {
       context.go('/practice');
@@ -611,10 +642,13 @@ class _LearnerBubble extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = AppTheme.colors(context);
     final theme = Theme.of(context);
+    final chatState = ref.watch(simulationChatProvider);
     final profile = ref.watch(userProfileProvider).value;
     final displayName = message.speakerName.isNotEmpty
         ? message.speakerName
-        : (profile?.fullName ?? 'You');
+        : (chatState.chosenCharacterName.isNotEmpty
+            ? chatState.chosenCharacterName
+            : 'You');
     final avatarUrl = profile?.avatarUrl;
     final feedback = message.feedback;
     final hasCorrections = feedback != null && feedback.corrections.isNotEmpty;

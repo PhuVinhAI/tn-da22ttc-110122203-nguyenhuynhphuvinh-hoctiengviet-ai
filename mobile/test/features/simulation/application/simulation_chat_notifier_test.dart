@@ -51,6 +51,7 @@ void main() {
       notifier.initSession(
         sessionId: 'session-1',
         chosenCharacterId: 'char-learner',
+        chosenCharacterName: 'Khách hàng',
         initialMessages: [
           const SimulationMessage(
             id: 'msg-1',
@@ -67,10 +68,46 @@ void main() {
       final state = getState();
       expect(state.sessionId, 'session-1');
       expect(state.chosenCharacterId, 'char-learner');
+      expect(state.chosenCharacterName, 'Khách hàng');
       expect(state.messages, hasLength(1));
       expect(state.nextTurnCharacterId, 'char-learner');
       expect(state.isLearnerTurn, true);
       expect(state.isNpcTurn, false);
+    });
+
+    test('sendMessage uses chosen character name instead of user profile', () async {
+      when(() => mockRepo.sendMessage('session-1', 'Xin chào'))
+          .thenAnswer(
+        (_) async => const SendMessageResponse(
+          messages: [
+            SimulationMessage(
+              id: 'msg-2',
+              speakerCharacterId: 'npc-1',
+              speakerName: 'Lan',
+              isLearner: false,
+              content: 'Chào bạn!',
+              orderIndex: 1,
+            ),
+          ],
+          nextTurnCharacterId: 'char-learner',
+          sessionEnded: false,
+        ),
+      );
+
+      final notifier = getNotifier();
+      notifier.initSession(
+        sessionId: 'session-1',
+        chosenCharacterId: 'char-learner',
+        chosenCharacterName: 'Khách hàng',
+        initialMessages: const [],
+        nextTurnCharacterId: 'char-learner',
+      );
+
+      await notifier.sendMessage('Xin chào');
+
+      final state = getState();
+      expect(state.messages[0].speakerName, 'Khách hàng');
+      expect(state.messages[0].isLearner, true);
     });
 
     test('sendMessage accumulates learner message then NPC response', () async {

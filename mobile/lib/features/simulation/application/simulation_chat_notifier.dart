@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../profile/data/profile_providers.dart';
 import '../data/simulation_providers.dart';
 import '../data/simulation_repository.dart';
 import '../domain/send_message_response.dart';
@@ -13,6 +12,7 @@ class SimulationChatState {
   const SimulationChatState({
     required this.sessionId,
     required this.chosenCharacterId,
+    this.chosenCharacterName = '',
     this.messages = const [],
     this.status = SimulationChatStatus.idle,
     this.nextTurnCharacterId = '',
@@ -25,6 +25,7 @@ class SimulationChatState {
 
   final String sessionId;
   final String chosenCharacterId;
+  final String chosenCharacterName;
   final List<SimulationMessage> messages;
   final SimulationChatStatus status;
   final String nextTurnCharacterId;
@@ -60,12 +61,14 @@ class SimulationChatState {
     bool? sessionEnded,
     String? endReason,
     String? error,
+    String? chosenCharacterName,
     String? scenarioId,
     String? resultId,
   }) {
     return SimulationChatState(
       sessionId: sessionId,
       chosenCharacterId: chosenCharacterId,
+      chosenCharacterName: chosenCharacterName ?? this.chosenCharacterName,
       messages: messages ?? this.messages,
       status: status ?? this.status,
       nextTurnCharacterId: nextTurnCharacterId ?? this.nextTurnCharacterId,
@@ -92,6 +95,7 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
     required String chosenCharacterId,
     required List<SimulationMessage> initialMessages,
     required String nextTurnCharacterId,
+    String chosenCharacterName = '',
     String scenarioId = '',
     Map<String, dynamic>? result,
   }) {
@@ -100,9 +104,14 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
       resultId = result['id'] as String;
     }
 
+    final resolvedCharacterName = chosenCharacterName.isNotEmpty
+        ? chosenCharacterName
+        : _characterNameFromMessages(chosenCharacterId, initialMessages);
+
     state = SimulationChatState(
       sessionId: sessionId,
       chosenCharacterId: chosenCharacterId,
+      chosenCharacterName: resolvedCharacterName,
       messages: initialMessages,
       nextTurnCharacterId: nextTurnCharacterId,
       status: SimulationChatStatus.idle,
@@ -116,11 +125,10 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
     if (trimmed.isEmpty || state.status != SimulationChatStatus.idle) return;
     if (state.sessionEnded) return;
 
-    final profile = ref.read(userProfileProvider).value;
     final learnerMessage = SimulationMessage(
       id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
       speakerCharacterId: state.chosenCharacterId,
-      speakerName: profile?.fullName ?? 'You',
+      speakerName: _learnerDisplayName(),
       isLearner: true,
       content: trimmed,
       orderIndex: state.messages.length,
@@ -205,9 +213,36 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
     );
   }
 
+  String _learnerDisplayName() {
+    if (state.chosenCharacterName.isNotEmpty) {
+      return state.chosenCharacterName;
+    }
+    final fromMessages = _characterNameFromMessages(
+      state.chosenCharacterId,
+      state.messages,
+    );
+    if (fromMessages.isNotEmpty) return fromMessages;
+    return 'You';
+  }
+
+  String _characterNameFromMessages(
+    String characterId,
+    List<SimulationMessage> messages,
+  ) {
+    if (characterId.isEmpty) return '';
+    final match = messages
+        .where(
+          (m) =>
+              m.speakerCharacterId == characterId && m.speakerName.isNotEmpty,
+        )
+        .lastOrNull;
+    return match?.speakerName ?? '';
+  }
+
   void loadExistingSession({
     required SimulationSession session,
     required List<SimulationMessage> messages,
+    String chosenCharacterName = '',
     Map<String, dynamic>? result,
   }) {
     final isCompleted = session.status == 'COMPLETED';
@@ -216,9 +251,14 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
       resultId = result['id'] as String;
     }
 
+    final resolvedCharacterName = chosenCharacterName.isNotEmpty
+        ? chosenCharacterName
+        : _characterNameFromMessages(session.chosenCharacterId, messages);
+
     state = SimulationChatState(
       sessionId: session.id,
       chosenCharacterId: session.chosenCharacterId,
+      chosenCharacterName: resolvedCharacterName,
       messages: messages,
       nextTurnCharacterId: session.nextTurnCharacterId,
       status:

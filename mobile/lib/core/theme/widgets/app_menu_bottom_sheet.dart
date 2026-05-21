@@ -40,28 +40,16 @@ class AppMenuBottomSheet {
                   horizontal: AppSpacing.lg,
                   vertical: AppSpacing.lg,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: GoogleFonts.inter(
-                          fontSize: AppTypography.titleSmall,
-                          fontWeight: FontWeight.w600,
-                          color: c.foreground,
-                        ),
-                      ),
+                child: Center(
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: AppTypography.titleSmall,
+                      fontWeight: FontWeight.w600,
+                      color: c.foreground,
                     ),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(ctx),
-                      child: Icon(
-                        Icons.close,
-                        size: 20,
-                        color: c.mutedForeground,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
               Divider(height: 1, color: c.border),

@@ -21,35 +21,28 @@ class FeedbackBottomSheet extends StatefulWidget {
 }
 
 class _FeedbackBottomSheetState extends State<FeedbackBottomSheet> {
-  final ScrollController _scrollController = ScrollController();
   static const double _correctionItemHeight = 56.0;
   static const double _headerHeight = 56.0;
   static const double _dividerHeight = 1.0;
+  bool _didScrollToCorrection = false;
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.scrollToCorrectionIndex != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCorrection());
-    }
-  }
+  void _scheduleScrollToCorrection(ScrollController scrollController) {
+    if (_didScrollToCorrection || widget.scrollToCorrectionIndex == null) return;
+    _didScrollToCorrection = true;
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!scrollController.hasClients) return;
 
-  void _scrollToCorrection() {
-    final index = widget.scrollToCorrectionIndex!;
-    if (index < widget.feedback.corrections.length) {
-      final offset = _headerHeight + index * _correctionItemHeight;
-      _scrollController.animateTo(
+      final index = widget.scrollToCorrectionIndex!;
+      if (index >= widget.feedback.corrections.length) return;
+
+      final offset = index * _correctionItemHeight;
+      scrollController.animateTo(
         offset,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
-    }
+    });
   }
 
   @override
@@ -64,6 +57,8 @@ class _FeedbackBottomSheetState extends State<FeedbackBottomSheet> {
       maxChildSize: 0.9,
       expand: false,
       builder: (context, scrollController) {
+        _scheduleScrollToCorrection(scrollController);
+
         return Column(
           children: [
             _buildHeader(c),
@@ -100,22 +95,15 @@ class _FeedbackBottomSheetState extends State<FeedbackBottomSheet> {
     return Container(
       height: _headerHeight,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: Row(
-        children: [
-          Text(
-            'Feedback',
-            style: GoogleFonts.inter(
-              fontSize: AppTypography.titleSmall,
-              fontWeight: FontWeight.w600,
-              color: c.foreground,
-            ),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Icon(Icons.close, size: 20, color: c.mutedForeground),
-          ),
-        ],
+      alignment: Alignment.center,
+      child: Text(
+        'Feedback',
+        textAlign: TextAlign.center,
+        style: GoogleFonts.inter(
+          fontSize: AppTypography.titleSmall,
+          fontWeight: FontWeight.w600,
+          color: c.foreground,
+        ),
       ),
     );
   }
@@ -165,14 +153,16 @@ class _CorrectionItemState extends State<_CorrectionItem>
     return AnimatedBuilder(
       animation: _highlightController,
       builder: (context, child) {
-        final highlightColor = Color.lerp(
-          c.primary.withAlpha(40),
-          Colors.transparent,
-          _highlightController.value,
-        );
+        final backgroundColor = widget.isHighlighted
+            ? Color.lerp(
+                c.primary.withValues(alpha: 0.12),
+                Colors.transparent,
+                _highlightController.value,
+              )
+            : null;
 
         return Container(
-          color: highlightColor,
+          color: backgroundColor,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.sm,
