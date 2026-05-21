@@ -258,7 +258,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           final isHistory = state.uri.queryParameters['history'] == 'true';
-          return ChatScreen(sessionId: id, isHistory: isHistory);
+          final fromResult = state.uri.queryParameters['fromResult'] == 'true';
+          return ChatScreen(sessionId: id, isHistory: isHistory, fromResult: fromResult);
         },
       ),
       ShellRoute(

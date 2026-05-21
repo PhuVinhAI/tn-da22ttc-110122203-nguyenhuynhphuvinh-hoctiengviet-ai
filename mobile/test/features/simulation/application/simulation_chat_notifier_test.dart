@@ -309,6 +309,99 @@ void main() {
       expect(state.messages[3].speakerName, 'Minh');
     });
 
+    test('initSession sets scenarioId and resultId from result map', () {
+      final notifier = getNotifier();
+      notifier.initSession(
+        sessionId: 'session-1',
+        chosenCharacterId: 'char-learner',
+        initialMessages: [],
+        nextTurnCharacterId: 'char-learner',
+        scenarioId: 'scenario-1',
+        result: {'id': 'result-1', 'totalScore': 85},
+      );
+
+      final state = getState();
+      expect(state.scenarioId, 'scenario-1');
+      expect(state.resultId, 'result-1');
+    });
+
+    test('sendMessage when sessionEnded sets resultId from result map', () async {
+      when(() => mockRepo.sendMessage('session-1', 'bye'))
+          .thenAnswer(
+        (_) async => const SendMessageResponse(
+          messages: [],
+          nextTurnCharacterId: '',
+          sessionEnded: true,
+          endReason: 'COMPLETED',
+          result: {'id': 'result-99', 'totalScore': 90},
+        ),
+      );
+
+      final notifier = getNotifier();
+      notifier.initSession(
+        sessionId: 'session-1',
+        chosenCharacterId: 'char-learner',
+        initialMessages: [],
+        nextTurnCharacterId: 'char-learner',
+        scenarioId: 'scenario-1',
+      );
+
+      await notifier.sendMessage('bye');
+
+      final state = getState();
+      expect(state.sessionEnded, true);
+      expect(state.resultId, 'result-99');
+    });
+
+    test('cancelSession calls repo.cancelSession and resets state', () async {
+      when(() => mockRepo.cancelSession('session-1')).thenAnswer(
+        (_) async {},
+      );
+
+      final notifier = getNotifier();
+      notifier.initSession(
+        sessionId: 'session-1',
+        chosenCharacterId: 'char-learner',
+        initialMessages: [],
+        nextTurnCharacterId: 'char-learner',
+      );
+
+      await notifier.cancelSession();
+
+      verify(() => mockRepo.cancelSession('session-1')).called(1);
+      final state = getState();
+      expect(state.sessionId, '');
+      expect(state.messages, isEmpty);
+    });
+
+    test('loadExistingSession sets scenarioId and resultId', () {
+      final notifier = getNotifier();
+      notifier.loadExistingSession(
+        session: const SimulationSession(
+          id: 'session-1',
+          scenarioId: 'scenario-1',
+          chosenCharacterId: 'char-learner',
+          status: 'COMPLETED',
+          nextTurnCharacterId: '',
+        ),
+        messages: [
+          const SimulationMessage(
+            id: 'msg-1',
+            speakerCharacterId: 'npc-1',
+            speakerName: 'Lan',
+            isLearner: false,
+            content: 'Hello',
+            orderIndex: 0,
+          ),
+        ],
+        result: {'id': 'result-1'},
+      );
+
+      final state = getState();
+      expect(state.scenarioId, 'scenario-1');
+      expect(state.resultId, 'result-1');
+    });
+
     test('error during send sets error and returns to idle', () async {
       when(() => mockRepo.sendMessage('session-1', 'test'))
           .thenThrow(Exception('Network error'));

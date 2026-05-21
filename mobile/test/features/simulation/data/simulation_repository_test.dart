@@ -232,6 +232,42 @@ void main() {
       });
     });
 
+    group('cancelSession', () {
+      const sessionId = 'session-1';
+
+      test('calls DELETE /simulations/sessions/:id', () async {
+        when(() => mockDio.delete<void>(any())).thenAnswer(
+          (_) async => Response(
+            requestOptions:
+                RequestOptions(path: '/simulations/sessions/$sessionId'),
+            statusCode: 200,
+            data: null,
+          ),
+        );
+
+        await repository.cancelSession(sessionId);
+
+        verify(() => mockDio.delete<void>(
+              '/simulations/sessions/$sessionId',
+            )).called(1);
+      });
+
+      test('throws NetworkException on connection timeout', () async {
+        when(() => mockDio.delete<void>(any())).thenThrow(
+          DioException(
+            requestOptions:
+                RequestOptions(path: '/simulations/sessions/$sessionId'),
+            type: DioExceptionType.connectionTimeout,
+          ),
+        );
+
+        expect(
+          () => repository.cancelSession(sessionId),
+          throwsA(isA<NetworkException>()),
+        );
+      });
+    });
+
     group('getSession', () {
       const sessionId = 'session-1';
 

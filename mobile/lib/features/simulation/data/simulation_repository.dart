@@ -101,6 +101,14 @@ class SimulationRepository {
     }
   }
 
+  Future<void> cancelSession(String sessionId) async {
+    try {
+      await _dio.delete<void>('/simulations/sessions/$sessionId');
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
   Future<SessionWithMessages> getSession(String sessionId) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(

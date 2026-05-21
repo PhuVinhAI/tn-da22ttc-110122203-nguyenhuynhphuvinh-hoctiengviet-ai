@@ -17,6 +17,8 @@ class SimulationChatState {
     this.sessionEnded = false,
     this.endReason,
     this.error,
+    this.scenarioId = '',
+    this.resultId,
   });
 
   final String sessionId;
@@ -27,6 +29,8 @@ class SimulationChatState {
   final bool sessionEnded;
   final String? endReason;
   final String? error;
+  final String scenarioId;
+  final String? resultId;
 
   bool get isLearnerTurn => !sessionEnded && nextTurnCharacterId == chosenCharacterId;
   bool get isNpcTurn => !sessionEnded && nextTurnCharacterId.isNotEmpty && nextTurnCharacterId != chosenCharacterId;
@@ -43,6 +47,8 @@ class SimulationChatState {
     bool? sessionEnded,
     String? endReason,
     String? error,
+    String? scenarioId,
+    String? resultId,
   }) {
     return SimulationChatState(
       sessionId: sessionId,
@@ -53,6 +59,8 @@ class SimulationChatState {
       sessionEnded: sessionEnded ?? this.sessionEnded,
       endReason: endReason ?? this.endReason,
       error: error,
+      scenarioId: scenarioId ?? this.scenarioId,
+      resultId: resultId ?? this.resultId,
     );
   }
 }
@@ -71,13 +79,22 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
     required String chosenCharacterId,
     required List<SimulationMessage> initialMessages,
     required String nextTurnCharacterId,
+    String scenarioId = '',
+    Map<String, dynamic>? result,
   }) {
+    String? resultId;
+    if (result != null && result['id'] != null) {
+      resultId = result['id'] as String;
+    }
+
     state = SimulationChatState(
       sessionId: sessionId,
       chosenCharacterId: chosenCharacterId,
       messages: initialMessages,
       nextTurnCharacterId: nextTurnCharacterId,
       status: SimulationChatStatus.idle,
+      scenarioId: scenarioId,
+      resultId: resultId,
     );
 
     if (state.isNpcTurn) {
@@ -119,10 +136,15 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
         state = state.copyWith(messages: allMessages);
 
         if (response.sessionEnded) {
+          String? resultId;
+          if (response.result != null && response.result!['id'] != null) {
+            resultId = response.result!['id'] as String;
+          }
           state = state.copyWith(
             status: SimulationChatStatus.completed,
             sessionEnded: true,
             endReason: response.endReason,
+            resultId: resultId,
           );
         } else {
           state = state.copyWith(status: SimulationChatStatus.idle);
@@ -158,10 +180,15 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
       state = state.copyWith(messages: allMessages);
 
       if (response.sessionEnded) {
+        String? resultId;
+        if (response.result != null && response.result!['id'] != null) {
+          resultId = response.result!['id'] as String;
+        }
         state = state.copyWith(
           status: SimulationChatStatus.completed,
           sessionEnded: true,
           endReason: response.endReason,
+          resultId: resultId,
         );
       } else {
         state = state.copyWith(status: SimulationChatStatus.idle);
@@ -178,11 +205,31 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
     }
   }
 
+  Future<void> cancelSession() async {
+    if (state.sessionId.isEmpty) return;
+
+    try {
+      final repo = ref.read(simulationRepositoryProvider);
+      await repo.cancelSession(state.sessionId);
+    } catch (_) {}
+
+    state = const SimulationChatState(
+      sessionId: '',
+      chosenCharacterId: '',
+    );
+  }
+
   void loadExistingSession({
     required SimulationSession session,
     required List<SimulationMessage> messages,
+    Map<String, dynamic>? result,
   }) {
     final isCompleted = session.status == 'COMPLETED';
+    String? resultId;
+    if (result != null && result['id'] != null) {
+      resultId = result['id'] as String;
+    }
+
     state = SimulationChatState(
       sessionId: session.id,
       chosenCharacterId: session.chosenCharacterId,
@@ -190,6 +237,8 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
       nextTurnCharacterId: session.nextTurnCharacterId,
       status: isCompleted ? SimulationChatStatus.completed : SimulationChatStatus.idle,
       sessionEnded: isCompleted,
+      scenarioId: session.scenarioId,
+      resultId: resultId,
     );
 
     if (!isCompleted && state.isNpcTurn) {

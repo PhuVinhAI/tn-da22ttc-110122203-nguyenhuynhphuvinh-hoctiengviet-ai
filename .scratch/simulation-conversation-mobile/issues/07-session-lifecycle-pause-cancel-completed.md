@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 ## Parent
 
@@ -23,16 +23,30 @@ Add `cancelSession(String sessionId)` to `SimulationRepository` (calls `DELETE /
 
 ## Acceptance criteria
 
-- [ ] Pressing back on active chat auto-pauses session (no confirmation); returns to tab landing
-- [ ] Resuming a paused session (via `GET /sessions/:id`) restores chat with full message history
-- [ ] Cancel: AppBar menu bottom sheet shows "Cancel Session" + "View Scenario"
-- [ ] "Cancel Session" → `AppDialog` confirm → `DELETE /sessions/:id` → pop to tab landing
-- [ ] "View Scenario" → push scenario detail screen
-- [ ] When `sessionEnded: true`: input hidden, bottom banner "Session Ended" + "View Results" button
-- [ ] Feedback bubbles remain tappable in completed state
-- [ ] `isHistory: true` mode: no input, "Session Ended" banner, "View Results" button only if not accessed from result screen
-- [ ] `SimulationRepository.cancelSession()` calls `DELETE /sessions/:id`
+- [x] Pressing back on active chat auto-pauses session (no confirmation); returns to tab landing
+- [x] Resuming a paused session (via `GET /sessions/:id`) restores chat with full message history
+- [x] Cancel: AppBar menu bottom sheet shows "Cancel Session" + "View Scenario"
+- [x] "Cancel Session" → `AppDialog` confirm → `DELETE /sessions/:id` → pop to tab landing
+- [x] "View Scenario" → push scenario detail screen
+- [x] When `sessionEnded: true`: input hidden, bottom banner "Session Ended" + "View Results" button
+- [x] Feedback bubbles remain tappable in completed state
+- [x] `isHistory: true` mode: no input, "Session Ended" banner, "View Results" button only if not accessed from result screen
+- [x] `SimulationRepository.cancelSession()` calls `DELETE /sessions/:id`
 
 ## Blocked by
 
 - `.scratch/simulation-conversation-mobile/issues/05-chat-core-group-bubbles-compose-bar.md`
+
+## Implementation notes
+
+### Files modified
+
+- **`mobile/lib/features/simulation/data/simulation_repository.dart`** — Added `cancelSession(String sessionId)` method that calls `DELETE /simulations/sessions/:id`
+- **`mobile/lib/features/simulation/application/simulation_chat_notifier.dart`** — Added `scenarioId` and `resultId` fields to `SimulationChatState`; `initSession` now accepts `scenarioId` and `result` params; `loadExistingSession` accepts `result` param; `cancelSession()` method resets state; both `sendMessage` and `_autoTriggerNpcTurn` extract `resultId` from `response.result` when session ends
+- **`mobile/lib/features/simulation/presentation/screens/chat_screen.dart`** — Full lifecycle rewrite: `PopScope` with `onPopInvokedWithResult` for auto-pause on back; `fromResult` param to control "View Results" button visibility in history mode; AppBar overflow menu (`more_vert` icon) opens bottom sheet with "Huỷ phiên" and "Xem tình huống" options; `_confirmCancelSession` shows `AppDialog` confirmation; `_doCancelSession` calls `cancelSession()` then pops to `/practice`; `_navigateToResult` pushes `/practice/results/:id`; `_HistoryBanner` now conditionally shows "Xem kết quả" button based on `fromResult`
+- **`mobile/lib/core/router/app_router.dart`** — Added `fromResult` query parameter parsing for `/practice/sessions/:id` route
+
+### Files modified (tests)
+
+- **`mobile/test/features/simulation/data/simulation_repository_test.dart`** — Added `cancelSession` test group: verifies DELETE call and NetworkException on timeout
+- **`mobile/test/features/simulation/application/simulation_chat_notifier_test.dart`** — Added tests: `initSession` sets scenarioId/resultId from result map, `sendMessage` captures resultId when sessionEnded, `cancelSession` calls repo and resets state, `loadExistingSession` sets scenarioId and resultId

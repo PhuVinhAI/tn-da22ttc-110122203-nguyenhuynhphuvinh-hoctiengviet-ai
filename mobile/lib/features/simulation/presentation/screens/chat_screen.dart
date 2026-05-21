@@ -7,6 +7,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../application/simulation_chat_notifier.dart';
 import '../../data/simulation_providers.dart';
+import '../../data/simulation_repository.dart';
 import '../../domain/simulation_message.dart';
 import '../widgets/correction_text_span_builder.dart';
 import '../widgets/feedback_bottom_sheet.dart';
@@ -16,10 +17,12 @@ class ChatScreen extends ConsumerStatefulWidget {
     super.key,
     required this.sessionId,
     this.isHistory = false,
+    this.fromResult = false,
   });
 
   final String sessionId;
   final bool isHistory;
+  final bool fromResult;
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -54,42 +57,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     await sessionAsync.when(
       data: (data) {
         if (!mounted) return;
-        final notifier = ref.read(simulationChatProvider.notifier);
-        if (widget.isHistory) {
-          notifier.loadExistingSession(
-            session: data.session,
-            messages: data.messages,
-          );
-        } else {
-          notifier.initSession(
-            sessionId: data.session.id,
-            chosenCharacterId: data.session.chosenCharacterId,
-            initialMessages: data.messages,
-            nextTurnCharacterId: data.session.nextTurnCharacterId,
-          );
-        }
-        _scrollToBottom();
+        _applySessionData(data);
       },
       loading: () async {
         final repo = ref.read(simulationRepositoryProvider);
         try {
           final data = await repo.getSession(widget.sessionId);
           if (!mounted) return;
-          final notifier = ref.read(simulationChatProvider.notifier);
-          if (widget.isHistory) {
-            notifier.loadExistingSession(
-              session: data.session,
-              messages: data.messages,
-            );
-          } else {
-            notifier.initSession(
-              sessionId: data.session.id,
-              chosenCharacterId: data.session.chosenCharacterId,
-              initialMessages: data.messages,
-              nextTurnCharacterId: data.session.nextTurnCharacterId,
-            );
-          }
-          _scrollToBottom();
+          _applySessionData(data);
         } catch (e) {
           if (!mounted) return;
           AppToast.show(
@@ -104,21 +79,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         try {
           final data = await repo.getSession(widget.sessionId);
           if (!mounted) return;
-          final notifier = ref.read(simulationChatProvider.notifier);
-          if (widget.isHistory) {
-            notifier.loadExistingSession(
-              session: data.session,
-              messages: data.messages,
-            );
-          } else {
-            notifier.initSession(
-              sessionId: data.session.id,
-              chosenCharacterId: data.session.chosenCharacterId,
-              initialMessages: data.messages,
-              nextTurnCharacterId: data.session.nextTurnCharacterId,
-            );
-          }
-          _scrollToBottom();
+          _applySessionData(data);
         } catch (_) {
           if (!mounted) return;
           AppToast.show(
@@ -129,6 +90,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         }
       },
     );
+  }
+
+  void _applySessionData(SessionWithMessages data) {
+    final notifier = ref.read(simulationChatProvider.notifier);
+    if (widget.isHistory) {
+      notifier.loadExistingSession(
+        session: data.session,
+        messages: data.messages,
+      );
+    } else {
+      notifier.initSession(
+        sessionId: data.session.id,
+        chosenCharacterId: data.session.chosenCharacterId,
+        initialMessages: data.messages,
+        nextTurnCharacterId: data.session.nextTurnCharacterId,
+        scenarioId: data.session.scenarioId,
+      );
+    }
+    _scrollToBottom();
   }
 
   void _scrollToBottom() {
@@ -151,6 +131,105 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _scrollToBottom();
   }
 
+  void _onBack() {
+    final chatState = ref.read(simulationChatProvider);
+    if (!chatState.sessionEnded && !widget.isHistory && chatState.sessionId.isNotEmpty) {
+      final notifier = ref.read(simulationChatProvider.notifier);
+      notifier.cancelSession();
+    }
+    context.pop();
+  }
+
+  void _showSessionMenu() {
+    final chatState = ref.read(simulationChatProvider);
+    final c = AppTheme.colors(context);
+
+    AppBottomSheet.show(
+      context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Text(
+                'Tuỳ chọn phiên',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.cancel_outlined, color: c.error),
+              title: Text(
+                'Huỷ phiên',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: c.error,
+                    ),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                _confirmCancelSession();
+              },
+            ),
+            if (chatState.scenarioId.isNotEmpty)
+              ListTile(
+                leading: Icon(Icons.description_outlined, color: c.foreground),
+                title: const Text('Xem tình huống'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.push('/practice/scenarios/${chatState.scenarioId}');
+                },
+              ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmCancelSession() {
+    AppDialog.show(
+      context,
+      builder: (context) => AppDialog(
+        title: 'Huỷ phiên hội thoại?',
+        content: 'Tiến trình hội thoại sẽ bị mất và không thể khôi phục.',
+        actions: [
+          AppDialogAction(
+            label: 'Không',
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          AppDialogAction(
+            label: 'Huỷ phiên',
+            isPrimary: true,
+            onPressed: () {
+              Navigator.of(context).pop();
+              _doCancelSession();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _doCancelSession() async {
+    final notifier = ref.read(simulationChatProvider.notifier);
+    await notifier.cancelSession();
+    if (!mounted) return;
+    while (context.canPop()) {
+      context.pop();
+    }
+    context.go('/practice');
+  }
+
+  void _navigateToResult() {
+    final chatState = ref.read(simulationChatProvider);
+    final resultId = chatState.resultId;
+    if (resultId != null && resultId.isNotEmpty) {
+      context.push('/practice/results/$resultId');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(simulationChatProvider);
@@ -161,46 +240,61 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       }
     });
 
-    final showCompletedBanner =
-        chatState.sessionEnded && !widget.isHistory;
+    final isCompleted = chatState.sessionEnded && !widget.isHistory;
+    final showCompletedBanner = isCompleted;
+    final showHistoryBanner = widget.isHistory;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Hội thoại'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: chatState.sessionId.isEmpty
-                ? const Center(child: AppSpinner())
-                : _MessageList(
-                    messages: chatState.messages,
-                    isReceiving: chatState.status == SimulationChatStatus.receiving ||
-                        chatState.status == SimulationChatStatus.sending,
-                    npcSpeakerName: chatState.npcSpeakerName,
-                    scrollController: _scrollController,
-                  ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _onBack();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Hội thoại'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _onBack,
           ),
-          if (showCompletedBanner)
-            _CompletedBanner(onViewResult: () {}),
-          if (!chatState.sessionEnded && !widget.isHistory)
-            _ComposeBar(
-              controller: _inputController,
-              focusNode: _inputFocusNode,
-              enabled: chatState.isLearnerTurn &&
-                  chatState.status == SimulationChatStatus.idle,
-              isNpcTurn: chatState.isNpcTurn ||
-                  chatState.status == SimulationChatStatus.sending,
-              npcName: chatState.npcSpeakerName,
-              onSend: _onSend,
+          actions: [
+            if (!widget.isHistory && !chatState.sessionEnded)
+              IconButton(
+                icon: const Icon(Icons.more_vert),
+                onPressed: _showSessionMenu,
+              ),
+          ],
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: chatState.sessionId.isEmpty
+                  ? const Center(child: AppSpinner())
+                  : _MessageList(
+                      messages: chatState.messages,
+                      isReceiving: chatState.status == SimulationChatStatus.receiving ||
+                          chatState.status == SimulationChatStatus.sending,
+                      npcSpeakerName: chatState.npcSpeakerName,
+                      scrollController: _scrollController,
+                    ),
             ),
-          if (widget.isHistory)
-            _HistoryBanner(),
-        ],
+            if (showCompletedBanner)
+              _CompletedBanner(onViewResult: _navigateToResult),
+            if (showHistoryBanner)
+              _HistoryBanner(showViewResult: !widget.fromResult, onViewResult: _navigateToResult),
+            if (!chatState.sessionEnded && !widget.isHistory)
+              _ComposeBar(
+                controller: _inputController,
+                focusNode: _inputFocusNode,
+                enabled: chatState.isLearnerTurn &&
+                    chatState.status == SimulationChatStatus.idle,
+                isNpcTurn: chatState.isNpcTurn ||
+                    chatState.status == SimulationChatStatus.sending,
+                npcName: chatState.npcSpeakerName,
+                onSend: _onSend,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -679,6 +773,14 @@ class _CompletedBanner extends StatelessWidget {
 }
 
 class _HistoryBanner extends StatelessWidget {
+  const _HistoryBanner({
+    this.showViewResult = true,
+    this.onViewResult,
+  });
+
+  final bool showViewResult;
+  final VoidCallback? onViewResult;
+
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
@@ -694,15 +796,25 @@ class _HistoryBanner extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: Center(
-          child: Text(
-            'Phiên đã kết thúc',
-            style: GoogleFonts.inter(
-              fontSize: AppTypography.bodySmall,
-              color: c.mutedForeground,
-              fontStyle: FontStyle.italic,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Phiên đã kết thúc',
+                style: GoogleFonts.inter(
+                  fontSize: AppTypography.bodySmall,
+                  color: c.mutedForeground,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
             ),
-          ),
+            if (showViewResult && onViewResult != null)
+              AppButton(
+                variant: AppButtonVariant.outline,
+                label: 'Xem kết quả',
+                onPressed: onViewResult,
+              ),
+          ],
         ),
       ),
     );
