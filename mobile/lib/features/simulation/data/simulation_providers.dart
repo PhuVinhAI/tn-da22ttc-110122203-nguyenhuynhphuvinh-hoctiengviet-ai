@@ -3,6 +3,7 @@ import '../../../core/sync/sync.dart';
 import '../../../core/providers/providers.dart';
 import '../data/simulation_repository.dart';
 import '../domain/scenario_category.dart';
+import '../domain/scenario_summary.dart';
 
 final simulationRepositoryProvider = Provider<SimulationRepository>((ref) {
   return SimulationRepository(ref.watch(dioProvider));
@@ -23,4 +24,98 @@ class SimulationCategoriesNotifier
 final simulationCategoriesProvider =
     AsyncNotifierProvider<SimulationCategoriesNotifier, List<ScenarioCategory>>(
   SimulationCategoriesNotifier.new,
+);
+
+class ScenarioFilter {
+  const ScenarioFilter({this.categoryId, this.level, this.difficulty});
+  final String? categoryId;
+  final String? level;
+  final String? difficulty;
+
+  ScenarioFilter copyWith({
+    String? categoryId,
+    String? level,
+    String? difficulty,
+    bool clearCategory = false,
+    bool clearLevel = false,
+    bool clearDifficulty = false,
+  }) {
+    return ScenarioFilter(
+      categoryId: clearCategory ? null : (categoryId ?? this.categoryId),
+      level: clearLevel ? null : (level ?? this.level),
+      difficulty: clearDifficulty ? null : (difficulty ?? this.difficulty),
+    );
+  }
+
+  bool get isActive => categoryId != null || level != null || difficulty != null;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ScenarioFilter &&
+          runtimeType == other.runtimeType &&
+          categoryId == other.categoryId &&
+          level == other.level &&
+          difficulty == other.difficulty;
+
+  @override
+  int get hashCode => Object.hash(categoryId, level, difficulty);
+}
+
+class ScenarioFilterNotifier extends Notifier<ScenarioFilter> {
+  @override
+  ScenarioFilter build() => const ScenarioFilter();
+
+  void setFilter(ScenarioFilter filter) {
+    state = filter;
+  }
+
+  void setCategory(String? categoryId) {
+    state = state.copyWith(
+      categoryId: categoryId,
+      clearCategory: categoryId == null,
+    );
+  }
+
+  void setLevel(String? level) {
+    state = state.copyWith(level: level, clearLevel: level == null);
+  }
+
+  void setDifficulty(String? difficulty) {
+    state = state.copyWith(
+      difficulty: difficulty,
+      clearDifficulty: difficulty == null,
+    );
+  }
+
+  void clearAll() {
+    state = const ScenarioFilter();
+  }
+}
+
+final scenarioFilterProvider =
+    NotifierProvider<ScenarioFilterNotifier, ScenarioFilter>(
+  ScenarioFilterNotifier.new,
+);
+
+class SimulationScenariosNotifier extends AsyncNotifier<List<ScenarioSummary>> {
+  @override
+  Future<List<ScenarioSummary>> build() async {
+    final filter = ref.watch(scenarioFilterProvider);
+    final repo = ref.read(simulationRepositoryProvider);
+    return repo.listScenarios(
+      categoryId: filter.categoryId,
+      level: filter.level,
+      difficulty: filter.difficulty,
+    );
+  }
+
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+  }
+}
+
+final simulationScenariosProvider = AsyncNotifierProvider<
+    SimulationScenariosNotifier, List<ScenarioSummary>>(
+  SimulationScenariosNotifier.new,
 );

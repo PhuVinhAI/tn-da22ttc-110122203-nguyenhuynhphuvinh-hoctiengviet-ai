@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 ## Parent
 
@@ -16,17 +16,33 @@ Add `listScenarios({categoryId, level, difficulty})` to `SimulationRepository`. 
 
 ## Acceptance criteria
 
-- [ ] Scenario cards render below category grid in a 2-column grid
-- [ ] Tapping a category card filters scenarios by that category; section header shows category name
-- [ ] "See all" or re-tapping selected category clears filter; header reverts to "All Scenarios"
-- [ ] Filter bottom sheet has Category, Level, Difficulty selectors; "Apply" applies all at once
-- [ ] AppBar filter icon indicates active category filter
-- [ ] Scenario card shows level badge (CEFR colors), title, description, difficulty badge (EASY=success, MEDIUM=warning, HARD=error), estimated time, character count
-- [ ] `SimulationRepository.listScenarios()` calls `GET /simulations/scenarios` with query params
-- [ ] `ScenarioSummary` model parses all fields including nullable `categoryInfo`
-- [ ] `simulationScenariosProvider` refetches when filter params change
-- [ ] Loading shimmer, error, and empty states work for scenario grid
+- [x] Scenario cards render below category grid in a 2-column grid
+- [x] Tapping a category card filters scenarios by that category; section header shows category name
+- [x] "See all" or re-tapping selected category clears filter; header reverts to "Tất cả tình huống"
+- [x] Filter bottom sheet has Category, Level, Difficulty selectors; "Áp dụng" applies all at once
+- [x] AppBar filter icon indicates active category filter
+- [x] Scenario card shows level badge (CEFR colors), title, description, difficulty badge (EASY=success, MEDIUM=warning, HARD=error), estimated time, character count
+- [x] `SimulationRepository.listScenarios()` calls `GET /simulations/scenarios` with query params
+- [x] `ScenarioSummary` model parses all fields including nullable `categoryInfo`
+- [x] `simulationScenariosProvider` refetches when filter params change
+- [x] Loading shimmer, error, and empty states work for scenario grid
 
 ## Blocked by
 
 - `.scratch/simulation-conversation-mobile/issues/01-bottom-nav-thuc-hanh-tab-category-grid.md`
+
+## Implementation notes
+
+### Files created
+
+- `mobile/lib/features/simulation/domain/scenario_summary.dart` — `ScenarioSummary` and `CategoryInfo` domain models with `fromJson`/`toJson` for all fields including nullable `categoryInfo`
+
+### Files modified
+
+- `mobile/lib/features/simulation/data/simulation_repository.dart` — Added `listScenarios({categoryId, level, difficulty})` method calling `GET /simulations/scenarios` with optional query params
+- `mobile/lib/features/simulation/data/simulation_providers.dart` — Added `ScenarioFilter` value class, `ScenarioFilterNotifier` (Notifier, replaces removed `StateProvider`), `SimulationScenariosNotifier` (AsyncNotifier that watches filter and refetches), `simulationScenariosProvider`
+- `mobile/lib/features/simulation/presentation/screens/practice_screen.dart` — Complete rewrite: added 2-column scenario grid below category grid, category tap filtering with section header + "Xem tất cả", filter bottom sheet (DraggableScrollableSheet with Category/Level/Difficulty chip selectors + "Áp dụng" button), AppBar filter icon with Badge indicator, scenario card layout (level badge CEFR colors, title maxLines 2, description maxLines 2, difficulty badge EASY/MEDIUM/HARD, clock + minutes, people + count), shimmer loading skeleton, error retry, empty state
+
+### Files deleted
+
+None.
