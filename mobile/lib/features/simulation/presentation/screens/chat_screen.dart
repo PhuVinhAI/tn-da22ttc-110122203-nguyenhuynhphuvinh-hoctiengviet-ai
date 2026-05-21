@@ -8,6 +8,8 @@ import '../../../../core/theme/widgets/widgets.dart';
 import '../../application/simulation_chat_notifier.dart';
 import '../../data/simulation_providers.dart';
 import '../../domain/simulation_message.dart';
+import '../widgets/correction_text_span_builder.dart';
+import '../widgets/feedback_bottom_sheet.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({
@@ -413,31 +415,86 @@ class _LearnerBubble extends StatelessWidget {
 
   final SimulationMessage message;
 
+  bool get _hasFeedback {
+    final feedback = message.feedback;
+    if (feedback == null) return false;
+    return feedback.corrections.isNotEmpty || feedback.reviewAvailable;
+  }
+
+  void _openFeedbackSheet(BuildContext context, {int? scrollToIndex}) {
+    final feedback = message.feedback;
+    if (feedback == null) return;
+
+    AppBottomSheet.show(
+      context,
+      isScrollControlled: true,
+      builder: (context) => FeedbackBottomSheet(
+        feedback: feedback,
+        scrollToCorrectionIndex: scrollToIndex,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
     final theme = Theme.of(context);
+    final feedback = message.feedback;
+    final hasCorrections = feedback != null && feedback.corrections.isNotEmpty;
+
+    final textWidget = hasCorrections
+        ? RichText(
+            text: TextSpan(
+              children: CorrectionTextSpanBuilder.build(
+                text: message.content,
+                corrections: feedback.corrections,
+                errorColor: c.error,
+                warningColor: c.warning,
+                baseStyle: theme.textTheme.bodyMedium!.copyWith(color: c.foreground),
+                onCorrectionTap: _hasFeedback
+                    ? (index) => _openFeedbackSheet(context, scrollToIndex: index)
+                    : null,
+              ),
+            ),
+          )
+        : Text(
+            message.content,
+            style: theme.textTheme.bodyMedium?.copyWith(color: c.foreground),
+          );
 
     return Align(
       alignment: Alignment.centerRight,
-      child: Container(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
-        ),
-        decoration: BoxDecoration(
-          color: c.primary.withAlpha(25),
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
-        child: Text(
-          message.content,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: c.foreground,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (_hasFeedback)
+            GestureDetector(
+              onTap: () => _openFeedbackSheet(context),
+              child: Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.xs, bottom: 2),
+                child: Icon(
+                  Icons.feedback_outlined,
+                  size: 16,
+                  color: c.mutedForeground,
+                ),
+              ),
+            ),
+          Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.75,
+            ),
+            decoration: BoxDecoration(
+              color: c.primary.withAlpha(25),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            child: textWidget,
           ),
-        ),
+        ],
       ),
     );
   }
