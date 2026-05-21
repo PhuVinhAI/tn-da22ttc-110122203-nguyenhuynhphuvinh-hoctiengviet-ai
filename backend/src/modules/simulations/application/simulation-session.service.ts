@@ -9,7 +9,10 @@ import { SimulationSessionsRepository } from './repositories/simulation-sessions
 import { ScenariosRepository } from './repositories/scenarios.repository';
 import { SimulationMessagesRepository } from './repositories/simulation-messages.repository';
 import { SimulationResultsRepository } from './repositories/simulation-results.repository';
-import { SimulationAiService } from './simulation-ai.service';
+import {
+  SimulationAiService,
+  SimulationAiTurnRequest,
+} from './simulation-ai.service';
 import { SimulationSession } from '../domain/simulation-session.entity';
 import { SimulationMessage } from '../domain/simulation-message.entity';
 import { SimulationResult } from '../domain/simulation-result.entity';
@@ -66,9 +69,11 @@ export interface SessionWithMessages {
 
 export interface SendMessageResult {
   messages: Array<{
+    id: string;
     speakerCharacterId: string;
     speakerName: string;
     content: string;
+    orderIndex: number;
   }>;
   nextTurnCharacterId: string;
   feedback: SimulationMessage['feedback'];
@@ -158,6 +163,17 @@ export class SimulationSessionService {
         SimulationSessionStatus.ACTIVE,
       );
       session.status = SimulationSessionStatus.ACTIVE;
+    }
+
+    if (
+      session.status === SimulationSessionStatus.ACTIVE &&
+      session.nextTurnCharacterId !== session.chosenCharacterId
+    ) {
+      await this.sessionsRepository.updateNextTurnCharacterId(
+        sessionId,
+        session.chosenCharacterId,
+      );
+      session.nextTurnCharacterId = session.chosenCharacterId;
     }
 
     return {
@@ -253,7 +269,83 @@ export class SimulationSessionService {
       throw new NotFoundException('Scenario not found');
     }
 
-    const aiScenario = {
+    const aiScenario = this.buildAiScenario(scenario);
+    const aiMessages = this.mapMessagesForAi(existingMessages);
+    const learnerMessageCount =
+      existingMessages.filter((m) => m.isLearner).length + 1;
+    const forceWrapUp =
+      scenario.maxTurns !== null && learnerMessageCount >= scenario.maxTurns;
+
+    const aiResponse = await this.aiService.processTurn({
+      scenario: aiScenario,
+      chosenCharacterId: session.chosenCharacterId,
+      messages: aiMessages,
+      learnerMessage: content,
+      userId,
+      forceWrapUp,
+    });
+
+    let currentOrderIndex = nextOrderIndex + 1;
+    const returnedMessages: SendMessageResult['messages'] = [];
+
+    for (const msg of aiResponse.messages) {
+      const aiMsg = await this.messagesRepository.create({
+        sessionId: session.id,
+        speakerCharacterId: msg.speakerCharacterId,
+        isLearner: false,
+        content: msg.content,
+        orderIndex: currentOrderIndex++,
+      });
+      returnedMessages.push({
+        id: aiMsg.id,
+        speakerCharacterId: msg.speakerCharacterId,
+        speakerName: msg.speakerName,
+        content: msg.content,
+        orderIndex: aiMsg.orderIndex,
+      });
+    }
+
+    if (aiResponse.feedback) {
+      await this.messagesRepository.updateFeedback(
+        learnerMessage.id,
+        aiResponse.feedback,
+      );
+      learnerMessage.feedback = aiResponse.feedback;
+    }
+
+    const nextTurnCharacterId = aiResponse.sessionEnded
+      ? aiResponse.nextTurnCharacterId
+      : session.chosenCharacterId;
+
+    await this.sessionsRepository.updateNextTurnCharacterId(
+      session.id,
+      nextTurnCharacterId,
+    );
+
+    if (aiResponse.tokenCount) {
+      await this.sessionsRepository.incrementTokens(
+        session.id,
+        aiResponse.tokenCount,
+      );
+    }
+
+    let result: SimulationResult | undefined;
+    if (aiResponse.sessionEnded) {
+      result = await this.completeSession(session, scenario, aiResponse);
+    }
+
+    return {
+      messages: returnedMessages,
+      nextTurnCharacterId,
+      feedback: aiResponse.feedback,
+      sessionEnded: aiResponse.sessionEnded,
+      endReason: aiResponse.endReason,
+      result,
+    };
+  }
+
+  private buildAiScenario(scenario: any): SimulationAiTurnRequest['scenario'] {
+    return {
       id: scenario.id,
       title: scenario.title,
       systemPrompt: scenario.systemPrompt,
@@ -270,8 +362,12 @@ export class SimulationSessionService {
         isPlayable: c.isPlayable,
       })),
     };
+  }
 
-    const aiMessages = existingMessages.map((m: any) => ({
+  private mapMessagesForAi(
+    messages: SimulationMessage[],
+  ): SimulationAiTurnRequest['messages'] {
+    return messages.map((m) => ({
       id: m.id,
       speakerCharacterId: m.speakerCharacterId,
       isLearner: m.isLearner,
@@ -279,89 +375,35 @@ export class SimulationSessionService {
       orderIndex: m.orderIndex,
       feedback: m.feedback,
     }));
+  }
 
-    const learnerMessageCount =
-      existingMessages.filter((m: any) => m.isLearner).length + 1;
-    const forceWrapUp =
-      scenario.maxTurns !== null && learnerMessageCount >= scenario.maxTurns;
-
-    const aiResponse = await this.aiService.processTurn({
-      scenario: aiScenario,
-      chosenCharacterId: session.chosenCharacterId,
-      messages: aiMessages,
-      learnerMessage: content,
-      userId,
-      forceWrapUp,
-    });
-
-    let currentOrderIndex = nextOrderIndex + 1;
-    const persistedAiMessages: SimulationMessage[] = [];
-
-    for (const msg of aiResponse.messages) {
-      const aiMsg = await this.messagesRepository.create({
-        sessionId: session.id,
-        speakerCharacterId: msg.speakerCharacterId,
-        isLearner: false,
-        content: msg.content,
-        orderIndex: currentOrderIndex++,
-      });
-      persistedAiMessages.push(aiMsg);
-    }
-
-    if (aiResponse.feedback) {
-      await this.messagesRepository.updateFeedback(
-        learnerMessage.id,
-        aiResponse.feedback,
-      );
-      learnerMessage.feedback = aiResponse.feedback;
-    }
-
-    await this.sessionsRepository.updateNextTurnCharacterId(
+  private async completeSession(
+    session: SimulationSession,
+    scenario: any,
+    aiResponse: Awaited<ReturnType<SimulationAiService['processTurn']>>,
+  ): Promise<SimulationResult> {
+    await this.sessionsRepository.updateStatus(
       session.id,
-      aiResponse.nextTurnCharacterId,
+      SimulationSessionStatus.COMPLETED,
     );
 
-    if (aiResponse.tokenCount) {
-      await this.sessionsRepository.incrementTokens(
-        session.id,
-        aiResponse.tokenCount,
-      );
-    }
+    const allMessages = await this.messagesRepository.findBySessionId(
+      session.id,
+    );
 
-    let result: SimulationResult | undefined;
-    if (aiResponse.sessionEnded) {
-      await this.sessionsRepository.updateStatus(
-        session.id,
-        SimulationSessionStatus.COMPLETED,
-      );
-
-      const allMessages = await this.messagesRepository.findBySessionId(
-        session.id,
-      );
-
-      result = await this.resultsRepository.create({
-        userId: session.userId,
-        sessionId: session.id,
-        scenarioId: session.scenarioId,
-        chosenCharacterId: session.chosenCharacterId,
-        totalScore: aiResponse.totalScore ?? 0,
-        criteriaScores: alignCriteriaScores(
-          aiResponse.criteriaScores ?? [],
-          scenario.scoringCriteria,
-        ),
-        endReason: aiResponse.endReason ?? SimulationEndReason.COMPLETED,
-        aiSummary: aiResponse.aiSummary ?? '',
-        totalMessages: allMessages.length,
-      });
-    }
-
-    return {
-      messages: aiResponse.messages,
-      nextTurnCharacterId: aiResponse.nextTurnCharacterId,
-      feedback: aiResponse.feedback,
-      sessionEnded: aiResponse.sessionEnded,
-      endReason: aiResponse.endReason,
-      result,
-    };
+    return this.resultsRepository.create({
+      userId: session.userId,
+      sessionId: session.id,
+      scenarioId: session.scenarioId,
+      chosenCharacterId: session.chosenCharacterId,
+      totalScore: aiResponse.totalScore ?? 0,
+      criteriaScores: alignCriteriaScores(
+        aiResponse.criteriaScores ?? [],
+        scenario.scoringCriteria,
+      ),
+      endReason: aiResponse.endReason ?? SimulationEndReason.COMPLETED,
+      aiSummary: aiResponse.aiSummary ?? '',
+      totalMessages: allMessages.length,
+    });
   }
 }

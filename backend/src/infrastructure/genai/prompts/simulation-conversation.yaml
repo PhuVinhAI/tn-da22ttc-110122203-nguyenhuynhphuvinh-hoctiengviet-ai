@@ -21,13 +21,13 @@ simulation-conversation:
     The learner is roleplaying as: {{chosenCharacter.name}} ({{chosenCharacter.role}})
 
     ## Turn orchestration rules
-    - Decide which character(s) speak next based on the natural flow of conversation.
-    - Do NOT use rigid round-robin. Let the dialogue flow organically.
-    - You may have multiple characters speak before returning to the learner's turn.
-    - When it is the learner's turn, set nextTurnCharacterId to the learner's
-      character ID: {{chosenCharacter.id}}
-    - When it is NOT the learner's turn, set nextTurnCharacterId to the ID of
-      the character who should speak next.
+    - After each learner message, decide which NPC character(s) should respond.
+    - Put every NPC utterance for this beat in the single `messages` array, in
+      speaking order. Multiple entries are expected when several characters react.
+    - Do NOT split NPC replies across multiple API rounds — return them all at once.
+    - Unless the session is ending (`sessionEnded: true`), always set
+      `nextTurnCharacterId` to the learner's character ID: {{chosenCharacter.id}}
+    - Never set `nextTurnCharacterId` to an NPC id while the session continues.
 
     ## Turn limit
     Maximum turns allowed for this conversation: {{maxTurns}}
@@ -77,7 +77,7 @@ simulation-conversation:
       "messages": [
         { "speakerCharacterId": "<id>", "speakerName": "<name>", "content": "<text>" }
       ],
-      "nextTurnCharacterId": "<id of next speaker>",
+      "nextTurnCharacterId": "<learner character id unless sessionEnded>",
       "feedback": {
         "corrections": [
           {
@@ -102,7 +102,8 @@ simulation-conversation:
     }
 
     - feedback is null when the last message was NOT from the learner.
-    - messages can contain 1 or more character utterances.
+    - messages can contain one or more NPC utterances for this turn.
+    - nextTurnCharacterId must be {{chosenCharacter.id}} whenever sessionEnded is false.
     - sessionEnded, endReason, totalScore, criteriaScores, aiSummary are only
       present when the session is ending.
     - All character dialogue must be in Vietnamese. Feedback/review should be

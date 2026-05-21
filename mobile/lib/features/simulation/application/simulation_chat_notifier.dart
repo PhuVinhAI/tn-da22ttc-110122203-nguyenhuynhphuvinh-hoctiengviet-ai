@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../profile/data/profile_providers.dart';
 import '../data/simulation_providers.dart';
 import '../data/simulation_repository.dart';
+import '../domain/send_message_response.dart';
 import '../domain/simulation_message.dart';
 import '../domain/simulation_session.dart';
 
@@ -32,11 +34,16 @@ class SimulationChatState {
   final String scenarioId;
   final String? resultId;
 
-  bool get isLearnerTurn => !sessionEnded && nextTurnCharacterId == chosenCharacterId;
-  bool get isNpcTurn => !sessionEnded && nextTurnCharacterId.isNotEmpty && nextTurnCharacterId != chosenCharacterId;
+  bool get isLearnerTurn =>
+      !sessionEnded && nextTurnCharacterId == chosenCharacterId;
+  bool get isNpcTurn =>
+      !sessionEnded &&
+      nextTurnCharacterId.isNotEmpty &&
+      nextTurnCharacterId != chosenCharacterId;
 
   String get npcSpeakerName {
-    final npcMsg = messages.where((m) => !m.isLearner && m.speakerName.isNotEmpty).lastOrNull;
+    final npcMsg =
+        messages.where((m) => !m.isLearner && m.speakerName.isNotEmpty).lastOrNull;
     return npcMsg?.speakerName ?? '';
   }
 
@@ -96,10 +103,6 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
       scenarioId: scenarioId,
       resultId: resultId,
     );
-
-    if (state.isNpcTurn) {
-      _autoTriggerNpcTurn();
-    }
   }
 
   Future<void> sendMessage(String content) async {
@@ -107,10 +110,11 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
     if (trimmed.isEmpty || state.status != SimulationChatStatus.idle) return;
     if (state.sessionEnded) return;
 
+    final profile = ref.read(userProfileProvider).value;
     final learnerMessage = SimulationMessage(
       id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
       speakerCharacterId: state.chosenCharacterId,
-      speakerName: '',
+      speakerName: profile?.fullName ?? 'You',
       isLearner: true,
       content: trimmed,
       orderIndex: state.messages.length,
@@ -125,35 +129,7 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
     try {
       final repo = ref.read(simulationRepositoryProvider);
       final response = await repo.sendMessage(state.sessionId, trimmed);
-
-      if (!state.sessionEnded) {
-        state = state.copyWith(
-          status: SimulationChatStatus.receiving,
-          nextTurnCharacterId: response.nextTurnCharacterId,
-        );
-
-        final allMessages = [...state.messages, ...response.messages];
-        state = state.copyWith(messages: allMessages);
-
-        if (response.sessionEnded) {
-          String? resultId;
-          if (response.result != null && response.result!['id'] != null) {
-            resultId = response.result!['id'] as String;
-          }
-          state = state.copyWith(
-            status: SimulationChatStatus.completed,
-            sessionEnded: true,
-            endReason: response.endReason,
-            resultId: resultId,
-          );
-        } else {
-          state = state.copyWith(status: SimulationChatStatus.idle);
-
-          if (state.isNpcTurn) {
-            _autoTriggerNpcTurn();
-          }
-        }
-      }
+      _applySendResponse(response, learnerMessageIndex: state.messages.length - 1);
     } catch (e) {
       state = state.copyWith(
         status: SimulationChatStatus.idle,
@@ -162,46 +138,50 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
     }
   }
 
-  Future<void> _autoTriggerNpcTurn() async {
-    if (state.status != SimulationChatStatus.idle || state.sessionEnded) return;
+  void _applySendResponse(
+    SendMessageResponse response, {
+    required int learnerMessageIndex,
+  }) {
+    if (state.sessionEnded) return;
 
-    state = state.copyWith(status: SimulationChatStatus.sending);
+    var messages = [...state.messages, ...response.messages];
 
-    try {
-      final repo = ref.read(simulationRepositoryProvider);
-      final response = await repo.sendMessage(state.sessionId, '');
+    if (response.feedback != null && learnerMessageIndex >= 0) {
+      final learner = messages[learnerMessageIndex];
+      messages = [
+        ...messages.sublist(0, learnerMessageIndex),
+        SimulationMessage(
+          id: learner.id,
+          speakerCharacterId: learner.speakerCharacterId,
+          speakerName: learner.speakerName,
+          isLearner: learner.isLearner,
+          content: learner.content,
+          feedback: response.feedback,
+          orderIndex: learner.orderIndex,
+        ),
+        ...messages.sublist(learnerMessageIndex + 1),
+      ];
+    }
 
-      state = state.copyWith(
-        status: SimulationChatStatus.receiving,
-        nextTurnCharacterId: response.nextTurnCharacterId,
-      );
+    state = state.copyWith(
+      status: SimulationChatStatus.receiving,
+      messages: messages,
+      nextTurnCharacterId: response.nextTurnCharacterId,
+    );
 
-      final allMessages = [...state.messages, ...response.messages];
-      state = state.copyWith(messages: allMessages);
-
-      if (response.sessionEnded) {
-        String? resultId;
-        if (response.result != null && response.result!['id'] != null) {
-          resultId = response.result!['id'] as String;
-        }
-        state = state.copyWith(
-          status: SimulationChatStatus.completed,
-          sessionEnded: true,
-          endReason: response.endReason,
-          resultId: resultId,
-        );
-      } else {
-        state = state.copyWith(status: SimulationChatStatus.idle);
-
-        if (state.isNpcTurn) {
-          _autoTriggerNpcTurn();
-        }
+    if (response.sessionEnded) {
+      String? resultId;
+      if (response.result != null && response.result!['id'] != null) {
+        resultId = response.result!['id'] as String;
       }
-    } catch (e) {
       state = state.copyWith(
-        status: SimulationChatStatus.idle,
-        error: e.toString(),
+        status: SimulationChatStatus.completed,
+        sessionEnded: true,
+        endReason: response.endReason,
+        resultId: resultId,
       );
+    } else {
+      state = state.copyWith(status: SimulationChatStatus.idle);
     }
   }
 
@@ -235,15 +215,12 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
       chosenCharacterId: session.chosenCharacterId,
       messages: messages,
       nextTurnCharacterId: session.nextTurnCharacterId,
-      status: isCompleted ? SimulationChatStatus.completed : SimulationChatStatus.idle,
+      status:
+          isCompleted ? SimulationChatStatus.completed : SimulationChatStatus.idle,
       sessionEnded: isCompleted,
       scenarioId: session.scenarioId,
       resultId: resultId,
     );
-
-    if (!isCompleted && state.isNpcTurn) {
-      _autoTriggerNpcTurn();
-    }
   }
 }
 

@@ -603,7 +603,7 @@ describe('SimulationSessionService', () => {
       expect(sessionsRepo.incrementTokens).not.toHaveBeenCalled();
     });
 
-    it('updates nextTurnCharacterId from AI response', async () => {
+    it('updates nextTurnCharacterId to learner even when AI returns an NPC id', async () => {
       setupSendMessage();
       const aiResponse = makeAiResponse({ nextTurnCharacterId: 'ch-2' });
       aiService.processTurn.mockResolvedValue(aiResponse);
@@ -612,7 +612,7 @@ describe('SimulationSessionService', () => {
 
       expect(sessionsRepo.updateNextTurnCharacterId).toHaveBeenCalledWith(
         'session-1',
-        'ch-2',
+        'ch-1',
       );
     });
 
@@ -733,14 +733,18 @@ describe('SimulationSessionService', () => {
       expect(result).toEqual({
         messages: [
           {
+            id: 'msg-1',
             speakerCharacterId: 'ch-2',
             speakerName: 'Chị Lan',
             content: 'Chào em!',
+            orderIndex: 1,
           },
         ],
         nextTurnCharacterId: 'ch-1',
         feedback,
         sessionEnded: false,
+        endReason: undefined,
+        result: undefined,
       });
     });
 

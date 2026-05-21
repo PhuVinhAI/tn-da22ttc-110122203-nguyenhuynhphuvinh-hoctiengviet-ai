@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
+import '../../../profile/data/profile_providers.dart';
 import '../../application/simulation_chat_notifier.dart';
 import '../../data/simulation_providers.dart';
 import '../../data/simulation_repository.dart';
@@ -240,6 +241,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     ref.listen(simulationChatProvider, (prev, next) {
       if (prev?.messages.length != next.messages.length) {
         _scrollToBottom();
+      }
+      if (next.error != null && next.error != prev?.error) {
+        AppToast.show(
+          context,
+          message: 'Unable to send message. Please try again.',
+          type: AppToastType.error,
+        );
       }
     });
 
@@ -507,7 +515,7 @@ class _NpcBubble extends StatelessWidget {
   }
 }
 
-class _LearnerBubble extends StatelessWidget {
+class _LearnerBubble extends ConsumerWidget {
   const _LearnerBubble({required this.message});
 
   final SimulationMessage message;
@@ -533,9 +541,14 @@ class _LearnerBubble extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = AppTheme.colors(context);
     final theme = Theme.of(context);
+    final profile = ref.watch(userProfileProvider).value;
+    final displayName = message.speakerName.isNotEmpty
+        ? message.speakerName
+        : (profile?.fullName ?? 'You');
+    final avatarUrl = profile?.avatarUrl;
     final feedback = message.feedback;
     final hasCorrections = feedback != null && feedback.corrections.isNotEmpty;
 
@@ -559,40 +572,79 @@ class _LearnerBubble extends StatelessWidget {
             style: theme.textTheme.bodyMedium?.copyWith(color: c.foreground),
           );
 
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (_hasFeedback)
-            GestureDetector(
-              onTap: () => _openFeedbackSheet(context),
-              child: Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.xs, bottom: 2),
-                child: Icon(
-                  Icons.feedback_outlined,
-                  size: 16,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Spacer(),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                displayName,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
                   color: c.mutedForeground,
                 ),
               ),
-            ),
-          Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.75,
-            ),
-            decoration: BoxDecoration(
-              color: c.primary.withAlpha(25),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-            ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            child: textWidget,
+              const SizedBox(height: 2),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (_hasFeedback)
+                    GestureDetector(
+                      onTap: () => _openFeedbackSheet(context),
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          right: AppSpacing.xs,
+                          bottom: 2,
+                        ),
+                        child: Icon(
+                          Icons.feedback_outlined,
+                          size: 16,
+                          color: c.mutedForeground,
+                        ),
+                      ),
+                    ),
+                  Flexible(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: c.primary.withAlpha(25),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.md,
+                      ),
+                      child: textWidget,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        AppAvatar(
+          radius: 20,
+          backgroundColor: c.muted,
+          backgroundImage:
+              avatarUrl != null ? NetworkImage(avatarUrl) : null,
+          child: avatarUrl == null
+              ? Text(
+                  displayName.isNotEmpty
+                      ? displayName[0].toUpperCase()
+                      : '?',
+                  style: TextStyle(
+                    color: c.foreground,
+                    fontWeight: FontWeight.w600,
+                    fontSize: AppTypography.caption,
+                  ),
+                )
+              : null,
+        ),
+      ],
     );
   }
 }
@@ -698,32 +750,25 @@ class _ComposeBar extends StatelessWidget {
           ),
           Align(
             alignment: Alignment.centerRight,
-            child: enabled
-                ? GestureDetector(
-                    onTap: onSend,
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: c.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.arrow_upward_rounded,
-                        color: c.primaryForeground,
-                        size: 20,
-                      ),
-                    ),
-                  )
-                : SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: AppSpinner(
-                      size: 20,
-                      color: c.mutedForeground,
-                      strokeWidth: 2,
-                    ),
+            child: GestureDetector(
+              onTap: enabled ? onSend : null,
+              child: Opacity(
+                opacity: enabled ? 1 : 0.38,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: enabled ? c.primary : c.muted,
+                    shape: BoxShape.circle,
                   ),
+                  child: Icon(
+                    Icons.arrow_upward_rounded,
+                    color: enabled ? c.primaryForeground : c.mutedForeground,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),

@@ -12,8 +12,9 @@ class SimulationMessage {
   });
 
   factory SimulationMessage.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] as String?;
     return SimulationMessage(
-      id: json['id'] as String,
+      id: id ?? 'msg-${json.hashCode}-${json['content'] ?? ''}',
       speakerCharacterId: json['speakerCharacterId'] as String?,
       speakerName: json['speakerName'] as String? ?? '',
       isLearner: json['isLearner'] as bool? ?? false,
