@@ -153,10 +153,54 @@ _Avoid_: AI-generated exercise set
 Snapshot dữ liệu structured của màn hình Flutter mà **Học viên** đang xem tại thời điểm tạo **Hội thoại**. Mobile push lên backend dưới dạng JSON (route, IDs, tóm tắt UI và nội dung học viên đang nhìn — vd: nội dung bài, câu hỏi đang làm, đáp án tạm). Lưu thành cột JSONB `screenContext` trên `Conversation`. AI lấy snapshot này làm hệ quy chiếu chính; **Công cụ AI** dùng để bổ sung dữ liệu nằm ngoài snapshot (lịch sử, catalog, ghi data).
 _Avoid_: Screen context, Page context, Route context, Snapshot
 
+### Hội thoại mô phỏng
+
+**Hội thoại mô phỏng**:
+Phiên trò chuyện giả lập tình huống thực tế giữa **Học viên** và AI. Học viên chọn một **Tình huống** có sẵn, hóa thân vào một **Nhân vật** trong tình huống đó, và trò chuyện bằng tiếng Việt. AI đóng vai các nhân vật còn lại, chấm điểm, và nhận xét ngữ pháp/chính tả theo từng tin nhắn. Khác biệt hoàn toàn với **Hội thoại** (Trợ lý AI hỏi đáp tự do). Nằm ở tab riêng trên bottom nav — nội dung độc lập với hệ thống **Khóa học/Chủ đề/Bài học**. Có vòng đời trạng thái: ACTIVE → PAUSED (học viên thoát giữa chừng) → ACTIVE (resume) → COMPLETED (AI kết thúc). Học viên có thể quay lại tiếp tục phiên đang tạm dừng — AI context được reconstruct từ tin nhắn đã lưu.
+_Avoid_: Contextual chat, Roleplay, Conversation practice, Trò chuyện theo ngữ cảnh
+
+**Danh mục tình huống**:
+Nhóm phân loại các **Tình huống** theo chủ đề giao tiếp (vd: "Mua sắm", "Nhà hàng", "Y tế"). Có tên, icon, màu. Lưu trong DB — admin thêm/sửa mà không cần deploy.
+_Avoid_: Scenario category, Topic, Tag
+
+**Tình huống**:
+Kịch bản giao tiếp thực tế có sẵn trong CSDL, độc lập với cây học liệu. Thuộc một **Danh mục tình huống**. Có danh sách **Nhân vật** tham gia (1-N, gắn chặt). Hai chiều độ khó: **trình độ yêu cầu** (`requiredLevel`, dùng lại CEFR A1–C2) xác định level tối thiểu, **độ khó** (`difficulty`: EASY/MEDIUM/HARD) phân biệt độ phức tạp trong cùng trình độ. Có **Tiêu chí chấm điểm** gắn kèm (JSONB). Các trường bổ sung: `title` (tên hiển thị), `description` (mô tả ngắn cho UI), `systemPrompt` (prompt template cho AI — render với variables), `openingMessage` (tin nhắn mở đầu cố định, nullable — null = AI tự generate), `maxTurns` (giới hạn lượt nhắn safety net, nullable), `estimatedMinutes` (thời gian ước tính hiện trên UI card).
+_Avoid_: Scenario, Scene, Context
+
+**Tiêu chí chấm điểm**:
+Danh sách tiêu chí mà AI dùng để đánh giá **Học viên** khi kết thúc **Hội thoại mô phỏng**. Lưu dạng JSONB trên **Tình huống** (`scoringCriteria`). Mỗi tiêu chí có tên, mô tả, và trọng số (`weight`) để AI phân bổ điểm. Ví dụ: "Sử dụng từ vựng phù hợp" (30%), "Ngữ pháp chính xác" (25%).
+_Avoid_: Rubric, Grading criteria, Assessment criteria
+
+
+**Nhân vật**:
+Vai trong một **Tình huống** (1-N, gắn chặt). Có `name` (tên hiển thị trên bubble), `role` (vai trò: "Người bán rau"), `personality` (mô tả tính cách cho AI), `speechStyle` (phong cách nói — giọng, từ lóng, cách xưng hô), `avatarKey` (key để mobile map asset avatar, nullable), `isPlayable` (boolean — học viên có thể chọn nhân vật này không; false cho narrator hoặc nhân vật phụ), `orderIndex` (thứ tự hiển thị). **Học viên** chọn một nhân vật playable để hóa thân; AI đóng vai các nhân vật còn lại.
+_Avoid_: Character, Role, Persona, Actor
+
+**Lượt nhắn**:
+Đơn vị điều phối trong **Hội thoại mô phỏng**. AI quyết định **Nhân vật** nào nhắn kế tiếp — không ràng buộc thứ tự. Mỗi response AI trả structured metadata: `speakerCharacterId` (ai vừa nói), `nextTurnCharacterId` (ai nhắn kế). Khi `nextTurnCharacterId` trùng nhân vật học viên → mobile hiện ô nhập. Khi trùng nhân vật AI → mobile tự gọi API tiếp để AI generate. Cùng một người có thể nhắn liên tiếp nhiều lượt.
+_Avoid_: Turn, Message turn
+
+**Điểm dừng**:
+Thời điểm AI quyết định kết thúc **Hội thoại mô phỏng**. Các trường hợp: (1) hoàn thành chủ đề hội thoại, (2) học viên sai quá nhiều — yêu cầu học thêm, (3) học viên cố ý phá hoại cuộc hội thoại, (4) học viên dùng từ ngữ thô tục. Khi kết thúc, AI trả `sessionEnded: true` kèm lý do và kết quả chấm điểm.
+_Avoid_: End condition, Stop point, Termination
+
+**Phản hồi lượt nhắn**:
+Nhận xét của AI trên mỗi tin nhắn **Học viên** gửi trong **Hội thoại mô phỏng**. Gồm 2 phần: (1) **Sửa lỗi inline** — gạch chân từ sai trên bubble tin nhắn, (2) **Nhận xét chi tiết** — hiện qua bottom sheet khi bấm nút. Chỉ hiện khi AI thực sự có nhận xét (`reviewAvailable: true`). AI tham chiếu tiến độ học tập hiện tại của học viên để đưa nhận xét phù hợp trình độ.
+_Avoid_: Feedback, Per-message review
+
+**Sửa lỗi inline**:
+Danh sách lỗi chính tả/ngữ pháp trên tin nhắn học viên (`corrections[]`). Mỗi lỗi có: từ gốc, từ sửa, loại (spelling/grammar), mức độ (error/warning), và vị trí (startIndex/endIndex). Mobile render gạch chân màu khác nhau tùy severity (đỏ = error, vàng = warning).
+_Avoid_: Inline correction, Spell check, Error highlight
+
+**Kết quả mô phỏng**:
+Bản ghi kết quả khi **Hội thoại mô phỏng** kết thúc. Gắn với **Học viên**, **Tình huống**, **Nhân vật** đã chọn. Có tổng điểm (0-100), điểm từng **Tiêu chí chấm điểm** (JSONB `criteriaScores`), lý do kết thúc (`endReason`: COMPLETED/TOO_MANY_ERRORS/INAPPROPRIATE/ABUSIVE), nhận xét tổng thể AI (`aiSummary`), tổng số tin nhắn. Không upsert — mỗi lần chơi tạo record mới (học viên chơi lại cùng tình huống nhiều lần).
+_Avoid_: Simulation result, Session result, Score
+
 ## Quan hệ
 
 - Một **Khóa học** chứa nhiều **Chủ đề** theo thứ tự
 - Một **Chủ đề** chứa nhiều **Bài học** theo thứ tự
+
 - Một **Bài học** chứa **Nội dung bài**, **Từ vựng**, **Quy tắc ngữ pháp**, **Bài tập**, và **Bộ bài tập**
 - Một **Bộ bài tập** chứa nhiều **Bài tập**
 - Một **Học viên** có **Tiến trình bài học** cho mỗi **Bài học**, **Tiến trình chủ đề** cho mỗi **Chủ đề**, và **Tiến trình khóa học** cho mỗi **Khóa học**
@@ -168,6 +212,12 @@ _Avoid_: Screen context, Page context, Route context, Snapshot
 - Một **Học viên** có nhiều **Hội thoại**; mỗi **Hội thoại** có nhiều **Tin nhắn**
 - Một **Hội thoại** scoped với đúng một **Ngữ cảnh màn hình** (đông cứng lúc tạo). Học viên có thể có nhiều Hội thoại cùng route/cùng bài học.
 - **Quyền hạn** gán cho **Vai trò**; **Vai trò** gán cho người dùng
+- Một **Danh mục tình huống** chứa nhiều **Tình huống**
+- Một **Tình huống** có nhiều **Nhân vật** (1-N, gắn chặt — không tái sử dụng)
+- Một **Tình huống** có **Tiêu chí chấm điểm** (JSONB `scoringCriteria`)
+- Một **Học viên** có nhiều **Hội thoại mô phỏng** — mỗi phiên gắn với một **Tình huống** và một **Nhân vật** đã chọn
+- Một **Hội thoại mô phỏng** tạo ra một **Kết quả mô phỏng** khi kết thúc
+- Mỗi tin nhắn học viên trong **Hội thoại mô phỏng** có thể kèm **Phản hồi lượt nhắn** (corrections + review)
 
 ## Ví dụ đối thoại
 
@@ -222,3 +272,20 @@ _Avoid_: Screen context, Page context, Route context, Snapshot
 - **Mobile context plumbing: reactive Riverpod provider `currentScreenContextProvider`** — auto-computes từ route + watch domain providers. Schema `ScreenContext { route, displayName, barPlaceholder, data: Map<String,dynamic> }`. Identity của Học viên (level, dialect, nativeLanguage) **không** push từ mobile mỗi lần — backend tự merge từ `User` entity của Hội thoại owner. `data` chỉ chứa thông tin của screen. Exercise play screen include `userAnswer` (AI cần thấy để gợi ý đúng).
 - **Trợ lý AI persona & language rule** — 1 template prompt `assistant-tutor.yaml` với placeholders `{{user.*}}` và `{{screenContext.*}}`. AI **luôn phản hồi bằng `user.nativeLanguage`** (hard rule, không adaptive theo level). Tiếng Việt chỉ dùng cho từ vựng đích, ví dụ, và trích Nội dung bài/Quy tắc ngữ pháp. Hint mode khi đang `exercises/play` (không đưa đáp án thẳng) áp dụng qua prompt rule. Dialect awareness qua prompt directive. Markdown render trong cả Mid Phase C lẫn Full mode. V2 có thể thêm `User.aiResponseLanguage` cho immersion-mode.
 - **V1 không rate limit / concurrency cho AI chat** — chỉ dùng `ThrottlerGuard` global hiện tại (1000/60s). Concurrent stream: backend không enforce, mobile tự cancel stream cũ khi user gửi mới (race-safe). Quota Gemini quản lý ở `KeyPool` cooldown (đã có). Bỏ enum `AI_CHAT_STREAM` (gộp với `AI_CHAT`); bổ sung guard `AI_GENERATE_EXERCISE` lên endpoint sinh exercise đã có. Không tạo permission mới cho V1.
+- **Hội thoại mô phỏng độc lập với cây học liệu** — nằm ở tab riêng trên bottom nav. **Tình huống**, **Nhân vật**, **Danh mục tình huống** là entity riêng, không gắn với Khóa học/Chủ đề/Bài học.
+- **Nhân vật gắn chặt 1-N với Tình huống** — không tái sử dụng giữa các tình huống. Mỗi nhân vật chỉ có nghĩa trong ngữ cảnh tình huống của nó.
+- **Hai chiều độ khó trên Tình huống** — `requiredLevel` (CEFR A1–C2, reuse `UserLevel` enum) + `difficulty` (EASY/MEDIUM/HARD). Filter 2 chiều trên UI.
+- **Danh mục tình huống là bảng riêng** — không enum, không chuỗi tự do. Admin thêm/sửa danh mục mà không cần deploy. 1-N với Tình huống.
+- **Tiêu chí chấm điểm = JSONB `scoringCriteria` trên Tình huống** — mỗi tiêu chí có tên, mô tả, trọng số (weight). AI dùng để phân bổ điểm cuối phiên.
+- **Lượt nhắn do AI điều phối** — AI quyết định nhân vật nhắn kế (`nextTurnCharacterId`), không ràng buộc thứ tự. Cùng người có thể nhắn liên tiếp. Response có thể chứa nhiều tin AI liên tiếp trước khi đến lượt học viên.
+- **Phản hồi lượt nhắn = corrections (inline gạch chân) + review (bottom sheet)** — corrections có startIndex/endIndex + severity (error/warning). Review chỉ hiện nút khi `reviewAvailable: true`. AI tham chiếu tiến độ học tập.
+- **Kết quả mô phỏng = entity riêng (`SimulationResult`)** — không upsert, mỗi lần chơi tạo record mới. totalScore, criteriaScores (JSONB), endReason (COMPLETED/TOO_MANY_ERRORS/INAPPROPRIATE/ABUSIVE), aiSummary.
+- **Module backend riêng `simulations/`** — entity riêng (SimulationSession, SimulationMessage, SimulationResult). Không ô nhiễm conversations module.
+- **Request-response, không streaming** — tin nhắn simulation ngắn (1-3 câu), metadata phức tạp (feedback, nextTurn) → JSON response đơn giản hơn SSE.
+- **Tình huống có systemPrompt, openingMessage, maxTurns, estimatedMinutes** — systemPrompt là template render với variables. openingMessage nullable (null = AI tự generate). maxTurns nullable (safety net).
+- **Pause/resume phiên** — vòng đời: ACTIVE → PAUSED (thoát giữa chừng) → ACTIVE (resume) → COMPLETED. AI context reconstruct từ tin nhắn đã lưu.
+- **Chỉ 1 phiên chưa hoàn thành** — muốn bắt đầu tình huống mới phải kết thúc/hủy phiên hiện tại.
+- **Permission `SIMULATION_ACCESS`** — 1 permission duy nhất cho học viên, gán mặc định role USER. Admin CRUD tình huống sẽ dùng `SIMULATION_MANAGE` (sau).
+- **AI integration: dùng lại GenAI infra, logic riêng** — `SimulationAiService` trong module simulations, prompt template riêng `simulation-conversation.yaml`, inject ProgressService trực tiếp (không dùng agent loop/tool system).
+- **Không ảnh hưởng hệ thống tiến trình/mục tiêu hiện tại** — simulation không tính vào Mục tiêu ngày. Phút truy cập app vẫn tính. Thống kê simulation riêng từ SimulationResult.
+- **Seed data: 6 danh mục, ~15 tình huống, A1–B2** — Mua sắm, Ăn uống, Di chuyển, Y tế, Công việc, Đời sống. 2-3 tình huống mỗi danh mục.
