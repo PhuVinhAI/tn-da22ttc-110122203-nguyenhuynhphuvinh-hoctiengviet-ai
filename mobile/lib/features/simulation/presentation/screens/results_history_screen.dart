@@ -265,30 +265,42 @@ class _ResultsEmpty extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.history_outlined,
-            size: 64,
-            color: c.mutedForeground,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            'No results yet',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: c.mutedForeground,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 48),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: c.primary.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.history_outlined,
+                size: 80,
+                color: c.primary,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Complete a simulation conversation to see results',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: c.mutedForeground,
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'No results yet',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: c.foreground,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Complete a simulation conversation to see results here',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: c.mutedForeground,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -393,14 +405,28 @@ class _ResultsError extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: c.mutedForeground),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: c.error.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: 80,
+                color: c.error,
+              ),
+            ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               'Unable to load history',
-              style: theme.textTheme.titleMedium,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: c.foreground,
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.lg),
             AppButton(
               variant: AppButtonVariant.primary,
               onPressed: onRetry,

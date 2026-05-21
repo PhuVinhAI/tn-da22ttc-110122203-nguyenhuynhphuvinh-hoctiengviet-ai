@@ -266,7 +266,7 @@ class _PracticeContent extends StatelessWidget {
             error: (error, stack) => _ScenariosError(
               onRetry: onRefreshScenarios,
             ),
-            data: (scenarios) => _ScenarioGrid(scenarios: scenarios),
+            data: (scenarios) => _ScenarioList(scenarios: scenarios),
           ),
         ],
       ),
@@ -443,8 +443,8 @@ class _CategoryCard extends StatelessWidget {
   }
 }
 
-class _ScenarioGrid extends StatelessWidget {
-  const _ScenarioGrid({required this.scenarios});
+class _ScenarioList extends StatelessWidget {
+  const _ScenarioList({required this.scenarios});
   final List<ScenarioSummary> scenarios;
 
   @override
@@ -453,16 +453,11 @@ class _ScenarioGrid extends StatelessWidget {
       return const _ScenariosEmpty();
     }
 
-    return GridView.builder(
+    return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: AppSpacing.md,
-        crossAxisSpacing: AppSpacing.md,
-        childAspectRatio: 0.62,
-      ),
       itemCount: scenarios.length,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
       itemBuilder: (context, index) {
         return _ScenarioCard(scenario: scenarios[index]);
       },
@@ -478,14 +473,22 @@ class _ScenarioCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
     final theme = Theme.of(context);
+    final metaStyle = theme.textTheme.bodySmall?.copyWith(
+      color: c.mutedForeground,
+      height: 1.2,
+    );
 
     return AppCard(
       variant: AppCardVariant.outlined,
       borderRadius: AppRadius.lg,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm + 2,
+      ),
       onTap: () => context.push('/practice/scenarios/${scenario.id}'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
@@ -493,61 +496,43 @@ class _ScenarioCard extends StatelessWidget {
                 label: scenario.requiredLevel,
                 color: _getLevelColor(scenario.requiredLevel, c),
               ),
-              const Spacer(),
-              Icon(
-                Icons.access_time_rounded,
-                size: 14,
-                color: c.mutedForeground,
-              ),
               const SizedBox(width: AppSpacing.xs),
-              Text(
-                '${scenario.estimatedMinutes}m',
-                style: theme.textTheme.bodySmall?.copyWith(
-                      color: c.mutedForeground,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            scenario.title,
-            style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            scenario.description,
-            style: theme.textTheme.bodySmall?.copyWith(
-                  color: c.mutedForeground,
-                ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const Spacer(),
-          Row(
-            children: [
               AppBadge(
                 label: _getDifficultyLabel(scenario.difficulty),
                 color: _getDifficultyColor(scenario.difficulty, c),
               ),
               const Spacer(),
-              Icon(
-                Icons.people_outline,
-                size: 14,
-                color: c.mutedForeground,
-              ),
+              Icon(Icons.access_time_rounded, size: 14, color: c.mutedForeground),
               const SizedBox(width: AppSpacing.xs),
-              Text(
-                '${scenario.characterCount}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                      color: c.mutedForeground,
-                    ),
-              ),
+              Text('${scenario.estimatedMinutes}m', style: metaStyle),
+              const SizedBox(width: AppSpacing.md),
+              Icon(Icons.people_outline, size: 14, color: c.mutedForeground),
+              const SizedBox(width: AppSpacing.xs),
+              Text('${scenario.characterCount}', style: metaStyle),
             ],
           ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            scenario.title,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              height: 1.25,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (scenario.description.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              scenario.description,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: c.mutedForeground,
+                height: 1.3,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ],
       ),
     );
@@ -593,23 +578,22 @@ class _ScenariosLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
 
-    return GridView.builder(
+    return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: AppSpacing.md,
-        crossAxisSpacing: AppSpacing.md,
-        childAspectRatio: 0.62,
-      ),
       itemCount: 4,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
       itemBuilder: (context, index) {
         return AppCard(
           variant: AppCardVariant.outlined,
           borderRadius: AppRadius.lg,
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm + 2,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
@@ -617,7 +601,20 @@ class _ScenariosLoading extends StatelessWidget {
                     baseColor: c.muted,
                     highlightColor: c.card,
                     child: Container(
-                      width: 36,
+                      width: 32,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Shimmer.fromColors(
+                    baseColor: c.muted,
+                    highlightColor: c.card,
+                    child: Container(
+                      width: 44,
                       height: 20,
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -630,7 +627,7 @@ class _ScenariosLoading extends StatelessWidget {
                     baseColor: c.muted,
                     highlightColor: c.card,
                     child: Container(
-                      width: 40,
+                      width: 72,
                       height: 14,
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -645,7 +642,7 @@ class _ScenariosLoading extends StatelessWidget {
                 baseColor: c.muted,
                 highlightColor: c.card,
                 child: Container(
-                  height: 18,
+                  height: 16,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -658,43 +655,13 @@ class _ScenariosLoading extends StatelessWidget {
                 baseColor: c.muted,
                 highlightColor: c.card,
                 child: Container(
-                  height: 14,
+                  height: 28,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
                 ),
-              ),
-              const Spacer(),
-              Row(
-                children: [
-                  Shimmer.fromColors(
-                    baseColor: c.muted,
-                    highlightColor: c.card,
-                    child: Container(
-                      width: 50,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppRadius.full),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Shimmer.fromColors(
-                    baseColor: c.muted,
-                    highlightColor: c.card,
-                    child: Container(
-                      width: 24,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppRadius.sm),
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ],
           ),
@@ -768,132 +735,153 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
     _selectedDifficulty = widget.filter.difficulty;
   }
 
+  void _apply() {
+    widget.onApply(ScenarioFilter(
+      categoryId: _selectedCategoryId,
+      level: _selectedLevel,
+      difficulty: _selectedDifficulty,
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
     final theme = Theme.of(context);
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.4,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (context, scrollController) {
-        return SingleChildScrollView(
-          controller: scrollController,
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: c.mutedForeground.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(AppRadius.full),
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.sm,
+                AppSpacing.sm,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Filters',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: c.foreground,
+                      ),
+                    ),
                   ),
-                ),
+                  IconButton(
+                    tooltip: 'Close',
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close, color: c.mutedForeground),
+                    style: IconButton.styleFrom(
+                      foregroundColor: c.mutedForeground,
+                      minimumSize: const Size(48, 48),
+                      fixedSize: const Size(48, 48),
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                'Filters',
-                style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+            ),
+            Divider(height: 1, color: c.border),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.md,
               ),
-              const SizedBox(height: AppSpacing.xl),
-              _FilterSection(
-                title: 'Category',
-                child: Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: [
-                    _FilterChip(
-                      label: 'All',
-                      isSelected: _selectedCategoryId == null,
-                      onTap: () => setState(() => _selectedCategoryId = null),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _FilterSection(
+                    title: 'Category',
+                    child: Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: [
+                        AppChip(
+                          label: 'All',
+                          isSelected: _selectedCategoryId == null,
+                          onTap: () => setState(() => _selectedCategoryId = null),
+                        ),
+                        ...widget.categories.map(
+                          (cat) => AppChip(
+                            label: cat.name,
+                            isSelected: _selectedCategoryId == cat.id,
+                            onTap: () =>
+                                setState(() => _selectedCategoryId = cat.id),
+                          ),
+                        ),
+                      ],
                     ),
-                    ...widget.categories.map(
-                      (cat) => _FilterChip(
-                        label: cat.name,
-                        isSelected: _selectedCategoryId == cat.id,
-                        onTap: () =>
-                            setState(() => _selectedCategoryId = cat.id),
-                      ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  _FilterSection(
+                    title: 'Level',
+                    child: Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: [
+                        AppChip(
+                          label: 'All',
+                          isSelected: _selectedLevel == null,
+                          onTap: () => setState(() => _selectedLevel = null),
+                        ),
+                        ..._levels.map(
+                          (level) => AppChip(
+                            label: level,
+                            isSelected: _selectedLevel == level,
+                            color: _getLevelColor(level, c),
+                            onTap: () => setState(() => _selectedLevel = level),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  _FilterSection(
+                    title: 'Difficulty',
+                    child: Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: [
+                        AppChip(
+                          label: 'All',
+                          isSelected: _selectedDifficulty == null,
+                          onTap: () =>
+                              setState(() => _selectedDifficulty = null),
+                        ),
+                        ..._difficulties.map(
+                          (diff) => AppChip(
+                            label: _getDifficultyLabel(diff),
+                            isSelected: _selectedDifficulty == diff,
+                            color: _getDifficultyColor(diff, c),
+                            onTap: () =>
+                                setState(() => _selectedDifficulty = diff),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  AppButton(
+                    variant: AppButtonVariant.primary,
+                    onPressed: _apply,
+                    label: 'Apply',
+                    isFullWidth: true,
+                  ),
+                ],
               ),
-              const SizedBox(height: AppSpacing.lg),
-              _FilterSection(
-                title: 'Level',
-                child: Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: [
-                    _FilterChip(
-                      label: 'All',
-                      isSelected: _selectedLevel == null,
-                      onTap: () => setState(() => _selectedLevel = null),
-                    ),
-                    ..._levels.map(
-                      (level) => _FilterChip(
-                        label: level,
-                        isSelected: _selectedLevel == level,
-                        color: _getLevelColor(level, c),
-                        onTap: () =>
-                            setState(() => _selectedLevel = level),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _FilterSection(
-                title: 'Difficulty',
-                child: Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: [
-                    _FilterChip(
-                      label: 'All',
-                      isSelected: _selectedDifficulty == null,
-                      onTap: () => setState(() => _selectedDifficulty = null),
-                    ),
-                    ..._difficulties.map(
-                      (diff) => _FilterChip(
-                        label: _getDifficultyLabel(diff),
-                        isSelected: _selectedDifficulty == diff,
-                        color: _getDifficultyColor(diff, c),
-                        onTap: () =>
-                            setState(() => _selectedDifficulty = diff),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-              SizedBox(
-                width: double.infinity,
-                child: AppButton(
-                  variant: AppButtonVariant.primary,
-                  onPressed: () {
-                    widget.onApply(ScenarioFilter(
-                      categoryId: _selectedCategoryId,
-                      level: _selectedLevel,
-                      difficulty: _selectedDifficulty,
-                    ));
-                  },
-                  label: 'Apply',
-                  isFullWidth: true,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-            ],
-          ),
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -912,59 +900,12 @@ class _FilterSection extends StatelessWidget {
         Text(
           title,
           style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
         child,
       ],
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-    this.color,
-  });
-
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppTheme.colors(context);
-    final chipColor = color ?? c.mutedForeground;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? chipColor.withValues(alpha: 0.12) : c.muted,
-          borderRadius: BorderRadius.circular(AppRadius.full),
-          border: Border.all(
-            color: isSelected
-                ? chipColor.withValues(alpha: 0.5)
-                : c.border,
-            width: 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: isSelected ? chipColor : c.mutedForeground,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
-        ),
-      ),
     );
   }
 }
