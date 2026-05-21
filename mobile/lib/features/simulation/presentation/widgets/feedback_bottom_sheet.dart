@@ -137,7 +137,6 @@ class _CorrectionItem extends StatefulWidget {
 class _CorrectionItemState extends State<_CorrectionItem>
     with SingleTickerProviderStateMixin {
   late final AnimationController _highlightController;
-  late final Animation<Color?> _highlightAnimation;
 
   @override
   void initState() {
@@ -146,10 +145,6 @@ class _CorrectionItemState extends State<_CorrectionItem>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _highlightAnimation = ColorTween(
-      begin: AppTheme.colors(context).primary.withAlpha(40),
-      end: Colors.transparent,
-    ).animate(_highlightController);
 
     if (widget.isHighlighted) {
       _highlightController.forward();
@@ -168,10 +163,16 @@ class _CorrectionItemState extends State<_CorrectionItem>
     final typeLabel = widget.correction.type == 'SPELLING' ? 'Spelling' : 'Grammar';
 
     return AnimatedBuilder(
-      animation: _highlightAnimation,
+      animation: _highlightController,
       builder: (context, child) {
+        final highlightColor = Color.lerp(
+          c.primary.withAlpha(40),
+          Colors.transparent,
+          _highlightController.value,
+        );
+
         return Container(
-          color: _highlightAnimation.value,
+          color: highlightColor,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.sm,

@@ -227,7 +227,7 @@ void main() {
       expect(state.messages, hasLength(1));
     });
 
-    test('npcSpeakerName returns last NPC speaker name', () {
+    test('speakerNameFor resolves name by character id', () {
       final notifier = getNotifier();
       notifier.initSession(
         sessionId: 'session-1',
@@ -254,7 +254,9 @@ void main() {
       );
 
       final state = getState();
-      expect(state.npcSpeakerName, 'Minh');
+      expect(state.speakerNameFor('npc-1'), 'Lan');
+      expect(state.speakerNameFor('npc-2'), 'Minh');
+      expect(state.speakerNameFor('unknown'), '');
     });
 
     test('multiple NPC messages in response all accumulate in order', () async {

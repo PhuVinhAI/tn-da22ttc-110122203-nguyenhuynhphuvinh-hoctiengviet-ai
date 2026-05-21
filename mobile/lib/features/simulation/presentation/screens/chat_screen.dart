@@ -283,9 +283,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ? const Center(child: AppSpinner())
                   : _MessageList(
                       messages: chatState.messages,
-                      isReceiving: chatState.status == SimulationChatStatus.receiving ||
+                      isWaitingForResponse:
                           chatState.status == SimulationChatStatus.sending,
-                      npcSpeakerName: chatState.npcSpeakerName,
                       scrollController: _scrollController,
                     ),
             ),
@@ -299,9 +298,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 focusNode: _inputFocusNode,
                 enabled: chatState.isLearnerTurn &&
                     chatState.status == SimulationChatStatus.idle,
-                isNpcTurn: chatState.isNpcTurn ||
-                    chatState.status == SimulationChatStatus.sending,
-                npcName: chatState.npcSpeakerName,
                 onSend: _onSend,
               ),
           ],
@@ -314,14 +310,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 class _MessageList extends StatefulWidget {
   const _MessageList({
     required this.messages,
-    required this.isReceiving,
-    required this.npcSpeakerName,
+    required this.isWaitingForResponse,
     required this.scrollController,
   });
 
   final List<SimulationMessage> messages;
-  final bool isReceiving;
-  final String npcSpeakerName;
+  final bool isWaitingForResponse;
   final ScrollController scrollController;
 
   @override
@@ -359,9 +353,9 @@ class _MessageListState extends State<_MessageList> {
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.md,
       ),
-      itemCount: widget.messages.length + (widget.isReceiving ? 1 : 0),
+      itemCount: widget.messages.length + (widget.isWaitingForResponse ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index == widget.messages.length && widget.isReceiving) {
+        if (index == widget.messages.length && widget.isWaitingForResponse) {
           return const _TypingIndicator();
         }
 
@@ -411,23 +405,44 @@ class _TypingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppSpinner(size: 16, color: c.mutedForeground),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'Thinking...',
-              style: GoogleFonts.inter(
-                fontSize: AppTypography.bodySmall,
-                color: c.mutedForeground,
-              ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppAvatar(
+            radius: 20,
+            backgroundColor: c.muted,
+            child: Icon(Icons.smart_toy_outlined, size: 20, color: c.mutedForeground),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Container(
+            decoration: BoxDecoration(
+              color: c.card,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: c.border, width: 1),
             ),
-          ],
-        ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppSpinner(size: 16, color: c.mutedForeground),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Thinking...',
+                  style: GoogleFonts.inter(
+                    fontSize: AppTypography.bodySmall,
+                    color: c.mutedForeground,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -572,11 +587,12 @@ class _LearnerBubble extends ConsumerWidget {
             style: theme.textTheme.bodyMedium?.copyWith(color: c.foreground),
           );
 
+    final maxBubbleWidth = MediaQuery.sizeOf(context).width * 0.75;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Spacer(),
-        Flexible(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -589,7 +605,7 @@ class _LearnerBubble extends ConsumerWidget {
               ),
               const SizedBox(height: 2),
               Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   if (_hasFeedback)
@@ -607,7 +623,8 @@ class _LearnerBubble extends ConsumerWidget {
                         ),
                       ),
                     ),
-                  Flexible(
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxBubbleWidth),
                     child: Container(
                       decoration: BoxDecoration(
                         color: c.primary.withAlpha(25),
@@ -680,25 +697,19 @@ class _ComposeBar extends StatelessWidget {
     required this.controller,
     required this.focusNode,
     required this.enabled,
-    required this.isNpcTurn,
-    required this.npcName,
     required this.onSend,
   });
 
   final TextEditingController controller;
   final FocusNode focusNode;
   final bool enabled;
-  final bool isNpcTurn;
-  final String npcName;
   final VoidCallback onSend;
 
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
 
-    final hint = isNpcTurn
-        ? (npcName.isNotEmpty ? '$npcName is typing...' : 'Thinking...')
-        : 'Your turn';
+    final hint = enabled ? 'Your turn' : 'Thinking...';
 
     return Container(
       decoration: BoxDecoration(

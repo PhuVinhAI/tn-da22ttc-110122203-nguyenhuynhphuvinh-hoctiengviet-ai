@@ -41,10 +41,16 @@ class SimulationChatState {
       nextTurnCharacterId.isNotEmpty &&
       nextTurnCharacterId != chosenCharacterId;
 
-  String get npcSpeakerName {
-    final npcMsg =
-        messages.where((m) => !m.isLearner && m.speakerName.isNotEmpty).lastOrNull;
-    return npcMsg?.speakerName ?? '';
+  /// Resolves a display name from prior messages for a character id.
+  String speakerNameFor(String characterId) {
+    if (characterId.isEmpty) return '';
+    final match = messages
+        .where(
+          (m) =>
+              m.speakerCharacterId == characterId && m.speakerName.isNotEmpty,
+        )
+        .lastOrNull;
+    return match?.speakerName ?? '';
   }
 
   SimulationChatState copyWith({
