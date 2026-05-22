@@ -28,9 +28,12 @@ Future<void> main() async {
   final exerciseSessionBox =
       await Hive.openBox<Map<dynamic, dynamic>>('exercise_sessions');
 
-  await GoogleSignIn.instance.initialize(
-    serverClientId: dotenv.env['GOOGLE_CLIENT_ID'],
-  );
+  // GOOGLE_CLIENT_ID: --dart-define wins, .env fallback
+  const dartDefineClientId = String.fromEnvironment('GOOGLE_CLIENT_ID');
+  final googleClientId = dartDefineClientId.isNotEmpty
+      ? dartDefineClientId
+      : dotenv.env['GOOGLE_CLIENT_ID'];
+  await GoogleSignIn.instance.initialize(serverClientId: googleClientId);
 
   final prefs = await SharedPreferences.getInstance();
   final preferencesService = PreferencesService(prefs);

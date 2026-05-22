@@ -8,13 +8,22 @@ const SEED_DATA_PATH = path.resolve(
 );
 
 async function main() {
-  const client = new pg.Client({
-    host: process.env.DATABASE_HOST || 'localhost',
-    port: parseInt(process.env.DATABASE_PORT || '5432', 10),
-    user: process.env.DATABASE_USER || 'postgres',
-    password: process.env.DATABASE_PASSWORD || 'postgres',
-    database: process.env.DATABASE_NAME || 'linvnix',
-  });
+  const url = process.env.DATABASE_URL;
+  const useSSL =
+    process.env.DATABASE_SSL === 'true' ||
+    (url ? /sslmode=(require|verify)/.test(url) : false);
+  const sslOption = useSSL ? { rejectUnauthorized: false } : false;
+
+  const client = url
+    ? new pg.Client({ connectionString: url, ssl: sslOption })
+    : new pg.Client({
+        host: process.env.DATABASE_HOST || 'localhost',
+        port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+        user: process.env.DATABASE_USER || 'postgres',
+        password: process.env.DATABASE_PASSWORD || 'postgres',
+        database: process.env.DATABASE_NAME || 'linvnix',
+        ssl: sslOption,
+      });
 
   await client.connect();
   console.log('Connected to PostgreSQL\n');

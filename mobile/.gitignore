@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Kotlin cache
+**/.kotlin/
+
+# Signing keystore (NEVER commit)
+**/android/key.properties
+**/android/app/*-keystore.jks
+**/android/app/*.jks

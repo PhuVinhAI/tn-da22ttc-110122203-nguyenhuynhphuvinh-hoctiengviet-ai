@@ -41,7 +41,7 @@ final class DataChangeBusProvider
   }
 }
 
-String _$dataChangeBusHash() => r'cabd560b4c035c1c2ba7bf3d0d5b3e1c81d0f453';
+String _$dataChangeBusHash() => r'cd9d8b518c938b8ef1145cd6981a37a6608746cb';
 
 abstract class _$DataChangeBus extends $Notifier<DataChanged?> {
   DataChanged? build();

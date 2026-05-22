@@ -13,8 +13,10 @@ import { MailModule } from '../mail/mail.module';
         redis: {
           host: configService.get('redis.host'),
           port: configService.get('redis.port'),
+          username: configService.get('redis.username'),
           password: configService.get('redis.password'),
           db: configService.get('redis.db'),
+          tls: configService.get('redis.tls'),
         },
       }),
       inject: [ConfigService],

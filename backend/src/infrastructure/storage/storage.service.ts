@@ -15,7 +15,8 @@ export interface UploadedFile {
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
-  private readonly uploadDir = path.join(process.cwd(), 'uploads');
+  private readonly uploadDir =
+    process.env.UPLOADS_DIR || path.join(process.cwd(), 'uploads');
   private readonly baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 
   constructor() {

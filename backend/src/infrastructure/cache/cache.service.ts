@@ -24,8 +24,10 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
       this.redisClient = new Redis({
         host: redisConfig.host,
         port: redisConfig.port,
+        username: redisConfig.username,
         password: redisConfig.password,
         db: redisConfig.db,
+        tls: redisConfig.tls,
         retryStrategy: (times) => {
           if (times > 3) {
             this.logger.warn('Redis connection failed, using in-memory cache');

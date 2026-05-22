@@ -67,7 +67,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       inject: [ConfigService],
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: process.env.UPLOADS_DIR || join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
     }),
     ThrottlerModule.forRoot([

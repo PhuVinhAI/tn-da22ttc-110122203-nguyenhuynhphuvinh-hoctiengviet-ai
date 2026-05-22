@@ -40,7 +40,9 @@
     "test:manual:google-oauth": "bun run scripts/test/manual/google-oauth.test.ts",
     "docs:generate": "bun run scripts/generate-api-docs.ts",
     "admin:create": "bun run scripts/create-admin.ts",
+    "seed:lessons": "bun run scripts/seed-lessons.ts",
     "seed:simulations": "bun run scripts/seed-simulations.ts",
+    "seed:simulations:direct": "bun run scripts/seed-simulations-direct.ts",
     "generate:a1-lesson1-audio": "bun run scripts/generate-a1-lesson1-audio.ts"
   },
   "dependencies": {
