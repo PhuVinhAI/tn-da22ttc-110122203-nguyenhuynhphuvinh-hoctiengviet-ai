@@ -110,10 +110,18 @@ Hành động cụ thể được phép thực hiện (vd: COURSE_CREATE, AI_CHA
 _Avoid_: Permission
 
 **Yêu sách**:
-Đánh dấu một **Từ vựng** để lưu lại tham chiếu nhanh. Thuộc một **Học viên**. Không phải hệ thống spaced repetition.
+Đánh dấu một **Từ vựng** hoặc **Từ vựng cá nhân** để lưu lại tham chiếu nhanh. Thuộc một **Học viên**. Không phải hệ thống spaced repetition. Trong UI, **Từ vựng cá nhân** hiện icon riêng để phân biệt với **Từ vựng** hệ thống.
 _Avoid_: Bookmark, Favorite, Flashcard
 
+**Từ vựng cá nhân**:
+Từ tiếng Việt do **Học viên** thu thập ngoài hệ thống học liệu (vd: từ AI phân tích ảnh, tự nhập). Thuộc trực tiếp một **Học viên**, không thuộc **Bài học**. Có đầy đủ cấu trúc: từ, nghĩa, phiên âm, từ loại, câu ví dụ, danh từ phân loại. Lưu persistent trong DB.
+_Avoid_: Custom vocabulary, User vocabulary, Personal word
+
 ### AI
+
+**Khám phá ảnh**:
+Tính năng riêng biệt cho phép **Học viên** chụp/tải ảnh lên, AI phân tích nội dung ảnh và trả lời câu hỏi. Hoàn toàn ephemeral: ảnh lưu tạm trên device, hội thoại không lưu server (stateless request-response). Mỗi lần thoát screen thì reset. AI trả structured response gồm text giải thích + danh sách **Từ vựng cá nhân** có thể thêm vào **Yêu sách**. Screen có quick action chips gợi ý (Phân tích ảnh, Tìm từ vựng, Dịch text, Giải thích nội dung). Tối đa 5 ảnh cùng lúc. Truy cập qua nút camera nhô lên giữa bottom nav. Độc lập với **Trợ lý AI** (V2 sẽ kết nối qua tool `search_personal_vocabulary`).
+_Avoid_: Image chat, Camera AI, Photo analysis
 
 **Trợ lý AI**:
 Tính năng AI tương tác trong app: học viên hỏi gì đó về màn hình hiện tại, AI trả lời và có thể gọi **Công cụ AI** để truy xuất/ghi dữ liệu hệ thống. Surface có 3 trạng thái UI:
@@ -205,7 +213,8 @@ _Avoid_: Simulation result, Session result, Score
 - Một **Bộ bài tập** chứa nhiều **Bài tập**
 - Một **Học viên** có **Tiến trình bài học** cho mỗi **Bài học**, **Tiến trình chủ đề** cho mỗi **Chủ đề**, và **Tiến trình khóa học** cho mỗi **Khóa học**
 - Một **Học viên** có **Kết quả bài tập** cho mỗi **Bài tập** đã làm
-- Một **Học viên** có **Yêu sách** cho các **Từ vựng** muốn lưu lại
+- Một **Học viên** có **Yêu sách** cho các **Từ vựng** và **Từ vựng cá nhân** muốn lưu lại
+- Một **Học viên** có nhiều **Từ vựng cá nhân** (thu thập từ **Khám phá ảnh** hoặc tự nhập)
 - Một **Học viên** có nhiều **Mục tiêu ngày** hoạt động cùng lúc (CRUD tự do, lặp lại mỗi ngày)
 - Một **Học viên** có **Chuỗi mục tiêu** — số ngày liên tiếp đạt tất cả mục tiêu
 - Một **Học viên** có cài đặt **Nhắc mục tiêu** (bật/tắt + giờ nhắc)
