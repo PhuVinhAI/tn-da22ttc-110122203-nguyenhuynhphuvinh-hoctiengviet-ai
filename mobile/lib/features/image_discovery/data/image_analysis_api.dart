@@ -10,12 +10,15 @@ class ImageAnalysisApi {
   Future<ImageAnalysisResponse> analyze({
     required List<ImageAnalysisRequestImage> images,
     required String prompt,
+    List<ImageAnalysisChatHistoryMessage> chatHistory = const [],
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/image-analysis/analyze',
       data: {
         'images': images.map((image) => image.toJson()).toList(),
         'prompt': prompt,
+        'chatHistory':
+            chatHistory.map((message) => message.toJson()).toList(),
       },
     );
 

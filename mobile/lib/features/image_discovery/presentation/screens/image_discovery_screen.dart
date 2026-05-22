@@ -55,6 +55,14 @@ class _ImageDiscoveryScreenState extends ConsumerState<ImageDiscoveryScreen> {
     _scrollToBottom();
   }
 
+  Future<void> _sendQuickAction(String prompt) async {
+    _inputController.text = prompt;
+    _inputController.selection = TextSelection.collapsed(
+      offset: _inputController.text.length,
+    );
+    await _send(prompt);
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(imageDiscoveryProvider);
@@ -79,13 +87,14 @@ class _ImageDiscoveryScreenState extends ConsumerState<ImageDiscoveryScreen> {
               isLoading: state.isLoading,
               onCamera: () => _pick(ImageSource.camera),
               onGallery: () => _pick(ImageSource.gallery),
+              canAddImages: state.canAddImages,
             ),
             if (state.images.isNotEmpty)
-              _ImagePreview(
-                image: state.images.first,
-                onRemove: () => ref
+              _ImageGrid(
+                images: state.images,
+                onRemove: (id) => ref
                     .read(imageDiscoveryProvider.notifier)
-                    .removeImage(state.images.first.id),
+                    .removeImage(id),
               )
             else
               Divider(color: c.border, height: 1),
@@ -98,7 +107,7 @@ class _ImageDiscoveryScreenState extends ConsumerState<ImageDiscoveryScreen> {
             if (state.error != null) _ErrorBanner(message: state.error!),
             _QuickActions(
               enabled: state.hasImage && !state.isLoading,
-              onPrompt: _send,
+              onPrompt: _sendQuickAction,
             ),
             _ComposeBar(
               controller: _inputController,
@@ -118,11 +127,13 @@ class _ImageActions extends StatelessWidget {
     required this.isLoading,
     required this.onCamera,
     required this.onGallery,
+    required this.canAddImages,
   });
 
   final bool isLoading;
   final VoidCallback onCamera;
   final VoidCallback onGallery;
+  final bool canAddImages;
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +151,7 @@ class _ImageActions extends StatelessWidget {
               variant: AppButtonVariant.secondary,
               icon: const Icon(Icons.camera_alt_outlined),
               label: 'Take Photo',
-              onPressed: isLoading ? null : onCamera,
+              onPressed: isLoading || !canAddImages ? null : onCamera,
               padding: const EdgeInsets.symmetric(vertical: 10),
             ),
           ),
@@ -150,7 +161,7 @@ class _ImageActions extends StatelessWidget {
               variant: AppButtonVariant.secondary,
               icon: const Icon(Icons.image_outlined),
               label: 'Upload',
-              onPressed: isLoading ? null : onGallery,
+              onPressed: isLoading || !canAddImages ? null : onGallery,
               padding: const EdgeInsets.symmetric(vertical: 10),
             ),
           ),
@@ -160,11 +171,11 @@ class _ImageActions extends StatelessWidget {
   }
 }
 
-class _ImagePreview extends StatelessWidget {
-  const _ImagePreview({required this.image, required this.onRemove});
+class _ImageGrid extends StatelessWidget {
+  const _ImageGrid({required this.images, required this.onRemove});
 
-  final ImageDiscoveryImage image;
-  final VoidCallback onRemove;
+  final List<ImageDiscoveryImage> images;
+  final ValueChanged<String> onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -177,38 +188,48 @@ class _ImagePreview extends StatelessWidget {
         AppSpacing.lg,
         AppSpacing.sm,
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final height = (constraints.maxWidth * 9 / 16)
-              .clamp(140.0, 220.0)
-              .toDouble();
+      child: GridView.builder(
+        key: const ValueKey('image_discovery_image_grid'),
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: images.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: AppSpacing.sm,
+          mainAxisSpacing: AppSpacing.sm,
+          childAspectRatio: 1,
+        ),
+        itemBuilder: (context, index) {
+          final image = images[index];
 
-          return SizedBox(
-            width: double.infinity,
-            height: height,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.memory(image.bytes, fit: BoxFit.cover),
-                  Positioned(
-                    top: AppSpacing.sm,
-                    right: AppSpacing.sm,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: c.card.withValues(alpha: 0.88),
-                        shape: BoxShape.circle,
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.memory(image.bytes, fit: BoxFit.cover),
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: c.card.withValues(alpha: 0.88),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.close, color: c.foreground),
+                      tooltip: 'Remove image',
+                      iconSize: 18,
+                      constraints: const BoxConstraints.tightFor(
+                        width: 32,
+                        height: 32,
                       ),
-                      child: IconButton(
-                        icon: Icon(Icons.close, color: c.foreground),
-                        tooltip: 'Remove image',
-                        onPressed: onRemove,
-                      ),
+                      padding: EdgeInsets.zero,
+                      onPressed: () => onRemove(image.id),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
@@ -494,18 +515,21 @@ class _QuickActions extends StatelessWidget {
   final Future<void> Function(String prompt) onPrompt;
 
   static const _actions = <({String label, String prompt})>[
-    (label: 'Analyze', prompt: 'Analyze this image and explain what it says.'),
     (
-      label: 'Vocabulary',
-      prompt: 'Find useful Vietnamese vocabulary in this image.',
+      label: 'Phân tích ảnh',
+      prompt: 'Analyze these images and explain what they show.',
     ),
     (
-      label: 'Translate',
-      prompt: 'Translate any visible Vietnamese text in this image.',
+      label: 'Tìm từ vựng',
+      prompt: 'Find useful Vietnamese vocabulary in these images.',
     ),
     (
-      label: 'Explain',
-      prompt: 'Explain the context and meaning of this image.',
+      label: 'Dịch text',
+      prompt: 'Translate any visible Vietnamese text in these images.',
+    ),
+    (
+      label: 'Giải thích nội dung',
+      prompt: 'Explain the context and meaning of these images.',
     ),
   ];
 

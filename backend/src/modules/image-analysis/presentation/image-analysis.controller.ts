@@ -27,7 +27,7 @@ export class ImageAnalysisController {
   @ApiOperation({
     summary: 'Analyze a learner image with AI',
     description:
-      'Stateless image discovery endpoint. Accepts one base64 image plus a prompt and returns a markdown answer with extracted vocabulary.',
+      'Stateless image discovery endpoint. Accepts up to five base64 images, chat history, and a prompt; returns a markdown answer with extracted vocabulary.',
   })
   @ApiBody({ type: AnalyzeImageDto })
   @ApiResponse({

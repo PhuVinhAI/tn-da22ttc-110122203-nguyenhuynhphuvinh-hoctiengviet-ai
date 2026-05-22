@@ -4,6 +4,7 @@ import {
   IsArray,
   IsIn,
   IsNotEmpty,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -37,14 +38,29 @@ export class ImageAnalysisImageDto {
   mimeType: string;
 }
 
+export class ImageAnalysisChatHistoryItemDto {
+  @ApiProperty({ enum: ['user', 'assistant'], example: 'user' })
+  @IsString()
+  @IsIn(['user', 'assistant'])
+  role: 'user' | 'assistant';
+
+  @ApiProperty({
+    description: 'Text content from a previous user or assistant message.',
+    example: 'What does this sign say?',
+  })
+  @IsString()
+  @IsNotEmpty()
+  content: string;
+}
+
 export class AnalyzeImageDto {
   @ApiProperty({
     type: [ImageAnalysisImageDto],
-    description: 'Exactly one image for this V1 slice.',
+    description: 'One to five images for multimodal image discovery.',
   })
   @IsArray()
   @ArrayMinSize(1)
-  @ArrayMaxSize(1)
+  @ArrayMaxSize(5, { message: 'A maximum of 5 images can be analyzed at once' })
   @ValidateNested({ each: true })
   @Type(() => ImageAnalysisImageDto)
   images: ImageAnalysisImageDto[];
@@ -56,4 +72,16 @@ export class AnalyzeImageDto {
   @IsString()
   @IsNotEmpty()
   prompt: string;
+
+  @ApiProperty({
+    type: () => [ImageAnalysisChatHistoryItemDto],
+    required: false,
+    description:
+      'Previous turns in the ephemeral image discovery session for multi-turn context.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImageAnalysisChatHistoryItemDto)
+  chatHistory?: ImageAnalysisChatHistoryItemDto[];
 }

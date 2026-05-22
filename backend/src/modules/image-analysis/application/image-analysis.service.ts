@@ -113,21 +113,33 @@ export class ImageAnalysisService {
     }
 
     if (!Array.isArray(dto.images) || dto.images.length === 0) {
-      throw new BadRequestException('Exactly one image is required');
+      throw new BadRequestException('At least one image is required');
     }
-    if (dto.images.length > 1) {
+    if (dto.images.length > 5) {
       throw new BadRequestException(
-        'Only one image is supported in this slice',
+        'A maximum of 5 images can be analyzed at once',
       );
     }
 
-    const image = dto.images[0];
-    if (!image.base64?.trim()) {
-      throw new BadRequestException('Image base64 data must not be empty');
-    }
-    if (!SUPPORTED_IMAGE_MIME_TYPES.includes(image.mimeType)) {
-      throw new BadRequestException('Unsupported image mimeType');
-    }
+    const images = dto.images.map((image, index) => {
+      const base64 = image.base64?.trim();
+      if (!base64) {
+        throw new BadRequestException(
+          `Image ${index + 1} base64 data must not be empty`,
+        );
+      }
+      if (!SUPPORTED_IMAGE_MIME_TYPES.includes(image.mimeType)) {
+        throw new BadRequestException(
+          `Image ${index + 1} has an unsupported mimeType`,
+        );
+      }
+      return { ...image, base64 };
+    });
+
+    const chatHistory = (dto.chatHistory ?? []).map((message) => ({
+      role: message.role,
+      content: message.content.trim(),
+    }));
 
     const systemInstruction = this.genaiService.renderPrompt(
       'image-discovery',
@@ -140,28 +152,33 @@ export class ImageAnalysisService {
       },
     );
 
-    const response = await this.callAi(prompt, image, systemInstruction);
+    const response = await this.callAi(
+      prompt,
+      images,
+      chatHistory,
+      systemInstruction,
+    );
     return this.parseResponse(response.text);
   }
 
   private async callAi(
     prompt: string,
-    image: AnalyzeImageDto['images'][number],
+    images: AnalyzeImageDto['images'],
+    chatHistory: NonNullable<AnalyzeImageDto['chatHistory']>,
     systemInstruction: string,
   ) {
     try {
       return await this.genaiService.chatStructured({
         messages: [
+          ...chatHistory,
           {
             role: 'user',
             content: prompt,
-            attachments: [
-              {
-                type: 'image',
-                mimeType: image.mimeType,
-                data: image.base64.trim(),
-              },
-            ],
+            attachments: images.map((image) => ({
+              type: 'image' as const,
+              mimeType: image.mimeType,
+              data: image.base64.trim(),
+            })),
           },
         ],
         systemInstruction,

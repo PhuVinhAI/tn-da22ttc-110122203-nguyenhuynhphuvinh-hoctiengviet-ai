@@ -18,8 +18,15 @@ describe('ImageAnalysisService', () => {
   };
 
   const request = {
-    images: [{ base64: 'base64-image-data', mimeType: 'image/png' }],
+    images: [
+      { base64: 'base64-image-data', mimeType: 'image/png' },
+      { base64: 'second-base64-image-data', mimeType: 'image/jpeg' },
+    ],
     prompt: 'What does this sign say?',
+    chatHistory: [
+      { role: 'user' as const, content: 'What is the red sign?' },
+      { role: 'assistant' as const, content: 'It is a traffic sign.' },
+    ],
   };
 
   beforeEach(async () => {
@@ -77,12 +84,25 @@ describe('ImageAnalysisService', () => {
         messages: [
           {
             role: 'user',
+            content: 'What is the red sign?',
+          },
+          {
+            role: 'assistant',
+            content: 'It is a traffic sign.',
+          },
+          {
+            role: 'user',
             content: 'What does this sign say?',
             attachments: [
               {
                 type: 'image',
                 mimeType: 'image/png',
                 data: 'base64-image-data',
+              },
+              {
+                type: 'image',
+                mimeType: 'image/jpeg',
+                data: 'second-base64-image-data',
               },
             ],
           },
@@ -111,7 +131,7 @@ describe('ImageAnalysisService', () => {
     ).rejects.toThrow(BadRequestException);
   });
 
-  it('rejects more than one image in this slice', async () => {
+  it('rejects more than five images with a clear error', async () => {
     await expect(
       service.analyze(
         {
@@ -119,11 +139,15 @@ describe('ImageAnalysisService', () => {
           images: [
             { base64: 'one', mimeType: 'image/png' },
             { base64: 'two', mimeType: 'image/png' },
+            { base64: 'three', mimeType: 'image/png' },
+            { base64: 'four', mimeType: 'image/png' },
+            { base64: 'five', mimeType: 'image/png' },
+            { base64: 'six', mimeType: 'image/png' },
           ],
         },
         user,
       ),
-    ).rejects.toThrow(BadRequestException);
+    ).rejects.toThrow('A maximum of 5 images can be analyzed at once');
   });
 
   it('rejects unsupported image mime types', async () => {

@@ -8,6 +8,7 @@ import '../data/image_analysis_providers.dart';
 import '../domain/image_analysis_models.dart';
 
 const _unsetError = Object();
+const maxImageDiscoveryImages = 5;
 
 final imagePickerProvider = Provider<ImagePicker>((ref) => ImagePicker());
 
@@ -50,6 +51,13 @@ class ImageDiscoveryMessage {
   final List<ImageAnalysisVocabulary> vocabularies;
 
   bool get isUser => role == ImageDiscoveryMessageRole.user;
+
+  ImageAnalysisChatHistoryMessage toChatHistoryMessage() {
+    return ImageAnalysisChatHistoryMessage(
+      role: isUser ? 'user' : 'assistant',
+      content: text,
+    );
+  }
 }
 
 class ImageDiscoveryState {
@@ -66,6 +74,7 @@ class ImageDiscoveryState {
   final String? error;
 
   bool get hasImage => images.isNotEmpty;
+  bool get canAddImages => images.length < maxImageDiscoveryImages;
 
   ImageDiscoveryState copyWith({
     List<ImageDiscoveryImage>? images,
@@ -89,25 +98,61 @@ class ImageDiscoveryNotifier extends Notifier<ImageDiscoveryState> {
   Future<void> pickImage(ImageSource source) async {
     try {
       final picker = ref.read(imagePickerProvider);
+      if (source == ImageSource.gallery) {
+        final slots = maxImageDiscoveryImages - state.images.length;
+        if (slots <= 0) return;
+        if (slots == 1) {
+          final file = await picker.pickImage(source: ImageSource.gallery);
+          if (file != null) await addImage(file);
+          return;
+        }
+
+        final files = await picker.pickMultiImage(limit: slots);
+        await addImages(files);
+        return;
+      }
+
       final file = await picker.pickImage(source: source);
       if (file == null) return;
-      await setImage(file);
+      await addImage(file);
     } catch (_) {
       state = state.copyWith(error: 'Unable to load image');
     }
   }
 
   Future<void> setImage(XFile file) async {
-    final bytes = await file.readAsBytes();
-    state = ImageDiscoveryState(
-      images: [
-        ImageDiscoveryImage(
-          id: DateTime.now().microsecondsSinceEpoch.toString(),
-          bytes: bytes,
-          base64: base64Encode(bytes),
-          mimeType: _inferMimeType(file),
-        ),
-      ],
+    await addImages([file], replace: true);
+  }
+
+  Future<void> addImage(XFile file) async {
+    await addImages([file], replace: false);
+  }
+
+  Future<void> addImages(
+    List<XFile> files, {
+    bool replace = false,
+  }) async {
+    if (files.isEmpty) return;
+    final existing = replace ? <ImageDiscoveryImage>[] : state.images;
+    final slots = maxImageDiscoveryImages - existing.length;
+    if (slots <= 0) {
+      state = state.copyWith(
+        error: 'You can analyze up to 5 images at once',
+      );
+      return;
+    }
+
+    final nextImages = <ImageDiscoveryImage>[];
+    var nextIndex = existing.length;
+    for (final file in files.take(slots)) {
+      nextImages.add(await _readImage(file, nextIndex));
+      nextIndex += 1;
+    }
+
+    final capped = files.length > slots;
+    state = state.copyWith(
+      images: [...existing, ...nextImages],
+      error: capped ? 'You can analyze up to 5 images at once' : null,
     );
   }
 
@@ -127,15 +172,15 @@ class ImageDiscoveryNotifier extends Notifier<ImageDiscoveryState> {
       return;
     }
 
-    final image = state.images.first;
     final userMessage = ImageDiscoveryMessage(
       id: 'user-${DateTime.now().microsecondsSinceEpoch}',
       role: ImageDiscoveryMessageRole.user,
       text: trimmed,
     );
+    final previousMessages = state.messages;
 
     state = state.copyWith(
-      messages: [...state.messages, userMessage],
+      messages: [...previousMessages, userMessage],
       isLoading: true,
       error: null,
     );
@@ -143,8 +188,11 @@ class ImageDiscoveryNotifier extends Notifier<ImageDiscoveryState> {
     try {
       final api = ref.read(imageAnalysisApiProvider);
       final response = await api.analyze(
-        images: [image.toRequestImage()],
+        images: state.images.map((image) => image.toRequestImage()).toList(),
         prompt: trimmed,
+        chatHistory: previousMessages
+            .map((message) => message.toChatHistoryMessage())
+            .toList(),
       );
       final assistantMessage = ImageDiscoveryMessage(
         id: 'assistant-${DateTime.now().microsecondsSinceEpoch}',
@@ -163,6 +211,16 @@ class ImageDiscoveryNotifier extends Notifier<ImageDiscoveryState> {
         error: 'Unable to analyze image. Please try again.',
       );
     }
+  }
+
+  Future<ImageDiscoveryImage> _readImage(XFile file, int index) async {
+    final bytes = await file.readAsBytes();
+    return ImageDiscoveryImage(
+      id: 'image-$index-${DateTime.now().microsecondsSinceEpoch}-${file.name}',
+      bytes: bytes,
+      base64: base64Encode(bytes),
+      mimeType: _inferMimeType(file),
+    );
   }
 
   String _inferMimeType(XFile file) {

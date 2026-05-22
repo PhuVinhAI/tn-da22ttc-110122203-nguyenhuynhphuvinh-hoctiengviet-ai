@@ -13,6 +13,21 @@ class ImageAnalysisRequestImage {
       };
 }
 
+class ImageAnalysisChatHistoryMessage {
+  const ImageAnalysisChatHistoryMessage({
+    required this.role,
+    required this.content,
+  });
+
+  final String role;
+  final String content;
+
+  Map<String, dynamic> toJson() => {
+        'role': role,
+        'content': content,
+      };
+}
+
 class ImageAnalysisVocabulary {
   const ImageAnalysisVocabulary({
     required this.word,
