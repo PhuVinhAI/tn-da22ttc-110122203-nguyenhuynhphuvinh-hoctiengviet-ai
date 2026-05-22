@@ -65,8 +65,8 @@ ExerciseTypeVisuals getExerciseVisuals(
       label: 'Translation',
     ),
     ExerciseType.listening => ExerciseTypeVisuals(
-      accent: AppTheme.colors(context).info,
-      surface: AppTheme.colors(context).muted,
+      accent: tokens.listeningAccent,
+      surface: tokens.listeningSurface,
       icon: Icons.headphones_rounded,
       label: 'Listening',
     ),

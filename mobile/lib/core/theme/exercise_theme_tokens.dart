@@ -16,6 +16,8 @@ class ExerciseThemeTokens extends ThemeExtension<ExerciseThemeTokens> {
     required this.orderingSurface,
     required this.translationAccent,
     required this.translationSurface,
+    required this.listeningAccent,
+    required this.listeningSurface,
     required this.speakingAccent,
     required this.speakingSurface,
   });
@@ -40,6 +42,11 @@ class ExerciseThemeTokens extends ThemeExtension<ExerciseThemeTokens> {
   final Color translationAccent;
   final Color translationSurface;
 
+  // ── Listening — Sky / Blue family ──
+  final Color listeningAccent;
+  final Color listeningSurface;
+
+  // ── Speaking — Rose / Pink family ──
   final Color speakingAccent;
   final Color speakingSurface;
 
@@ -55,6 +62,8 @@ class ExerciseThemeTokens extends ThemeExtension<ExerciseThemeTokens> {
     orderingSurface: Color(0xFFECFDF5), // Emerald-50
     translationAccent: Color(0xFF8B5CF6), // Violet-500
     translationSurface: Color(0xFFF5F3FF), // Violet-50
+    listeningAccent: Color(0xFF0EA5E9), // Sky-500
+    listeningSurface: Color(0xFFF0F9FF), // Sky-50
     speakingAccent: Color(0xFFE11D48), // Rose-600
     speakingSurface: Color(0xFFFFF1F2), // Rose-50
   );
@@ -71,6 +80,8 @@ class ExerciseThemeTokens extends ThemeExtension<ExerciseThemeTokens> {
     orderingSurface: Color(0xFF022C22), // Emerald-950
     translationAccent: Color(0xFFA78BFA), // Violet-400
     translationSurface: Color(0xFF2E1065), // Violet-950
+    listeningAccent: Color(0xFF38BDF8), // Sky-400
+    listeningSurface: Color(0xFF082F49), // Sky-950
     speakingAccent: Color(0xFFFB7185), // Rose-400
     speakingSurface: Color(0xFF4C0519), // Rose-950
   );
@@ -87,6 +98,8 @@ class ExerciseThemeTokens extends ThemeExtension<ExerciseThemeTokens> {
     Color? orderingSurface,
     Color? translationAccent,
     Color? translationSurface,
+    Color? listeningAccent,
+    Color? listeningSurface,
     Color? speakingAccent,
     Color? speakingSurface,
   }) {
@@ -102,6 +115,8 @@ class ExerciseThemeTokens extends ThemeExtension<ExerciseThemeTokens> {
       orderingSurface: orderingSurface ?? this.orderingSurface,
       translationAccent: translationAccent ?? this.translationAccent,
       translationSurface: translationSurface ?? this.translationSurface,
+      listeningAccent: listeningAccent ?? this.listeningAccent,
+      listeningSurface: listeningSurface ?? this.listeningSurface,
       speakingAccent: speakingAccent ?? this.speakingAccent,
       speakingSurface: speakingSurface ?? this.speakingSurface,
     );
@@ -139,6 +154,12 @@ class ExerciseThemeTokens extends ThemeExtension<ExerciseThemeTokens> {
       translationSurface: Color.lerp(
         translationSurface,
         other.translationSurface,
+        t,
+      )!,
+      listeningAccent: Color.lerp(listeningAccent, other.listeningAccent, t)!,
+      listeningSurface: Color.lerp(
+        listeningSurface,
+        other.listeningSurface,
         t,
       )!,
       speakingAccent: Color.lerp(speakingAccent, other.speakingAccent, t)!,

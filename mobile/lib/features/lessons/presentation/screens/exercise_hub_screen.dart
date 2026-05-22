@@ -9,6 +9,7 @@ import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../data/lesson_providers.dart';
+import '../../data/lesson_repository.dart';
 import '../../data/lesson_time_tracker.dart';
 import '../../domain/exercise_set_models.dart';
 import '../widgets/custom_practice_bottom_sheet.dart';
@@ -33,16 +34,22 @@ class _ExerciseHubScreenState extends ConsumerState<ExerciseHubScreen>
   String? _regeneratingNewSetId;
   CancelToken? _aiCancelToken;
   LessonTimeTracker? _lessonTimeTracker;
+  // Cached so cleanup paths that run during/after dispose don't touch `ref`.
+  late final LessonRepository _lessonRepo;
+  LessonProgressNotifier? _progressNotifier;
 
   void _bindLessonTimeTracker() {
-    _lessonTimeTracker ??= LessonTimeTracker(
-      onFlush: (seconds) => ref
-          .read(lessonProgressProvider(widget.lessonId).notifier)
-          .addTimeSpent(seconds),
-    );
-    if (!_lessonTimeTracker!.isRunning) {
-      _lessonTimeTracker!.start();
+    if (_lessonTimeTracker != null) {
+      if (!_lessonTimeTracker!.isRunning) _lessonTimeTracker!.start();
+      return;
     }
+    _progressNotifier ??=
+        ref.read(lessonProgressProvider(widget.lessonId).notifier);
+    final notifier = _progressNotifier!;
+    _lessonTimeTracker = LessonTimeTracker(
+      onFlush: (seconds) => notifier.addTimeSpent(seconds),
+    );
+    _lessonTimeTracker!.start();
   }
 
   CancelToken _newAiCancelToken() {
@@ -55,6 +62,7 @@ class _ExerciseHubScreenState extends ConsumerState<ExerciseHubScreen>
   @override
   void initState() {
     super.initState();
+    _lessonRepo = ref.read(lessonRepositoryProvider);
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -79,16 +87,15 @@ class _ExerciseHubScreenState extends ConsumerState<ExerciseHubScreen>
   }
 
   void _cleanupIncompleteSet() {
-    final repo = ref.read(lessonRepositoryProvider);
     if (_creatingSetId != null) {
       final id = _creatingSetId!;
       _creatingSetId = null;
-      repo.deleteCustomExerciseSet(id).catchError((_) {});
+      _lessonRepo.deleteCustomExerciseSet(id).catchError((_) {});
     }
     if (_regeneratingNewSetId != null) {
       final id = _regeneratingNewSetId!;
       _regeneratingNewSetId = null;
-      repo.deleteCustomExerciseSet(id).catchError((_) {});
+      _lessonRepo.deleteCustomExerciseSet(id).catchError((_) {});
     }
   }
 
