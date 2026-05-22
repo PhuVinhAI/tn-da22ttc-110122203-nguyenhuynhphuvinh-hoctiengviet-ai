@@ -20,6 +20,33 @@ class AppNavBar extends StatelessWidget {
   final IconData centerActionIcon;
   final String centerActionTooltip;
 
+  static const double protrusionHeight = 10;
+  static const double _barVerticalPadding = AppSpacing.sm * 2;
+  static const double _destinationHeight =
+      AppSpacing.xs * 2 + // item vertical padding
+      AppSpacing.xs * 2 + // icon container vertical padding
+      22 + // icon size
+      2 + // label gap
+      13; // caption line height
+  static const double barContentHeight =
+      _barVerticalPadding + _destinationHeight;
+
+  /// Full inset needed so scrollable content clears the nav bar overlay.
+  static double bottomInset(BuildContext context) {
+    return protrusionHeight +
+        barContentHeight +
+        MediaQuery.paddingOf(context).bottom +
+        AppSpacing.md;
+  }
+
+  /// Use as ListView / CustomScrollView bottom padding on tab screens.
+  static EdgeInsets scrollPadding(
+    BuildContext context, {
+    EdgeInsets base = EdgeInsets.zero,
+  }) {
+    return base.copyWith(bottom: base.bottom + bottomInset(context));
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
@@ -28,7 +55,7 @@ class AppNavBar extends StatelessWidget {
 
     for (var index = 0; index < destinations.length; index++) {
       if (index == centerIndex) {
-        items.add(const Expanded(child: SizedBox(height: 56)));
+        items.add(const SizedBox(width: 44));
       }
 
       items.add(
@@ -44,19 +71,24 @@ class AppNavBar extends StatelessWidget {
       clipBehavior: Clip.none,
       alignment: Alignment.topCenter,
       children: [
-        Container(
-          margin: const EdgeInsets.only(top: AppSpacing.xl),
-          decoration: BoxDecoration(
-            color: c.card,
-            border: Border(top: BorderSide(color: c.border, width: 1)),
-          ),
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-              child: Row(children: items),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: protrusionHeight),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: c.card,
+                border: Border(top: BorderSide(color: c.border, width: 1)),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                  child: Row(children: items),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
         Positioned(
           top: 0,
@@ -159,21 +191,20 @@ class _AppNavBarCenterAction extends StatelessWidget {
             opacity: enabled ? 1 : 0.5,
             duration: const Duration(milliseconds: 120),
             child: Container(
-              width: 58,
-              height: 58,
+              width: 54,
+              height: 54,
               decoration: BoxDecoration(
                 color: c.primary,
                 shape: BoxShape.circle,
-                border: Border.all(color: c.card, width: 4),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
+                    color: Colors.black.withValues(alpha: 0.16),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
-              child: Icon(icon, color: c.primaryForeground, size: 26),
+              child: Icon(icon, color: c.primaryForeground, size: 24),
             ),
           ),
         ),

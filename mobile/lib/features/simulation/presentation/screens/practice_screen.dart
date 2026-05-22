@@ -236,7 +236,10 @@ class _PracticeContent extends StatelessWidget {
         await onRefreshPaused();
       },
       child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: AppNavBar.scrollPadding(
+          context,
+          base: const EdgeInsets.all(AppSpacing.lg),
+        ),
         children: [
           if (activeSession != null)
             _PausedSessionBanner(
@@ -258,7 +261,7 @@ class _PracticeContent extends StatelessWidget {
             selectedCategoryId: filter.categoryId,
             onCategoryTap: onCategoryTap,
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.lg),
           _SectionHeader(title: _sectionTitle),
           const SizedBox(height: AppSpacing.md),
           scenariosAsync.when(
@@ -918,7 +921,10 @@ class _CategoriesLoading extends StatelessWidget {
     final c = AppTheme.colors(context);
 
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: AppNavBar.scrollPadding(
+        context,
+        base: const EdgeInsets.all(AppSpacing.lg),
+      ),
       children: [
         Shimmer.fromColors(
           baseColor: c.muted,

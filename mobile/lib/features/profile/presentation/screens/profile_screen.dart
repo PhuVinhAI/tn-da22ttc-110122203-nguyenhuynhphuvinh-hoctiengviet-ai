@@ -36,9 +36,12 @@ class ProfileScreen extends ConsumerWidget {
           await ref.read(simulationStatsProvider.notifier).refresh();
         },
         child: ListView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.sm,
+          padding: AppNavBar.scrollPadding(
+            context,
+            base: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
           ),
           children: [
             profileAsync.when(

@@ -39,6 +39,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         child: ListView(
+          padding: AppNavBar.scrollPadding(context),
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(

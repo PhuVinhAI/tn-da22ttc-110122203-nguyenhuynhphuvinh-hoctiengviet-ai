@@ -102,31 +102,41 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
     );
 
     return Scaffold(
-      body: widget.child,
-      bottomNavigationBar: AppNavBar(
-        selectedIndex: _getCurrentIndex(context),
-        onDestinationSelected: (index) => _onTap(context, index),
-        onCenterAction: () => context.push('/camera'),
-        destinations: [
-          const AppNavBarDestination(
-            icon: Icons.home_outlined,
-            selectedIcon: Icons.home,
-            label: 'Home',
-          ),
-          const AppNavBarDestination(
-            icon: Icons.school_outlined,
-            selectedIcon: Icons.school,
-            label: 'Courses',
-          ),
-          const AppNavBarDestination(
-            icon: Icons.chat_bubble_outline,
-            selectedIcon: Icons.chat_bubble,
-            label: 'Practice',
-          ),
-          const AppNavBarDestination(
-            icon: Icons.person_outlined,
-            selectedIcon: Icons.person,
-            label: 'Profile',
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          widget.child,
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: AppNavBar(
+              selectedIndex: _getCurrentIndex(context),
+              onDestinationSelected: (index) => _onTap(context, index),
+              onCenterAction: () => context.push('/camera'),
+              destinations: const [
+                AppNavBarDestination(
+                  icon: Icons.home_outlined,
+                  selectedIcon: Icons.home,
+                  label: 'Home',
+                ),
+                AppNavBarDestination(
+                  icon: Icons.school_outlined,
+                  selectedIcon: Icons.school,
+                  label: 'Courses',
+                ),
+                AppNavBarDestination(
+                  icon: Icons.chat_bubble_outline,
+                  selectedIcon: Icons.chat_bubble,
+                  label: 'Practice',
+                ),
+                AppNavBarDestination(
+                  icon: Icons.person_outlined,
+                  selectedIcon: Icons.person,
+                  label: 'Profile',
+                ),
+              ],
+            ),
           ),
         ],
       ),

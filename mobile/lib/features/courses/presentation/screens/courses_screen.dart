@@ -74,7 +74,10 @@ class _CoursesList extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: AppNavBar.scrollPadding(
+        context,
+        base: const EdgeInsets.all(AppSpacing.lg),
+      ),
       itemCount: courses.length,
       itemBuilder: (context, index) {
         final course = courses[index];
@@ -180,7 +183,10 @@ class _CoursesLoading extends StatelessWidget {
     final c = AppTheme.colors(context);
 
     return ListView.builder(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: AppNavBar.scrollPadding(
+        context,
+        base: const EdgeInsets.all(AppSpacing.lg),
+      ),
       itemCount: 3,
       itemBuilder: (context, index) {
         return AppCard(
