@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../../core/network/media_url.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../domain/lesson_models.dart';
@@ -299,27 +303,118 @@ class DialogueContentWidget extends StatelessWidget {
           ...lines.map((line) => _ChatBubble(line: line)),
           if (content.audioUrl != null) ...[
             const SizedBox(height: 16),
-            AppCard(
-              variant: AppCardVariant.muted,
-              padding: const EdgeInsets.all(AppSpacing.md),
-              borderRadius: AppRadius.md,
-              child: Row(
-                children: [
-                  Icon(Icons.headphones, color: c.foreground),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    'Listen to dialogue',
-                    style: TextStyle(color: c.foreground),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.play_arrow, color: c.foreground),
-                  ),
-                ],
+            _DialogueAudioCard(audioUrl: content.audioUrl!),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DialogueAudioCard extends StatefulWidget {
+  const _DialogueAudioCard({required this.audioUrl});
+
+  final String audioUrl;
+
+  @override
+  State<_DialogueAudioCard> createState() => _DialogueAudioCardState();
+}
+
+class _DialogueAudioCardState extends State<_DialogueAudioCard> {
+  final _player = AudioPlayer();
+  StreamSubscription<PlayerState>? _stateSub;
+  bool _isPlaying = false;
+  bool _isLoading = true;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _stateSub = _player.playerStateStream.listen(_handleState);
+    _initPlayer();
+  }
+
+  Future<void> _initPlayer() async {
+    try {
+      await _player.setUrl(resolveMediaUrl(widget.audioUrl));
+      if (mounted) setState(() => _isLoading = false);
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
+    }
+  }
+
+  void _handleState(PlayerState state) {
+    if (!mounted) return;
+    final playing =
+        state.playing && state.processingState != ProcessingState.completed;
+    if (_isPlaying != playing) {
+      setState(() => _isPlaying = playing);
+    }
+    if (state.processingState == ProcessingState.completed) {
+      unawaited(_player.seek(Duration.zero));
+      unawaited(_player.pause());
+    }
+  }
+
+  Future<void> _toggle() async {
+    if (_isLoading || _hasError) return;
+    if (_isPlaying) {
+      await _player.pause();
+      return;
+    }
+    if (_player.processingState == ProcessingState.completed) {
+      await _player.seek(Duration.zero);
+    }
+    await _player.play();
+  }
+
+  @override
+  void dispose() {
+    _stateSub?.cancel();
+    _player.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+
+    return AppCard(
+      variant: AppCardVariant.muted,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      borderRadius: AppRadius.md,
+      child: Row(
+        children: [
+          Icon(Icons.headphones, color: c.foreground),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              _hasError ? 'Audio unavailable' : 'Listen to dialogue',
+              style: TextStyle(
+                color: _hasError ? c.error : c.foreground,
               ),
             ),
-          ],
+          ),
+          IconButton(
+            onPressed: _isLoading || _hasError ? null : _toggle,
+            icon: _isLoading
+                ? SizedBox.square(
+                    dimension: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: c.foreground,
+                    ),
+                  )
+                : Icon(
+                    _isPlaying ? Icons.pause : Icons.play_arrow,
+                    color: c.foreground,
+                  ),
+          ),
         ],
       ),
     );
