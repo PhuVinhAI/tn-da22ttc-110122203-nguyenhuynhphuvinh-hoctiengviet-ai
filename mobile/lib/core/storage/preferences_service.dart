@@ -73,4 +73,14 @@ class PreferencesService {
 
   Future<void> setLevelUpPrompted(String courseId, bool value) =>
       _prefs.setBool('level_up_prompted_$courseId', value);
+
+  Future<void> clearLevelUpPromptFlags() async {
+    final keys = _prefs
+        .getKeys()
+        .where((k) => k.startsWith('level_up_prompted_'))
+        .toList();
+    for (final key in keys) {
+      await _prefs.remove(key);
+    }
+  }
 }

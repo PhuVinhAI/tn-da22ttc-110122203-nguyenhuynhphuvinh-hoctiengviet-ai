@@ -10,6 +10,7 @@ import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/sync/sync.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
+import '../../../daily_goals/data/notification_service.dart';
 import '../../../daily_goals/presentation/widgets/daily_goal_section.dart';
 import '../../../lessons/data/lesson_providers.dart';
 import '../../../user/domain/user_profile.dart';
@@ -214,6 +215,11 @@ class SettingsScreen extends ConsumerWidget {
                 try {
                   final prefs = await ref.read(preferencesProvider.future);
                   await prefs.clearOnboardingState();
+                  await prefs.clearLevelUpPromptFlags();
+                } catch (_) {}
+
+                try {
+                  await NotificationService.cancelDailyReminder();
                 } catch (_) {}
 
                 ref.read(onboardingCompletedProvider.notifier).reset();
@@ -224,6 +230,8 @@ class SettingsScreen extends ConsumerWidget {
                   'exercise-set',
                   'bookmark',
                   'daily-goal',
+                  'simulation',
+                  'simulation-results',
                 });
 
                 await ref.read(userProfileProvider.notifier).refresh();
@@ -287,6 +295,10 @@ class SettingsScreen extends ConsumerWidget {
                 try {
                   final prefs = await ref.read(preferencesProvider.future);
                   await prefs.clearOnboardingState();
+                  await prefs.clearLevelUpPromptFlags();
+                } catch (_) {}
+                try {
+                  await NotificationService.cancelDailyReminder();
                 } catch (_) {}
                 ref.read(onboardingCompletedProvider.notifier).reset();
                 ref.read(dataChangeBusProvider.notifier).emit({
@@ -295,6 +307,9 @@ class SettingsScreen extends ConsumerWidget {
                   'bookmark',
                   'exercise',
                   'progress',
+                  'exercise-set',
+                  'simulation',
+                  'simulation-results',
                 });
                 await ref.read(authStateProvider.notifier).logout();
                 if (context.mounted) {
