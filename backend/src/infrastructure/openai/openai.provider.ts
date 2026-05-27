@@ -25,6 +25,14 @@ import type {
   ToolDeclaration,
 } from '@linvnix/shared';
 
+export interface OpenaiGenerationConfig {
+  temperature?: number;
+  top_p?: number;
+  top_k?: number;
+  max_tokens?: number;
+  reasoning_effort?: string;
+}
+
 export interface OpenaiProviderConfig {
   baseUrl: string;
   apiKeys: string[];
@@ -32,6 +40,7 @@ export interface OpenaiProviderConfig {
   fallbackModel?: string;
   timeout?: number;
   maxRetries?: number;
+  generation?: OpenaiGenerationConfig;
 }
 
 export class OpenaiProvider implements IAiProvider {
@@ -39,10 +48,12 @@ export class OpenaiProvider implements IAiProvider {
   private readonly keyPool: KeyPool;
   private readonly model: string;
   private readonly maxRetries: number;
+  private readonly generation: OpenaiGenerationConfig;
 
   constructor(config: OpenaiProviderConfig) {
     this.model = config.model;
     this.maxRetries = config.maxRetries ?? 2;
+    this.generation = config.generation ?? {};
 
     this.keyPool = new KeyPool({
       keys: config.apiKeys,
@@ -63,6 +74,16 @@ export class OpenaiProvider implements IAiProvider {
     );
   }
 
+  private buildGenerationParams(): Record<string, any> {
+    const params: Record<string, any> = {};
+    if (this.generation.temperature !== undefined) params.temperature = this.generation.temperature;
+    if (this.generation.top_p !== undefined) params.top_p = this.generation.top_p;
+    if (this.generation.top_k !== undefined) params.top_k = this.generation.top_k;
+    if (this.generation.max_tokens !== undefined) params.max_tokens = this.generation.max_tokens;
+    if (this.generation.reasoning_effort) params.reasoning_effort = this.generation.reasoning_effort;
+    return params;
+  }
+
   async chat(req: AiChatRequest): Promise<AiChatResponse> {
     const model = req.model || this.model;
     const messages = this.convertMessages(req.messages);
@@ -77,6 +98,7 @@ export class OpenaiProvider implements IAiProvider {
       const response = await client.chat.completions.create({
         model,
         messages,
+        ...this.buildGenerationParams(),
         ...(tools ? { tools } : {}),
         stream: false,
       });
@@ -93,6 +115,7 @@ export class OpenaiProvider implements IAiProvider {
       const response = await client.chat.completions.create({
         model,
         messages,
+        ...this.buildGenerationParams(),
         response_format: {
           type: 'json_schema',
           json_schema: {
@@ -130,6 +153,7 @@ export class OpenaiProvider implements IAiProvider {
       stream = (await client.chat.completions.create({
         model,
         messages,
+        ...this.buildGenerationParams(),
         ...(tools ? { tools } : {}),
         stream: true,
       })) as AsyncIterable<OpenAI.Chat.ChatCompletionChunk>;

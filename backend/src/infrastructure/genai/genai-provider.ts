@@ -63,6 +63,16 @@ interface PromptTemplateCollection {
   templates: Record<string, PromptTemplate>;
 }
 
+interface GenaiGenerationConfig {
+  temperature?: number;
+  topP?: number;
+  topK?: number;
+  maxOutputTokens?: number;
+  thinkingBudget?: number;
+  thinkingLevel?: string;
+  includeThoughts?: boolean;
+}
+
 interface GenaiConfig {
   apiKey: string;
   apiKeys: string[];
@@ -79,6 +89,7 @@ interface GenaiConfig {
     image: Array<{ category: string; threshold: string }>;
     default: Array<{ category: string; threshold: string }>;
   };
+  generation?: GenaiGenerationConfig;
 }
 
 @Injectable()
@@ -290,6 +301,25 @@ export class GenaiProvider implements IAiProvider, OnModuleInit {
     return out;
   }
 
+  private buildGenerationConfig(): Record<string, any> | undefined {
+    const gen = this.config.generation;
+    if (!gen) return undefined;
+    const cfg: Record<string, any> = {};
+    if (gen.temperature !== undefined) cfg.temperature = gen.temperature;
+    if (gen.topP !== undefined) cfg.topP = gen.topP;
+    if (gen.topK !== undefined) cfg.topK = gen.topK;
+    if (gen.maxOutputTokens !== undefined) cfg.maxOutputTokens = gen.maxOutputTokens;
+    const hasThinking = gen.thinkingBudget !== undefined || gen.thinkingLevel || gen.includeThoughts !== undefined;
+    if (hasThinking) {
+      cfg.thinkingConfig = {
+        ...(gen.thinkingBudget !== undefined ? { thinkingBudget: gen.thinkingBudget } : {}),
+        ...(gen.thinkingLevel ? { thinkingLevel: gen.thinkingLevel } : {}),
+        ...(gen.includeThoughts !== undefined ? { includeThoughts: gen.includeThoughts } : {}),
+      };
+    }
+    return Object.keys(cfg).length > 0 ? cfg : undefined;
+  }
+
   async chat(req: AiChatRequest): Promise<AiChatResponse> {
     const model = req.model || this.config.models.chat;
     const steps = this.mapMessagesToSteps(req.messages as AiChatMessage[]);
@@ -298,6 +328,8 @@ export class GenaiProvider implements IAiProvider, OnModuleInit {
       `chat() called with ${steps.length} steps, tools=${req.tools?.length ?? 0}, step types: ${steps.map((s) => s.type).join(', ')}`,
     );
 
+    const genConfig = this.buildGenerationConfig();
+
     return this.executeWithRetry(async (client) => {
       const response = await client.interactions.create({
         model,
@@ -305,6 +337,7 @@ export class GenaiProvider implements IAiProvider, OnModuleInit {
         store: false,
         stream: false,
         system_instruction: req.systemInstruction,
+        ...(genConfig ? { config: genConfig } : {}),
         ...(req.tools?.length
           ? {
               tools: req.tools.map((t) => ({
@@ -332,12 +365,15 @@ export class GenaiProvider implements IAiProvider, OnModuleInit {
     const { key } = this.keyPool.getKey();
     const client = this.getClientForKey(key);
 
+    const genConfig = this.buildGenerationConfig();
+
     const params = {
       model,
       input: steps,
       store: false,
       stream: true as const,
       system_instruction: req.systemInstruction,
+      ...(genConfig ? { config: genConfig } : {}),
       ...(req.tools?.length
         ? {
             tools: req.tools.map((t) => ({
@@ -445,6 +481,8 @@ export class GenaiProvider implements IAiProvider, OnModuleInit {
     const model = req.model || this.config.models.chat;
     const contents = this.mapStructuredMessagesToContents(req.messages);
 
+    const genConfig = this.buildGenerationConfig();
+
     const response = await this.executeWithRetry(async (client) => {
       return client.models.generateContent({
         model,
@@ -453,6 +491,7 @@ export class GenaiProvider implements IAiProvider, OnModuleInit {
           responseMimeType: 'application/json',
           responseSchema: req.responseSchema,
           systemInstruction: req.systemInstruction,
+          ...genConfig,
         },
       });
     });

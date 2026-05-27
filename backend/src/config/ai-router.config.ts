@@ -15,6 +15,13 @@ function featureConfig(prefix: string) {
     apiKeys: parseKeys(process.env[`${prefix}_API_KEYS`]),
     model: process.env[`${prefix}_MODEL`] || '',
     fallbackModel: process.env[`${prefix}_FALLBACK_MODEL`] || '',
+    generation: {
+      temperature: process.env[`${prefix}_TEMPERATURE`] ? parseFloat(process.env[`${prefix}_TEMPERATURE`]!) : undefined,
+      topP: process.env[`${prefix}_TOP_P`] ? parseFloat(process.env[`${prefix}_TOP_P`]!) : undefined,
+      topK: process.env[`${prefix}_TOP_K`] ? parseInt(process.env[`${prefix}_TOP_K`]!, 10) : undefined,
+      maxTokens: process.env[`${prefix}_MAX_TOKENS`] ? parseInt(process.env[`${prefix}_MAX_TOKENS`]!, 10) : undefined,
+      reasoningEffort: process.env[`${prefix}_REASONING_EFFORT`] || undefined,
+    },
   };
 }
 

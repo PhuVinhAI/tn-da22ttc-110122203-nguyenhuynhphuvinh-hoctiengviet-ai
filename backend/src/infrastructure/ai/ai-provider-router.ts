@@ -12,6 +12,13 @@ interface FeatureConfig {
   apiKeys: string[];
   model: string;
   fallbackModel: string;
+  generation: {
+    temperature?: number;
+    topP?: number;
+    topK?: number;
+    maxTokens?: number;
+    reasoningEffort?: string;
+  };
 }
 
 @Injectable()
@@ -65,6 +72,13 @@ export class AiProviderRouter implements OnModuleInit {
         apiKeys: config.apiKeys,
         model: config.model,
         fallbackModel: config.fallbackModel || undefined,
+        generation: {
+          temperature: config.generation.temperature,
+          top_p: config.generation.topP,
+          top_k: config.generation.topK,
+          max_tokens: config.generation.maxTokens,
+          reasoning_effort: config.generation.reasoningEffort,
+        },
       });
     }
 

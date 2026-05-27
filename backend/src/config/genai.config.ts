@@ -22,4 +22,13 @@ export default registerAs('genai', () => ({
     image: [],
     default: [],
   },
+  generation: {
+    temperature: process.env.GENAI_TEMPERATURE !== undefined ? parseFloat(process.env.GENAI_TEMPERATURE) : undefined,
+    topP: process.env.GENAI_TOP_P !== undefined ? parseFloat(process.env.GENAI_TOP_P) : undefined,
+    topK: process.env.GENAI_TOP_K !== undefined ? parseInt(process.env.GENAI_TOP_K, 10) : undefined,
+    maxOutputTokens: process.env.GENAI_MAX_OUTPUT_TOKENS !== undefined ? parseInt(process.env.GENAI_MAX_OUTPUT_TOKENS, 10) : undefined,
+    thinkingBudget: process.env.GENAI_THINKING_BUDGET !== undefined ? parseInt(process.env.GENAI_THINKING_BUDGET, 10) : undefined,
+    thinkingLevel: process.env.GENAI_THINKING_LEVEL || undefined,
+    includeThoughts: process.env.GENAI_INCLUDE_THOUGHTS !== undefined ? process.env.GENAI_INCLUDE_THOUGHTS === 'true' : undefined,
+  },
 }));
