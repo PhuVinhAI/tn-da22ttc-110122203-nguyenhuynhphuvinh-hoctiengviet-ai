@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { SimulationAiService } from './simulation-ai.service';
-import { GenaiProvider } from '../../../infrastructure/genai/genai-provider';
+import { AiProviderRouter } from '../../../infrastructure/ai/ai-provider-router';
 import { UsersService } from '../../users/application/users.service';
 import { ScenariosRepository } from './repositories/scenarios.repository';
 import { SimulationEndReason, UserLevel } from '../../../common/enums';
@@ -69,14 +69,21 @@ const makeAiResponse = (overrides: any = {}) => ({
 
 describe('SimulationAiService', () => {
   let service: SimulationAiService;
-  let genaiService: jest.Mocked<GenaiProvider>;
+  let router: {
+    renderPrompt: jest.MockedFunction<any>;
+    forFeature: jest.MockedFunction<any>;
+  };
+  let fakeProvider: { chatStructured: jest.MockedFunction<any> };
   let usersService: jest.Mocked<UsersService>;
   let scenariosRepo: jest.Mocked<ScenariosRepository>;
 
   beforeEach(async () => {
-    const genaiMock = {
-      renderPrompt: jest.fn().mockReturnValue('rendered system prompt'),
+    fakeProvider = {
       chatStructured: jest.fn(),
+    };
+    const routerMock = {
+      renderPrompt: jest.fn().mockReturnValue('rendered system prompt'),
+      forFeature: jest.fn().mockReturnValue(fakeProvider),
     };
     const usersMock = {
       findById: jest.fn(),
@@ -89,14 +96,14 @@ describe('SimulationAiService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SimulationAiService,
-        { provide: GenaiProvider, useValue: genaiMock },
+        { provide: AiProviderRouter, useValue: routerMock },
         { provide: UsersService, useValue: usersMock },
         { provide: ScenariosRepository, useValue: scenariosMock },
       ],
     }).compile();
 
     service = module.get<SimulationAiService>(SimulationAiService);
-    genaiService = module.get(GenaiProvider);
+    router = module.get(AiProviderRouter);
     usersService = module.get(UsersService);
     scenariosRepo = module.get(ScenariosRepository);
   });
@@ -112,7 +119,7 @@ describe('SimulationAiService', () => {
 
       service.buildSystemInstruction(scenario, 'ch-1', learner);
 
-      expect(genaiService.renderPrompt).toHaveBeenCalledWith(
+      expect(router.renderPrompt).toHaveBeenCalledWith(
         'simulation-conversation',
         expect.objectContaining({
           scenario: {
@@ -143,7 +150,7 @@ describe('SimulationAiService', () => {
 
       service.buildSystemInstruction(scenario, 'ch-1', learner);
 
-      const callArgs = genaiService.renderPrompt.mock.calls[0][1]!;
+      const callArgs = router.renderPrompt.mock.calls[0][1]!;
       expect(callArgs.charactersDescription).toContain('Minh');
       expect(callArgs.charactersDescription).toContain('Bà Lan');
       expect(callArgs.charactersDescription).toContain('playable');
@@ -159,7 +166,7 @@ describe('SimulationAiService', () => {
 
       service.buildSystemInstruction(scenario, 'ch-1', learner);
 
-      const callArgs = genaiService.renderPrompt.mock.calls[0][1]!;
+      const callArgs = router.renderPrompt.mock.calls[0][1]!;
       expect(callArgs.scoringCriteriaDescription).toContain('Giao tiếp');
       expect(callArgs.scoringCriteriaDescription).toContain('Ngữ pháp');
       expect(callArgs.scoringCriteriaDescription).toContain('50');
@@ -188,7 +195,7 @@ describe('SimulationAiService', () => {
 
       service.buildSystemInstruction(scenario, 'ch-1', learner);
 
-      const callArgs = genaiService.renderPrompt.mock.calls[0][1]!;
+      const callArgs = router.renderPrompt.mock.calls[0][1]!;
       expect(callArgs.learner.level).toBe('B1');
       expect(callArgs.learner.nativeLanguage).toBe('Japanese');
     });
@@ -203,7 +210,7 @@ describe('SimulationAiService', () => {
 
       service.buildSystemInstruction(scenario, 'ch-1', learner);
 
-      const callArgs = genaiService.renderPrompt.mock.calls[0][1]!;
+      const callArgs = router.renderPrompt.mock.calls[0][1]!;
       expect(callArgs.maxTurns).toBe('5');
     });
 
@@ -217,7 +224,7 @@ describe('SimulationAiService', () => {
 
       service.buildSystemInstruction(scenario, 'ch-1', learner);
 
-      const callArgs = genaiService.renderPrompt.mock.calls[0][1]!;
+      const callArgs = router.renderPrompt.mock.calls[0][1]!;
       expect(callArgs.maxTurns).toBe('unlimited');
     });
 
@@ -231,7 +238,7 @@ describe('SimulationAiService', () => {
 
       service.buildSystemInstruction(scenario, 'ch-1', learner, true);
 
-      const callArgs = genaiService.renderPrompt.mock.calls[0][1]!;
+      const callArgs = router.renderPrompt.mock.calls[0][1]!;
       expect(callArgs.forceWrapUpInstruction).toContain(
         'reached the maximum number of turns',
       );
@@ -248,7 +255,7 @@ describe('SimulationAiService', () => {
 
       service.buildSystemInstruction(scenario, 'ch-1', learner, false);
 
-      const callArgs = genaiService.renderPrompt.mock.calls[0][1]!;
+      const callArgs = router.renderPrompt.mock.calls[0][1]!;
       expect(callArgs.forceWrapUpInstruction).toBe('');
     });
 
@@ -262,7 +269,7 @@ describe('SimulationAiService', () => {
 
       service.buildSystemInstruction(scenario, 'ch-1', learner);
 
-      const callArgs = genaiService.renderPrompt.mock.calls[0][1]!;
+      const callArgs = router.renderPrompt.mock.calls[0][1]!;
       expect(callArgs.forceWrapUpInstruction).toBe('');
     });
   });
@@ -667,10 +674,10 @@ describe('SimulationAiService', () => {
   });
 
   describe('processTurn', () => {
-    it('calls GenaiProvider.chatStructured with rendered system instruction and chat messages', async () => {
+    it('calls chatStructured via router with rendered system instruction and chat messages', async () => {
       const scenario = makeScenario();
       usersService.findById.mockResolvedValue(makeUser());
-      genaiService.chatStructured.mockResolvedValue(makeAiResponse());
+      fakeProvider.chatStructured.mockResolvedValue(makeAiResponse());
 
       await service.processTurn({
         scenario,
@@ -680,19 +687,19 @@ describe('SimulationAiService', () => {
         userId: 'user-1',
       });
 
-      expect(genaiService.chatStructured).toHaveBeenCalledWith(
+      expect(fakeProvider.chatStructured).toHaveBeenCalledWith(
         expect.objectContaining({
           systemInstruction: expect.any(String),
           responseSchema: expect.any(Object),
         }),
       );
-      expect(genaiService.chatStructured).toHaveBeenCalledTimes(1);
+      expect(fakeProvider.chatStructured).toHaveBeenCalledTimes(1);
     });
 
     it('fetches user data for learner context', async () => {
       const scenario = makeScenario();
       usersService.findById.mockResolvedValue(makeUser());
-      genaiService.chatStructured.mockResolvedValue(makeAiResponse());
+      fakeProvider.chatStructured.mockResolvedValue(makeAiResponse());
 
       await service.processTurn({
         scenario,
@@ -708,7 +715,7 @@ describe('SimulationAiService', () => {
     it('returns parsed response with token count', async () => {
       const scenario = makeScenario();
       usersService.findById.mockResolvedValue(makeUser());
-      genaiService.chatStructured.mockResolvedValue(makeAiResponse());
+      fakeProvider.chatStructured.mockResolvedValue(makeAiResponse());
 
       const result = await service.processTurn({
         scenario,
@@ -727,7 +734,7 @@ describe('SimulationAiService', () => {
     it('returns feedback on learner message', async () => {
       const scenario = makeScenario();
       usersService.findById.mockResolvedValue(makeUser());
-      genaiService.chatStructured.mockResolvedValue(
+      fakeProvider.chatStructured.mockResolvedValue(
         makeAiResponse({
           feedback: {
             corrections: [
@@ -761,7 +768,7 @@ describe('SimulationAiService', () => {
     it('throws when AI returns malformed response after retries', async () => {
       const scenario = makeScenario();
       usersService.findById.mockResolvedValue(makeUser());
-      genaiService.chatStructured.mockResolvedValue({
+      fakeProvider.chatStructured.mockResolvedValue({
         text: 'not valid json',
         usageMetadata: { totalTokenCount: 10 },
       });
@@ -776,13 +783,13 @@ describe('SimulationAiService', () => {
         }),
       ).rejects.toThrow(BadRequestException);
 
-      expect(genaiService.chatStructured).toHaveBeenCalledTimes(3);
+      expect(fakeProvider.chatStructured).toHaveBeenCalledTimes(3);
     });
 
     it('retries AI call when the first response fails validation', async () => {
       const scenario = makeScenario();
       usersService.findById.mockResolvedValue(makeUser());
-      genaiService.chatStructured
+      fakeProvider.chatStructured
         .mockResolvedValueOnce({
           text: JSON.stringify({
             messages: [],
@@ -801,14 +808,14 @@ describe('SimulationAiService', () => {
         userId: 'user-1',
       });
 
-      expect(genaiService.chatStructured).toHaveBeenCalledTimes(2);
+      expect(fakeProvider.chatStructured).toHaveBeenCalledTimes(2);
       expect(result.sessionEnded).toBe(false);
     });
 
     it('passes forceWrapUp to buildSystemInstruction', async () => {
       const scenario = makeScenario();
       usersService.findById.mockResolvedValue(makeUser());
-      genaiService.chatStructured.mockResolvedValue(makeAiResponse());
+      fakeProvider.chatStructured.mockResolvedValue(makeAiResponse());
 
       await service.processTurn({
         scenario,
@@ -819,7 +826,7 @@ describe('SimulationAiService', () => {
         forceWrapUp: true,
       });
 
-      const callArgs = genaiService.renderPrompt.mock.calls[0][1]!;
+      const callArgs = router.renderPrompt.mock.calls[0][1]!;
       expect(callArgs.forceWrapUpInstruction).toContain(
         'reached the maximum number of turns',
       );

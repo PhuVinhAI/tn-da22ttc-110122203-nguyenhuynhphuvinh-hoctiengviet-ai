@@ -255,7 +255,10 @@ export class OpenaiProvider implements IAiProvider {
     const functionCalls = (message?.tool_calls ?? [])
       .filter((call) => call.type === 'function')
       .map((call) => {
-        const fn = (call as any).function as { name: string; arguments: string };
+        const fn = (call as any).function as {
+          name: string;
+          arguments: string;
+        };
         return {
           id: call.id,
           name: fn.name,

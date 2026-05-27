@@ -1,9 +1,7 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { z } from 'zod';
-import {
-  GenaiProvider,
-  Type,
-} from '../../../infrastructure/genai/genai-provider';
+import { Type } from '../../../infrastructure/genai/genai-provider';
+import { AiProviderRouter } from '../../../infrastructure/ai/ai-provider-router';
 import { UsersService } from '../../users/application/users.service';
 import { ScenariosRepository } from './repositories/scenarios.repository';
 import { SimulationEndReason } from '../../../common/enums';
@@ -262,7 +260,7 @@ export class SimulationAiService {
   private readonly logger = new Logger(SimulationAiService.name);
 
   constructor(
-    private readonly genaiService: GenaiProvider,
+    private readonly router: AiProviderRouter,
     private readonly usersService: UsersService,
     private readonly scenariosRepository: ScenariosRepository,
   ) {}
@@ -293,18 +291,35 @@ export class SimulationAiService {
     const maxAttempts = _MAX_PARSE_RETRIES + 1;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const response = await this.genaiService.chatStructured({
-        messages: chatMessages,
-        systemInstruction,
-        responseSchema: SIMULATION_RESPONSE_SCHEMA,
-      });
+      const response = await this.router
+        .forFeature('simulation')
+        .chatStructured({
+          messages: chatMessages,
+          systemInstruction,
+          responseSchema: SIMULATION_RESPONSE_SCHEMA,
+        });
+
+      // GenaiProvider returns { text: "...", usageMetadata: {...} }, OpenaiProvider returns the parsed object directly.
+      const rawText =
+        response !== null &&
+        typeof response === 'object' &&
+        'text' in (response as object)
+          ? response.text
+          : JSON.stringify(response);
+
+      const tokenCount =
+        response !== null &&
+        typeof response === 'object' &&
+        'usageMetadata' in (response as object)
+          ? response.usageMetadata?.totalTokenCount
+          : undefined;
 
       try {
-        const parsed = this.parseAiResponse(response.text);
+        const parsed = this.parseAiResponse(rawText);
         return {
           ...parsed,
           feedback: parsed.feedback ?? null,
-          tokenCount: response.usageMetadata?.totalTokenCount,
+          tokenCount,
         };
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
@@ -357,7 +372,7 @@ export class SimulationAiService {
       ? `IMPORTANT: The learner has reached the maximum number of turns (${scenario.maxTurns}). You MUST end the session now. Set sessionEnded to true, endReason to "COMPLETED", and provide final scores and summary. Wrap up the conversation naturally before scoring.`
       : '';
 
-    return this.genaiService.renderPrompt('simulation-conversation', {
+    return this.router.renderPrompt('simulation-conversation', {
       scenario: {
         systemPrompt: scenario.systemPrompt,
         title: scenario.title,
