@@ -20,7 +20,6 @@ export interface FillBlankOptions extends BaseExerciseOptions {
   type: ExerciseType.FILL_BLANK;
   blanks: number; // Số chỗ trống
   acceptedAnswers?: string[][]; // Mảng các đáp án chấp nhận được cho mỗi chỗ trống
-  acceptWithoutDiacritics?: boolean; // Chấp nhận đáp án không dấu (dùng cho khóa A1/A2)
 }
 
 export interface FillBlankAnswer {
@@ -59,7 +58,6 @@ export interface TranslationOptions extends BaseExerciseOptions {
   sourceLanguage: string;
   targetLanguage: string;
   acceptedTranslations?: string[]; // Các bản dịch chấp nhận được
-  acceptWithoutDiacritics?: boolean;
 }
 
 export interface TranslationAnswer {
@@ -72,7 +70,6 @@ export interface ListeningOptions extends BaseExerciseOptions {
   audioUrl: string;
   transcriptType: 'exact' | 'keywords'; // Kiểm tra chính xác hay chỉ keywords
   keywords?: string[]; // Nếu transcriptType = 'keywords'
-  acceptWithoutDiacritics?: boolean;
 }
 
 export interface ListeningAnswer {
@@ -86,7 +83,6 @@ export interface SpeakingOptions extends BaseExerciseOptions {
   promptAudioUrl: string;
   transcriptType: 'exact' | 'keywords';
   keywords?: string[];
-  acceptWithoutDiacritics?: boolean;
 }
 
 export interface SpeakingAnswer {

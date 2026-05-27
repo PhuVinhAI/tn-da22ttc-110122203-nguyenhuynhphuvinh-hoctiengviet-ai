@@ -33,6 +33,24 @@ export class ExercisesRepository {
     return this.repository.findOne({ where: { id } });
   }
 
+  async findByIdWithCourseLevel(id: string): Promise<Exercise | null> {
+    return this.repository.findOne({
+      where: { id },
+      relations: [
+        'lesson',
+        'lesson.module',
+        'lesson.module.course',
+        'exerciseSet',
+        'exerciseSet.lesson',
+        'exerciseSet.lesson.module',
+        'exerciseSet.lesson.module.course',
+        'exerciseSet.module',
+        'exerciseSet.module.course',
+        'exerciseSet.course',
+      ],
+    });
+  }
+
   async update(id: string, data: Partial<Exercise>): Promise<Exercise> {
     await this.repository.update(id, data);
     const exercise = await this.findById(id);

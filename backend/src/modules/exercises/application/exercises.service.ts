@@ -7,12 +7,7 @@ import { AnswerNormalizer } from './answer-normalizer';
 import { Transactional } from '../../../common/decorators';
 import { Exercise } from '../domain/exercise.entity';
 import { UserExerciseResult } from '../domain/user-exercise-result.entity';
-import {
-  isFillBlankOptions,
-  isListeningOptions,
-  isSpeakingOptions,
-  isTranslationOptions,
-} from '../domain/exercise-options.types';
+import { UserLevel } from '../../../common/enums';
 import type { AssessmentContext } from '../domain/assessment.types';
 import {
   ExerciseStatsPort,
@@ -85,7 +80,11 @@ export class ExercisesService implements ExerciseStatsPort {
     userAnswer: any,
     timeTaken?: number,
   ): Promise<UserExerciseResult> {
-    const exercise = await this.findById(exerciseId);
+    const exercise =
+      await this.exercisesRepository.findByIdWithCourseLevel(exerciseId);
+    if (!exercise) {
+      throw new NotFoundException(`Exercise with ID ${exerciseId} not found`);
+    }
 
     const normalizedAnswer = this.answerNormalizer.normalize(
       exercise.exerciseType,
@@ -93,7 +92,6 @@ export class ExercisesService implements ExerciseStatsPort {
     );
 
     const context = this.buildAssessmentContext(exercise);
-
 
     const { isCorrect } = this.answerAssessment.assessAnswer(
       exercise.exerciseType,
@@ -147,14 +145,30 @@ export class ExercisesService implements ExerciseStatsPort {
   }
 
   private buildAssessmentContext(exercise: Exercise): AssessmentContext | undefined {
-    const opts = exercise.options;
-    if (!opts) return undefined;
+    const level = this.resolveCourseLevel(exercise);
+    if (!level) return undefined;
 
-    if (isFillBlankOptions(opts)) return { acceptWithoutDiacritics: opts.acceptWithoutDiacritics };
-    if (isListeningOptions(opts)) return { acceptWithoutDiacritics: opts.acceptWithoutDiacritics };
-    if (isSpeakingOptions(opts)) return { acceptWithoutDiacritics: opts.acceptWithoutDiacritics };
-    if (isTranslationOptions(opts)) return { acceptWithoutDiacritics: opts.acceptWithoutDiacritics };
+    const acceptWithoutDiacritics =
+      level === UserLevel.A1 || level === UserLevel.A2;
 
-    return undefined;
+    return { acceptWithoutDiacritics };
+  }
+
+  private resolveCourseLevel(exercise: Exercise): UserLevel | undefined {
+    // Path 1: Exercise → Lesson → Module → Course
+    const viaLesson = exercise.lesson?.module?.course?.level as
+      | UserLevel
+      | undefined;
+    if (viaLesson) return viaLesson;
+
+    // Path 2: Exercise → ExerciseSet → (lesson|module|course)
+    const set = exercise.exerciseSet;
+    if (!set) return undefined;
+
+    return (
+      (set.lesson?.module?.course?.level as UserLevel | undefined) ??
+      (set.module?.course?.level as UserLevel | undefined) ??
+      (set.course?.level as UserLevel | undefined)
+    );
   }
 }
