@@ -3,6 +3,7 @@ import { ExerciseType } from '../../../common/enums';
 import type { ExerciseAnswer } from '../domain/exercise-options.types';
 import type {
   AssessmentResult,
+  AssessmentContext,
   CheckerAdapter,
 } from '../domain/assessment.types';
 import { MultipleChoiceChecker } from './checkers/multiple-choice.checker';
@@ -32,6 +33,7 @@ export class AnswerAssessment {
     exerciseType: ExerciseType,
     userAnswer: ExerciseAnswer,
     correctAnswer: ExerciseAnswer,
+    context?: AssessmentContext,
   ): AssessmentResult {
     const checker = this.registry.get(exerciseType);
 
@@ -42,6 +44,6 @@ export class AnswerAssessment {
       };
     }
 
-    return checker.check(userAnswer, correctAnswer);
+    return checker.check(userAnswer, correctAnswer, context);
   }
 }

@@ -7,6 +7,16 @@ export function normalizeVietnamese(text: string): string {
     .replace(/[.,!?;:]/g, '');
 }
 
+// Strips Vietnamese tone marks and diacritics so accents-free input is accepted.
+// e.g. "tieng viet" matches "tiếng việt", "di" matches "đi"
+export function stripVietnameseDiacritics(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D');
+}
+
 export function calculateSimilarity(str1: string, str2: string): number {
   const longer = str1.length > str2.length ? str1 : str2;
   const shorter = str1.length > str2.length ? str2 : str1;

@@ -1,10 +1,12 @@
 import type {
   CheckerAdapter,
   AssessmentResult,
+  AssessmentContext,
 } from '../../domain/assessment.types';
 import type { TranslationAnswer } from '../../domain/exercise-options.types';
 import {
   normalizeVietnamese,
+  stripVietnameseDiacritics,
   calculateSimilarity,
 } from '../utils/text-normalizer';
 
@@ -14,6 +16,7 @@ export class TranslationChecker implements CheckerAdapter {
   check(
     userAnswer: TranslationAnswer,
     correctAnswer: TranslationAnswer,
+    context?: AssessmentContext,
   ): AssessmentResult {
     const userTranslation = userAnswer.translation;
     const correctTranslation = correctAnswer.translation;
@@ -30,9 +33,20 @@ export class TranslationChecker implements CheckerAdapter {
     const normalizedCorrect = normalizeVietnamese(correctTranslation);
     const similarity = calculateSimilarity(normalizedUser, normalizedCorrect);
 
-    return {
-      isCorrect: similarity > this.SIMILARITY_THRESHOLD,
-      similarity,
-    };
+    if (similarity > this.SIMILARITY_THRESHOLD) {
+      return { isCorrect: true, similarity };
+    }
+
+    if (context?.acceptWithoutDiacritics) {
+      const strippedUser = stripVietnameseDiacritics(normalizedUser);
+      const strippedCorrect = stripVietnameseDiacritics(normalizedCorrect);
+      const strippedSimilarity = calculateSimilarity(strippedUser, strippedCorrect);
+      return {
+        isCorrect: strippedSimilarity > this.SIMILARITY_THRESHOLD,
+        similarity: strippedSimilarity,
+      };
+    }
+
+    return { isCorrect: false, similarity };
   }
 }

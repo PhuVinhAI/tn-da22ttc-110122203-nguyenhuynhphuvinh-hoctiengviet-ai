@@ -1,14 +1,19 @@
 import type {
   CheckerAdapter,
   AssessmentResult,
+  AssessmentContext,
 } from '../../domain/assessment.types';
 import type { ListeningAnswer } from '../../domain/exercise-options.types';
-import { normalizeVietnamese } from '../utils/text-normalizer';
+import {
+  normalizeVietnamese,
+  stripVietnameseDiacritics,
+} from '../utils/text-normalizer';
 
 export class ListeningChecker implements CheckerAdapter {
   check(
     userAnswer: ListeningAnswer,
     correctAnswer: ListeningAnswer,
+    context?: AssessmentContext,
   ): AssessmentResult {
     const userTranscript = userAnswer.transcript;
     const correctTranscript = correctAnswer.transcript;
@@ -20,6 +25,16 @@ export class ListeningChecker implements CheckerAdapter {
     const normalizedUser = normalizeVietnamese(userTranscript);
     const normalizedCorrect = normalizeVietnamese(correctTranscript);
 
-    return { isCorrect: normalizedUser === normalizedCorrect };
+    if (normalizedUser === normalizedCorrect) return { isCorrect: true };
+
+    if (context?.acceptWithoutDiacritics) {
+      return {
+        isCorrect:
+          stripVietnameseDiacritics(normalizedUser) ===
+          stripVietnameseDiacritics(normalizedCorrect),
+      };
+    }
+
+    return { isCorrect: false };
   }
 }

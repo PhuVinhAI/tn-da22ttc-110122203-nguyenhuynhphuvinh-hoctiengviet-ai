@@ -7,9 +7,14 @@ export interface AssessmentResult {
   feedback?: string;
 }
 
+export interface AssessmentContext {
+  acceptWithoutDiacritics?: boolean;
+}
+
 export interface CheckerAdapter {
   check(
     userAnswer: ExerciseAnswer,
     correctAnswer: ExerciseAnswer,
+    context?: AssessmentContext,
   ): AssessmentResult;
 }

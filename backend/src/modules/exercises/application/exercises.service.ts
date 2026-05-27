@@ -8,6 +8,13 @@ import { Transactional } from '../../../common/decorators';
 import { Exercise } from '../domain/exercise.entity';
 import { UserExerciseResult } from '../domain/user-exercise-result.entity';
 import {
+  isFillBlankOptions,
+  isListeningOptions,
+  isSpeakingOptions,
+  isTranslationOptions,
+} from '../domain/exercise-options.types';
+import type { AssessmentContext } from '../domain/assessment.types';
+import {
   ExerciseStatsPort,
   ExerciseStatsResult,
 } from '../../admin/application/ports/dashboard-stats.ports';
@@ -85,10 +92,14 @@ export class ExercisesService implements ExerciseStatsPort {
       userAnswer,
     );
 
+    const context = this.buildAssessmentContext(exercise);
+
+
     const { isCorrect } = this.answerAssessment.assessAnswer(
       exercise.exerciseType,
       normalizedAnswer,
       exercise.correctAnswer,
+      context,
     );
 
     const queryRunner = (this as any).queryRunner;
@@ -133,5 +144,17 @@ export class ExercisesService implements ExerciseStatsPort {
 
   async getUserStats(userId: string) {
     return this.userExerciseResultsRepository.getStatsByUser(userId);
+  }
+
+  private buildAssessmentContext(exercise: Exercise): AssessmentContext | undefined {
+    const opts = exercise.options;
+    if (!opts) return undefined;
+
+    if (isFillBlankOptions(opts)) return { acceptWithoutDiacritics: opts.acceptWithoutDiacritics };
+    if (isListeningOptions(opts)) return { acceptWithoutDiacritics: opts.acceptWithoutDiacritics };
+    if (isSpeakingOptions(opts)) return { acceptWithoutDiacritics: opts.acceptWithoutDiacritics };
+    if (isTranslationOptions(opts)) return { acceptWithoutDiacritics: opts.acceptWithoutDiacritics };
+
+    return undefined;
   }
 }
