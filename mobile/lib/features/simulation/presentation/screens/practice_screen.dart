@@ -750,7 +750,8 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
     final theme = Theme.of(context);
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final mq = MediaQuery.of(context);
+    final bottomInset = mq.viewInsets.bottom + mq.viewPadding.bottom;
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),

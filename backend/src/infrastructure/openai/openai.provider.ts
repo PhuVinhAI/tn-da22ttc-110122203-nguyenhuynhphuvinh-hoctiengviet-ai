@@ -97,7 +97,7 @@ export class OpenaiProvider implements IAiProvider {
           type: 'json_schema',
           json_schema: {
             name: 'response',
-            schema: req.responseSchema,
+            schema: this.normalizeSchema(req.responseSchema),
             strict: false,
           },
         },
@@ -227,6 +227,24 @@ export class OpenaiProvider implements IAiProvider {
       });
 
     return { text: '', functionCalls };
+  }
+
+  private normalizeSchema(schema: any): any {
+    if (Array.isArray(schema)) {
+      return schema.map((item) => this.normalizeSchema(item));
+    }
+    if (schema && typeof schema === 'object') {
+      const result: Record<string, any> = {};
+      for (const [key, value] of Object.entries(schema)) {
+        if (key === 'type' && typeof value === 'string') {
+          result[key] = value.toLowerCase();
+        } else {
+          result[key] = this.normalizeSchema(value);
+        }
+      }
+      return result;
+    }
+    return schema;
   }
 
   private async executeWithRetry<T>(

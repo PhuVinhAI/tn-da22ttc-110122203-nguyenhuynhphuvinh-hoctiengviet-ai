@@ -15,6 +15,7 @@ class AppBottomSheet {
       isScrollControlled: isScrollControlled,
       isDismissible: isDismissible,
       enableDrag: enableDrag,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
         final c = AppTheme.colors(context);
