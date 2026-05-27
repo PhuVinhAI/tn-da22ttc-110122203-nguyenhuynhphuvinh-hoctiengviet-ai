@@ -10,14 +10,14 @@ import '../../domain/bookmark_models.dart';
 import '../../../../core/services/audio_player_service.dart';
 import '../../../profile/data/profile_providers.dart';
 
-class FlashcardScreen extends ConsumerStatefulWidget {
-  const FlashcardScreen({super.key});
+class SavedWordsScreen extends ConsumerStatefulWidget {
+  const SavedWordsScreen({super.key});
 
   @override
-  ConsumerState<FlashcardScreen> createState() => _FlashcardScreenState();
+  ConsumerState<SavedWordsScreen> createState() => _SavedWordsScreenState();
 }
 
-class _FlashcardScreenState extends ConsumerState<FlashcardScreen>
+class _SavedWordsScreenState extends ConsumerState<SavedWordsScreen>
     with TickerProviderStateMixin {
   final PageController _pageController = PageController();
   late AnimationController _flipController;
@@ -105,7 +105,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen>
           _items = items;
           return _buildCardStack(items, preferredDialect, safeIndex);
         },
-        loading: () => const _FlashcardLoading(),
+        loading: () => const _SavedWordsLoading(),
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 48),
@@ -209,8 +209,8 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen>
   }
 }
 
-class _FlashcardLoading extends StatelessWidget {
-  const _FlashcardLoading();
+class _SavedWordsLoading extends StatelessWidget {
+  const _SavedWordsLoading();
 
   @override
   Widget build(BuildContext context) {

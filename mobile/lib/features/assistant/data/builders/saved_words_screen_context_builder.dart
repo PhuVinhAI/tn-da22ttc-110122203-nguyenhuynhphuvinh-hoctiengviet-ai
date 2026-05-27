@@ -6,10 +6,10 @@ import 'bookmark_context_summaries.dart';
 import 'course_context_summaries.dart';
 import '../../../profile/data/profile_providers.dart';
 
-/// `ScreenContext` builder for `/bookmarks/flashcard`. Pulls the full
-/// flashcard deck from `flashcardBookmarksProvider` so the AI can help with
+/// `ScreenContext` builder for `/bookmarks/saved-words`. Pulls the full
+/// saved words deck from `flashcardBookmarksProvider` so the AI can help with
 /// review even though the current card index lives only in widget state.
-ScreenContext flashcardScreenContextBuilder(Ref ref, RouteMatch match) {
+ScreenContext savedWordsScreenContextBuilder(Ref ref, RouteMatch match) {
   final bookmarksAsync = ref.watch(flashcardBookmarksProvider);
   final status = asyncLoadStatus(bookmarksAsync);
 
@@ -17,7 +17,7 @@ ScreenContext flashcardScreenContextBuilder(Ref ref, RouteMatch match) {
   final preferredDialect = profileAsync.value?.preferredDialect;
 
   final data = <String, dynamic>{
-    'screenType': 'bookmarksFlashcard',
+    'screenType': 'savedWords',
     'status': status,
   };
 
@@ -38,8 +38,8 @@ ScreenContext flashcardScreenContextBuilder(Ref ref, RouteMatch match) {
 
   return ScreenContext(
     route: match.location,
-    displayName: 'Flashcards',
-    barPlaceholder: 'Ask about flashcards?',
+    displayName: 'Saved Words',
+    barPlaceholder: 'Ask about saved words?',
     data: data,
   );
 }

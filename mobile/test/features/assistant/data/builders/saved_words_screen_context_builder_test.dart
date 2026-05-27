@@ -15,8 +15,8 @@ class _StubFlashcardBookmarks extends FlashcardBookmarksNotifier {
 }
 
 void main() {
-  group('flashcardScreenContextBuilder', () {
-    test('produces bookmarksFlashcard context with deck summaries', () async {
+  group('savedWordsScreenContextBuilder', () {
+    test('produces savedWords context with deck summaries', () async {
       final items = [
         BookmarkWithVocabulary(
           id: 'bm-1',
@@ -46,7 +46,7 @@ void main() {
 
       final ctx = container.read(currentScreenContextProvider);
 
-      expect(ctx.data['screenType'], 'bookmarksFlashcard');
+      expect(ctx.data['screenType'], 'savedWords');
       expect(ctx.data['status'], 'data');
       expect(ctx.data['cardCount'], 1);
 

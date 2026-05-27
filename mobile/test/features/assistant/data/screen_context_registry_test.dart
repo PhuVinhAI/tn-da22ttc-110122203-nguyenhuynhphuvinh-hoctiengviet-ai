@@ -34,7 +34,7 @@ void main() {
           routePattern: '/bookmarks/flashcard',
           location: '/bookmarks/flashcard',
           pathParameters: {},
-          screenType: 'bookmarksFlashcard',
+          screenType: 'savedWords',
         ),
         (
           routePattern: '/lessons/:id/exercises',

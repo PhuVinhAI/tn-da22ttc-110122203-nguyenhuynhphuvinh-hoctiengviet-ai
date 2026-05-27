@@ -15,7 +15,7 @@ import '../../features/courses/presentation/screens/courses_screen.dart';
 import '../../features/courses/presentation/screens/course_detail_screen.dart';
 import '../../features/courses/presentation/screens/module_detail_screen.dart';
 import '../../features/bookmarks/presentation/screens/bookmarks_screen.dart';
-import '../../features/bookmarks/presentation/screens/flashcard_screen.dart';
+import '../../features/bookmarks/presentation/screens/saved_words_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/settings_screen.dart';
 import '../../features/profile/data/profile_providers.dart';
@@ -216,7 +216,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/bookmarks/flashcard',
-        builder: (context, state) => const FlashcardScreen(),
+        builder: (context, state) => const SavedWordsScreen(),
       ),
       GoRoute(
         path: '/lessons/:id',

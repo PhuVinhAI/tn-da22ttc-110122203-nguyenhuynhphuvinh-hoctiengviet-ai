@@ -44,7 +44,7 @@ Câu hỏi tương tác có kiểu xác định (trắc nghiệm, điền chỗ 
 _Avoid_: Exercise
 
 **Bộ bài tập**:
-Tập hợp **Bài tập** liên quan. Bộ do quản trị viên tạo là công khai cho tất cả **Học viên**. **Bộ bài tập tùy chỉnh** do AI sinh theo yêu cầu học viên là cá nhân — chỉ học viên tạo mới thấy.
+Tập hợp **Bài tập** liên quan. Bộ do quản trị viên tạo là công khai cho tất cả **Học viên**. **Bộ bài tập tùy chỉnh** do AI sinh theo yêu cầu học viên là cá nhân — chỉ học viên tạo mới thấy. Học viên kích hoạt sinh bộ tùy chỉnh trực tiếp qua UI.
 _Avoid_: Exercise set
 
 **Câu trả lời**:
@@ -62,15 +62,12 @@ _Avoid_: UserExerciseResult, Exercise result
 ### Mục tiêu
 
 **Mục tiêu ngày**:
-Mục tiêu học tập preset mà **Học viên** đặt cho mỗi ngày. Có 3 loại: bài tập hoàn thành, phút truy cập app, bài học hoàn thành. Học viên có thể có nhiều mục tiêu hoạt động cùng lúc và CRUD tự do. Mục tiêu lặp lại mỗi ngày, xoá vĩnh viễn khi xoá. Hoàn thành khi đã thực hiện bất kể đúng sai.
+Mục tiêu học tập preset mà **Học viên** đặt cho mỗi ngày. Có 3 loại: bài tập hoàn thành (`EXERCISES`), hội thoại mô phỏng hoàn thành (`SIMULATIONS`), bài học hoàn thành (`LESSONS`). Học viên có thể có nhiều mục tiêu hoạt động cùng lúc và CRUD tự do. Mục tiêu lặp lại mỗi ngày, xoá vĩnh viễn khi xoá. Hoàn thành khi đã thực hiện bất kể đúng sai.
 _Avoid_: Daily goal, Daily target
 
-**Phút truy cập app**:
-Tổng thời gian app foreground trong một ngày lịch (0:00–23:59 giờ Việt Nam). Dùng làm đơn vị đo cho loại mục tiêu "phút học/ngày".
-_Avoid_: Study time, Session time
 
 **Chuỗi mục tiêu**:
-Số ngày liên tiếp **Học viên** đạt TẤT CẢ **Mục tiêu ngày**. Được tính theo ngày lịch giờ Việt Nam. Hiện trên home và profile.
+Số ngày liên tiếp **Học viên** đạt TẤT CẢ **Mục tiêu ngày**. Được tính theo ngày lịch giờ Việt Nam. Lưu 2 giá trị: `currentStreak` (chuỗi đang chạy — hiện trên home) và `longestStreak` (chuỗi dài nhất mọi thời — hiện trên profile).
 _Avoid_: Streak, Daily streak
 
 **Nhắc mục tiêu**:
@@ -145,16 +142,13 @@ Một lượt trong **Hội thoại** — do học viên gửi, AI phản hồi,
 _Avoid_: ConversationMessage, Chat message
 
 **Công cụ AI**:
-Hàm mà AI có thể gọi trong vòng lặp agent (Reason-Act). Mỗi công cụ định nghĩa tham số bằng Zod schema. Phân làm 3 loại theo semantics:
-- **Tool đọc**: truy xuất data của **Học viên** (tiến trình, bookmarks, lịch sử bài tập) hoặc catalog hệ thống (từ vựng, ngữ pháp, bài học). Execute trực tiếp.
-- **Tool ghi trực tiếp**: action reversible nhanh (vd: toggle **Yêu sách**). Execute trực tiếp.
-- **Tool đề xuất** (propose): action nhạy hơn (vd: CRUD **Mục tiêu ngày**, sinh **Bộ bài tập do AI sinh**). Backend trả về proposal payload; UI mobile hiện inline confirm card; học viên bấm OK → client gọi endpoint thật.
+Hàm mà AI có thể gọi trong vòng lặp agent (Reason-Act). Mỗi công cụ định nghĩa tham số bằng Zod schema. V1 chỉ có **Tool đọc**: truy xuất data của **Học viên** (tiến trình, bookmarks, lịch sử bài tập) hoặc catalog hệ thống (từ vựng, ngữ pháp, bài học). Execute trực tiếp.
 
-Tool **không cho phép** progression-mutating action (vd: `mark_lesson_complete`, `update_profile.level`) trong V1. Tool nhận `userId` của **Hội thoại** owner từ execution context (không từ AI params) để scope an toàn.
+Tool **không cho phép** bất kỳ hành động ghi/xóa data nào trong V1. Tool nhận `userId` của **Hội thoại** owner từ execution context (không từ AI params) để scope an toàn.
 _Avoid_: Tool, AI Tool, Function call
 
 **Bộ bài tập do AI sinh**:
-**Bộ bài tập tùy chỉnh** (cá nhân) được tạo tự động bởi AI dựa trên ngữ cảnh bài học và cấu hình yêu cầu. Có vòng đời: đang sinh → sẵn sàng → thất bại.
+**Bộ bài tập tùy chỉnh** (cá nhân) được tạo tự động bởi AI dựa trên ngữ cảnh bài học và cấu hình yêu cầu. Học viên kích hoạt trực tiếp qua UI (không qua **Công cụ AI**). Có vòng đời: đang sinh → sẵn sàng → thất bại.
 _Avoid_: AI-generated exercise set
 
 **Ngữ cảnh màn hình**:
@@ -241,7 +235,7 @@ _Avoid_: Simulation result, Session result, Score
 
 ## Nghi vấn đã giải quyết
 
-- ~~"Flashcard" được dùng trong mobile app nhưng không phải hệ thống spaced repetition — chỉ là xem **Từ vựng** đã **Yêu sách**.~~ **Đã giải quyết:** Đổi thành **Lướt yêu sách**. Code rename `flashcard_screen` → `saved_words_screen`.
+- ~~"Flashcard" được dùng trong mobile app nhưng không phải hệ thống spaced repetition — chỉ là xem **Từ vựng** đã **Yêu sách**.~~ **Đã giải quyết:** Tên domain chuẩn là **Lướt yêu sách**. Code đã rename: `flashcard_screen.dart` → `saved_words_screen.dart`, `FlashcardScreen` → `SavedWordsScreen`, `screenType` → `savedWords`.
 - ~~"Unit" được dùng trong TECH_STACK.md (admin) và seed-data prompt nhưng code entity thực tế là "Chủ đề" (Module) — cần thống nhất thuật ngữ.~~ **Đã giải quyết:** Chuẩn hoá术语 thành "Chủ đề", tránh "Module"/"Unit". Code entity giữ nguyên tên `Module`.
 - **Học viên được làm lại Bài tập** — kết quả cũ bị ghi đè (upsert). Unique constraint (userId, exerciseId) phù hợp. Làm lại bài không tự động thay đổi **Tiến trình bài học**.
 - **Tiến trình chủ đề và Tiến trình khóa học tự động cập nhật** — khi học viên completeLesson, backend tự kiểm tra và cập nhật tiến trình cấp chủ đề/khóa học. Không yêu cầu học viên nhấn nút thủ công.
@@ -257,18 +251,18 @@ _Avoid_: Simulation result, Session result, Score
 - **AI sửa lỗi phát âm/ngữ pháp từ text** — defer, sẽ grill riêng. Có thể là Công cụ AI thêm hoặc làm trực tiếp trong response.
 - **ConversationStatus (ACTIVE/ARCHIVED) không cần thiết** — Hội thoại chỉ tồn tại hoặc bị soft-delete. Bỏ enum `ConversationStatus`.
 - ~~"User" vừa chỉ **Học viên** vừa chỉ **Quản trị viên** — code dùng chung entity User với RBAC phân biệt, nhưng domain nên tách biệt khái niệm.~~ **Đã giải quyết:** Gọi theo ngữ cảnh sử dụng. Dual-role (USER+ADMIN) gọi kèm ngoặc, vd: "Quản trị viên (vai trò USER+ADMIN)".
-- ~~SSE streaming endpoint gọi AI trực tiếp không qua agent loop — không hỗ trợ **Công cụ AI** trong chế độ streaming.~~ **Đã xác nhận là bug:** Streaming cần gọi **Công cụ AI** qua agent loop như non-streaming. Cần sửa khi bổ sung tool thật.
+- ~~SSE streaming endpoint gọi AI trực tiếp không qua agent loop — không hỗ trợ **Công cụ AI** trong chế độ streaming.~~ **Đã sửa:** Single endpoint `POST /ai/chat/stream` (SSE) gọi `AgentService.runTurnStream()` qua agent loop. Fix đã được triển khai cùng lúc streaming refactor — xác nhận từ `ai.controller.ts`.
 - ~~`AI_GENERATE_EXERCISE` và `AI_CORRECT_GRAMMAR` có permission enum nhưng chưa có endpoint triển khai.~~ **Đã xác nhận:** `AI_GENERATE_EXERCISE` đáng lẽ phải guard endpoint sinh bài tập hiện tại (thiếu). `AI_CORRECT_GRAMMAR` là tính năng tương lai cho AI chat sửa ngữ pháp.
 - ~~`embed()`, `uploadFile()`, `generateImage()` trên `IAiProvider` khai báo nhưng chưa implement.~~ **Đã xác nhận:** Placeholder cho tương lai, có config sẵn (imagen-4.0-generate-001, text-embedding-004). Chưa có kế hoạch triển khai sớm.
-- **Mục tiêu ngày dùng preset, không tự do** — 3 loại: bài tập hoàn thành, phút truy cập app, bài học hoàn thành. Không cho tự viết tên/loại goal vì mỗi loại cần aggregation logic riêng trên backend.
+- **Mục tiêu ngày dùng preset, không tự do** — 3 loại: bài tập hoàn thành (`EXERCISES`), hội thoại mô phỏng hoàn thành (`SIMULATIONS`), bài học hoàn thành (`LESSONS`). Không cho tự viết tên/loại goal vì mỗi loại cần aggregation logic riêng trên backend.
 - **Chuỗi mục tiêu yêu cầu đạt TẤT CẢ** — đạt 1 trong 3 goal không tính chuỗi. Tiêu chuẩn rõ ràng, tránh mơ hồ.
-- **Phút truy cập app = thời gian app foreground toàn bộ** — không phân biệt screen. Đếm khi app foreground, pause khi minimize/lock. Mobile đếm timer, sync tổng phút hôm nay lên backend khi có event.
+- **Loại mục tiêu "phút truy cập app" đã bị xóa** — thay bằng `SIMULATIONS` (hội thoại mô phỏng hoàn thành). Mobile không còn cần sync timer foreground lên backend.
 - **Timezone hardcode Asia/Ho_Chi_Minh** — app học tiếng Việt, user đa số ở VN. Không cần timezone picker cho MVP.
 - **Hội thoại là phiên hỏi đáp ngắn 1-ngữ-cảnh, không phải long thread như ChatGPT** — mỗi lần kéo thanh trợ lý lên để hỏi → Hội thoại mới (lazy create lúc gửi tin nhắn đầu tiên). Ngữ cảnh màn hình đông cứng tại thời điểm tạo. Thanh trợ lý persistent xuyên route, có nút **Reset** để mở phiên mới với ngữ cảnh hiện tại. Học viên muốn tiếp Hội thoại cũ phải vào màn lịch sử.
 - **Ngữ cảnh màn hình gửi dày, mobile build, JSONB** — mobile push toàn bộ snapshot dữ liệu hiển thị (text nội dung, câu hỏi đang làm, ...) lên cùng tin nhắn đầu tiên; backend lưu JSONB. **Công cụ AI** chỉ dành cho dữ liệu nằm NGOÀI snapshot (lịch sử cross-screen, catalog tra cứu, ghi data). Lý do: bài học và screen content trong app rất nhỏ — payload không đáng lo, lợi về latency và đơn giản.
-- **Tool catalog V1 = reads + low-risk writes** — AI không tự ý mark complete bài, đổi level học viên, hay xoá data. Writes chia 2 nhánh: **direct execute** (bookmark toggle) và **propose + confirm** (CRUD Mục tiêu ngày, sinh Bộ bài tập tùy chỉnh). `userId` luôn lấy từ Hội thoại owner, không từ AI params.
-- **V1 catalog 12 tool** — `get_user_summary`, `get_progress_overview`, `list_recent_exercise_results`, `list_bookmarks`, `search_vocabulary`, `search_grammar_rules`, `find_lessons`, `get_lesson_detail`, `toggle_bookmark` (direct), `propose_create_daily_goal`, `propose_update_daily_goal`, `propose_generate_custom_exercise_set` (propose). V2 (sau): get_*_detail còn lại, `get_daily_goal_history`, `propose_delete_*`, `list_conversations`.
-- **Propose action: mobile gọi endpoint thật** — tool `propose_*` chỉ trả proposal payload kèm trong tool result; UI mobile hiện inline confirm card; học viên bấm OK thì client tự gọi endpoint REST thật (POST /daily-goals, POST .../custom, etc.). Backend không lưu pending proposal — audit trail dựa vào toolCalls/toolResults trong Hội thoại + log của endpoint thật.
+- **Tool catalog V1 = reads only** — AI không tự ý mark complete bài, đổi level học viên, hay xoá/ghi data. Toàn bộ 8 tool V1 là read-only. `userId` luôn lấy từ Hội thoại owner, không từ AI params.
+- **V1 catalog 8 tool (read-only)** — `get_user_summary`, `get_progress_overview`, `list_recent_exercise_results`, `list_bookmarks`, `search_vocabulary`, `search_grammar_rules`, `find_lessons`, `get_lesson_detail`. Tất cả đều là **Tool đọc**, execute trực tiếp. Các write/propose tool (`toggle_bookmark`, `propose_create_daily_goal`, `propose_update_daily_goal`, `propose_generate_custom_exercise_set`) đã bị xóa khỏi scope và không còn được implement.
+- **Write/propose tool đã bị xóa khỏi V1** — `toggle_bookmark`, `propose_create_daily_goal`, `propose_update_daily_goal`, `propose_generate_custom_exercise_set` không còn được implement. Tất cả tool V1 là read-only.
 - **Kiến trúc Thanh Trợ lý AI = MaterialApp.router.builder wrap** — toàn bộ router tree được wrap bằng `GlobalAssistantShell` widget. Bar luôn ở đáy màn hình, không dùng Overlay (modal/dialog vẫn được ở trên bar). Visibility logic watch route hiện tại để hide ở splash/auth/onboarding.
 - **Bar hiện cả ở exercise play** — học viên có thể hỏi AI giữa lúc làm bài. Tránh "gian lận" bằng cách design AI response style (gợi ý hint không đưa đáp án thẳng) thay vì hide UI. Phù hợp triết lý "không giới hạn token cho học viên".
 - **Mid mode là single-exchange focused, không phải chat list** — phase Soạn chỉ có textarea, phase Đọc chỉ có AI message hiện tại. Tap **Soạn tiếp** = ẩn AI message cũ, hiện textarea trống mới (Hội thoại server-side vẫn liên tục, AI vẫn nhớ ngữ cảnh). Muốn xem Tin nhắn trước → vào trạng thái Toàn màn hình.
@@ -296,6 +290,6 @@ _Avoid_: Simulation result, Session result, Score
 - **Chỉ 1 phiên chưa hoàn thành** — muốn bắt đầu tình huống mới phải kết thúc/hủy phiên hiện tại.
 - **Permission `SIMULATION_ACCESS`** — 1 permission duy nhất cho học viên, gán mặc định role USER. Admin CRUD tình huống sẽ dùng `SIMULATION_MANAGE` (sau).
 - **AI integration: dùng lại GenAI infra, logic riêng** — `SimulationAiService` trong module simulations, prompt template riêng `simulation-conversation.yaml`, inject ProgressService trực tiếp (không dùng agent loop/tool system).
-- **Không ảnh hưởng hệ thống tiến trình/mục tiêu hiện tại** — simulation không tính vào Mục tiêu ngày. Phút truy cập app vẫn tính. Thống kê simulation riêng từ SimulationResult.
+- **Simulation tích hợp vào hệ thống Mục tiêu ngày** — **Hội thoại mô phỏng** hoàn thành (`SimulationResult` được tạo) tính vào loại mục tiêu `SIMULATIONS`. Thống kê simulation từ `SimulationResult`.
 - **Seed data: 6 danh mục, ~15 tình huống, A1–B2** — Mua sắm, Ăn uống, Di chuyển, Y tế, Công việc, Đời sống. 2-3 tình huống mỗi danh mục.
 - **Bài tập nhập text A1/A2 chấp nhận không dấu** — các kiểu bài yêu cầu gõ tiếng Việt (điền chỗ trống, nghe, nói, dịch) hỗ trợ flag `acceptWithoutDiacritics: true` trong `options`. Khi bật, hệ thống chấp nhận đáp án thiếu dấu thanh/dấu chữ (vd: "tieng" khớp "tiếng", "di" khớp "đi"). Luôn kiểm tra có dấu trước — đúng thì đúng luôn; sai mới fallback sang so sánh không dấu. Dùng cho khóa A1/A2 vì người học ngoại quốc ở cấp đầu thường chưa biết gõ tiếng Việt có dấu từ bàn phím. Kỹ thuật: NFD normalize + strip combining marks U+0300–U+036F + `đ→d`. Bài tập dịch (kiểu fuzzy) dùng lại ngưỡng similarity 0.8 sau khi strip.
