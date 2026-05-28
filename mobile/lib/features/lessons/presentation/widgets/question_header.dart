@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/exercise_models.dart';
+import '../../domain/exercise_renderer.dart';
 import '../../domain/exercise_theme_helper.dart';
 
 class QuestionHeader extends StatelessWidget {
   const QuestionHeader({
     super.key,
     required this.exercise,
-    required this.renderer,
+    required this.exerciseRenderer,
   });
 
   final Exercise exercise;
-  final Widget renderer;
+  final ExerciseRenderer exerciseRenderer;
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +54,10 @@ class QuestionHeader extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        renderer,
+        if (exerciseRenderer.showsQuestion) ...[
+          const SizedBox(height: 16),
+          exerciseRenderer.buildQuestion(exercise, context),
+        ],
       ],
     );
   }

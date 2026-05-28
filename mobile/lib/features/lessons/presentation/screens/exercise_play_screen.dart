@@ -12,6 +12,7 @@ import '../../../assistant/data/exercise_context_sanitizer.dart';
 import '../../data/lesson_providers.dart';
 import '../../domain/exercise_models.dart';
 import '../../domain/exercise_session.dart';
+import '../../domain/exercise_renderer.dart';
 import '../../domain/exercise_renderer_registry.dart';
 import '../../domain/exercise_theme_helper.dart';
 
@@ -593,7 +594,7 @@ class _ExercisePlayScreenState extends ConsumerState<ExercisePlayScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  QuestionHeader(exercise: exercise),
+                  QuestionHeader(exercise: exercise, renderer: renderer),
                   const SizedBox(height: 16),
                   renderer.buildInput(
                     exercise,
@@ -660,8 +661,9 @@ class _ExercisePlayScreenState extends ConsumerState<ExercisePlayScreen> {
 }
 
 class QuestionHeader extends StatelessWidget {
-  const QuestionHeader({super.key, required this.exercise});
+  const QuestionHeader({super.key, required this.exercise, required this.renderer});
   final Exercise exercise;
+  final ExerciseRenderer renderer;
 
   @override
   Widget build(BuildContext context) {
@@ -700,13 +702,15 @@ class QuestionHeader extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        Text(
-          exercise.question,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+        if (renderer.showsQuestion) ...[
+          const SizedBox(height: 12),
+          Text(
+            exercise.question,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

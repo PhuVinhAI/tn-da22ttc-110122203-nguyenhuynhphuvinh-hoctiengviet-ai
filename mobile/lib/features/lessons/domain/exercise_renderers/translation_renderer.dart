@@ -12,6 +12,9 @@ class TranslationRenderer extends ExerciseRenderer {
   ExerciseType get type => ExerciseType.translation;
 
   @override
+  bool get showsQuestion => false;
+
+  @override
   bool validateAnswer(Exercise exercise, dynamic answer) {
     return answer is String && answer.trim().isNotEmpty;
   }

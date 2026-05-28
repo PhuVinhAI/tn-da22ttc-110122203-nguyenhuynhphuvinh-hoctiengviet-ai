@@ -165,7 +165,7 @@ class _ExerciseStepWidgetState extends ConsumerState<ExerciseStepWidget> {
           const SizedBox(height: 24),
           QuestionHeader(
             exercise: widget.exercise,
-            renderer: _renderer.buildQuestion(widget.exercise, context),
+            exerciseRenderer: _renderer,
           ),
           const SizedBox(height: 24),
           if (!_submitted)

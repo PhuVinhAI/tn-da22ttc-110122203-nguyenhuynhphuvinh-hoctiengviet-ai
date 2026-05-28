@@ -6,6 +6,8 @@ abstract class ExerciseRenderer {
 
   ExerciseType get type;
 
+  bool get showsQuestion => true;
+
   bool validateAnswer(Exercise exercise, dynamic answer);
 
   Map<String, dynamic> buildAnswerPayload(dynamic answer);

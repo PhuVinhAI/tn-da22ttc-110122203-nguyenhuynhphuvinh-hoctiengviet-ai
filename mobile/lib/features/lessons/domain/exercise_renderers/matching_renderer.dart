@@ -12,6 +12,9 @@ class MatchingRenderer extends ExerciseRenderer {
   ExerciseType get type => ExerciseType.matching;
 
   @override
+  bool get showsQuestion => false;
+
+  @override
   bool validateAnswer(Exercise exercise, dynamic answer) {
     if (answer is! List<MatchPair>) return false;
     final options = exercise.options as MatchingOptions;
