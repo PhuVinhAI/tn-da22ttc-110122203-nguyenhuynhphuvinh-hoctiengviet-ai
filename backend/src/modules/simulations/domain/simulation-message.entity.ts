@@ -24,6 +24,9 @@ export class SimulationMessage extends BaseEntity {
   @Column({ type: 'text' })
   content: string;
 
+  @Column({ name: 'content_en', type: 'text', nullable: true })
+  contentEn: string | null;
+
   @Column({
     type: 'jsonb',
     nullable: true,

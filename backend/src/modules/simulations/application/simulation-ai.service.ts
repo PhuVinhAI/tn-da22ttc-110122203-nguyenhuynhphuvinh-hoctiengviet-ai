@@ -66,6 +66,7 @@ export interface SimulationAiTurnResponse {
     speakerCharacterId: string;
     speakerName: string;
     content: string;
+    contentEn: string;
   }>;
   nextTurnCharacterId: string;
   feedback: SimulationMessageFeedback | null;
@@ -150,6 +151,7 @@ const AiResponseSchema = z.object({
         speakerCharacterId: z.string(),
         speakerName: z.string(),
         content: z.string().min(1),
+        contentEn: z.string().min(1),
       }),
     )
     .min(1),
@@ -191,8 +193,12 @@ const SIMULATION_RESPONSE_SCHEMA = {
             type: Type.STRING,
             nullable: false,
           },
+          contentEn: {
+            type: Type.STRING,
+            nullable: false,
+          },
         },
-        required: ['speakerCharacterId', 'speakerName', 'content'],
+        required: ['speakerCharacterId', 'speakerName', 'content', 'contentEn'],
       },
     },
     nextTurnCharacterId: {

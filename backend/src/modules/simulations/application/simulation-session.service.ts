@@ -170,6 +170,7 @@ export interface ClientSimulationMessage {
   speakerName: string;
   isLearner: boolean;
   content: string;
+  contentEn: string | null;
   feedback: SimulationMessage['feedback'];
   orderIndex: number;
 }
@@ -185,6 +186,7 @@ export interface SendMessageResult {
     speakerCharacterId: string;
     speakerName: string;
     content: string;
+    contentEn: string;
     orderIndex: number;
   }>;
   nextTurnCharacterId: string;
@@ -460,6 +462,7 @@ export class SimulationSessionService {
           speakerCharacterId: msg.speakerCharacterId,
           isLearner: false,
           content: msg.content,
+          contentEn: msg.contentEn,
           orderIndex: currentOrderIndex++,
         });
         returnedMessages.push({
@@ -467,6 +470,7 @@ export class SimulationSessionService {
           speakerCharacterId: msg.speakerCharacterId,
           speakerName: msg.speakerName,
           content: msg.content,
+          contentEn: msg.contentEn,
           orderIndex: aiMsg.orderIndex,
         });
       }
@@ -552,6 +556,7 @@ export class SimulationSessionService {
       speakerName,
       isLearner: message.isLearner,
       content: message.content,
+      contentEn: message.contentEn ?? null,
       feedback: message.feedback,
       orderIndex: message.orderIndex,
     };

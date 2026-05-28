@@ -15,6 +15,7 @@ export class SimulationMessagesRepository {
     speakerCharacterId: string | null;
     isLearner: boolean;
     content: string;
+    contentEn?: string | null;
     orderIndex: number;
     feedback?: SimulationMessage['feedback'];
   }): Promise<SimulationMessage> {

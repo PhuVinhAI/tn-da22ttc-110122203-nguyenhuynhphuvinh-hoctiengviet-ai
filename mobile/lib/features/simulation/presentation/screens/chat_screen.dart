@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +10,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../../profile/data/profile_providers.dart';
 import '../../application/simulation_chat_notifier.dart';
+import '../../application/simulation_tts_service.dart';
 import '../../data/simulation_providers.dart';
 import '../../data/simulation_repository.dart';
 import '../../domain/simulation_message.dart';
@@ -209,6 +211,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       speakerName: name,
       isLearner: message.isLearner,
       content: message.content,
+      contentEn: message.contentEn,
       feedback: message.feedback,
       orderIndex: message.orderIndex,
     );
@@ -574,15 +577,60 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
-class _NpcBubble extends StatelessWidget {
+class _NpcBubble extends ConsumerWidget {
   const _NpcBubble({required this.message});
 
   final SimulationMessage message;
 
+  void _showOptions(BuildContext context, WidgetRef ref) {
+    final tts = ref.read(simulationTtsServiceProvider);
+    final hasEn = message.contentEn != null && message.contentEn!.isNotEmpty;
+
+    AppMenuBottomSheet.show(
+      context,
+      title: message.speakerName,
+      items: [
+        AppMenuBottomSheetItem(
+          label: 'Read aloud (Vietnamese)',
+          icon: Icons.volume_up_outlined,
+          onTap: () => tts.speak(message.id, message.content),
+        ),
+        AppMenuBottomSheetItem(
+          label: 'Copy Vietnamese',
+          icon: Icons.content_copy_outlined,
+          onTap: () {
+            Clipboard.setData(ClipboardData(text: message.content));
+            AppToast.show(
+              context,
+              message: 'Copied',
+              type: AppToastType.success,
+            );
+          },
+        ),
+        if (hasEn)
+          AppMenuBottomSheetItem(
+            label: 'Copy English',
+            icon: Icons.translate_outlined,
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: message.contentEn!));
+              AppToast.show(
+                context,
+                message: 'Copied',
+                type: AppToastType.success,
+              );
+            },
+          ),
+      ],
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = AppTheme.colors(context);
     final theme = Theme.of(context);
+    final hasEn = message.contentEn != null && message.contentEn!.isNotEmpty;
+    final playingId = ref.watch(ttsPlayingMessageIdProvider);
+    final isPlaying = playingId == message.id;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -614,20 +662,54 @@ class _NpcBubble extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Container(
-                decoration: BoxDecoration(
-                  color: c.card,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: c.border, width: 1),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-                child: Text(
-                  message.content,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: c.foreground,
+              GestureDetector(
+                onLongPress: () => _showOptions(context, ref),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: c.card,
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    border: Border.all(color: c.border, width: 1),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              message.content,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: c.foreground,
+                              ),
+                            ),
+                          ),
+                          if (isPlaying) ...[
+                            const SizedBox(width: AppSpacing.xs),
+                            Icon(
+                              Icons.volume_up,
+                              size: 16,
+                              color: c.primary,
+                            ),
+                          ],
+                        ],
+                      ),
+                      if (hasEn) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          message.contentEn!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: c.mutedForeground,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),
