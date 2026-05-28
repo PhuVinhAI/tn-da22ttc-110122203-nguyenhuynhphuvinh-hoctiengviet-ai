@@ -781,8 +781,6 @@ class _LearnerBubble extends ConsumerWidget {
             style: theme.textTheme.bodyMedium?.copyWith(color: c.foreground),
           );
 
-    final maxBubbleWidth = MediaQuery.sizeOf(context).width * 0.75;
-
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -817,8 +815,7 @@ class _LearnerBubble extends ConsumerWidget {
                         ),
                       ),
                     ),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: maxBubbleWidth),
+                  Flexible(
                     child: GestureDetector(
                       onTap: _hasFeedback
                           ? () => _openFeedbackSheet(context)
