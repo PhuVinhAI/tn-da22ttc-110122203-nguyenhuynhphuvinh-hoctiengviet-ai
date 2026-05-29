@@ -1757,4 +1757,38 @@ class SEn extends S {
   @override
   String get onboardingSelectNativeLanguageDescription =>
       'We\'ll use this to personalise AI responses for you.';
+
+  @override
+  String get passwordRuleMinLength => 'At least 12 characters';
+
+  @override
+  String get passwordRuleLowercase => 'Lowercase letter (a-z)';
+
+  @override
+  String get passwordRuleUppercase => 'Uppercase letter (A-Z)';
+
+  @override
+  String get passwordRuleNumber => 'Number (0-9)';
+
+  @override
+  String get passwordRuleSpecial => 'Special character (!@#\$%)';
+
+  @override
+  String get passwordRuleNoSpace => 'No spaces';
+
+  @override
+  String get passwordRuleNotCommon => 'Not a common password';
+
+  @override
+  String get passwordStrengthWeak => 'Weak';
+
+  @override
+  String get passwordStrengthMedium => 'Medium';
+
+  @override
+  String get passwordStrengthStrong => 'Strong';
+
+  @override
+  String get passwordRequirementsNotMet =>
+      'Password doesn\'t meet the security requirements';
 }

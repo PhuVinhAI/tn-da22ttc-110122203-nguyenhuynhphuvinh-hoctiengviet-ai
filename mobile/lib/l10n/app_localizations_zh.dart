@@ -1675,4 +1675,37 @@ class SZh extends S {
 
   @override
   String get onboardingSelectNativeLanguageDescription => '我们将用此信息为您个性化AI回复。';
+
+  @override
+  String get passwordRuleMinLength => '至少 12 个字符';
+
+  @override
+  String get passwordRuleLowercase => '包含小写字母 (a-z)';
+
+  @override
+  String get passwordRuleUppercase => '包含大写字母 (A-Z)';
+
+  @override
+  String get passwordRuleNumber => '包含数字 (0-9)';
+
+  @override
+  String get passwordRuleSpecial => '包含特殊字符 (!@#\$%)';
+
+  @override
+  String get passwordRuleNoSpace => '不含空格';
+
+  @override
+  String get passwordRuleNotCommon => '非常见弱密码';
+
+  @override
+  String get passwordStrengthWeak => '弱';
+
+  @override
+  String get passwordStrengthMedium => '中等';
+
+  @override
+  String get passwordStrengthStrong => '强';
+
+  @override
+  String get passwordRequirementsNotMet => '密码不符合安全要求';
 }

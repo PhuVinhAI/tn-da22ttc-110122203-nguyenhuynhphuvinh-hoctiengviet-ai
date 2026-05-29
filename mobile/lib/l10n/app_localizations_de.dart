@@ -1781,4 +1781,38 @@ class SDe extends S {
   @override
   String get onboardingSelectNativeLanguageDescription =>
       'Wir nutzen diese Information, um KI-Antworten zu personalisieren.';
+
+  @override
+  String get passwordRuleMinLength => 'Mindestens 12 Zeichen';
+
+  @override
+  String get passwordRuleLowercase => 'Kleinbuchstabe (a-z)';
+
+  @override
+  String get passwordRuleUppercase => 'Großbuchstabe (A-Z)';
+
+  @override
+  String get passwordRuleNumber => 'Zahl (0-9)';
+
+  @override
+  String get passwordRuleSpecial => 'Sonderzeichen (!@#\$%)';
+
+  @override
+  String get passwordRuleNoSpace => 'Keine Leerzeichen';
+
+  @override
+  String get passwordRuleNotCommon => 'Kein gängiges Passwort';
+
+  @override
+  String get passwordStrengthWeak => 'Schwach';
+
+  @override
+  String get passwordStrengthMedium => 'Mittel';
+
+  @override
+  String get passwordStrengthStrong => 'Stark';
+
+  @override
+  String get passwordRequirementsNotMet =>
+      'Das Passwort erfüllt die Sicherheitsanforderungen nicht';
 }

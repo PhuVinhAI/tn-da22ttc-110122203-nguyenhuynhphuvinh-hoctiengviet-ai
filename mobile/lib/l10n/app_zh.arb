@@ -532,5 +532,16 @@
   "levelC2": "精通",
   "practiceWithLessonDesc": "使用课程内置练习进行练习",
   "onboardingSelectNativeLanguageTitle": "您的母语是什么？",
-  "onboardingSelectNativeLanguageDescription": "我们将用此信息为您个性化AI回复。"
+  "onboardingSelectNativeLanguageDescription": "我们将用此信息为您个性化AI回复。",
+  "passwordRuleMinLength": "至少 12 个字符",
+  "passwordRuleLowercase": "包含小写字母 (a-z)",
+  "passwordRuleUppercase": "包含大写字母 (A-Z)",
+  "passwordRuleNumber": "包含数字 (0-9)",
+  "passwordRuleSpecial": "包含特殊字符 (!@#$%)",
+  "passwordRuleNoSpace": "不含空格",
+  "passwordRuleNotCommon": "非常见弱密码",
+  "passwordStrengthWeak": "弱",
+  "passwordStrengthMedium": "中等",
+  "passwordStrengthStrong": "强",
+  "passwordRequirementsNotMet": "密码不符合安全要求"
 }

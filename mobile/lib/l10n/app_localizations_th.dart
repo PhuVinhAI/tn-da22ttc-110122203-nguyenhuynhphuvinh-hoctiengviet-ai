@@ -1721,4 +1721,38 @@ class STh extends S {
   @override
   String get onboardingSelectNativeLanguageDescription =>
       'เราจะใช้ข้อมูลนี้เพื่อปรับแต่งการตอบสนองของ AI สำหรับคุณ';
+
+  @override
+  String get passwordRuleMinLength => 'อย่างน้อย 12 ตัวอักษร';
+
+  @override
+  String get passwordRuleLowercase => 'มีตัวพิมพ์เล็ก (a-z)';
+
+  @override
+  String get passwordRuleUppercase => 'มีตัวพิมพ์ใหญ่ (A-Z)';
+
+  @override
+  String get passwordRuleNumber => 'มีตัวเลข (0-9)';
+
+  @override
+  String get passwordRuleSpecial => 'มีอักขระพิเศษ (!@#\$%)';
+
+  @override
+  String get passwordRuleNoSpace => 'ไม่มีช่องว่าง';
+
+  @override
+  String get passwordRuleNotCommon => 'ไม่ใช่รหัสผ่านที่เดาง่าย';
+
+  @override
+  String get passwordStrengthWeak => 'อ่อน';
+
+  @override
+  String get passwordStrengthMedium => 'ปานกลาง';
+
+  @override
+  String get passwordStrengthStrong => 'แข็งแรง';
+
+  @override
+  String get passwordRequirementsNotMet =>
+      'รหัสผ่านไม่ตรงตามข้อกำหนดด้านความปลอดภัย';
 }

@@ -1765,4 +1765,38 @@ class SEs extends S {
   @override
   String get onboardingSelectNativeLanguageDescription =>
       'Lo usaremos para personalizar las respuestas de la IA.';
+
+  @override
+  String get passwordRuleMinLength => 'Al menos 12 caracteres';
+
+  @override
+  String get passwordRuleLowercase => 'Letra minúscula (a-z)';
+
+  @override
+  String get passwordRuleUppercase => 'Letra mayúscula (A-Z)';
+
+  @override
+  String get passwordRuleNumber => 'Número (0-9)';
+
+  @override
+  String get passwordRuleSpecial => 'Carácter especial (!@#\$%)';
+
+  @override
+  String get passwordRuleNoSpace => 'Sin espacios';
+
+  @override
+  String get passwordRuleNotCommon => 'No es una contraseña común';
+
+  @override
+  String get passwordStrengthWeak => 'Débil';
+
+  @override
+  String get passwordStrengthMedium => 'Media';
+
+  @override
+  String get passwordStrengthStrong => 'Fuerte';
+
+  @override
+  String get passwordRequirementsNotMet =>
+      'La contraseña no cumple los requisitos de seguridad';
 }

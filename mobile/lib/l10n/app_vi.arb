@@ -532,5 +532,16 @@
   "levelC2": "Thành thạo",
   "practiceWithLessonDesc": "Luyện tập với các bài tập tích hợp sẵn của bài học",
   "onboardingSelectNativeLanguageTitle": "Ngôn ngữ mẹ đẻ của bạn là gì?",
-  "onboardingSelectNativeLanguageDescription": "Chúng tôi sẽ dùng thông tin này để cá nhân hóa phản hồi AI cho bạn."
+  "onboardingSelectNativeLanguageDescription": "Chúng tôi sẽ dùng thông tin này để cá nhân hóa phản hồi AI cho bạn.",
+  "passwordRuleMinLength": "Ít nhất 12 ký tự",
+  "passwordRuleLowercase": "Có chữ thường (a-z)",
+  "passwordRuleUppercase": "Có chữ hoa (A-Z)",
+  "passwordRuleNumber": "Có chữ số (0-9)",
+  "passwordRuleSpecial": "Có ký tự đặc biệt (!@#$%)",
+  "passwordRuleNoSpace": "Không có khoảng trắng",
+  "passwordRuleNotCommon": "Không phải mật khẩu dễ đoán",
+  "passwordStrengthWeak": "Yếu",
+  "passwordStrengthMedium": "Trung bình",
+  "passwordStrengthStrong": "Mạnh",
+  "passwordRequirementsNotMet": "Mật khẩu chưa đáp ứng yêu cầu bảo mật"
 }

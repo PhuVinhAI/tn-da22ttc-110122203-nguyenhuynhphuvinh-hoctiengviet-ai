@@ -532,5 +532,16 @@
   "levelC2": "Proficient",
   "practiceWithLessonDesc": "Practice with the lesson's built-in exercises",
   "onboardingSelectNativeLanguageTitle": "What's your native language?",
-  "onboardingSelectNativeLanguageDescription": "We'll use this to personalise AI responses for you."
+  "onboardingSelectNativeLanguageDescription": "We'll use this to personalise AI responses for you.",
+  "passwordRuleMinLength": "At least 12 characters",
+  "passwordRuleLowercase": "Lowercase letter (a-z)",
+  "passwordRuleUppercase": "Uppercase letter (A-Z)",
+  "passwordRuleNumber": "Number (0-9)",
+  "passwordRuleSpecial": "Special character (!@#$%)",
+  "passwordRuleNoSpace": "No spaces",
+  "passwordRuleNotCommon": "Not a common password",
+  "passwordStrengthWeak": "Weak",
+  "passwordStrengthMedium": "Medium",
+  "passwordStrengthStrong": "Strong",
+  "passwordRequirementsNotMet": "Password doesn't meet the security requirements"
 }

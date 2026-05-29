@@ -1774,4 +1774,38 @@ class SFr extends S {
   @override
   String get onboardingSelectNativeLanguageDescription =>
       'Nous l\'utiliserons pour personnaliser les réponses de l\'IA.';
+
+  @override
+  String get passwordRuleMinLength => 'Au moins 12 caractères';
+
+  @override
+  String get passwordRuleLowercase => 'Lettre minuscule (a-z)';
+
+  @override
+  String get passwordRuleUppercase => 'Lettre majuscule (A-Z)';
+
+  @override
+  String get passwordRuleNumber => 'Chiffre (0-9)';
+
+  @override
+  String get passwordRuleSpecial => 'Caractère spécial (!@#\$%)';
+
+  @override
+  String get passwordRuleNoSpace => 'Aucun espace';
+
+  @override
+  String get passwordRuleNotCommon => 'Pas un mot de passe courant';
+
+  @override
+  String get passwordStrengthWeak => 'Faible';
+
+  @override
+  String get passwordStrengthMedium => 'Moyen';
+
+  @override
+  String get passwordStrengthStrong => 'Fort';
+
+  @override
+  String get passwordRequirementsNotMet =>
+      'Le mot de passe ne répond pas aux exigences de sécurité';
 }

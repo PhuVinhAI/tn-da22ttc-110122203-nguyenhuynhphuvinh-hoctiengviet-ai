@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/providers/providers.dart';
 import '../../../../core/providers/auth_state_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../utils/password_policy.dart';
+import '../widgets/auth_layout.dart';
 import '../widgets/google_sign_in_button.dart';
+import '../widgets/password_requirements.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -25,6 +29,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String _password = '';
 
   @override
   void dispose() {
@@ -99,208 +104,153 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final c = AppTheme.colors(context);
     final s = S.of(context);
 
-    return Scaffold(
-      appBar: AppAppBar(title: Text(s.authCreateAccount)),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 28,
-              vertical: AppSpacing.xl,
+    return AuthScaffold(
+      title: s.authCreateAccount,
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AuthHeader(
+              icon: Icons.person_add_outlined,
+              title: s.registerTitle,
+              subtitle: s.registerSubtitle,
             ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: c.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                      ),
-                      child: Icon(
-                        Icons.person_add_outlined,
-                        size: 28,
-                        color: c.primary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    s.registerTitle,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    s.registerSubtitle,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: c.mutedForeground,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxl),
-                  // Full Name
-                AppInput(
-                  controller: _nameController,
-                  textCapitalization: TextCapitalization.words,
-                  label: s.nameLabel,
-                  prefixIcon: const Icon(Icons.person_outlined),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return s.nameHint;
-                    }
-                    return null;
-                  },
+            const SizedBox(height: AppSpacing.xl),
+            // ── Full name ─────────────────────────────────────────────
+            AppInput(
+              controller: _nameController,
+              textCapitalization: TextCapitalization.words,
+              label: s.nameLabel,
+              prefixIcon: const Icon(Icons.person_outlined),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return s.nameHint;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+            // ── Email ─────────────────────────────────────────────────
+            AppInput(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              autocorrect: false,
+              label: s.emailLabel,
+              prefixIcon: const Icon(Icons.email_outlined),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return s.authEmailRequired;
+                }
+                if (!value.contains('@')) {
+                  return s.authEmailInvalid;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+            // ── Password ──────────────────────────────────────────────
+            AppInput(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              label: s.passwordLabel,
+              prefixIcon: const Icon(Icons.lock_outlined),
+              onChanged: (value) => setState(() => _password = value),
+              suffixIcon: IconButton(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                icon: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                // Email
-                AppInput(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  autocorrect: false,
-                  label: s.emailLabel,
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return s.authEmailRequired;
-                    }
-                    if (!value.contains('@')) {
-                      return s.authEmailInvalid;
-                    }
-                    return null;
-                  },
+                onPressed: () {
+                  setState(() => _obscurePassword = !_obscurePassword);
+                },
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return s.authPasswordRequired;
+                }
+                if (!PasswordPolicy.isStrong(value)) {
+                  return s.passwordRequirementsNotMet;
+                }
+                return null;
+              },
+            ),
+            PasswordRequirements(password: _password),
+            const SizedBox(height: AppSpacing.md),
+            // ── Confirm password ──────────────────────────────────────
+            AppInput(
+              controller: _confirmPasswordController,
+              obscureText: _obscureConfirmPassword,
+              label: s.confirmPasswordLabel,
+              prefixIcon: const Icon(Icons.lock_outlined),
+              suffixIcon: IconButton(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                icon: Icon(
+                  _obscureConfirmPassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                // Password
-                AppInput(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  label: s.passwordLabel,
-                  prefixIcon: const Icon(Icons.lock_outlined),
-                  suffixIcon: IconButton(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                    ),
-                    onPressed: () {
-                      setState(() => _obscurePassword = !_obscurePassword);
-                    },
+                onPressed: () {
+                  setState(() =>
+                      _obscureConfirmPassword = !_obscureConfirmPassword);
+                },
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return s.authConfirmPasswordRequired;
+                }
+                if (value != _passwordController.text) {
+                  return s.authPasswordMismatch;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            // ── Actions ───────────────────────────────────────────────
+            AppButton(
+              variant: AppButtonVariant.primary,
+              isFullWidth: true,
+              onPressed: _isLoading ? null : _handleRegister,
+              isLoading: _isLoading,
+              label: s.authCreateAccount,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            AuthOrDivider(label: s.authOr),
+            const SizedBox(height: AppSpacing.xl),
+            GoogleSignInButton(
+              enabled: !_isLoading,
+              onSuccess: _handleGoogleRegister,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            // ── Already have an account ───────────────────────────────
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  s.authAlreadyHaveAccount,
+                  style: GoogleFonts.inter(
+                    fontSize: AppTypography.bodySmall,
+                    color: c.mutedForeground,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return s.authPasswordRequired;
-                    }
-                    if (value.length < 8) {
-                      return s.passwordLengthError;
-                    }
-                    if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)')
-                        .hasMatch(value)) {
-                      return s.passwordComplexityError;
-                    }
-                    return null;
-                  },
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                // Confirm Password
-                AppInput(
-                  controller: _confirmPasswordController,
-                  obscureText: _obscureConfirmPassword,
-                  label: s.confirmPasswordLabel,
-                  prefixIcon: const Icon(Icons.lock_outlined),
-                  suffixIcon: IconButton(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    icon: Icon(
-                      _obscureConfirmPassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                    ),
-                    onPressed: () {
-                      setState(() =>
-                          _obscureConfirmPassword =
-                              !_obscureConfirmPassword);
-                    },
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return s.authConfirmPasswordRequired;
-                    }
-                    if (value != _passwordController.text) {
-                      return s.authPasswordMismatch;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSpacing.xxl),
-                // Create account button
+                const SizedBox(width: AppSpacing.xs),
                 AppButton(
-                  variant: AppButtonVariant.primary,
-                  isFullWidth: true,
-                  onPressed: _isLoading ? null : _handleRegister,
-                  isLoading: _isLoading,
-                  label: s.authCreateAccount,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                // Divider
-                Row(
-                  children: [
-                    const Expanded(child: AppDivider()),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                      ),
-                      child: Text(
-                        s.authOr,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: c.mutedForeground,
-                          fontSize: AppTypography.caption,
-                        ),
-                      ),
-                    ),
-                    const Expanded(child: AppDivider()),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                // Google sign in
-                GoogleSignInButton(
-                  enabled: !_isLoading,
-                  onSuccess: _handleGoogleRegister,
-                ),
-                const SizedBox(height: AppSpacing.xxl),
-                // Already have account
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      s.authAlreadyHaveAccount,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: c.mutedForeground,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    AppButton(
-                      variant: AppButtonVariant.text,
-                      onPressed: () => context.pop(),
-                      label: s.authSignIn,
-                    ),
-                  ],
+                  variant: AppButtonVariant.text,
+                  onPressed: () => context.pop(),
+                  label: s.authSignIn,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xs,
+                    vertical: AppSpacing.xs,
+                  ),
                 ),
               ],
             ),
-          ),
-          ),
+          ],
         ),
       ),
     );

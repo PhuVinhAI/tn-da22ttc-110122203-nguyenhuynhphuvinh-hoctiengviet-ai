@@ -532,5 +532,16 @@
   "levelC2": "Maîtrise",
   "practiceWithLessonDesc": "Pratiquer avec les exercices intégrés de la leçon",
   "onboardingSelectNativeLanguageTitle": "Quelle est votre langue maternelle ?",
-  "onboardingSelectNativeLanguageDescription": "Nous l'utiliserons pour personnaliser les réponses de l'IA."
+  "onboardingSelectNativeLanguageDescription": "Nous l'utiliserons pour personnaliser les réponses de l'IA.",
+  "passwordRuleMinLength": "Au moins 12 caractères",
+  "passwordRuleLowercase": "Lettre minuscule (a-z)",
+  "passwordRuleUppercase": "Lettre majuscule (A-Z)",
+  "passwordRuleNumber": "Chiffre (0-9)",
+  "passwordRuleSpecial": "Caractère spécial (!@#$%)",
+  "passwordRuleNoSpace": "Aucun espace",
+  "passwordRuleNotCommon": "Pas un mot de passe courant",
+  "passwordStrengthWeak": "Faible",
+  "passwordStrengthMedium": "Moyen",
+  "passwordStrengthStrong": "Fort",
+  "passwordRequirementsNotMet": "Le mot de passe ne répond pas aux exigences de sécurité"
 }

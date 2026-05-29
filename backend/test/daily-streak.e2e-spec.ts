@@ -72,7 +72,7 @@ describe('Daily Streak (e2e)', () => {
       .post('/api/v1/auth/register')
       .send({
         email: `streak-test-${Date.now()}@test.com`,
-        password: 'Test1234!',
+        password: 'Test1234!Secure',
         fullName: 'Streak Test User',
       });
 

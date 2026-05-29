@@ -6,6 +6,9 @@ import '../../../../core/providers/providers.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../utils/password_policy.dart';
+import '../widgets/auth_layout.dart';
+import '../widgets/password_requirements.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
   const ResetPasswordScreen({
@@ -30,6 +33,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   bool _isReset = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String _password = '';
 
   @override
   void dispose() {
@@ -66,193 +70,126 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final c = AppTheme.colors(context);
     final s = S.of(context);
 
-    return Scaffold(
-      appBar: AppAppBar(title: Text(s.authResetPassword)),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 28,
-              vertical: AppSpacing.xl,
-            ),
-          child: _isReset
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: AppSpacing.xxxl),
-                    // Success icon
-                    Center(
-                      child: Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          color: c.success.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppRadius.xl),
-                        ),
-                        child: Icon(
-                          Icons.check_rounded,
-                          size: 36,
-                          color: c.success,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    Text(
-                      s.authPasswordResetSuccess,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.3,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      widget.fromSettings
-                          ? s.authPasswordChangedSuccess
-                          : s.authPasswordResetSuccessMessage,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: c.mutedForeground,
-                        height: 1.5,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.xxl),
-                    AppButton(
-                      variant: AppButtonVariant.primary,
-                      isFullWidth: true,
-                      onPressed: () => context.go(
-                        widget.fromSettings ? '/settings' : '/login',
-                      ),
-                      label: widget.fromSettings ? s.authBackToSettings : s.authSignIn,
-                    ),
-                  ],
-                )
-              : Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Icon
-                      Center(
-                        child: Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: c.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(AppRadius.lg),
-                          ),
-                          child: Icon(
-                            Icons.lock_outlined,
-                            size: 26,
-                            color: c.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
-                      Text(
-                        s.authSetNewPassword,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.3,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        s.authChooseStrongPassword,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: c.mutedForeground,
-                          height: 1.5,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: AppSpacing.xxl),
-                      // New password
-                      AppInput(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        label: s.authNewPassword,
-                        prefixIcon: const Icon(Icons.lock_outlined),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
-                          onPressed: () {
-                            setState(
-                                () => _obscurePassword = !_obscurePassword);
-                          },
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return s.authPasswordRequired;
-                          }
-                          if (value.length < 8) {
-                            return s.passwordLengthError;
-                          }
-                          if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)')
-                              .hasMatch(value)) {
-                            return s.passwordComplexityError;
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      // Confirm password
-                      AppInput(
-                        controller: _confirmPasswordController,
-                        obscureText: _obscureConfirmPassword,
-                        label: s.authConfirmPassword,
-                        prefixIcon: const Icon(Icons.lock_outlined),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirmPassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
-                          onPressed: () {
-                            setState(() =>
-                                _obscureConfirmPassword =
-                                    !_obscureConfirmPassword);
-                          },
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return s.authConfirmPasswordRequired;
-                          }
-                          if (value != _passwordController.text) {
-                            return s.authPasswordMismatch;
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.xxl),
-                      AppButton(
-                        variant: AppButtonVariant.primary,
-                        isFullWidth: true,
-                        onPressed: _isLoading ? null : _handleReset,
-                        isLoading: _isLoading,
-                        label: s.authResetPassword,
-                      ),
-                      if (!widget.fromSettings) ...[
-                        const SizedBox(height: AppSpacing.md),
-                        AppButton(
-                          variant: AppButtonVariant.text,
-                          isFullWidth: true,
-                          onPressed: () => context.go('/login'),
-                          label: s.authBackToSignIn,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-          ),
+    return AuthScaffold(
+      title: s.authResetPassword,
+      child: _isReset ? _buildSuccess(context, s) : _buildForm(context, s),
+    );
+  }
+
+  Widget _buildSuccess(BuildContext context, S s) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AuthHeader(
+          icon: Icons.check_rounded,
+          iconColor: AppTheme.colors(context).success,
+          badgeSize: 72,
+          title: s.authPasswordResetSuccess,
+          subtitle: widget.fromSettings
+              ? s.authPasswordChangedSuccess
+              : s.authPasswordResetSuccessMessage,
         ),
+        const SizedBox(height: AppSpacing.xl),
+        AppButton(
+          variant: AppButtonVariant.primary,
+          isFullWidth: true,
+          onPressed: () => context.go(
+            widget.fromSettings ? '/settings' : '/login',
+          ),
+          label: widget.fromSettings ? s.authBackToSettings : s.authSignIn,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildForm(BuildContext context, S s) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AuthHeader(
+            icon: Icons.lock_outlined,
+            title: s.authSetNewPassword,
+            subtitle: s.authChooseStrongPassword,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          // ── New password ──────────────────────────────────────────
+          AppInput(
+            controller: _passwordController,
+            obscureText: _obscurePassword,
+            label: s.authNewPassword,
+            prefixIcon: const Icon(Icons.lock_outlined),
+            onChanged: (value) => setState(() => _password = value),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+              onPressed: () {
+                setState(() => _obscurePassword = !_obscurePassword);
+              },
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return s.authPasswordRequired;
+              }
+              if (!PasswordPolicy.isStrong(value)) {
+                return s.passwordRequirementsNotMet;
+              }
+              return null;
+            },
+          ),
+          PasswordRequirements(password: _password),
+          const SizedBox(height: AppSpacing.md),
+          // ── Confirm password ──────────────────────────────────────
+          AppInput(
+            controller: _confirmPasswordController,
+            obscureText: _obscureConfirmPassword,
+            label: s.authConfirmPassword,
+            prefixIcon: const Icon(Icons.lock_outlined),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureConfirmPassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+              onPressed: () {
+                setState(() =>
+                    _obscureConfirmPassword = !_obscureConfirmPassword);
+              },
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return s.authConfirmPasswordRequired;
+              }
+              if (value != _passwordController.text) {
+                return s.authPasswordMismatch;
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          AppButton(
+            variant: AppButtonVariant.primary,
+            isFullWidth: true,
+            onPressed: _isLoading ? null : _handleReset,
+            isLoading: _isLoading,
+            label: s.authResetPassword,
+          ),
+          if (!widget.fromSettings) ...[
+            const SizedBox(height: AppSpacing.sm),
+            AppButton(
+              variant: AppButtonVariant.text,
+              isFullWidth: true,
+              onPressed: () => context.go('/login'),
+              label: s.authBackToSignIn,
+            ),
+          ],
+        ],
       ),
     );
   }

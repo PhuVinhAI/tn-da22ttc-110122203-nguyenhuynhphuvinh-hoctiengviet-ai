@@ -10,9 +10,9 @@ class AuthActionSkeleton extends StatelessWidget {
     return Column(
       children: [
         const AppShimmerBox(
-          width: 56,
-          height: 56,
-          shape: BoxShape.circle,
+          width: 64,
+          height: 64,
+          borderRadius: BorderRadius.all(Radius.circular(AppRadius.xl)),
         ),
         const SizedBox(height: AppSpacing.lg),
         const AppShimmerBox(

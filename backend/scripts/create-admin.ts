@@ -33,7 +33,7 @@ async function bootstrap() {
 
     // Fixed credentials for testing
     const email = 'admin@linvnix.test';
-    const password = 'Admin123456!';
+    const password = 'Str0ng!Boss2026';
     const fullName = 'Admin User';
 
     // Check if user exists

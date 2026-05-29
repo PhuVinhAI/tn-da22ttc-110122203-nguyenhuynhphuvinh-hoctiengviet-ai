@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 
 /// Six-digit OTP row with per-cell inputs. Pasting digits into any cell fills all cells.
@@ -101,9 +102,9 @@ class _OtpCodeInputState extends State<OtpCodeInput> {
       children: List.generate(widget.length, (index) {
         return Flexible(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             child: SizedBox(
-              height: 52,
+              height: 56,
               child: Focus(
                 onKeyEvent: (node, event) {
                   if (event is! KeyDownEvent ||
@@ -129,10 +130,12 @@ class _OtpCodeInputState extends State<OtpCodeInput> {
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                   ],
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        height: 1.0,
-                      ),
+                  style: GoogleFonts.inter(
+                    fontSize: AppTypography.titleMedium,
+                    fontWeight: FontWeight.w700,
+                    color: c.foreground,
+                    height: 1.0,
+                  ),
                   decoration: InputDecoration(
                     counterText: '',
                     contentPadding: EdgeInsets.zero,
@@ -140,15 +143,15 @@ class _OtpCodeInputState extends State<OtpCodeInput> {
                     fillColor: c.card,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppRadius.lg),
-                      borderSide: BorderSide(color: c.border),
+                      borderSide: BorderSide(color: c.inputBorder, width: 1),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppRadius.lg),
-                      borderSide: BorderSide(color: c.border),
+                      borderSide: BorderSide(color: c.inputBorder, width: 1),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppRadius.lg),
-                      borderSide: BorderSide(color: c.primary, width: 2),
+                      borderSide: BorderSide(color: c.primary, width: 1.5),
                     ),
                   ),
                   onChanged: (value) => _onChanged(value, index),

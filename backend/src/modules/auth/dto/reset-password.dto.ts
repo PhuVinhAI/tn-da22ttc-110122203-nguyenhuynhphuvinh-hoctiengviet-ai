@@ -1,5 +1,6 @@
-import { IsString, MinLength, Matches } from 'class-validator';
+import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsSecurePassword } from '../../../common/validators';
 
 export class ResetPasswordDto {
   @ApiProperty({
@@ -10,13 +11,11 @@ export class ResetPasswordDto {
   token: string;
 
   @ApiProperty({
-    example: 'NewPassword123!',
-    description: 'Mật khẩu mới (tối thiểu 8 ký tự, có chữ hoa, chữ thường, số)',
+    example: 'Str0ng!Pass2026',
+    description:
+      'Mật khẩu mới mạnh: tối thiểu 12 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt; không có khoảng trắng; không phải mật khẩu phổ biến.',
   })
   @IsString()
-  @MinLength(8, { message: 'Password must be at least 8 characters' })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-    message: 'Password must include uppercase, lowercase, and a number',
-  })
+  @IsSecurePassword()
   newPassword: string;
 }

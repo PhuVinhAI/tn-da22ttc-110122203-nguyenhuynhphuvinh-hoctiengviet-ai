@@ -532,5 +532,16 @@
   "levelC2": "熟練",
   "practiceWithLessonDesc": "レッスンの組み込み練習問題で練習する",
   "onboardingSelectNativeLanguageTitle": "あなたの母国語は何ですか？",
-  "onboardingSelectNativeLanguageDescription": "この情報を使ってAIの返答をパーソナライズします。"
+  "onboardingSelectNativeLanguageDescription": "この情報を使ってAIの返答をパーソナライズします。",
+  "passwordRuleMinLength": "12 文字以上",
+  "passwordRuleLowercase": "小文字 (a-z) を含む",
+  "passwordRuleUppercase": "大文字 (A-Z) を含む",
+  "passwordRuleNumber": "数字 (0-9) を含む",
+  "passwordRuleSpecial": "特殊文字 (!@#$%) を含む",
+  "passwordRuleNoSpace": "スペースなし",
+  "passwordRuleNotCommon": "よくあるパスワードではない",
+  "passwordStrengthWeak": "弱い",
+  "passwordStrengthMedium": "普通",
+  "passwordStrengthStrong": "強い",
+  "passwordRequirementsNotMet": "パスワードがセキュリティ要件を満たしていません"
 }

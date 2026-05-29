@@ -1691,4 +1691,37 @@ class SJa extends S {
   @override
   String get onboardingSelectNativeLanguageDescription =>
       'この情報を使ってAIの返答をパーソナライズします。';
+
+  @override
+  String get passwordRuleMinLength => '12 文字以上';
+
+  @override
+  String get passwordRuleLowercase => '小文字 (a-z) を含む';
+
+  @override
+  String get passwordRuleUppercase => '大文字 (A-Z) を含む';
+
+  @override
+  String get passwordRuleNumber => '数字 (0-9) を含む';
+
+  @override
+  String get passwordRuleSpecial => '特殊文字 (!@#\$%) を含む';
+
+  @override
+  String get passwordRuleNoSpace => 'スペースなし';
+
+  @override
+  String get passwordRuleNotCommon => 'よくあるパスワードではない';
+
+  @override
+  String get passwordStrengthWeak => '弱い';
+
+  @override
+  String get passwordStrengthMedium => '普通';
+
+  @override
+  String get passwordStrengthStrong => '強い';
+
+  @override
+  String get passwordRequirementsNotMet => 'パスワードがセキュリティ要件を満たしていません';
 }

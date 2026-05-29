@@ -1693,4 +1693,37 @@ class SKo extends S {
   @override
   String get onboardingSelectNativeLanguageDescription =>
       '이 정보를 사용하여 AI 응답을 개인화합니다.';
+
+  @override
+  String get passwordRuleMinLength => '12자 이상';
+
+  @override
+  String get passwordRuleLowercase => '소문자 (a-z) 포함';
+
+  @override
+  String get passwordRuleUppercase => '대문자 (A-Z) 포함';
+
+  @override
+  String get passwordRuleNumber => '숫자 (0-9) 포함';
+
+  @override
+  String get passwordRuleSpecial => '특수문자 (!@#\$%) 포함';
+
+  @override
+  String get passwordRuleNoSpace => '공백 없음';
+
+  @override
+  String get passwordRuleNotCommon => '흔한 비밀번호가 아님';
+
+  @override
+  String get passwordStrengthWeak => '약함';
+
+  @override
+  String get passwordStrengthMedium => '보통';
+
+  @override
+  String get passwordStrengthStrong => '강함';
+
+  @override
+  String get passwordRequirementsNotMet => '비밀번호가 보안 요건을 충족하지 않습니다';
 }

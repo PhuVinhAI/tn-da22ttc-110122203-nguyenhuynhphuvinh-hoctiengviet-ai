@@ -532,5 +532,16 @@
   "levelC2": "ระดับเชี่ยวชาญ",
   "practiceWithLessonDesc": "ฝึกซ้อมด้วยแบบฝึกหัดในตัวของบทเรียน",
   "onboardingSelectNativeLanguageTitle": "ภาษาแม่ของคุณคืออะไร?",
-  "onboardingSelectNativeLanguageDescription": "เราจะใช้ข้อมูลนี้เพื่อปรับแต่งการตอบสนองของ AI สำหรับคุณ"
+  "onboardingSelectNativeLanguageDescription": "เราจะใช้ข้อมูลนี้เพื่อปรับแต่งการตอบสนองของ AI สำหรับคุณ",
+  "passwordRuleMinLength": "อย่างน้อย 12 ตัวอักษร",
+  "passwordRuleLowercase": "มีตัวพิมพ์เล็ก (a-z)",
+  "passwordRuleUppercase": "มีตัวพิมพ์ใหญ่ (A-Z)",
+  "passwordRuleNumber": "มีตัวเลข (0-9)",
+  "passwordRuleSpecial": "มีอักขระพิเศษ (!@#$%)",
+  "passwordRuleNoSpace": "ไม่มีช่องว่าง",
+  "passwordRuleNotCommon": "ไม่ใช่รหัสผ่านที่เดาง่าย",
+  "passwordStrengthWeak": "อ่อน",
+  "passwordStrengthMedium": "ปานกลาง",
+  "passwordStrengthStrong": "แข็งแรง",
+  "passwordRequirementsNotMet": "รหัสผ่านไม่ตรงตามข้อกำหนดด้านความปลอดภัย"
 }

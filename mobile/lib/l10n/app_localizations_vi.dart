@@ -1734,4 +1734,38 @@ class SVi extends S {
   @override
   String get onboardingSelectNativeLanguageDescription =>
       'Chúng tôi sẽ dùng thông tin này để cá nhân hóa phản hồi AI cho bạn.';
+
+  @override
+  String get passwordRuleMinLength => 'Ít nhất 12 ký tự';
+
+  @override
+  String get passwordRuleLowercase => 'Có chữ thường (a-z)';
+
+  @override
+  String get passwordRuleUppercase => 'Có chữ hoa (A-Z)';
+
+  @override
+  String get passwordRuleNumber => 'Có chữ số (0-9)';
+
+  @override
+  String get passwordRuleSpecial => 'Có ký tự đặc biệt (!@#\$%)';
+
+  @override
+  String get passwordRuleNoSpace => 'Không có khoảng trắng';
+
+  @override
+  String get passwordRuleNotCommon => 'Không phải mật khẩu dễ đoán';
+
+  @override
+  String get passwordStrengthWeak => 'Yếu';
+
+  @override
+  String get passwordStrengthMedium => 'Trung bình';
+
+  @override
+  String get passwordStrengthStrong => 'Mạnh';
+
+  @override
+  String get passwordRequirementsNotMet =>
+      'Mật khẩu chưa đáp ứng yêu cầu bảo mật';
 }

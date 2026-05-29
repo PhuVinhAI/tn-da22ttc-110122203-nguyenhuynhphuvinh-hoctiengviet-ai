@@ -1,13 +1,7 @@
-import {
-  IsEmail,
-  IsString,
-  MinLength,
-  Matches,
-  IsEnum,
-  IsOptional,
-} from 'class-validator';
+import { IsEmail, IsString, IsEnum, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserLevel } from '../../../common/enums';
+import { IsSecurePassword } from '../../../common/validators';
 
 export class RegisterDto {
   @ApiProperty({ example: 'user@example.com' })
@@ -15,14 +9,12 @@ export class RegisterDto {
   email: string;
 
   @ApiProperty({
-    example: 'Password123',
-    description: 'Mật khẩu (tối thiểu 8 ký tự, có chữ hoa, chữ thường, số)',
+    example: 'Str0ng!Pass2026',
+    description:
+      'Mật khẩu mạnh: tối thiểu 12 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt; không có khoảng trắng; không phải mật khẩu phổ biến.',
   })
   @IsString()
-  @MinLength(8, { message: 'Password must be at least 8 characters' })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-    message: 'Password must include uppercase, lowercase, and a number',
-  })
+  @IsSecurePassword()
   password: string;
 
   @ApiProperty({ example: 'John Doe' })

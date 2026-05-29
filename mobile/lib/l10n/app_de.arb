@@ -532,5 +532,16 @@
   "levelC2": "Kompetent",
   "practiceWithLessonDesc": "Mit den integrierten Übungen der Lektion üben",
   "onboardingSelectNativeLanguageTitle": "Was ist Ihre Muttersprache?",
-  "onboardingSelectNativeLanguageDescription": "Wir nutzen diese Information, um KI-Antworten zu personalisieren."
+  "onboardingSelectNativeLanguageDescription": "Wir nutzen diese Information, um KI-Antworten zu personalisieren.",
+  "passwordRuleMinLength": "Mindestens 12 Zeichen",
+  "passwordRuleLowercase": "Kleinbuchstabe (a-z)",
+  "passwordRuleUppercase": "Großbuchstabe (A-Z)",
+  "passwordRuleNumber": "Zahl (0-9)",
+  "passwordRuleSpecial": "Sonderzeichen (!@#$%)",
+  "passwordRuleNoSpace": "Keine Leerzeichen",
+  "passwordRuleNotCommon": "Kein gängiges Passwort",
+  "passwordStrengthWeak": "Schwach",
+  "passwordStrengthMedium": "Mittel",
+  "passwordStrengthStrong": "Stark",
+  "passwordRequirementsNotMet": "Das Passwort erfüllt die Sicherheitsanforderungen nicht"
 }

@@ -3308,6 +3308,72 @@ abstract class S {
   /// In vi, this message translates to:
   /// **'Chúng tôi sẽ dùng thông tin này để cá nhân hóa phản hồi AI cho bạn.'**
   String get onboardingSelectNativeLanguageDescription;
+
+  /// No description provided for @passwordRuleMinLength.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ít nhất 12 ký tự'**
+  String get passwordRuleMinLength;
+
+  /// No description provided for @passwordRuleLowercase.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có chữ thường (a-z)'**
+  String get passwordRuleLowercase;
+
+  /// No description provided for @passwordRuleUppercase.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có chữ hoa (A-Z)'**
+  String get passwordRuleUppercase;
+
+  /// No description provided for @passwordRuleNumber.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có chữ số (0-9)'**
+  String get passwordRuleNumber;
+
+  /// No description provided for @passwordRuleSpecial.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có ký tự đặc biệt (!@#\$%)'**
+  String get passwordRuleSpecial;
+
+  /// No description provided for @passwordRuleNoSpace.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không có khoảng trắng'**
+  String get passwordRuleNoSpace;
+
+  /// No description provided for @passwordRuleNotCommon.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không phải mật khẩu dễ đoán'**
+  String get passwordRuleNotCommon;
+
+  /// No description provided for @passwordStrengthWeak.
+  ///
+  /// In vi, this message translates to:
+  /// **'Yếu'**
+  String get passwordStrengthWeak;
+
+  /// No description provided for @passwordStrengthMedium.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trung bình'**
+  String get passwordStrengthMedium;
+
+  /// No description provided for @passwordStrengthStrong.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mạnh'**
+  String get passwordStrengthStrong;
+
+  /// No description provided for @passwordRequirementsNotMet.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu chưa đáp ứng yêu cầu bảo mật'**
+  String get passwordRequirementsNotMet;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

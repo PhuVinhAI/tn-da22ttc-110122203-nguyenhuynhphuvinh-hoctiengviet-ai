@@ -532,5 +532,16 @@
   "levelC2": "숙련",
   "practiceWithLessonDesc": "레슨의 내장 연습 문제로 연습하기",
   "onboardingSelectNativeLanguageTitle": "모국어가 무엇인가요?",
-  "onboardingSelectNativeLanguageDescription": "이 정보를 사용하여 AI 응답을 개인화합니다."
+  "onboardingSelectNativeLanguageDescription": "이 정보를 사용하여 AI 응답을 개인화합니다.",
+  "passwordRuleMinLength": "12자 이상",
+  "passwordRuleLowercase": "소문자 (a-z) 포함",
+  "passwordRuleUppercase": "대문자 (A-Z) 포함",
+  "passwordRuleNumber": "숫자 (0-9) 포함",
+  "passwordRuleSpecial": "특수문자 (!@#$%) 포함",
+  "passwordRuleNoSpace": "공백 없음",
+  "passwordRuleNotCommon": "흔한 비밀번호가 아님",
+  "passwordStrengthWeak": "약함",
+  "passwordStrengthMedium": "보통",
+  "passwordStrengthStrong": "강함",
+  "passwordRequirementsNotMet": "비밀번호가 보안 요건을 충족하지 않습니다"
 }
