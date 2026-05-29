@@ -1,3 +1,11 @@
+enum ImageDiscoveryError {
+  unableToLoadImage,
+  maxImagesReached,
+  addPhotoFirst,
+  unableToAnalyzeImage,
+  unableToSaveVocabulary,
+}
+
 class ImageAnalysisRequestImage {
   const ImageAnalysisRequestImage({
     required this.base64,

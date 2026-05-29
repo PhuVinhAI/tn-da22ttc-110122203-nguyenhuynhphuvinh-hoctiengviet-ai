@@ -336,7 +336,7 @@ class _ListeningInputState extends State<_ListeningInput> {
                     color: visuals.accent,
                   ),
                   label: Text(
-                    'Play again',
+                    S.of(context).playAgain,
                     style: GoogleFonts.inter(
                       fontSize: AppTypography.bodySmall,
                       fontWeight: FontWeight.w600,

@@ -4,7 +4,17 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/daily_goal_progress_models.dart';
+import '../../domain/daily_goal_models.dart';
 import '../../data/daily_goal_progress_providers.dart';
+
+String _goalTypeLabel(BuildContext context, GoalType type) {
+  final s = S.of(context);
+  return switch (type) {
+    GoalType.exercises => s.exercisesTitle,
+    GoalType.simulations => s.scenariosTried,
+    GoalType.lessons => s.lessonsTitle,
+  };
+}
 
 class DailyGoalProgressCard extends ConsumerWidget {
   const DailyGoalProgressCard({super.key});
@@ -189,7 +199,7 @@ class _GoalProgressRow extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  goal.goalType.label,
+                  _goalTypeLabel(context, goal.goalType),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),

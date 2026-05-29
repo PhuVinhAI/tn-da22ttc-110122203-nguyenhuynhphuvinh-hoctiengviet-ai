@@ -4,9 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../application/assistant_chat_notifier.dart';
 import '../../application/assistant_state_machine.dart';
 import '../../data/screen_context_provider.dart';
+import '../../data/screen_context_registry.dart';
 import '../../domain/assistant_state.dart';
 import 'assistant_question_sheet.dart';
 
@@ -25,6 +27,9 @@ class AssistantBar extends ConsumerWidget {
     final placeholder = ref.watch(
       currentScreenContextProvider.select((s) => s.barPlaceholder),
     );
+    final displayPlaceholder = placeholder == genericBarPlaceholder
+        ? S.of(context).askAnythingHint
+        : placeholder;
 
     return Material(
       color: c.card,
@@ -46,7 +51,7 @@ class AssistantBar extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    placeholder,
+                    displayPlaceholder,
                     style: GoogleFonts.inter(
                       fontSize: AppTypography.bodySmall,
                       color: c.mutedForeground,

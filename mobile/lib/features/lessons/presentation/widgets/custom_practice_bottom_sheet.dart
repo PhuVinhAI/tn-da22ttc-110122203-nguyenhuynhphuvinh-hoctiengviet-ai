@@ -5,6 +5,15 @@ import '../../../../core/theme/widgets/widgets.dart';
 import '../../domain/exercise_models.dart';
 import '../../domain/exercise_set_models.dart';
 
+String _focusAreaLabel(BuildContext context, FocusArea area) {
+  final s = S.of(context);
+  return switch (area) {
+    FocusArea.vocabulary => s.vocabularyTitle,
+    FocusArea.grammar => s.grammarTitle,
+    FocusArea.both => '${s.vocabularyTitle} & ${s.grammarTitle}',
+  };
+}
+
 enum CustomPracticeSheetMode { creation, info }
 
 class CustomPracticeBottomSheet extends StatelessWidget {
@@ -215,7 +224,7 @@ class _CreationFormState extends State<_CreationForm> {
                     children: FocusArea.values.map((fa) {
                       final selected = _focusArea == fa;
                       return AppChip(
-                        label: fa.displayName,
+                        label: _focusAreaLabel(context, fa),
                         isSelected: selected,
                         color: c.accent,
                         onTap: () => setState(() => _focusArea = fa),

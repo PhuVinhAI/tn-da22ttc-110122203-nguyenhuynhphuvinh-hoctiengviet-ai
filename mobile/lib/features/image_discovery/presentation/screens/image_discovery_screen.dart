@@ -10,6 +10,7 @@ import '../../../../core/theme/widgets/widgets.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../application/image_discovery_notifier.dart';
+import '../../domain/image_analysis_models.dart';
 import '../widgets/vocabulary_card.dart';
 
 class ImageDiscoveryScreen extends ConsumerStatefulWidget {
@@ -122,12 +123,11 @@ class _ImageDiscoveryScreenState extends ConsumerState<ImageDiscoveryScreen> {
       }
       if (next.error != null && next.error != previous?.error) {
         final localizedMsg = switch (next.error!) {
-          'Unable to load image' => S.of(context).unableToLoadImage,
-          'You can analyze up to 5 images at once' => S.of(context).maxImagesAnalysisWarning,
-          'Add a photo first' => S.of(context).addPhotoFirst,
-          'Unable to analyze image. Please try again.' => S.of(context).unableToAnalyzeImage,
-          'Unable to save vocabulary. Please try again.' => S.of(context).unableToSaveVocabulary,
-          _ => next.error!,
+          ImageDiscoveryError.unableToLoadImage => S.of(context).unableToLoadImage,
+          ImageDiscoveryError.maxImagesReached => S.of(context).maxImagesAnalysisWarning,
+          ImageDiscoveryError.addPhotoFirst => S.of(context).addPhotoFirst,
+          ImageDiscoveryError.unableToAnalyzeImage => S.of(context).unableToAnalyzeImage,
+          ImageDiscoveryError.unableToSaveVocabulary => S.of(context).unableToSaveVocabulary,
         };
         AppToast.show(
           context,

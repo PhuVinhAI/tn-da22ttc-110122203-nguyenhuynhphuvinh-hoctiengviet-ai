@@ -181,14 +181,31 @@ class _Header extends ConsumerWidget {
 
   bool get _resetVisible => state is! AssistantCollapsed;
 
+  String _localizeDisplayName(BuildContext context, String name) {
+    final s = S.of(context);
+    return switch (name) {
+      'Bookmarks' => s.bookmarksTitle,
+      'Saved Words' => s.savedWordsTitle,
+      'Exercise' => s.exercisePlayTitle,
+      'Practice' => s.practiceSection,
+      'Lesson' => s.lessonTitle,
+      'Module' => s.moduleDetailTitle,
+      'Course' => s.courseDetailTitle,
+      'Conversation history' => s.conversationHistoryTitle,
+      'Simulation result' => s.simulationResultTitle,
+      _ => name,
+    };
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = AppTheme.colors(context);
+    final localizedName = _localizeDisplayName(context, displayName);
     return Row(
       children: [
         Expanded(
           child: Text(
-            '${S.of(context).aiAssistantTitle} · $displayName',
+            '${S.of(context).aiAssistantTitle} · $localizedName',
             style: GoogleFonts.inter(
               fontSize: AppTypography.bodySmall,
               fontWeight: FontWeight.w600,
@@ -297,6 +314,9 @@ class _LoadingBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = AppTheme.colors(context);
+    final displayText = statusText == AssistantMidLoading.defaultStatusText
+        ? S.of(context).thinking
+        : statusText;
     return Container(
       decoration: BoxDecoration(
         color: c.muted.withValues(alpha: 0.4),
@@ -329,7 +349,7 @@ class _LoadingBody extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Flexible(
                   child: Text(
-                    statusText,
+                    displayText,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       fontSize: AppTypography.bodyMedium,

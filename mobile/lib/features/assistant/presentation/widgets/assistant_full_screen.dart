@@ -474,9 +474,26 @@ class _Header extends StatelessWidget {
   final VoidCallback onClose;
   final VoidCallback onReset;
 
+  String _localizeDisplayName(BuildContext context, String name) {
+    final s = S.of(context);
+    return switch (name) {
+      'Bookmarks' => s.bookmarksTitle,
+      'Saved Words' => s.savedWordsTitle,
+      'Exercise' => s.exercisePlayTitle,
+      'Practice' => s.practiceSection,
+      'Lesson' => s.lessonTitle,
+      'Module' => s.moduleDetailTitle,
+      'Course' => s.courseDetailTitle,
+      'Conversation history' => s.conversationHistoryTitle,
+      'Simulation result' => s.simulationResultTitle,
+      _ => name,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
+    final localizedName = _localizeDisplayName(context, displayName);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.sm,
@@ -494,7 +511,7 @@ class _Header extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              '${S.of(context).aiAssistantTitle} · $displayName',
+              '${S.of(context).aiAssistantTitle} · $localizedName',
               style: GoogleFonts.inter(
                 fontSize: AppTypography.bodySmall,
                 fontWeight: FontWeight.w600,
@@ -628,7 +645,9 @@ class _LiveAssistantTurn extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               Flexible(
                 child: Text(
-                  statusText,
+                  statusText == AssistantMidLoading.defaultStatusText
+                      ? S.of(context).thinking
+                      : statusText,
                   style: GoogleFonts.inter(
                     fontSize: AppTypography.bodyMedium,
                     color: c.mutedForeground,

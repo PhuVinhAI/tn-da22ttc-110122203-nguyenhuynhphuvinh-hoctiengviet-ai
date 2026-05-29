@@ -11,6 +11,8 @@ import '../domain/simulation_session.dart';
 
 enum SimulationChatStatus { idle, sending, receiving, completed }
 
+const defaultLearnerName = 'learner:you';
+
 class SimulationChatState {
   const SimulationChatState({
     required this.sessionId,
@@ -310,7 +312,7 @@ class SimulationChatNotifier extends Notifier<SimulationChatState> {
       state.messages,
     );
     if (fromMessages.isNotEmpty) return fromMessages;
-    return 'You';
+    return defaultLearnerName;
   }
 
   String _characterNameFromMessages(

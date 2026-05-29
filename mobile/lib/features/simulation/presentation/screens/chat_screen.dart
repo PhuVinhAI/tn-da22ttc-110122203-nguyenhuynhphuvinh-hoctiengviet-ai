@@ -760,12 +760,13 @@ class _LearnerBubble extends ConsumerWidget {
     final theme = Theme.of(context);
     final chatState = ref.watch(simulationChatProvider);
     final profile = ref.watch(userProfileProvider).value;
+    final youLabel = S.of(context).youLabel;
     final rawDisplayName = message.speakerName.isNotEmpty
         ? message.speakerName
         : (chatState.chosenCharacterName.isNotEmpty
             ? chatState.chosenCharacterName
-            : 'You');
-    final displayName = rawDisplayName == 'You' ? S.of(context).youLabel : rawDisplayName;
+            : youLabel);
+    final displayName = rawDisplayName == defaultLearnerName ? youLabel : rawDisplayName;
     final avatarUrl = profile?.avatarUrl;
     final feedback = message.feedback;
     final hasCorrections = feedback != null && feedback.corrections.isNotEmpty;

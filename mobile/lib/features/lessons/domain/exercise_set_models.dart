@@ -12,14 +12,6 @@ enum FocusArea {
       orElse: () => FocusArea.both,
     );
   }
-
-  String get displayName {
-    return switch (this) {
-      FocusArea.vocabulary => 'Vocabulary',
-      FocusArea.grammar => 'Grammar',
-      FocusArea.both => 'Both',
-    };
-  }
 }
 
 class CustomSetConfig {

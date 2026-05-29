@@ -10,6 +10,15 @@ import '../../data/daily_goals_providers.dart';
 import '../../data/notification_service.dart';
 import '../../domain/daily_goal_models.dart';
 
+String _goalTypeLabel(BuildContext context, GoalType type) {
+  final s = S.of(context);
+  return switch (type) {
+    GoalType.exercises => s.exercisesTitle,
+    GoalType.simulations => s.scenariosTried,
+    GoalType.lessons => s.lessonsTitle,
+  };
+}
+
 class DailyGoalSection extends ConsumerWidget {
   const DailyGoalSection({super.key});
 
@@ -193,7 +202,7 @@ class _GoalsCard extends ConsumerWidget {
                   label: S.of(context).goalTypeLabel,
                   value: selectedType,
                   items: availableTypes,
-                  itemLabelBuilder: (t) => t.label,
+                  itemLabelBuilder: (t) => _goalTypeLabel(context, t),
                   onChanged: (type) {
                     setState(() {
                       selectedType = type;
@@ -208,7 +217,7 @@ class _GoalsCard extends ConsumerWidget {
                     Icon(onlyType.icon, color: AppTheme.colors(context).primary),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
-                      onlyType.label,
+                      _goalTypeLabel(context, onlyType),
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -271,7 +280,7 @@ class _GoalTile extends ConsumerWidget {
       ),
       leading: Icon(goal.goalType.icon, color: c.primary, size: 20),
       titleWidget: Text(
-        goal.goalType.label,
+        _goalTypeLabel(context, goal.goalType),
         style: theme.textTheme.bodyMedium,
       ),
       subtitleWidget: Text(
@@ -303,7 +312,7 @@ class _GoalTile extends ConsumerWidget {
       context,
       builder: (dialogCtx) => StatefulBuilder(
         builder: (context, setState) => AppDialog(
-          title: S.of(context).editGoalTitle(goal.goalType.label),
+          title: S.of(context).editGoalTitle(_goalTypeLabel(context, goal.goalType)),
           contentWidget: _TargetSlider(
             goalType: goal.goalType,
             value: targetValue,
@@ -343,7 +352,7 @@ class _GoalTile extends ConsumerWidget {
       context,
       builder: (dialogCtx) => AppDialog(
         title: S.of(dialogCtx).deleteGoal,
-        content: S.of(dialogCtx).deleteGoalPermanentlyQuestion(goal.goalType.label),
+        content: S.of(dialogCtx).deleteGoalPermanentlyQuestion(_goalTypeLabel(dialogCtx, goal.goalType)),
         actions: [
           AppDialogAction(
             label: S.of(dialogCtx).cancelButton,
@@ -525,6 +534,8 @@ class _NotificationSettings extends ConsumerWidget {
         if (profile != null) {
           await NotificationService.scheduleDailyReminder(
             notificationTime: profile.notificationTime,
+            title: S.of(context).dailyGoals,
+            body: S.of(context).greatJobCompletedAllGoals,
           );
         }
       } else {
@@ -565,6 +576,8 @@ class _NotificationSettings extends ConsumerWidget {
       if (profile != null && profile.notificationEnabled) {
         await NotificationService.scheduleDailyReminder(
           notificationTime: time,
+          title: S.of(context).dailyGoals,
+          body: S.of(context).greatJobCompletedAllGoals,
         );
       }
     } catch (e) {

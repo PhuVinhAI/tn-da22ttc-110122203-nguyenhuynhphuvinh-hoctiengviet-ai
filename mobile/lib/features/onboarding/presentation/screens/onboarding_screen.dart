@@ -11,6 +11,15 @@ import '../../../../features/profile/data/profile_providers.dart';
 import '../../../../features/daily_goals/domain/daily_goal_models.dart';
 import '../../../../l10n/app_localizations.dart';
 
+String _goalTypeLabel(BuildContext context, GoalType type) {
+  final s = S.of(context);
+  return switch (type) {
+    GoalType.exercises => s.exercisesTitle,
+    GoalType.simulations => s.scenariosTried,
+    GoalType.lessons => s.lessonsTitle,
+  };
+}
+
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -40,10 +49,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const _levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
   static const _a1Index = 0;
   static const _dialects = [
-    _DialectOption('STANDARD', 'Standard', 'General standard'),
-    _DialectOption('NORTHERN', 'Northern', 'Northern Vietnam (Hanoi)'),
-    _DialectOption('CENTRAL', 'Central', 'Central Vietnam (Hue, Da Nang)'),
-    _DialectOption('SOUTHERN', 'Southern', 'Southern Vietnam (Ho Chi Minh City)'),
+    _DialectOption('STANDARD'),
+    _DialectOption('NORTHERN'),
+    _DialectOption('CENTRAL'),
+    _DialectOption('SOUTHERN'),
   ];
 
   bool get _canProceed {
@@ -564,7 +573,7 @@ class _GoalToggleTile extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
-                    goalType.label,
+                    _goalTypeLabel(context, goalType),
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: enabled ? c.foreground : c.mutedForeground,
@@ -703,8 +712,6 @@ class _SelectableCard extends StatelessWidget {
 }
 
 class _DialectOption {
-  const _DialectOption(this.value, this.label, this.description);
+  const _DialectOption(this.value);
   final String value;
-  final String label;
-  final String description;
 }

@@ -42,6 +42,8 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
       } else {
         NotificationService.scheduleDailyReminder(
           notificationTime: profile.notificationTime,
+          title: S.of(context).dailyGoals,
+          body: S.of(context).greatJobCompletedAllGoals,
         );
       }
     } else {

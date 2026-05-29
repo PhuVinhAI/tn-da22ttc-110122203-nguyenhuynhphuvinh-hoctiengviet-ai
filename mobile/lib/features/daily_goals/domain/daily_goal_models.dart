@@ -15,12 +15,6 @@ enum GoalType {
     );
   }
 
-  String get label => switch (this) {
-        GoalType.exercises => 'Exercises',
-        GoalType.simulations => 'Simulations',
-        GoalType.lessons => 'Lessons',
-      };
-
   String get unit => switch (this) {
         GoalType.exercises => 'exercises',
         GoalType.simulations => 'simulations',

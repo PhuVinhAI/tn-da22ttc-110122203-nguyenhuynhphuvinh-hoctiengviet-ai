@@ -63,7 +63,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
         width: 20,
         height: 20,
       ),
-      label: 'Sign in with Google',
+      label: S.of(context).googleSignInButton,
     );
   }
 }

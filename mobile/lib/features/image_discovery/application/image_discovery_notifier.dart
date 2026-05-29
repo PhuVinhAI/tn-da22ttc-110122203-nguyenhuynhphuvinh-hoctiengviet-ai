@@ -74,7 +74,7 @@ class ImageDiscoveryState {
   final List<ImageDiscoveryImage> images;
   final List<ImageDiscoveryMessage> messages;
   final bool isLoading;
-  final String? error;
+  final ImageDiscoveryError? error;
   final String? failedOutboundContent;
 
   bool get hasImage => images.isNotEmpty;
@@ -91,7 +91,7 @@ class ImageDiscoveryState {
       images: images ?? this.images,
       messages: messages ?? this.messages,
       isLoading: isLoading ?? this.isLoading,
-      error: identical(error, _unsetError) ? this.error : error as String?,
+      error: identical(error, _unsetError) ? this.error : error as ImageDiscoveryError?,
       failedOutboundContent: identical(failedOutboundContent, _unsetError)
           ? this.failedOutboundContent
           : failedOutboundContent as String?,
@@ -153,7 +153,7 @@ class ImageDiscoveryNotifier extends Notifier<ImageDiscoveryState> {
       if (file == null) return;
       await addImage(file);
     } catch (_) {
-      state = state.copyWith(error: 'Unable to load image');
+      state = state.copyWith(error: ImageDiscoveryError.unableToLoadImage);
     }
   }
 
@@ -170,7 +170,7 @@ class ImageDiscoveryNotifier extends Notifier<ImageDiscoveryState> {
     final existing = replace ? <ImageDiscoveryImage>[] : state.images;
     final slots = maxImageDiscoveryImages - existing.length;
     if (slots <= 0) {
-      state = state.copyWith(error: 'You can analyze up to 5 images at once');
+      state = state.copyWith(error: ImageDiscoveryError.maxImagesReached);
       return;
     }
 
@@ -200,7 +200,7 @@ class ImageDiscoveryNotifier extends Notifier<ImageDiscoveryState> {
     final trimmed = prompt.trim();
     if (trimmed.isEmpty || state.isLoading) return;
     if (!state.hasImage) {
-      state = state.copyWith(error: 'Add a photo first');
+      state = state.copyWith(error: ImageDiscoveryError.addPhotoFirst);
       return;
     }
 
@@ -255,7 +255,7 @@ class ImageDiscoveryNotifier extends Notifier<ImageDiscoveryState> {
       state = state.copyWith(
         messages: previousMessages,
         isLoading: false,
-        error: 'Unable to analyze image. Please try again.',
+        error: ImageDiscoveryError.unableToAnalyzeImage,
         failedOutboundContent: trimmed,
       );
     }
@@ -270,7 +270,7 @@ class ImageDiscoveryNotifier extends Notifier<ImageDiscoveryState> {
       ref.read(dataChangeBusProvider.notifier).emit({'bookmark'});
     } catch (_) {
       state = state.copyWith(
-        error: 'Unable to save vocabulary. Please try again.',
+        error: ImageDiscoveryError.unableToSaveVocabulary,
       );
       rethrow;
     }

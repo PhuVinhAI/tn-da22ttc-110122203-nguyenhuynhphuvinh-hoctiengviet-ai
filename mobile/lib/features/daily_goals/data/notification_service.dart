@@ -58,6 +58,8 @@ class NotificationService {
 
   static Future<void> scheduleDailyReminder({
     required String notificationTime,
+    required String title,
+    required String body,
   }) async {
     await cancelDailyReminder();
 
@@ -81,8 +83,8 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       id: _notificationId,
-      title: 'Daily goals',
-      body: 'You have not met your goals today. Keep learning!',
+      title: title,
+      body: body,
       scheduledDate: scheduled,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
