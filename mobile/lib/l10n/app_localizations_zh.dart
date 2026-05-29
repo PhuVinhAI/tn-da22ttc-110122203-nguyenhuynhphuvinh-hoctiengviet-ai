@@ -53,6 +53,9 @@ class SZh extends S {
   String get aiFeedback => 'AI 反馈';
 
   @override
+  String get aiWordsLabel => 'AI 单词';
+
+  @override
   String get allLabel => '全部';
 
   @override
@@ -683,6 +686,9 @@ class SZh extends S {
   String get lessonTitle => '课程';
 
   @override
+  String get lessonWordsLabel => '课程单词';
+
+  @override
   String get lessonsCompleted => '已完成课程';
 
   @override
@@ -1251,6 +1257,9 @@ class SZh extends S {
 
   @override
   String get wordRemovedToast => '单词已移除';
+
+  @override
+  String get wordSourceLabel => '来源';
 
   @override
   String get yourScoreLabel => '您的分数';

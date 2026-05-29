@@ -53,6 +53,9 @@ class STh extends S {
   String get aiFeedback => 'ข้อเสนอแนะจาก AI';
 
   @override
+  String get aiWordsLabel => 'คำจาก AI';
+
+  @override
   String get allLabel => 'ทั้งหมด';
 
   @override
@@ -698,6 +701,9 @@ class STh extends S {
   String get lessonTitle => 'บทเรียน';
 
   @override
+  String get lessonWordsLabel => 'คำจากบทเรียน';
+
+  @override
   String get lessonsCompleted => 'บทเรียนที่เสร็จสิ้น';
 
   @override
@@ -1283,6 +1289,9 @@ class STh extends S {
 
   @override
   String get wordRemovedToast => 'ลบคำออกแล้ว';
+
+  @override
+  String get wordSourceLabel => 'แหล่งที่มา';
 
   @override
   String get yourScoreLabel => 'คะแนนของคุณ';

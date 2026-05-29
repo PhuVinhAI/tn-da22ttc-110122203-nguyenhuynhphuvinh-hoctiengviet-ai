@@ -53,6 +53,9 @@ class SEn extends S {
   String get aiFeedback => 'AI feedback';
 
   @override
+  String get aiWordsLabel => 'AI words';
+
+  @override
   String get allLabel => 'All';
 
   @override
@@ -700,6 +703,9 @@ class SEn extends S {
   String get lessonTitle => 'Lesson';
 
   @override
+  String get lessonWordsLabel => 'Lesson words';
+
+  @override
   String get lessonsCompleted => 'Lessons Completed';
 
   @override
@@ -1291,6 +1297,9 @@ class SEn extends S {
 
   @override
   String get wordRemovedToast => 'Word removed';
+
+  @override
+  String get wordSourceLabel => 'Source';
 
   @override
   String get yourScoreLabel => 'Your score';

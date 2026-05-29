@@ -53,6 +53,9 @@ class SKo extends S {
   String get aiFeedback => 'AI 피드백';
 
   @override
+  String get aiWordsLabel => 'AI 단어';
+
+  @override
   String get allLabel => '전체';
 
   @override
@@ -688,6 +691,9 @@ class SKo extends S {
   String get lessonTitle => '강좌';
 
   @override
+  String get lessonWordsLabel => '레슨 단어';
+
+  @override
   String get lessonsCompleted => '완료한 레슨';
 
   @override
@@ -1266,6 +1272,9 @@ class SKo extends S {
 
   @override
   String get wordRemovedToast => '단어가 삭제되었습니다';
+
+  @override
+  String get wordSourceLabel => '출처';
 
   @override
   String get yourScoreLabel => '귀하의 점수';

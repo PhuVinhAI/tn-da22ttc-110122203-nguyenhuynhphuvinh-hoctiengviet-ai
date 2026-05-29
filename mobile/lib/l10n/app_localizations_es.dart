@@ -54,6 +54,9 @@ class SEs extends S {
   String get aiFeedback => 'Comentarios de IA';
 
   @override
+  String get aiWordsLabel => 'Palabras de IA';
+
+  @override
   String get allLabel => 'Todo';
 
   @override
@@ -704,6 +707,9 @@ class SEs extends S {
   String get lessonTitle => 'Lección';
 
   @override
+  String get lessonWordsLabel => 'Palabras de lección';
+
+  @override
   String get lessonsCompleted => 'Lecciones completadas';
 
   @override
@@ -1297,6 +1303,9 @@ class SEs extends S {
 
   @override
   String get wordRemovedToast => 'Palabra eliminada';
+
+  @override
+  String get wordSourceLabel => 'Origen';
 
   @override
   String get yourScoreLabel => 'Su puntuación';

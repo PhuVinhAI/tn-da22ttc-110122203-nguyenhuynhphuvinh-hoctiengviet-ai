@@ -125,6 +125,18 @@ final bookmarkSearchProvider =
       BookmarkSearchNotifier.new,
     );
 
+class BookmarkSourceFilterNotifier extends Notifier<BookmarkSourceFilter> {
+  @override
+  BookmarkSourceFilter build() => BookmarkSourceFilter.all;
+
+  void setFilter(BookmarkSourceFilter filter) => state = filter;
+}
+
+final bookmarkSourceFilterProvider =
+    NotifierProvider<BookmarkSourceFilterNotifier, BookmarkSourceFilter>(
+      BookmarkSourceFilterNotifier.new,
+    );
+
 final bookmarksProvider =
     AsyncNotifierProvider<BookmarksNotifier, BookmarksPage>(
       BookmarksNotifier.new,
@@ -134,7 +146,10 @@ class BookmarksNotifier extends AsyncNotifier<BookmarksPage>
     with DataChangeBusSubscriber<BookmarksPage> {
   int _page = 1;
   bool _hasMore = true;
+  bool _isLoadingMore = false;
   static const _limit = 20;
+
+  bool get hasMore => _hasMore;
 
   @override
   Future<BookmarksPage> build() async {
@@ -161,10 +176,11 @@ class BookmarksNotifier extends AsyncNotifier<BookmarksPage>
   }
 
   Future<void> loadMore() async {
-    if (!_hasMore) return;
+    if (!_hasMore || _isLoadingMore) return;
     final current = state.value;
     if (current == null) return;
 
+    _isLoadingMore = true;
     try {
       final search = ref.read(bookmarkSearchProvider);
       final sort = ref.read(bookmarkSortProvider);
@@ -182,6 +198,8 @@ class BookmarksNotifier extends AsyncNotifier<BookmarksPage>
       );
     } catch (e, st) {
       state = AsyncError(e, st);
+    } finally {
+      _isLoadingMore = false;
     }
   }
 

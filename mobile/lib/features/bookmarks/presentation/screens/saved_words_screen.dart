@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/widgets/widgets.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -10,6 +10,16 @@ import '../../data/bookmark_providers.dart';
 import '../../domain/bookmark_models.dart';
 import '../../../../core/services/audio_player_service.dart';
 import '../../../profile/data/profile_providers.dart';
+
+String _displayWord(BookmarkWithVocabulary item, String? preferredDialect) {
+  if (preferredDialect != null &&
+      item.dialectVariants != null &&
+      item.dialectVariants![preferredDialect] != null &&
+      item.dialectVariants![preferredDialect]!.isNotEmpty) {
+    return item.dialectVariants![preferredDialect]!;
+  }
+  return item.word;
+}
 
 class SavedWordsScreen extends ConsumerStatefulWidget {
   const SavedWordsScreen({super.key});
@@ -24,7 +34,6 @@ class _SavedWordsScreenState extends ConsumerState<SavedWordsScreen>
   late AnimationController _flipController;
   int _currentIndex = 0;
   bool _isFlipped = false;
-  List<BookmarkWithVocabulary> _items = [];
 
   @override
   void initState() {
@@ -76,6 +85,10 @@ class _SavedWordsScreenState extends ConsumerState<SavedWordsScreen>
     final profileAsync = ref.watch(userProfileProvider);
     final preferredDialect = profileAsync.value?.preferredDialect;
 
+    final total = bookmarksAsync.value?.length ?? 0;
+    final hasItems = total > 0;
+    final activeIndex = hasItems ? _currentIndex.clamp(0, total - 1) : 0;
+
     return Scaffold(
       appBar: AppAppBar(
         leading: IconButton(
@@ -83,16 +96,23 @@ class _SavedWordsScreenState extends ConsumerState<SavedWordsScreen>
           onPressed: () => context.pop(),
           tooltip: S.of(context).exitButton,
         ),
-        title: Text(
-          _items.isNotEmpty ? '${_currentIndex + 1}/${_items.length}' : '',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        title: hasItems
+            ? Text(
+                '${activeIndex + 1} / $total',
+                style: GoogleFonts.inter(
+                  fontSize: AppTypography.titleSmall,
+                  fontWeight: FontWeight.w600,
+                  color: c.foreground,
+                ),
+              )
+            : null,
+        bottom: hasItems
+            ? _FlashcardProgress(value: (activeIndex + 1) / total)
+            : null,
       ),
       body: bookmarksAsync.when(
         data: (items) {
-          if (items.isEmpty) {
-            return _buildEmpty(c);
-          }
+          if (items.isEmpty) return const _SavedWordsEmpty();
           final safeIndex = _currentIndex.clamp(0, items.length - 1);
           if (safeIndex != _currentIndex) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -103,83 +123,14 @@ class _SavedWordsScreenState extends ConsumerState<SavedWordsScreen>
               }
             });
           }
-          _items = items;
           return _buildCardStack(items, preferredDialect, safeIndex);
         },
         loading: () => const _SavedWordsLoading(),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 48),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: c.error.withValues(alpha: 0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.error_outline_rounded,
-                    size: 80,
-                    color: c.error,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  e.toString(),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: c.mutedForeground,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                AppButton(
-                  label: S.of(context).retryButton,
-                  variant: AppButtonVariant.primary,
-                  onPressed: () => ref.read(flashcardBookmarksProvider.notifier).refresh(),
-                ),
-              ],
-            ),
-          ),
+        error: (e, _) => _SavedWordsError(
+          message: e.toString(),
+          onRetry: () =>
+              ref.read(flashcardBookmarksProvider.notifier).refresh(),
         ),
-      ),
-    );
-  }
-
-  Widget _buildEmpty(AppColors c) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: c.primary.withValues(alpha: 0.08),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.bookmark_outline_rounded,
-              size: 80,
-              color: c.primary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            S.of(context).noSavedWords,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: c.foreground,
-                ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            S.of(context).saveFavoriteWordsDescription2,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: c.mutedForeground,
-                ),
-          ),
-        ],
       ),
     );
   }
@@ -202,7 +153,8 @@ class _SavedWordsScreenState extends ConsumerState<SavedWordsScreen>
           flipController: _flipController,
           isActive: index == activeIndex,
           onFlip: _flip,
-          onPlayAudio: item.audioUrl != null ? () => _playAudio(item.audioUrl!) : null,
+          onPlayAudio:
+              item.audioUrl != null ? () => _playAudio(item.audioUrl!) : null,
           preferredDialect: preferredDialect,
         );
       },
@@ -210,79 +162,32 @@ class _SavedWordsScreenState extends ConsumerState<SavedWordsScreen>
   }
 }
 
-class _SavedWordsLoading extends StatelessWidget {
-  const _SavedWordsLoading();
+// ─── App-bar progress ────────────────────────────────────────────────────────
+
+class _FlashcardProgress extends StatelessWidget
+    implements PreferredSizeWidget {
+  const _FlashcardProgress({required this.value});
+  final double value;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(AppSpacing.md);
 
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
-
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: AppCard(
-        variant: AppCardVariant.outlined,
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Shimmer.fromColors(
-              baseColor: c.muted,
-              highlightColor: c.card,
-              child: Container(
-                width: 180,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Shimmer.fromColors(
-              baseColor: c.muted,
-              highlightColor: c.card,
-              child: Container(
-                width: 100,
-                height: 18,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Shimmer.fromColors(
-              baseColor: c.muted,
-              highlightColor: c.card,
-              child: Container(
-                width: 48,
-                height: 48,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Shimmer.fromColors(
-              baseColor: c.muted,
-              highlightColor: c.card,
-              child: Container(
-                width: 80,
-                height: 14,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-              ),
-            ),
-          ],
-        ),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.lg,
+        AppSpacing.sm,
       ),
+      child: AppProgress(value: value, height: 4, color: c.primary),
     );
   }
 }
 
+// ─── Card ──────────────────────────────────────────────────────────────────
 
 class _Flashcard extends StatelessWidget {
   const _Flashcard({
@@ -312,7 +217,9 @@ class _Flashcard extends StatelessWidget {
         child: AnimatedBuilder(
           animation: flipController,
           builder: (context, child) {
-            final angle = isActive ? flipController.value * math.pi : (isFlipped ? math.pi : 0.0);
+            final angle = isActive
+                ? flipController.value * math.pi
+                : (isFlipped ? math.pi : 0.0);
             return Transform(
               alignment: Alignment.center,
               transform: Matrix4.identity()
@@ -334,54 +241,44 @@ class _Flashcard extends StatelessWidget {
 
   Widget _buildFront(BuildContext context) {
     final c = AppTheme.colors(context);
-    final theme = Theme.of(context);
+    final displayedWord = _displayWord(item, preferredDialect);
 
-    final String displayedWord;
-    if (preferredDialect != null &&
-        item.dialectVariants != null &&
-        item.dialectVariants![preferredDialect] != null &&
-        item.dialectVariants![preferredDialect]!.isNotEmpty) {
-      displayedWord = item.dialectVariants![preferredDialect]!;
-    } else {
-      displayedWord = item.word;
-    }
-
-    return AppCard(
-      variant: AppCardVariant.outlined,
-      padding: const EdgeInsets.all(AppSpacing.xxl),
+    return _CardSurface(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          if (item.isPersonal) ...[
+            Icon(Icons.auto_awesome, color: c.primary, size: 22),
+            const SizedBox(height: AppSpacing.md),
+          ],
           Text(
             displayedWord,
-            style: theme.textTheme.headlineLarge,
+            style: GoogleFonts.inter(
+              fontSize: AppTypography.headlineMedium,
+              fontWeight: FontWeight.w800,
+              color: c.foreground,
+              height: 1.15,
+            ),
             textAlign: TextAlign.center,
           ),
           if (item.phonetic != null) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(
               '/${item.phonetic}/',
-              style: theme.textTheme.titleMedium?.copyWith(
-                    color: c.mutedForeground,
-                  ),
+              style: GoogleFonts.inter(
+                fontSize: AppTypography.bodyLarge,
+                color: c.mutedForeground,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
           if (onPlayAudio != null) ...[
-            const SizedBox(height: AppSpacing.lg),
-            IconButton(
-              icon: Icon(Icons.volume_up, size: 32, color: c.primary),
-              onPressed: onPlayAudio,
-              tooltip: S.of(context).playPronunciation,
-            ),
+            const SizedBox(height: AppSpacing.xl),
+            _CircleAudioButton(onTap: onPlayAudio!),
           ],
           const SizedBox(height: AppSpacing.xl),
-          Text(
-            S.of(context).tapToFlipBack,
-            style: theme.textTheme.bodySmall?.copyWith(
-                  color: c.mutedForeground,
-                ),
-          ),
+          _FlipHint(label: S.of(context).tapToFlipBack),
         ],
       ),
     );
@@ -389,65 +286,355 @@ class _Flashcard extends StatelessWidget {
 
   Widget _buildBack(BuildContext context) {
     final c = AppTheme.colors(context);
-    final theme = Theme.of(context);
 
-    return AppCard(
-      variant: AppCardVariant.outlined,
-      padding: const EdgeInsets.all(AppSpacing.xxl),
+    return _CardSurface(
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
+              S.of(context).translationLabel.toUpperCase(),
+              style: GoogleFonts.inter(
+                fontSize: AppTypography.caption,
+                fontWeight: FontWeight.w700,
+                color: c.mutedForeground,
+                letterSpacing: 0.6,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
               item.translation,
-              style: theme.textTheme.headlineSmall,
+              style: GoogleFonts.inter(
+                fontSize: AppTypography.headlineSmall,
+                fontWeight: FontWeight.w800,
+                color: c.foreground,
+                height: 1.25,
+              ),
             ),
             if (item.partOfSpeech != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              AppChip(
-                label: kPartOfSpeechViLabels[item.partOfSpeech!.toLowerCase()] ?? item.partOfSpeech!,
-                color: c.info,
-              ),
+              const SizedBox(height: AppSpacing.md),
+              _PosPill(partOfSpeech: item.partOfSpeech!),
             ],
             if (item.classifier != null) ...[
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 '${S.of(context).classifierLabel} ${item.classifier}',
-                style: theme.textTheme.bodyMedium,
+                style: GoogleFonts.inter(
+                  fontSize: AppTypography.bodyMedium,
+                  color: c.mutedForeground,
+                ),
               ),
             ],
             if (item.exampleSentence != null) ...[
               const SizedBox(height: AppSpacing.lg),
-              Text(
-                '${S.of(context).exampleLabel}:',
-                style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              _ExampleBlock(
+                sentence: item.exampleSentence!,
+                translation: item.exampleTranslation,
               ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                item.exampleSentence!,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                      fontStyle: FontStyle.italic,
-                    ),
-              ),
-              if (item.exampleTranslation != null) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  item.exampleTranslation!,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                        color: c.mutedForeground,
-                      ),
-                ),
-              ],
             ],
             const SizedBox(height: AppSpacing.xl),
-            Text(
-              S.of(context).tapToFlipBack,
-              style: theme.textTheme.bodySmall?.copyWith(
-                    color: c.mutedForeground,
-                  ),
+            Center(child: _FlipHint(label: S.of(context).tapToFlipBack)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CardSurface extends StatelessWidget {
+  const _CardSurface({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.xxl),
+      decoration: BoxDecoration(
+        color: c.card,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: c.border, width: 1),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _CircleAudioButton extends StatelessWidget {
+  const _CircleAudioButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        child: Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: c.primary.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.volume_up_rounded, color: c.primary, size: 28),
+        ),
+      ),
+    );
+  }
+}
+
+class _FlipHint extends StatelessWidget {
+  const _FlipHint({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.touch_app_outlined, size: 16, color: c.mutedForeground),
+        const SizedBox(width: AppSpacing.xs),
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: AppTypography.bodySmall,
+            color: c.mutedForeground,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PosPill extends StatelessWidget {
+  const _PosPill({required this.partOfSpeech});
+  final String partOfSpeech;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    final label =
+        kPartOfSpeechViLabels[partOfSpeech.toLowerCase()] ?? partOfSpeech;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 3,
+      ),
+      decoration: BoxDecoration(
+        color: c.muted,
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        border: Border.all(color: c.border, width: 1),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.inter(
+          fontSize: AppTypography.caption,
+          color: c.mutedForeground,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}
+
+class _ExampleBlock extends StatelessWidget {
+  const _ExampleBlock({required this.sentence, this.translation});
+  final String sentence;
+  final String? translation;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: c.muted,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            S.of(context).exampleLabel,
+            style: GoogleFonts.inter(
+              fontSize: AppTypography.caption,
+              fontWeight: FontWeight.w700,
+              color: c.mutedForeground,
+              letterSpacing: 0.4,
             ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            sentence,
+            style: GoogleFonts.inter(
+              fontSize: AppTypography.bodyMedium,
+              fontStyle: FontStyle.italic,
+              color: c.foreground,
+              height: 1.4,
+            ),
+          ),
+          if (translation != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              translation!,
+              style: GoogleFonts.inter(
+                fontSize: AppTypography.bodySmall,
+                color: c.mutedForeground,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Empty / error / loading ─────────────────────────────────────────────────
+
+class _SavedWordsCentered extends StatelessWidget {
+  const _SavedWordsCentered({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.message,
+    this.action,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String message;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 34, color: iconColor),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: AppTypography.titleSmall,
+                fontWeight: FontWeight.w700,
+                color: c.foreground,
+                height: 1.2,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: AppTypography.bodySmall,
+                color: c.mutedForeground,
+                height: 1.4,
+              ),
+            ),
+            if (action != null) ...[
+              const SizedBox(height: AppSpacing.lg),
+              action!,
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SavedWordsEmpty extends StatelessWidget {
+  const _SavedWordsEmpty();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    return _SavedWordsCentered(
+      icon: Icons.style_outlined,
+      iconColor: c.primary,
+      title: S.of(context).noSavedWords,
+      message: S.of(context).saveFavoriteWordsDescription2,
+    );
+  }
+}
+
+class _SavedWordsError extends StatelessWidget {
+  const _SavedWordsError({required this.message, required this.onRetry});
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    return _SavedWordsCentered(
+      icon: Icons.error_outline_rounded,
+      iconColor: c.error,
+      title: S.of(context).unableToLoadDataMessage,
+      message: message,
+      action: AppButton(
+        label: S.of(context).retryButton,
+        variant: AppButtonVariant.outline,
+        onPressed: onRetry,
+      ),
+    );
+  }
+}
+
+class _SavedWordsLoading extends StatelessWidget {
+  const _SavedWordsLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    Widget bar(double w, double h) => Container(
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: c.muted,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      child: _CardSurface(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            bar(180, 32),
+            const SizedBox(height: AppSpacing.md),
+            bar(100, 16),
+            const SizedBox(height: AppSpacing.xl),
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: c.muted,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            bar(120, 12),
           ],
         ),
       ),

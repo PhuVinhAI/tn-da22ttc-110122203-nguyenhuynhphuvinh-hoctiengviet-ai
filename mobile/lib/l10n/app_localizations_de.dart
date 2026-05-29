@@ -55,6 +55,9 @@ class SDe extends S {
   String get aiFeedback => 'KI-Feedback';
 
   @override
+  String get aiWordsLabel => 'KI-Wörter';
+
+  @override
   String get allLabel => 'Alle';
 
   @override
@@ -709,6 +712,9 @@ class SDe extends S {
   String get lessonTitle => 'Lektion';
 
   @override
+  String get lessonWordsLabel => 'Lektionswörter';
+
+  @override
   String get lessonsCompleted => 'Abgeschlossene Lektionen';
 
   @override
@@ -1310,6 +1316,9 @@ class SDe extends S {
 
   @override
   String get wordRemovedToast => 'Wort entfernt';
+
+  @override
+  String get wordSourceLabel => 'Quelle';
 
   @override
   String get yourScoreLabel => 'Ihre Punktzahl';

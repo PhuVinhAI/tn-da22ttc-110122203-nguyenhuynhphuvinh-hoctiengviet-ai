@@ -53,6 +53,9 @@ class SJa extends S {
   String get aiFeedback => 'AIフィードバック';
 
   @override
+  String get aiWordsLabel => 'AI単語';
+
+  @override
   String get allLabel => 'すべて';
 
   @override
@@ -688,6 +691,9 @@ class SJa extends S {
   String get lessonTitle => 'レッスン';
 
   @override
+  String get lessonWordsLabel => 'レッスンの単語';
+
+  @override
   String get lessonsCompleted => '完了したレッスン';
 
   @override
@@ -1266,6 +1272,9 @@ class SJa extends S {
 
   @override
   String get wordRemovedToast => '単語が削除されました';
+
+  @override
+  String get wordSourceLabel => 'ソース';
 
   @override
   String get yourScoreLabel => 'あなたのスコア';

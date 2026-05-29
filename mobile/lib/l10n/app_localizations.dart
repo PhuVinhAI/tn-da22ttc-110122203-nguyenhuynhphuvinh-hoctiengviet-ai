@@ -195,6 +195,12 @@ abstract class S {
   /// **'Phản hồi từ AI'**
   String get aiFeedback;
 
+  /// No description provided for @aiWordsLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Từ AI'**
+  String get aiWordsLabel;
+
   /// No description provided for @allLabel.
   ///
   /// In vi, this message translates to:
@@ -1413,6 +1419,12 @@ abstract class S {
   /// **'Bài học'**
   String get lessonTitle;
 
+  /// No description provided for @lessonWordsLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Từ bài học'**
+  String get lessonWordsLabel;
+
   /// No description provided for @lessonsCompleted.
   ///
   /// In vi, this message translates to:
@@ -2540,6 +2552,12 @@ abstract class S {
   /// In vi, this message translates to:
   /// **'Đã xóa từ'**
   String get wordRemovedToast;
+
+  /// No description provided for @wordSourceLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nguồn từ'**
+  String get wordSourceLabel;
 
   /// No description provided for @yourScoreLabel.
   ///

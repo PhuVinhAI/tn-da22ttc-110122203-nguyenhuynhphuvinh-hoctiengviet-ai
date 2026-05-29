@@ -54,6 +54,9 @@ class SFr extends S {
   String get aiFeedback => 'Commentaires de l\'IA';
 
   @override
+  String get aiWordsLabel => 'Mots IA';
+
+  @override
   String get allLabel => 'Tout';
 
   @override
@@ -710,6 +713,9 @@ class SFr extends S {
   String get lessonTitle => 'Leçon';
 
   @override
+  String get lessonWordsLabel => 'Mots de leçon';
+
+  @override
   String get lessonsCompleted => 'Leçons terminées';
 
   @override
@@ -1304,6 +1310,9 @@ class SFr extends S {
 
   @override
   String get wordRemovedToast => 'Mot supprimé';
+
+  @override
+  String get wordSourceLabel => 'Source';
 
   @override
   String get yourScoreLabel => 'Votre score';

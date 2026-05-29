@@ -54,6 +54,9 @@ class SVi extends S {
   String get aiFeedback => 'Phản hồi từ AI';
 
   @override
+  String get aiWordsLabel => 'Từ AI';
+
+  @override
   String get allLabel => 'Tất cả';
 
   @override
@@ -701,6 +704,9 @@ class SVi extends S {
   String get lessonTitle => 'Bài học';
 
   @override
+  String get lessonWordsLabel => 'Từ bài học';
+
+  @override
   String get lessonsCompleted => 'Bài học đã hoàn thành';
 
   @override
@@ -1291,6 +1297,9 @@ class SVi extends S {
 
   @override
   String get wordRemovedToast => 'Đã xóa từ';
+
+  @override
+  String get wordSourceLabel => 'Nguồn từ';
 
   @override
   String get yourScoreLabel => 'Điểm số của bạn';
