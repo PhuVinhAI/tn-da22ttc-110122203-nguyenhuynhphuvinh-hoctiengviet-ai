@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/providers/providers.dart';
@@ -107,7 +108,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     AppDialog.show(
       context,
       builder: (dialogCtx) => AppDialog(
+        icon: Icons.fast_forward_rounded,
         title: S.of(context).bypassDialogTitle,
+        content: S.of(context).bypassDialogContent,
         actions: [
           AppDialogAction(
             label: S.of(context).continueWithLessonsButton,
@@ -136,6 +139,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+  }
+
+  void _previousStep() {
+    if (_currentStep > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void _skipStep() {
@@ -238,15 +250,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top bar: dot progress
+            // Top bar: back button + dot progress
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 28,
-                vertical: AppSpacing.lg,
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                AppSpacing.sm,
               ),
-              child: _DotProgressIndicator(
-                currentStep: _currentStep,
-                totalSteps: 4,
+              child: Row(
+                children: [
+                  _BackButton(
+                    visible: _currentStep > 0,
+                    onPressed: _isSubmitting ? null : _previousStep,
+                  ),
+                  Expanded(
+                    child: _DotProgressIndicator(
+                      currentStep: _currentStep,
+                      totalSteps: 4,
+                    ),
+                  ),
+                  // Balances the back button so the dots stay centred.
+                  const SizedBox(width: 40),
+                ],
               ),
             ),
             // Page content
@@ -323,6 +349,47 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 }
 
+// Flat back button; keeps its width when hidden so the dots stay centred.
+class _BackButton extends StatelessWidget {
+  const _BackButton({required this.visible, required this.onPressed});
+
+  final bool visible;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!visible) return const SizedBox(width: 40);
+
+    final c = AppTheme.colors(context);
+    return Tooltip(
+      message: S.of(context).backButton,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          child: Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: c.card,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: c.border, width: 1),
+            ),
+            child: Icon(
+              Icons.arrow_back_rounded,
+              size: 20,
+              color: c.foreground,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // Dot-style progress indicator
 class _DotProgressIndicator extends StatelessWidget {
   const _DotProgressIndicator({
@@ -358,6 +425,45 @@ class _DotProgressIndicator extends StatelessWidget {
   }
 }
 
+// Shared step header: title + description
+class _StepHeader extends StatelessWidget {
+  const _StepHeader({required this.title, required this.description});
+
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          title,
+          style: GoogleFonts.inter(
+            fontSize: AppTypography.headlineSmall,
+            fontWeight: FontWeight.w700,
+            color: c.foreground,
+            height: 1.2,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          description,
+          style: GoogleFonts.inter(
+            fontSize: AppTypography.bodyMedium,
+            color: c.mutedForeground,
+            height: 1.5,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+      ],
+    );
+  }
+}
+
 class _NativeLanguageStep extends StatelessWidget {
   const _NativeLanguageStep({
     required this.languages,
@@ -387,31 +493,16 @@ class _NativeLanguageStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final c = AppTheme.colors(context);
-
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            S.of(context).onboardingSelectNativeLanguageTitle,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
-            ),
+          _StepHeader(
+            title: S.of(context).onboardingSelectNativeLanguageTitle,
+            description:
+                S.of(context).onboardingSelectNativeLanguageDescription,
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            S.of(context).onboardingSelectNativeLanguageDescription,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: c.mutedForeground,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xxl),
           ...languages.map((lang) {
             final isSelected = lang == selected;
             return Padding(
@@ -443,31 +534,15 @@ class _LevelStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final c = AppTheme.colors(context);
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            S.of(context).selectLevelTitle,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
-            ),
+          _StepHeader(
+            title: S.of(context).selectLevelTitle,
+            description: S.of(context).onboardingSelectLevelDescription,
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            S.of(context).onboardingSelectLevelDescription,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: c.mutedForeground,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xxl),
           Expanded(
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -543,31 +618,15 @@ class _DialectStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final c = AppTheme.colors(context);
-
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            S.of(context).selectDialectTitle,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
-            ),
+          _StepHeader(
+            title: S.of(context).selectDialectTitle,
+            description: S.of(context).onboardingSelectDialectDescription,
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            S.of(context).onboardingSelectDialectDescription,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: c.mutedForeground,
-              height: 1.5,
-            ),
-          ), // Note: description string, keeping as is
-          const SizedBox(height: AppSpacing.xxl),
           ...dialects.map((dialect) {
             final isSelected = dialect.value == selected;
             final label = _getDialectLabel(context, dialect.value);
@@ -604,38 +663,43 @@ class _DailyGoalStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final c = AppTheme.colors(context);
+    final types = GoalType.values;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            S.of(context).selectGoalsTitle,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
+          _StepHeader(
+            title: S.of(context).selectGoalsTitle,
+            description: S.of(context).onboardingSelectGoalsDescription,
+          ),
+          // Single flat card with divider-separated goal rows, matching the
+          // in-app daily goals section.
+          Container(
+            decoration: BoxDecoration(
+              color: c.card,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: c.border, width: 1),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: [
+                for (var i = 0; i < types.length; i++) ...[
+                  if (i > 0) Container(height: 1, color: c.border),
+                  _GoalToggleTile(
+                    goalType: types[i],
+                    enabled: goalEnabled[types[i]] ?? false,
+                    targetValue:
+                        goalTargets[types[i]] ?? types[i].defaultTarget,
+                    onToggle: (v) => onToggle(types[i], v),
+                    onTargetChanged: (v) => onTargetChanged(types[i], v),
+                  ),
+                ],
+              ],
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            S.of(context).onboardingSelectGoalsDescription,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: c.mutedForeground,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-          ...GoalType.values.map((type) => _GoalToggleTile(
-                goalType: type,
-                enabled: goalEnabled[type] ?? false,
-                targetValue: goalTargets[type] ?? type.defaultTarget,
-                onToggle: (v) => onToggle(type, v),
-                onTargetChanged: (v) => onTargetChanged(type, v),
-              )),
         ],
       ),
     );
@@ -660,60 +724,78 @@ class _GoalToggleTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
-    final theme = Theme.of(context);
     final (min, max) = goalType.range;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-      child: AppCard(
-        variant: AppCardVariant.outlined,
-        borderColor: enabled ? c.primary : c.border,
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Icon(goalType.icon,
-                    color: enabled ? c.primary : c.mutedForeground, size: 24),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    _goalTypeLabel(context, goalType),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: enabled ? c.foreground : c.mutedForeground,
-                    ),
-                  ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: enabled ? c.primary.withValues(alpha: 0.12) : c.muted,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
-                AppSwitch(
-                  value: enabled,
-                  onChanged: onToggle,
-                ),
-              ],
-            ),
-            if (enabled) ...[
-              const SizedBox(height: AppSpacing.md),
-              Center(
-                child: Text(
-                  '$targetValue ${goalType.unit}/day',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: c.primary,
-                  ),
+                child: Icon(
+                  goalType.icon,
+                  color: enabled ? c.primary : c.mutedForeground,
+                  size: 20,
                 ),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              AppSlider(
-                value: targetValue.toDouble(),
-                min: min.toDouble(),
-                max: max.toDouble(),
-                divisions: (max - min) ~/ goalType.step,
-                label: '$targetValue',
-                onChanged: (v) => onTargetChanged(v.round()),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _goalTypeLabel(context, goalType),
+                      style: GoogleFonts.inter(
+                        fontSize: AppTypography.bodyMedium,
+                        fontWeight: FontWeight.w600,
+                        color: enabled ? c.foreground : c.mutedForeground,
+                        height: 1.2,
+                      ),
+                    ),
+                    if (enabled) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        '$targetValue ${goalType.unit}/day',
+                        style: GoogleFonts.inter(
+                          fontSize: AppTypography.bodySmall,
+                          fontWeight: FontWeight.w600,
+                          color: c.primary,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              AppSwitch(
+                value: enabled,
+                onChanged: onToggle,
               ),
             ],
+          ),
+          if (enabled) ...[
+            const SizedBox(height: AppSpacing.sm),
+            AppSlider(
+              value: targetValue.toDouble(),
+              min: min.toDouble(),
+              max: max.toDouble(),
+              divisions: (max - min) ~/ goalType.step,
+              label: '$targetValue',
+              onChanged: (v) => onTargetChanged(v.round()),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -736,7 +818,6 @@ class _SelectableCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final c = AppTheme.colors(context);
 
     return AppCard(
@@ -755,24 +836,28 @@ class _SelectableCard extends StatelessWidget {
                     children: [
                       Text(
                         label,
-                        style: theme.textTheme.titleMedium?.copyWith(
+                        style: GoogleFonts.inter(
+                          fontSize: AppTypography.bodyLarge,
                           fontWeight: FontWeight.w600,
                           color: isSelected ? c.primary : c.foreground,
+                          height: 1.2,
                         ),
                       ),
                       if (subtitle != null) ...[
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           subtitle!,
-                          style: AppTheme.vnStyle(
+                          style: GoogleFonts.inter(
                             fontSize: AppTypography.bodySmall,
                             color: isSelected ? c.primary : c.mutedForeground,
+                            height: 1.4,
                           ),
                         ),
                       ],
                     ],
                   ),
                 ),
+                const SizedBox(width: AppSpacing.sm),
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 150),
                   opacity: isSelected ? 1.0 : 0.0,
@@ -791,9 +876,11 @@ class _SelectableCard extends StatelessWidget {
                 FittedBox(
                   child: Text(
                     label,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    style: GoogleFonts.inter(
+                      fontSize: AppTypography.titleMedium,
+                      fontWeight: FontWeight.w700,
                       color: isSelected ? c.primary : c.foreground,
+                      height: 1.2,
                     ),
                   ),
                 ),
@@ -802,9 +889,10 @@ class _SelectableCard extends StatelessWidget {
                   FittedBox(
                     child: Text(
                       subtitle!,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: GoogleFonts.inter(
                         fontSize: AppTypography.caption,
                         color: isSelected ? c.primary : c.mutedForeground,
+                        height: 1.2,
                       ),
                       textAlign: TextAlign.center,
                     ),

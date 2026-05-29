@@ -24,8 +24,13 @@ class SplashScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: c.card,
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
+                          border: Border.all(color: c.border, width: 1),
+                        ),
+                        clipBehavior: Clip.antiAlias,
                         child: Image.asset(
                           'assets/branding/app_icon.png',
                           width: 96,

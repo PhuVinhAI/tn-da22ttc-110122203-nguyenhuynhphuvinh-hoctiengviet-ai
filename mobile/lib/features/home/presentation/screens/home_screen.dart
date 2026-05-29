@@ -93,6 +93,11 @@ class _HeroSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
+    final name = userProfileAsync.whenOrNull(
+      data: (profile) =>
+          profile.fullName.isNotEmpty ? profile.fullName as String : null,
+    );
+
     return Container(
       margin: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -122,97 +127,166 @@ class _HeroSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
-                userProfileAsync.whenOrNull(
-                  data: (profile) => Text(
-                    profile.fullName ?? S.of(context).readyToLearnPrompt,
-                    style: GoogleFonts.inter(
-                      fontSize: AppTypography.bodyMedium,
-                      color: c.mutedForeground,
-                      height: 1.4,
-                    ),
-                  ),
-                ) ?? Text(
-                  S.of(context).readyToLearnPrompt,
+                Text(
+                  name ?? S.of(context).readyToLearnPrompt,
                   style: GoogleFonts.inter(
                     fontSize: AppTypography.bodyMedium,
                     color: c.mutedForeground,
                     height: 1.4,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          userProfileAsync.when(
-            loading: () => Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: c.muted,
-                shape: BoxShape.circle,
-              ),
+          _HeroAvatar(userProfileAsync: userProfileAsync),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroAvatar extends StatelessWidget {
+  const _HeroAvatar({required this.userProfileAsync});
+
+  final AsyncValue userProfileAsync;
+
+  static const double _size = 64;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+
+    return Material(
+      color: Colors.transparent,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.go('/profile'),
+        customBorder: const CircleBorder(),
+        child: userProfileAsync.when(
+          loading: () => Container(
+            width: _size,
+            height: _size,
+            decoration: BoxDecoration(
+              color: c.muted,
+              shape: BoxShape.circle,
             ),
-            error: (_, _) => Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: c.primary.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: c.primary.withValues(alpha: 0.2),
-                  width: 2,
-                ),
-              ),
-              child: Icon(
-                Icons.person_outline,
-                size: 32,
-                color: c.primary,
-              ),
-            ),
-            data: (profile) {
-              if (profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty) {
-                return Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: c.primary.withValues(alpha: 0.2),
-                      width: 2,
-                    ),
-                    image: DecorationImage(
-                      image: NetworkImage(profile.avatarUrl!),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                );
-              }
+          ),
+          error: (_, _) => _tinted(
+            c,
+            child: Icon(Icons.person_outline, size: 32, color: c.primary),
+          ),
+          data: (profile) {
+            if (profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty) {
               return Container(
-                width: 64,
-                height: 64,
+                width: _size,
+                height: _size,
                 decoration: BoxDecoration(
-                  color: c.primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: c.primary.withValues(alpha: 0.2),
                     width: 2,
                   ),
-                ),
-                child: Center(
-                  child: Text(
-                    (profile.fullName?.isNotEmpty ?? false)
-                        ? profile.fullName![0].toUpperCase()
-                        : '?',
-                    style: GoogleFonts.inter(
-                      fontSize: AppTypography.titleLarge,
-                      fontWeight: FontWeight.w700,
-                      color: c.primary,
-                    ),
+                  image: DecorationImage(
+                    image: NetworkImage(profile.avatarUrl!),
+                    fit: BoxFit.cover,
                   ),
                 ),
               );
-            },
+            }
+            final fullName = profile.fullName as String;
+            return _tinted(
+              c,
+              child: Text(
+                fullName.isNotEmpty ? fullName[0].toUpperCase() : '?',
+                style: GoogleFonts.inter(
+                  fontSize: AppTypography.titleLarge,
+                  fontWeight: FontWeight.w700,
+                  color: c.primary,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _tinted(AppColors c, {required Widget child}) {
+    return Container(
+      width: _size,
+      height: _size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: c.primary.withValues(alpha: 0.12),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: c.primary.withValues(alpha: 0.2),
+          width: 2,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+// ─── Section header ─────────────────────────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title, this.onSeeAll});
+
+  final String title;
+  final VoidCallback? onSeeAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppTheme.colors(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: GoogleFonts.inter(
+                fontSize: AppTypography.titleMedium,
+                fontWeight: FontWeight.w700,
+                color: c.foreground,
+                height: 1.2,
+              ),
+            ),
           ),
+          if (onSeeAll != null)
+            TextButton(
+              onPressed: onSeeAll,
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
+                ),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    S.of(context).seeAll,
+                    style: GoogleFonts.inter(
+                      fontSize: AppTypography.bodySmall,
+                      color: c.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(Icons.arrow_forward, size: 16, color: c.primary),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -227,52 +301,12 @@ class _CoursesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = AppTheme.colors(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                S.of(context).coursesSection,
-                style: GoogleFonts.inter(
-                  fontSize: AppTypography.titleMedium,
-                  fontWeight: FontWeight.w700,
-                  color: c.foreground,
-                ),
-              ),
-              TextButton(
-                onPressed: () => context.go('/courses'),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.xs,
-                  ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      S.of(context).seeAll,
-                      style: GoogleFonts.inter(
-                        fontSize: AppTypography.bodySmall,
-                        color: c.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.arrow_forward, size: 16, color: c.primary),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        _SectionHeader(
+          title: S.of(context).coursesSection,
+          onSeeAll: () => context.go('/courses'),
         ),
         const SizedBox(height: AppSpacing.md),
         coursesAsync.when(
@@ -415,52 +449,12 @@ class _SimulationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = AppTheme.colors(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                S.of(context).practiceSection,
-                style: GoogleFonts.inter(
-                  fontSize: AppTypography.titleMedium,
-                  fontWeight: FontWeight.w700,
-                  color: c.foreground,
-                ),
-              ),
-              TextButton(
-                onPressed: () => context.go('/practice'),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.xs,
-                  ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      S.of(context).seeAll,
-                      style: GoogleFonts.inter(
-                        fontSize: AppTypography.bodySmall,
-                        color: c.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.arrow_forward, size: 16, color: c.primary),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        _SectionHeader(
+          title: S.of(context).practiceSection,
+          onSeeAll: () => context.go('/practice'),
         ),
         const SizedBox(height: AppSpacing.md),
         scenariosAsync.when(
