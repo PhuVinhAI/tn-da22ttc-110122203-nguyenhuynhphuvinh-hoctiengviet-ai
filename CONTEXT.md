@@ -95,8 +95,12 @@ Người nước ngoài đăng ký học tiếng Việt. Có cấp độ hiện 
 _Avoid_: User, Learner, Student
 
 **Quản trị viên**:
-Người quản lý nền tảng: quản lý học liệu, xem thống kê, quản lý học viên. Được phân biệt bằng vai trò ADMIN. Admin panel không được ưu tiên phát triển — không cần cập nhật.
+Người quản lý nền tảng: quản lý học liệu, xem thống kê, quản lý học viên. Được phân biệt bằng vai trò ADMIN. Truy cập nền tảng qua **Trang quản trị** (app `admin/`) — chỉ đăng nhập, không tự đăng ký (tài khoản tạo qua CLI `bun run admin:create`).
 _Avoid_: Admin, Administrator
+
+**Trang quản trị**:
+Ứng dụng desktop/web (Electron + React + Vite, thư mục `admin/`) dành riêng cho **Quản trị viên**. Bảng màu, font và component bám sát mobile để đồng bộ thương hiệu. Chỉ tài khoản có **Vai trò** ADMIN mới đăng nhập được.
+_Avoid_: Admin panel, Dashboard, Backoffice
 
 **Vai trò**:
 Nhóm quyền gán cho người dùng (USER hoặc ADMIN). Mỗi vai trò có nhiều **Quyền hạn**.
