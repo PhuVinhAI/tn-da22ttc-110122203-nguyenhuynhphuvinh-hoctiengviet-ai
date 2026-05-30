@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useAuthStore } from '../../../lib/state/stores/auth.store';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Alert } from '../ui/alert';
-import { Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { useAuthStore } from '../../features/auth'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Label } from '../ui/label'
+import { Alert } from '../ui/alert'
+import { Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react'
 
 /**
  * Login Form Schema
@@ -15,12 +15,12 @@ import { Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 const loginSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
   password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
-});
+})
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type LoginFormData = z.infer<typeof loginSchema>
 
 interface LoginFormProps {
-  onSuccess?: () => void;
+  onSuccess?: () => void
 }
 
 /**
@@ -28,8 +28,8 @@ interface LoginFormProps {
  * Presenter Component (Dumb)
  */
 export function LoginForm({ onSuccess }: LoginFormProps) {
-  const { login, isLoading, error, clearError } = useAuthStore();
-  const [showPassword, setShowPassword] = useState(false);
+  const { login, isLoading, error, clearError } = useAuthStore()
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -41,17 +41,17 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       email: '',
       password: '',
     },
-  });
+  })
 
   const onSubmit = async (data: LoginFormData) => {
-    clearError();
+    clearError()
     try {
-      await login(data);
-      onSuccess?.();
-    } catch (error) {
+      await login(data)
+      onSuccess?.()
+    } catch {
       // Error handled by store
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -120,36 +120,6 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           'Đăng nhập'
         )}
       </Button>
-
-      {/* Login Info */}
-      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-        <div className="flex gap-3">
-          <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-sm font-semibold text-foreground">
-              Thông tin đăng nhập Admin
-            </h3>
-            <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-              <p><span className="font-medium">Email:</span> admin@linvnix.test</p>
-              <p><span className="font-medium">Password:</span> Admin123456!</p>
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Trang này chỉ dành cho quản trị viên. Tài khoản USER không thể truy cập.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Info */}
-      <div className="rounded-md bg-muted p-4">
-        <p className="text-xs text-muted-foreground">
-          <strong>Lưu ý:</strong> Trang này chỉ dành cho quản trị viên. Tài khoản thường không thể truy cập.
-        </p>
-      </div>
     </form>
-  );
+  )
 }

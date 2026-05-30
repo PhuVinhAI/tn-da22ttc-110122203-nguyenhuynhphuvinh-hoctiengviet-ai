@@ -1,5 +1,5 @@
-import type { User } from '../../../core/domain/entities/User'
-import { Role } from '../../../core/domain/enums'
+import type { User } from '../../../../lib/core/domain/entities/User'
+import { Role } from '../../../../lib/core/domain/enums'
 
 /**
  * Check if a user has the ADMIN role

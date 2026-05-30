@@ -1,6 +1,6 @@
-import { LocalStorage } from '../../../core/infrastructure/storage/LocalStorage'
-import { STORAGE_KEYS } from '../../../shared/constants'
-import type { User } from '../../../core/domain/entities/User'
+import { LocalStorage } from '../../../../lib/core/infrastructure/storage/LocalStorage'
+import { STORAGE_KEYS } from '../../../../lib/shared/constants'
+import type { User } from '../../../../lib/core/domain/entities/User'
 
 /**
  * Token storage helpers for auth tokens and user data

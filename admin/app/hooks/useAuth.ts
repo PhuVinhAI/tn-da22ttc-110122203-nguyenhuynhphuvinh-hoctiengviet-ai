@@ -1,4 +1,4 @@
-import { useAuthStore } from '../../lib/state/stores/auth.store';
+import { useAuthStore } from '../features/auth'
 
 /**
  * useAuth Hook - Convenient access to auth state
@@ -12,7 +12,7 @@ export function useAuth() {
     login,
     logout,
     clearError,
-  } = useAuthStore();
+  } = useAuthStore()
 
   return {
     user,
@@ -22,5 +22,5 @@ export function useAuth() {
     login,
     logout,
     clearError,
-  };
+  }
 }

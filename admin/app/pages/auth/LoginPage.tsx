@@ -1,31 +1,31 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { useAuthStore } from '../../../lib/state/stores/auth.store';
-import { LoginForm } from '../../components/forms/LoginForm';
-import { TitleBar } from '../../components/layout/TitleBar';
-import { ROUTES } from '../../../lib/shared/constants';
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router'
+import { useAuthStore } from '../../features/auth'
+import { LoginForm } from '../../components/forms/LoginForm'
+import { TitleBar } from '../../components/layout/TitleBar'
+import { ROUTES } from '../../../lib/shared/constants'
 
 /**
  * Login Page - Admin authentication
  * Container Component (Smart)
  */
 export function LoginPage() {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuthStore()
 
   // Redirect nếu đã login
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(ROUTES.DASHBOARD, { replace: true });
+      navigate(ROUTES.DASHBOARD, { replace: true })
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate])
 
   const handleLoginSuccess = () => {
-    navigate(ROUTES.DASHBOARD, { replace: true });
-  };
+    navigate(ROUTES.DASHBOARD, { replace: true })
+  }
 
   return (
-    <div className="flex h-screen flex-col bg-gradient-to-br from-primary/5 via-background to-primary/10">
+    <div className="flex h-screen flex-col bg-background">
       {/* TitleBar - Only in Electron */}
       <TitleBar />
 
@@ -43,7 +43,7 @@ export function LoginPage() {
           </div>
 
           {/* Login Form */}
-          <div className="rounded-xl bg-card p-8 shadow-xl border border-border">
+          <div className="rounded-xl bg-card p-8 border border-border">
             <LoginForm onSuccess={handleLoginSuccess} />
           </div>
 
@@ -54,5 +54,5 @@ export function LoginPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

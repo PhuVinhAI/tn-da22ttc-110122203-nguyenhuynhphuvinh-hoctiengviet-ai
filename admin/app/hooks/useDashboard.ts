@@ -1,4 +1,4 @@
-import { useDashboardStore } from '../../lib/state/stores/dashboard.store';
+import { useDashboardStore } from '../features/dashboard'
 
 export function useDashboard() {
   const { stats, isLoading, error, fetchStats, clearError } = useDashboardStore();
