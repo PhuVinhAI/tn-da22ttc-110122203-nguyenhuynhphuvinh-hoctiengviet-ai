@@ -23,11 +23,11 @@ Use React Query for data fetching. Handle loading, error, and success states. Di
 - [x] Error state shows clear error message
 - [x] Success state displays all stats in cards: total users, DAU, top courses, high-error exercises
 - [x] Stats cards use themed components (card, typography) matching mobile style
-- [ ] Manual test with backend running: dashboard shows real data
-- [ ] Manual test: verify admin account has `SYSTEM_SETTINGS` permission (created via `bun run admin:create`)
+- [x] Manual test with backend running: dashboard shows real data
+- [x] Manual test: verify admin account has `SYSTEM_SETTINGS` permission (created via `bun run admin:create`)
 - [x] If permission missing, error message is clear
 
-> Two boxes left unchecked are **manual QA against a live backend + DB + admin login**, which was not performed in this pass. Everything was verified via lint / typecheck / test / web build. The code paths they cover are implemented (the dashboard fetches `GET /admin/dashboard`, and a missing `SYSTEM_SETTINGS` permission surfaces an explicit Vietnamese 403 message). See **Verification** below.
+> All criteria verified, including a **live end-to-end run** against the backend + Postgres on 2026-05-30 (see **Verification → Live E2E** below): admin login → `GET /admin/dashboard` returns real data (200), the `ADMIN` role carries `SYSTEM_SETTINGS` (confirmed in the DB and functionally), and an authenticated non-admin gets a clear `403 Missing required permissions: SYSTEM_SETTINGS`.
 
 ## Blocked by
 
@@ -70,4 +70,12 @@ The dashboard data layer follows the existing feature-based pattern (mirrors `fe
 - ✅ Typecheck (`bun run typecheck`): no errors
 - ✅ Tests (`bun run test`): 16/16 passed (3 new dashboard-repository tests, plus the existing 13)
 - ✅ Web build (`bun run build:web`): succeeds (only non-blocking chunk-size / dynamic-import warnings) — this required the `client.ts` path fix above
-- ⏳ Manual QA pending: full end-to-end test against a running backend + DB + admin login ("dashboard shows real data", "admin account has `SYSTEM_SETTINGS`") was not run in this pass.
+
+#### Live E2E (backend + Postgres, 2026-05-30)
+
+- ✅ Backend `start:dev` on `http://localhost:3000`; Postgres + Redis via Docker; admin seeded.
+- ✅ `POST /api/v1/auth/login` as `admin@linvnix.test` → `roles: ["ADMIN"]`, access token issued.
+- ✅ `GET /api/v1/admin/dashboard` (admin Bearer) → **HTTP 200** with real data: `{ totalUsers: 6, dailyActiveUsers: 2, topCourses: [{ courseTitle: "Tiếng Việt Sơ cấp A1", userCount: 2 }], exercisesWithHighestErrors: [] }` — shape matches the frontend `DashboardStats` types exactly (camelCase, `{ data }` envelope).
+- ✅ Admin has `SYSTEM_SETTINGS`: DB join returns `ADMIN -> SYSTEM_SETTINGS`; the 200 from the SYSTEM_SETTINGS-guarded route confirms it functionally.
+- ✅ Permission-missing path: an authenticated non-admin (`USER`) → **HTTP 403** `{"message":"Missing required permissions: SYSTEM_SETTINGS","error":"Forbidden"}`; no token → **HTTP 401**. The frontend maps the 403 to the explicit Vietnamese message.
+- ℹ️ `bun run admin:create` crashes under Bun on Windows (Bull/ioredis `defineCommand` receives `undefined` lua at module init); ran the identical script under Node instead (`node -r ts-node/register -r tsconfig-paths/register scripts/create-admin.ts`). Pre-existing backend/runtime issue, unrelated to this issue.
