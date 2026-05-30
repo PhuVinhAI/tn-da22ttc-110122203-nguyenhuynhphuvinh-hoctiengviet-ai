@@ -1,7 +1,9 @@
+/* Google Fonts must precede the Tailwind/shadcn imports (which expand inline),
+   otherwise the bundled CSS places this @import after other rules and it is dropped. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
 @import 'tailwindcss';
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 @source '@/app';
