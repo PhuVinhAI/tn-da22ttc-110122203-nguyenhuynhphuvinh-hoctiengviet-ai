@@ -1,1 +1,2 @@
-export { useDashboardStore } from './store/dashboard.store'
+export { dashboardRepository, DashboardRepository } from './api/dashboard.repository'
+export type { DashboardStats, TopCourse, HighErrorExercise, IDashboardRepository } from './types'

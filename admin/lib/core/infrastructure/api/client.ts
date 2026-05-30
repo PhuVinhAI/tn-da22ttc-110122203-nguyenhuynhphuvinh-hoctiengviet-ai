@@ -27,7 +27,7 @@ class ApiClient {
     // Request interceptor - Thêm token vào headers
     this.client.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
-        const { tokenStorage } = await import('../../../app/features/auth/utils/token-storage')
+        const { tokenStorage } = await import('../../../../app/features/auth/utils/token-storage')
         const token = tokenStorage.getAccessToken()
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`
@@ -61,7 +61,7 @@ class ApiClient {
           this.isRefreshing = true
 
           try {
-            const { tokenStorage } = await import('../../../app/features/auth/utils/token-storage')
+            const { tokenStorage } = await import('../../../../app/features/auth/utils/token-storage')
             const refreshToken = tokenStorage.getRefreshToken()
             if (!refreshToken) {
               throw AppError.unauthorized('No refresh token')
@@ -89,8 +89,8 @@ class ApiClient {
             return this.client(originalRequest)
           } catch (refreshError) {
             // Refresh failed - Clear tokens and update store
-            const { tokenStorage } = await import('../../../app/features/auth/utils/token-storage')
-            const { useAuthStore } = await import('../../../app/features/auth/store/auth.store')
+            const { tokenStorage } = await import('../../../../app/features/auth/utils/token-storage')
+            const { useAuthStore } = await import('../../../../app/features/auth/store/auth.store')
 
             // Clear all tokens from storage
             tokenStorage.clearAll()
