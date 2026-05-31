@@ -59,9 +59,9 @@ const navigationGroups: NavigationGroup[] = [
  */
 export function Sidebar() {
   return (
-    <aside className="w-64 border-r border-border bg-card">
+    <aside className="w-64 border-r-2 border-border bg-card">
       {/* Logo */}
-      <div className="flex h-16 items-center border-b border-border px-6">
+      <div className="flex h-16 items-center border-b-2 border-border px-6">
         <h1 className="text-xl font-bold text-card-foreground">
           LinVNix Admin
         </h1>
@@ -69,10 +69,10 @@ export function Sidebar() {
 
       {/* Navigation */}
       <ScrollArea className="h-[calc(100vh-4rem)]">
-        <nav className="space-y-6 p-4">
+        <nav className="space-y-6 p-5">
           {navigationGroups.map((group) => (
             <div key={group.title}>
-              <h3 className="mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <h3 className="mb-2 px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 {group.title}
               </h3>
               <div className="space-y-1">
@@ -81,14 +81,14 @@ export function Sidebar() {
                     key={item.name}
                     to={item.href}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+                      `flex items-center gap-3 rounded-lg px-4 py-3 text-base font-semibold transition-all ${
                         isActive
                           ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                          : 'text-foreground hover:bg-muted'
                       }`
                     }
                   >
-                    <item.icon className="h-5 w-5" />
+                    <item.icon className="h-6 w-6" />
                     {item.name}
                   </NavLink>
                 ))}

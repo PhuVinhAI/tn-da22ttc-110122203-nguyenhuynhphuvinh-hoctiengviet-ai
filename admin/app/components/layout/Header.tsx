@@ -23,10 +23,10 @@ export function Header() {
   }
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
+    <header className="flex h-16 items-center justify-between border-b-2 border-border bg-card px-6">
       {/* Left - Breadcrumb hoặc Page Title */}
       <div>
-        <h2 className="text-lg font-semibold text-card-foreground">
+        <h2 className="text-xl font-bold text-card-foreground">
           {/* Page title sẽ được inject sau */}
         </h2>
       </div>
@@ -38,12 +38,12 @@ export function Header() {
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
-          className="h-9 w-9"
+          className="h-12 w-12"
         >
           {theme === 'dark' ? (
-            <Sun className="h-5 w-5" />
+            <Sun className="h-6 w-6" />
           ) : (
-            <Moon className="h-5 w-5" />
+            <Moon className="h-6 w-6" />
           )}
           <span className="sr-only">Toggle theme</span>
         </Button>
@@ -51,29 +51,29 @@ export function Header() {
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                <User className="h-4 w-4 text-primary" />
+            <Button variant="ghost" className="flex items-center gap-3 h-12 px-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <User className="h-5 w-5 text-primary" />
               </div>
-              <span className="text-sm font-medium text-foreground">{user?.fullName}</span>
+              <span className="text-base font-semibold text-foreground">{user?.fullName}</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-64">
             <DropdownMenuLabel>
               <div>
-                <p className="text-sm font-medium text-foreground">{user?.fullName}</p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
+                <p className="text-base font-semibold text-foreground">{user?.fullName}</p>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              Cài đặt
+            <DropdownMenuItem className="py-3">
+              <Settings className="mr-3 h-5 w-5" />
+              <span className="text-base">Cài đặt</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-              <LogOut className="mr-2 h-4 w-4" />
-              Đăng xuất
+            <DropdownMenuItem onClick={handleLogout} className="text-destructive py-3">
+              <LogOut className="mr-3 h-5 w-5" />
+              <span className="text-base">Đăng xuất</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

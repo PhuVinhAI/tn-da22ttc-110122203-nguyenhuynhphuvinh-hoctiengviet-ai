@@ -1,9 +1,8 @@
 import { Link, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
+import { ArrowLeft, Save, FileText, BookMarked, Lightbulb, ClipboardList } from 'lucide-react'
 import { Button } from '../../components/ui/button'
-import { Card, CardContent } from '../../components/ui/card'
 import { Breadcrumbs } from '../../components/admin/Breadcrumbs'
-import { PageHeader } from '../../components/admin/PageHeader'
 import { ResourceForm } from '../../components/admin/ResourceForm'
 import {
   contentFields,
@@ -17,17 +16,18 @@ import { learningPath } from './route-utils'
 
 type ChildKind = 'contents' | 'vocabularies' | 'grammar' | 'exercise-sets'
 
-const childConfig: Record<ChildKind, { title: string; fields: FieldConfig[] }> = {
-  contents: { title: 'nội dung', fields: contentFields },
-  vocabularies: { title: 'từ vựng', fields: vocabularyFields },
-  grammar: { title: 'ngữ pháp', fields: grammarFields },
-  'exercise-sets': { title: 'bộ bài tập', fields: exerciseSetFields },
+const childConfig: Record<ChildKind, { title: string; fields: FieldConfig[]; icon: any }> = {
+  contents: { title: 'nội dung', fields: contentFields, icon: FileText },
+  vocabularies: { title: 'từ vựng', fields: vocabularyFields, icon: BookMarked },
+  grammar: { title: 'ngữ pháp', fields: grammarFields, icon: Lightbulb },
+  'exercise-sets': { title: 'bộ bài tập', fields: exerciseSetFields, icon: ClipboardList },
 }
 
 export function LessonChildFormPage({ kind, mode }: { kind: ChildKind; mode: 'create' | 'edit' }) {
   const { lessonId, id } = useParams()
   const navigate = useNavigate()
   const config = childConfig[kind]
+  const Icon = config.icon
   const { data: lesson } = useAdminLesson(lessonId)
   const mutations = useLearningAdminMutation()
 
@@ -55,8 +55,10 @@ export function LessonChildFormPage({ kind, mode }: { kind: ChildKind; mode: 'cr
     }
   }
 
+  const backPath = lessonId ? learningPath.lesson(lessonId) : learningPath.courses()
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       <Breadcrumbs
         items={[
           { label: 'Học liệu', href: learningPath.courses() },
@@ -66,15 +68,51 @@ export function LessonChildFormPage({ kind, mode }: { kind: ChildKind; mode: 'cr
           { label: mode === 'edit' ? `Sửa ${config.title}` : `Thêm ${config.title}` },
         ]}
       />
-      <PageHeader
-        title={mode === 'edit' ? `Sửa ${config.title}` : `Thêm ${config.title}`}
-        actions={<Button asChild variant="outline"><Link to={lessonId ? learningPath.lesson(lessonId) : learningPath.courses()}>Quay lại</Link></Button>}
-      />
-      <Card>
-        <CardContent className="p-5">
-          <ResourceForm fields={config.fields} initialValue={initialValue as Record<string, unknown> | undefined} onSubmit={submit} />
-        </CardContent>
-      </Card>
+
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="ghost" size="icon-lg">
+            <Link to={backPath}>
+              <ArrowLeft className="h-6 w-6" />
+            </Link>
+          </Button>
+          <div className="flex items-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+              <Icon className="h-8 w-8 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold capitalize">
+                {mode === 'edit' ? `Sửa ${config.title}` : `Thêm ${config.title}`}
+              </h1>
+              <p className="text-lg text-muted-foreground mt-2">
+                {lesson?.title ?? 'Bài học'}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button asChild variant="outline" size="lg">
+            <Link to={backPath}>Hủy</Link>
+          </Button>
+          <Button type="submit" form="child-form" size="lg">
+            <Save className="h-5 w-5" />
+            {mode === 'edit' ? 'Cập nhật' : 'Tạo mới'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Form */}
+      <div className="max-w-4xl">
+        <div className="rounded-2xl border-2 border-border bg-card p-8">
+          <ResourceForm
+            id="child-form"
+            fields={config.fields}
+            initialValue={initialValue as Record<string, unknown> | undefined}
+            onSubmit={submit}
+          />
+        </div>
+      </div>
     </div>
   )
 }

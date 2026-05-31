@@ -18,12 +18,12 @@ export function DataTable<T extends { id: string }>({
   empty: string
 }) {
   return (
-    <div className="rounded-lg border">
+    <div className="rounded-2xl border-2">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="h-14 bg-muted hover:bg-muted">
             {columns.map((column) => (
-              <TableHead key={column.key} className={column.className}>
+              <TableHead key={column.key} className={`px-5 py-4 text-base font-bold ${column.className || ''}`}>
                 {column.header}
               </TableHead>
             ))}
@@ -31,16 +31,16 @@ export function DataTable<T extends { id: string }>({
         </TableHeader>
         <TableBody>
           {data.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+            <TableRow className="hover:bg-transparent">
+              <TableCell colSpan={columns.length} className="h-[200px] text-center text-muted-foreground text-lg">
                 {empty}
               </TableCell>
             </TableRow>
           ) : (
             data.map((record) => (
-              <TableRow key={record.id}>
+              <TableRow key={record.id} className="h-16 hover:bg-muted/50">
                 {columns.map((column) => (
-                  <TableCell key={column.key} className={column.className}>
+                  <TableCell key={column.key} className={`px-5 py-4 ${column.className || ''}`}>
                     {column.cell(record)}
                   </TableCell>
                 ))}

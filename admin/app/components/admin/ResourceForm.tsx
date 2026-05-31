@@ -13,11 +13,15 @@ export function ResourceForm({
   initialValue,
   submitLabel = 'Lưu',
   onSubmit,
+  onChange,
+  id,
 }: {
   fields: FieldConfig[]
   initialValue?: Record<string, unknown>
   submitLabel?: string
   onSubmit: (payload: Record<string, unknown>) => Promise<void> | void
+  onChange?: (form: Record<string, unknown>) => void
+  id?: string
 }) {
   const initialState = useMemo(
     () =>
@@ -38,6 +42,14 @@ export function ResourceForm({
   const [form, setForm] = useState<Record<string, unknown>>(initialState)
   const [saving, setSaving] = useState(false)
 
+  const updateForm = (updates: Record<string, unknown>) => {
+    setForm((current) => {
+      const newForm = { ...current, ...updates }
+      onChange?.(newForm)
+      return newForm
+    })
+  }
+
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     setSaving(true)
@@ -49,7 +61,7 @@ export function ResourceForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-5">
+    <form onSubmit={submit} className="space-y-5" id={id}>
       <div className="grid gap-4 md:grid-cols-2">
         {fields.map((field) => (
           <div key={field.name} className={field.fullWidth || field.type === 'textarea' || field.type === 'json' ? 'md:col-span-2' : undefined}>
@@ -63,20 +75,20 @@ export function ResourceForm({
                   id={field.name}
                   required={field.required}
                   value={String(form[field.name] ?? '')}
-                  onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))}
+                  onChange={(event) => updateForm({ [field.name]: event.target.value })}
                 />
               ) : field.type === 'json' ? (
                 <Textarea
                   id={field.name}
                   required={field.required}
                   value={String(form[field.name] ?? '')}
-                  onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))}
+                  onChange={(event) => updateForm({ [field.name]: event.target.value })}
                   className="min-h-32 font-mono text-xs"
                 />
               ) : field.type === 'select' ? (
                 <Select
                   value={String(form[field.name] ?? '')}
-                  onValueChange={(value) => setForm((current) => ({ ...current, [field.name]: value }))}
+                  onValueChange={(value) => updateForm({ [field.name]: value })}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue />
@@ -92,7 +104,7 @@ export function ResourceForm({
               ) : field.type === 'switch' ? (
                 <Switch
                   checked={Boolean(form[field.name])}
-                  onCheckedChange={(checked) => setForm((current) => ({ ...current, [field.name]: checked }))}
+                  onCheckedChange={(checked) => updateForm({ [field.name]: checked })}
                 />
               ) : (
                 <Input
@@ -100,7 +112,7 @@ export function ResourceForm({
                   type={field.type === 'number' ? 'number' : 'text'}
                   required={field.required}
                   value={String(form[field.name] ?? '')}
-                  onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))}
+                  onChange={(event) => updateForm({ [field.name]: event.target.value })}
                 />
               )}
             </div>

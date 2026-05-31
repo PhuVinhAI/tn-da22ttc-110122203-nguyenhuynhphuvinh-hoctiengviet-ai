@@ -1,21 +1,23 @@
 import { Link, useParams } from 'react-router'
+import { Bot, ArrowLeft } from 'lucide-react'
 import { Badge } from '../../components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
 import { Breadcrumbs } from '../../components/admin/Breadcrumbs'
-import { PageHeader } from '../../components/admin/PageHeader'
+import { LoadingState } from '../../components/admin/LoadingState'
+import { ErrorState } from '../../components/admin/ErrorState'
 import { useAdminLearner, useAdminLearnerConversation } from '../../features/learners/api/use-learners-admin'
 import { learnerPath } from './route-utils'
 
 export function LearnerConversationDetailPage() {
   const { learnerId, conversationId } = useParams()
   const { data: learnerData } = useAdminLearner(learnerId)
-  const { data, isLoading, error } = useAdminLearnerConversation(learnerId, conversationId)
+  const { data, isLoading, error, refetch } = useAdminLearnerConversation(learnerId, conversationId)
 
   const learner = learnerData?.user
   const conversation = data?.conversation
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       <Breadcrumbs
         items={[
           { label: 'Học viên', href: learnerPath.learners() },
@@ -23,57 +25,70 @@ export function LearnerConversationDetailPage() {
           { label: conversation?.title || 'Hội thoại AI' },
         ]}
       />
-      <PageHeader title={conversation?.title || 'Hội thoại AI'} description={conversation?.model} />
+
+      <div className="flex items-center gap-4">
+        {learnerId && (
+          <Button asChild variant="ghost" size="icon-lg">
+            <Link to={learnerPath.learner(learnerId)}>
+              <ArrowLeft className="h-6 w-6" />
+            </Link>
+          </Button>
+        )}
+        <div className="flex items-center gap-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+            <Bot className="h-8 w-8 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-bold">{conversation?.title || 'Hội thoại AI'}</h1>
+            <p className="text-lg text-muted-foreground mt-2">{conversation?.model}</p>
+          </div>
+        </div>
+      </div>
+
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Đang tải...</p>
+        <LoadingState message="Đang tải hội thoại..." />
       ) : error ? (
-        <p className="text-sm text-destructive">{error instanceof Error ? error.message : 'Không tải được dữ liệu'}</p>
+        <ErrorState message={error instanceof Error ? error.message : 'Không tải được dữ liệu'} onRetry={() => refetch()} />
       ) : data ? (
         <>
-          <Card>
-            <CardContent className="grid gap-3 p-4 md:grid-cols-4">
-              <Info label="Model" value={conversation?.model} />
-              <Info label="Tokens" value={String(conversation?.totalTokens ?? 0)} />
-              <Info label="Khóa học" value={conversation?.course?.title ?? '-'} />
-              <Info label="Bài học" value={conversation?.lesson?.title ?? '-'} />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Tin nhắn</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+          <div className="grid grid-cols-4 gap-6">
+            <Metric label="Model" value={conversation?.model ?? '-'} />
+            <Metric label="Tokens" value={conversation?.totalTokens ?? 0} />
+            <Metric label="Khóa học" value={conversation?.course?.title ?? '-'} />
+            <Metric label="Bài học" value={conversation?.lesson?.title ?? '-'} />
+          </div>
+
+          <div className="rounded-2xl border-2 border-border bg-card p-8">
+            <h2 className="text-2xl font-bold mb-6">Tin nhắn</h2>
+            <div className="space-y-4">
               {data.messages.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Chưa có tin nhắn</p>
+                <p className="text-center text-lg text-muted-foreground py-12">Chưa có tin nhắn</p>
               ) : (
                 data.messages.map((message) => (
-                  <div key={message.id} className="rounded-lg border p-3">
-                    <div className="mb-2 flex items-center justify-between gap-2">
-                      <Badge variant="outline">{message.role}</Badge>
-                      <span className="text-xs text-muted-foreground">{message.tokenCount} tokens</span>
+                  <div key={message.id} className="rounded-xl border-2 border-border p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <Badge variant={message.role === 'user' ? 'default' : 'secondary'} className="text-base px-4 py-2">
+                        {message.role}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground font-semibold">{message.tokenCount} tokens</span>
                     </div>
-                    <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                    <p className="whitespace-pre-wrap text-base leading-relaxed">{message.content}</p>
                   </div>
                 ))
               )}
-            </CardContent>
-          </Card>
-          {learnerId ? (
-            <Link className="text-sm font-medium text-primary" to={learnerPath.learner(learnerId)}>
-              Quay lại học viên
-            </Link>
-          ) : null}
+            </div>
+          </div>
         </>
       ) : null}
     </div>
   )
 }
 
-function Info({ label, value }: { label: string; value?: string }) {
+function Metric({ label, value }: { label: string; value: string | number }) {
   return (
-    <div>
-      <p className="text-xs font-medium uppercase text-muted-foreground">{label}</p>
-      <p className="mt-1 text-sm font-medium">{value ?? '-'}</p>
+    <div className="rounded-xl border-2 border-border bg-card p-6">
+      <p className="text-sm font-semibold text-muted-foreground mb-2">{label}</p>
+      <p className="text-2xl font-bold">{value}</p>
     </div>
   )
 }

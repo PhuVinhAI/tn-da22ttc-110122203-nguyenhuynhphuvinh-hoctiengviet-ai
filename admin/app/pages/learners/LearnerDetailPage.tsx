@@ -1,183 +1,140 @@
-﻿import { Link, useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import type { ReactNode } from 'react'
+import { User, TrendingUp, Target, BookOpen, MessageSquare, Bot } from 'lucide-react'
 import { Badge } from '../../components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
 import { Breadcrumbs } from '../../components/admin/Breadcrumbs'
 import { DataTable } from '../../components/admin/DataTable'
-import { PageHeader } from '../../components/admin/PageHeader'
+import { LoadingState } from '../../components/admin/LoadingState'
+import { ErrorState } from '../../components/admin/ErrorState'
 import { useAdminLearner } from '../../features/learners/api/use-learners-admin'
 import { learnerPath } from './route-utils'
 
 export function LearnerDetailPage() {
   const { learnerId } = useParams()
-  const { data, isLoading, error } = useAdminLearner(learnerId)
+  const { data, isLoading, error, refetch } = useAdminLearner(learnerId)
 
   const learner = data?.user
 
   return (
-    <div className="space-y-5">
-      <Breadcrumbs items={[{ label: 'Há»c viÃªn', href: learnerPath.learners() }, { label: learner?.fullName ?? 'Chi tiáº¿t' }]} />
-      <PageHeader title={learner?.fullName ?? 'Học viên'} description={learner?.email} />
+    <div className="space-y-8">
+      <Breadcrumbs items={[{ label: 'Học viên', href: learnerPath.learners() }, { label: learner?.fullName ?? 'Chi tiết' }]} />
+
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Äang táº£i...</p>
+        <LoadingState message="Đang tải thông tin học viên..." />
       ) : error ? (
-        <p className="text-sm text-destructive">{error instanceof Error ? error.message : 'KhÃ´ng táº£i Ä‘Æ°á»£c dá»¯ liá»‡u'}</p>
+        <ErrorState message={error instanceof Error ? error.message : 'Không tải được dữ liệu'} onRetry={() => refetch()} />
       ) : data ? (
         <>
-          <div className="grid gap-3 md:grid-cols-4">
-            <Metric label="Tiáº¿n Ä‘á»™ hoÃ n táº¥t" value={`${data.summary.completedProgressCount}/${data.summary.progressCount}`} />
-            <Metric label="BÃ i táº­p Ä‘Ãºng" value={`${data.summary.correctExerciseResultsCount}/${data.summary.exerciseResultsCount}`} />
-            <Metric label="Tá»« cÃ¡ nhÃ¢n" value={data.summary.personalVocabularyCount} />
-            <Metric label="Streak" value={`${data.summary.currentStreak}/${data.summary.longestStreak}`} />
+          <div className="rounded-2xl border-2 border-border bg-card overflow-hidden">
+            <div className="h-32 bg-primary/10 flex items-center justify-center border-b-2 border-border">
+              <User className="h-16 w-16 text-primary/30" />
+            </div>
+            <div className="p-8">
+              <h1 className="text-4xl font-bold mb-2">{learner?.fullName ?? 'Học viên'}</h1>
+              <p className="text-lg text-muted-foreground mb-6">{learner?.email}</p>
+
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="rounded-xl border border-border bg-muted/30 p-4">
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">Level</p>
+                  <p className="text-xl font-bold">{learner?.currentLevel}</p>
+                </div>
+                <div className="rounded-xl border border-border bg-muted/30 p-4">
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">Vai trò</p>
+                  <Badge variant="secondary" className="text-base">{learner?.role}</Badge>
+                </div>
+                <div className="rounded-xl border border-border bg-muted/30 p-4">
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">Giọng ưu tiên</p>
+                  <p className="text-xl font-bold">{learner?.preferredDialect}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-6">
+                <Metric label="Tiến độ hoàn tất" value={`${data.summary.completedProgressCount}/${data.summary.progressCount}`} />
+                <Metric label="Bài tập đúng" value={`${data.summary.correctExerciseResultsCount}/${data.summary.exerciseResultsCount}`} />
+                <Metric label="Từ cá nhân" value={data.summary.personalVocabularyCount} />
+                <Metric label="Streak" value={`${data.summary.currentStreak}/${data.summary.longestStreak}`} />
+              </div>
+            </div>
           </div>
-          <Card>
-            <CardContent className="grid gap-3 p-4 md:grid-cols-3">
-              <Info label="Level" value={learner?.currentLevel} />
-              <Info label="Vai trÃ²" value={learner?.role} />
-              <Info label="Provider" value={learner?.provider} />
-              <Info label="Giá»ng Æ°u tiÃªn" value={learner?.preferredDialect} />
-              <Info label="Email" value={learner?.emailVerified ? 'ÄÃ£ xÃ¡c thá»±c' : 'ChÆ°a xÃ¡c thá»±c'} />
-              <Info label="Onboarding" value={learner?.onboardingCompleted ? 'HoÃ n táº¥t' : 'ChÆ°a hoÃ n táº¥t'} />
-            </CardContent>
-          </Card>
-          <Tabs defaultValue="progress">
-            <TabsList>
-              <TabsTrigger value="progress">Tiáº¿n Ä‘á»™</TabsTrigger>
-              <TabsTrigger value="goals">Má»¥c tiÃªu</TabsTrigger>
-              <TabsTrigger value="exercises">BÃ i táº­p</TabsTrigger>
-              <TabsTrigger value="vocabulary">Tá»« vá»±ng</TabsTrigger>
-              <TabsTrigger value="simulations">MÃ´ phá»ng</TabsTrigger>
-              <TabsTrigger value="ai">AI</TabsTrigger>
+
+          <Tabs defaultValue="progress" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-6 h-14">
+              <TabsTrigger value="progress" className="text-base"><TrendingUp className="h-5 w-5 mr-2" />Tiến độ</TabsTrigger>
+              <TabsTrigger value="goals" className="text-base"><Target className="h-5 w-5 mr-2" />Mục tiêu</TabsTrigger>
+              <TabsTrigger value="exercises" className="text-base"><BookOpen className="h-5 w-5 mr-2" />Bài tập</TabsTrigger>
+              <TabsTrigger value="vocabulary" className="text-base"><BookOpen className="h-5 w-5 mr-2" />Từ vựng</TabsTrigger>
+              <TabsTrigger value="simulations" className="text-base"><MessageSquare className="h-5 w-5 mr-2" />Mô phỏng</TabsTrigger>
+              <TabsTrigger value="ai" className="text-base"><Bot className="h-5 w-5 mr-2" />AI</TabsTrigger>
             </TabsList>
+
             <TabsContent value="progress">
-              <Section title="Tiáº¿n Ä‘á»™ há»c táº­p">
-                <DataTable
-                  data={data.progress}
-                  empty="ChÆ°a cÃ³ tiáº¿n Ä‘á»™"
-                  columns={[
-                    { key: 'unit', header: 'Háº¡ng má»¥c', cell: (row) => row.lesson?.title ?? row.module?.title ?? row.course?.title ?? row.unitType },
-                    { key: 'type', header: 'Loáº¡i', cell: (row) => row.unitType },
-                    { key: 'status', header: 'Tráº¡ng thÃ¡i', cell: (row) => <Badge variant="outline">{row.status}</Badge> },
-                    { key: 'score', header: 'Äiá»ƒm', cell: (row) => row.score ?? '-' },
-                    { key: 'time', header: 'Thá»i gian', cell: (row) => `${row.timeSpent}s` },
-                  ]}
-                />
+              <Section title="Tiến độ học tập" icon={TrendingUp}>
+                <DataTable data={data.progress} empty="Chưa có tiến độ" columns={[
+                  { key: 'unit', header: 'Hạng mục', cell: (row) => <span className="font-semibold">{row.lesson?.title ?? row.module?.title ?? row.course?.title ?? row.unitType}</span> },
+                  { key: 'type', header: 'Loại', cell: (row) => <Badge variant="outline">{row.unitType}</Badge> },
+                  { key: 'status', header: 'Trạng thái', cell: (row) => <Badge>{row.status}</Badge> },
+                  { key: 'score', header: 'Điểm', cell: (row) => <span className="font-bold text-lg">{row.score ?? '-'}</span> },
+                  { key: 'time', header: 'Thời gian', cell: (row) => `${row.timeSpent}s` },
+                ]} />
               </Section>
             </TabsContent>
+
             <TabsContent value="goals">
-              <Section title="Má»¥c tiÃªu háº±ng ngÃ y">
-                <DataTable
-                  data={data.dailyGoals}
-                  empty="ChÆ°a cÃ³ má»¥c tiÃªu"
-                  columns={[
-                    { key: 'type', header: 'Loáº¡i', cell: (row) => row.goalType },
-                    { key: 'target', header: 'Má»¥c tiÃªu', cell: (row) => row.targetValue },
-                  ]}
-                />
-              </Section>
-              <Section title="Lá»‹ch sá»­ má»¥c tiÃªu">
-                <DataTable
-                  data={data.dailyProgress}
-                  empty="ChÆ°a cÃ³ lá»‹ch sá»­"
-                  columns={[
-                    { key: 'date', header: 'NgÃ y', cell: (row) => row.date },
-                    { key: 'lessons', header: 'BÃ i há»c', cell: (row) => row.lessonsCompleted },
-                    { key: 'exercises', header: 'BÃ i táº­p', cell: (row) => row.exercisesCompleted },
-                  ]}
-                />
+              <Section title="Mục tiêu hằng ngày" icon={Target}>
+                <DataTable data={data.dailyGoals} empty="Chưa có mục tiêu" columns={[
+                  { key: 'type', header: 'Loại', cell: (row) => <Badge variant="secondary" className="text-base">{row.goalType}</Badge> },
+                  { key: 'target', header: 'Mục tiêu', cell: (row) => <span className="font-bold text-lg">{row.targetValue}</span> },
+                ]} />
               </Section>
             </TabsContent>
+
             <TabsContent value="exercises">
-              <Section title="Káº¿t quáº£ bÃ i táº­p">
-                <DataTable
-                  data={data.exerciseResults}
-                  empty="ChÆ°a cÃ³ káº¿t quáº£"
-                  columns={[
-                    { key: 'question', header: 'CÃ¢u há»i', cell: (row) => row.exercise?.question ?? '-' },
-                    { key: 'type', header: 'Kiá»ƒu', cell: (row) => row.exercise?.exerciseType ?? '-' },
-                    { key: 'correct', header: 'ÄÃºng', cell: (row) => (row.isCorrect ? 'CÃ³' : 'KhÃ´ng') },
-                    { key: 'score', header: 'Äiá»ƒm', cell: (row) => row.bestScore || row.score },
-                    { key: 'attempts', header: 'Láº§n lÃ m', cell: (row) => row.attemptCount },
-                  ]}
-                />
+              <Section title="Kết quả bài tập" icon={BookOpen}>
+                <DataTable data={data.exerciseResults} empty="Chưa có kết quả" columns={[
+                  { key: 'question', header: 'Câu hỏi', cell: (row) => <span className="font-semibold">{row.exercise?.question ?? '-'}</span> },
+                  { key: 'type', header: 'Kiểu', cell: (row) => <Badge variant="outline">{row.exercise?.exerciseType ?? '-'}</Badge> },
+                  { key: 'correct', header: 'Đúng', cell: (row) => <Badge variant={row.isCorrect ? 'default' : 'destructive'}>{row.isCorrect ? 'Có' : 'Không'}</Badge> },
+                  { key: 'score', header: 'Điểm', cell: (row) => <span className="font-bold text-lg">{row.bestScore || row.score}</span> },
+                  { key: 'attempts', header: 'Lần làm', cell: (row) => row.attemptCount },
+                ]} />
               </Section>
             </TabsContent>
+
             <TabsContent value="vocabulary">
-              <Section title="Tá»« vá»±ng cÃ¡ nhÃ¢n">
-                <DataTable
-                  data={data.personalVocabularies}
-                  empty="ChÆ°a cÃ³ tá»« cÃ¡ nhÃ¢n"
-                  columns={[
-                    { key: 'word', header: 'Tá»«', cell: (row) => row.word },
-                    { key: 'translation', header: 'Dá»‹ch', cell: (row) => row.translation },
-                    { key: 'source', header: 'Nguá»“n', cell: (row) => row.source },
-                    { key: 'pos', header: 'Loáº¡i', cell: (row) => row.partOfSpeech ?? '-' },
-                  ]}
-                />
-              </Section>
-              <Section title="Bookmark">
-                <DataTable
-                  data={data.bookmarks}
-                  empty="ChÆ°a cÃ³ bookmark"
-                  columns={[
-                    { key: 'word', header: 'Tá»«', cell: (row) => row.vocabulary?.word ?? row.personalVocabulary?.word ?? '-' },
-                    { key: 'translation', header: 'Dá»‹ch', cell: (row) => row.vocabulary?.translation ?? row.personalVocabulary?.translation ?? '-' },
-                    { key: 'created', header: 'NgÃ y lÆ°u', cell: (row) => formatDate(row.createdAt) },
-                  ]}
-                />
+              <Section title="Từ vựng cá nhân" icon={BookOpen}>
+                <DataTable data={data.personalVocabularies} empty="Chưa có từ cá nhân" columns={[
+                  { key: 'word', header: 'Từ', cell: (row) => <span className="font-bold text-lg">{row.word}</span> },
+                  { key: 'translation', header: 'Dịch', cell: (row) => row.translation },
+                  { key: 'source', header: 'Nguồn', cell: (row) => <Badge variant="outline">{row.source}</Badge> },
+                  { key: 'pos', header: 'Loại', cell: (row) => row.partOfSpeech ?? '-' },
+                ]} />
               </Section>
             </TabsContent>
+
             <TabsContent value="simulations">
-              <Section title="PhiÃªn mÃ´ phá»ng">
-                <DataTable
-                  data={data.simulations}
-                  empty="ChÆ°a cÃ³ phiÃªn mÃ´ phá»ng"
-                  columns={[
-                    { key: 'scenario', header: 'TÃ¬nh huá»‘ng', cell: (row) => row.scenario?.title ?? '-' },
-                    { key: 'character', header: 'NhÃ¢n váº­t', cell: (row) => row.chosenCharacter?.name ?? '-' },
-                    { key: 'status', header: 'Tráº¡ng thÃ¡i', cell: (row) => <Badge variant="outline">{row.status}</Badge> },
-                    { key: 'score', header: 'Äiá»ƒm', cell: (row) => row.totalScore ?? '-' },
-                    { key: 'messages', header: 'Tin nháº¯n', cell: (row) => row.totalMessages },
-                    {
-                      key: 'actions',
-                      header: '',
-                      className: 'text-right',
-                      cell: (row) =>
-                        learnerId ? (
-                          <Link className="text-sm font-medium text-primary" to={learnerPath.simulation(learnerId, row.id)}>
-                            Xem
-                          </Link>
-                        ) : null,
-                    },
-                  ]}
-                />
+              <Section title="Phiên mô phỏng" icon={MessageSquare}>
+                <DataTable data={data.simulations} empty="Chưa có phiên mô phỏng" columns={[
+                  { key: 'scenario', header: 'Tình huống', cell: (row) => <span className="font-semibold">{row.scenario?.title ?? '-'}</span> },
+                  { key: 'character', header: 'Nhân vật', cell: (row) => row.chosenCharacter?.name ?? '-' },
+                  { key: 'status', header: 'Trạng thái', cell: (row) => <Badge>{row.status}</Badge> },
+                  { key: 'score', header: 'Điểm', cell: (row) => <span className="font-bold text-lg">{row.totalScore ?? '-'}</span> },
+                  { key: 'messages', header: 'Tin nhắn', cell: (row) => row.totalMessages },
+                  { key: 'actions', header: '', className: 'text-right', cell: (row) => learnerId ? <Link className="text-base font-semibold text-primary hover:underline" to={learnerPath.simulation(learnerId, row.id)}>Xem</Link> : null },
+                ]} />
               </Section>
             </TabsContent>
+
             <TabsContent value="ai">
-              <Section title="Há»™i thoáº¡i AI">
-                <DataTable
-                  data={data.conversations}
-                  empty="ChÆ°a cÃ³ há»™i thoáº¡i"
-                  columns={[
-                    { key: 'title', header: 'TiÃªu Ä‘á»', cell: (row) => row.title || 'KhÃ´ng tiÃªu Ä‘á»' },
-                    { key: 'model', header: 'Model', cell: (row) => row.model },
-                    { key: 'scope', header: 'Ngá»¯ cáº£nh', cell: (row) => row.lesson?.title ?? row.course?.title ?? '-' },
-                    { key: 'tokens', header: 'Tokens', cell: (row) => row.totalTokens },
-                    { key: 'updated', header: 'Cáº­p nháº­t', cell: (row) => formatDate(row.updatedAt) },
-                    {
-                      key: 'actions',
-                      header: '',
-                      className: 'text-right',
-                      cell: (row) =>
-                        learnerId ? (
-                          <Link className="text-sm font-medium text-primary" to={learnerPath.conversation(learnerId, row.id)}>
-                            Xem
-                          </Link>
-                        ) : null,
-                    },
-                  ]}
-                />
+              <Section title="Hội thoại AI" icon={Bot}>
+                <DataTable data={data.conversations} empty="Chưa có hội thoại" columns={[
+                  { key: 'title', header: 'Tiêu đề', cell: (row) => <span className="font-semibold">{row.title || 'Không tiêu đề'}</span> },
+                  { key: 'model', header: 'Model', cell: (row) => <Badge variant="secondary">{row.model}</Badge> },
+                  { key: 'scope', header: 'Ngữ cảnh', cell: (row) => row.lesson?.title ?? row.course?.title ?? '-' },
+                  { key: 'tokens', header: 'Tokens', cell: (row) => <span className="font-semibold">{row.totalTokens}</span> },
+                  { key: 'updated', header: 'Cập nhật', cell: (row) => formatDate(row.updatedAt) },
+                  { key: 'actions', header: '', className: 'text-right', cell: (row) => learnerId ? <Link className="text-base font-semibold text-primary hover:underline" to={learnerPath.conversation(learnerId, row.id)}>Xem</Link> : null },
+                ]} />
               </Section>
             </TabsContent>
           </Tabs>
@@ -189,32 +146,22 @@ export function LearnerDetailPage() {
 
 function Metric({ label, value }: { label: string; value: string | number }) {
   return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-xs font-medium uppercase text-muted-foreground">{label}</p>
-        <p className="mt-2 text-2xl font-semibold">{value}</p>
-      </CardContent>
-    </Card>
-  )
-}
-
-function Info({ label, value }: { label: string; value?: string }) {
-  return (
-    <div>
-      <p className="text-xs font-medium uppercase text-muted-foreground">{label}</p>
-      <p className="mt-1 text-sm font-medium">{value ?? '-'}</p>
+    <div className="rounded-xl border-2 border-border bg-card p-6">
+      <p className="text-sm font-semibold text-muted-foreground mb-2">{label}</p>
+      <p className="text-3xl font-bold">{value}</p>
     </div>
   )
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({ title, icon: Icon, children }: { title: string; icon: any; children: ReactNode }) {
   return (
-    <Card className="mt-4">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </Card>
+    <div className="space-y-6 mt-6">
+      <div className="flex items-center gap-3">
+        <Icon className="h-6 w-6 text-primary" />
+        <h2 className="text-2xl font-bold">{title}</h2>
+      </div>
+      {children}
+    </div>
   )
 }
 
@@ -222,4 +169,3 @@ function formatDate(value?: string | null) {
   if (!value) return '-'
   return new Date(value).toLocaleDateString('vi-VN')
 }
-

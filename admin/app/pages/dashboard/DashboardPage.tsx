@@ -15,44 +15,44 @@ export function DashboardPage() {
   const { data: stats, isLoading, isError, error, refetch, isFetching } = useDashboard()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="mt-2 text-muted-foreground">Chào mừng trở lại, {user?.fullName}!</p>
+        <h1 className="text-5xl font-bold text-foreground mb-3">Dashboard</h1>
+        <p className="text-xl text-muted-foreground">Chào mừng trở lại, {user?.fullName}! 👋</p>
       </div>
 
       {isError ? (
         <DashboardError error={error} onRetry={() => refetch()} retrying={isFetching} />
       ) : (
         <>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             <StatCard
               label="Tổng người dùng"
               value={stats?.totalUsers}
-              icon={<Users className="size-5 text-primary" />}
+              icon={<Users className="size-8 text-primary" />}
               loading={isLoading}
             />
             <StatCard
               label="Người dùng hoạt động (DAU)"
               value={stats?.dailyActiveUsers}
-              icon={<Activity className="size-5 text-secondary" />}
+              icon={<Activity className="size-8 text-secondary" />}
               loading={isLoading}
             />
             <StatCard
               label="Top khóa học"
               value={stats?.topCourses.length}
-              icon={<GraduationCap className="size-5 text-accent" />}
+              icon={<GraduationCap className="size-8 text-accent" />}
               loading={isLoading}
             />
             <StatCard
               label="Bài tập lỗi cao"
               value={stats?.exercisesWithHighestErrors.length}
-              icon={<TriangleAlert className="size-5 text-destructive" />}
+              icon={<TriangleAlert className="size-8 text-destructive" />}
               loading={isLoading}
             />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-8 lg:grid-cols-2">
             <TopCoursesCard courses={stats?.topCourses} loading={isLoading} />
             <HighErrorExercisesCard exercises={stats?.exercisesWithHighestErrors} loading={isLoading} />
           </div>
@@ -74,18 +74,20 @@ function StatCard({
   loading: boolean
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
-        <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">{icon}</div>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <Skeleton className="h-9 w-20" />
-        ) : (
-          <p className="text-3xl font-bold text-card-foreground">{value ?? '—'}</p>
-        )}
-      </CardContent>
+    <Card className="p-8">
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex-1">
+          <p className="text-base font-semibold text-muted-foreground mb-2">{label}</p>
+        </div>
+        <div className="rounded-xl bg-primary/10 p-3">
+          {icon}
+        </div>
+      </div>
+      {loading ? (
+        <Skeleton className="h-14 w-32" />
+      ) : (
+        <p className="text-5xl font-bold text-card-foreground">{value ?? '—'}</p>
+      )}
     </Card>
   )
 }
