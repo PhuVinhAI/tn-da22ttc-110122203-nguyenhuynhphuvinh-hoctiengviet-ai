@@ -23,6 +23,13 @@ export class CoursesRepository {
     });
   }
 
+  async findAllForAdmin(): Promise<Course[]> {
+    return this.repository.find({
+      order: { orderIndex: 'ASC' },
+      relations: ['modules', 'modules.lessons'],
+    });
+  }
+
   async findById(id: string): Promise<Course | null> {
     return this.repository.findOne({
       where: { id },

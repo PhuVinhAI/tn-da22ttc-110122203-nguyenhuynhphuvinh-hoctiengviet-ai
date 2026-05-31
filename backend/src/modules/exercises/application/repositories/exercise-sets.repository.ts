@@ -22,6 +22,14 @@ export class ExerciseSetsRepository {
     });
   }
 
+  async findAllByLessonIdForAdmin(lessonId: string): Promise<ExerciseSet[]> {
+    return this.repository.find({
+      where: { lessonId },
+      order: { orderIndex: 'ASC', createdAt: 'DESC' },
+      relations: ['exercises'],
+    });
+  }
+
   async findActiveByLessonId(
     lessonId: string,
     userId?: string,
@@ -49,7 +57,13 @@ export class ExerciseSetsRepository {
   async findByIdWithExercises(id: string): Promise<ExerciseSet | null> {
     return this.repository.findOne({
       where: { id },
-      relations: ['exercises'],
+      relations: [
+        'lesson',
+        'lesson.module',
+        'lesson.module.course',
+        'exercises',
+      ],
+      order: { exercises: { orderIndex: 'ASC' } },
     });
   }
 

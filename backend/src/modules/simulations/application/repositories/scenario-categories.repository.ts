@@ -15,4 +15,33 @@ export class ScenarioCategoriesRepository {
       order: { orderIndex: 'ASC' },
     });
   }
+
+  async findById(id: string): Promise<ScenarioCategory | null> {
+    return this.repository.findOne({
+      where: { id },
+      relations: ['scenarios', 'scenarios.characters'],
+      order: { scenarios: { createdAt: 'DESC' } },
+    });
+  }
+
+  async create(data: Partial<ScenarioCategory>): Promise<ScenarioCategory> {
+    const category = this.repository.create(data);
+    return this.repository.save(category);
+  }
+
+  async update(
+    id: string,
+    data: Partial<ScenarioCategory>,
+  ): Promise<ScenarioCategory> {
+    await this.repository.update(id, data);
+    const category = await this.findById(id);
+    if (!category) {
+      throw new Error('Scenario category not found after update');
+    }
+    return category;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.repository.softDelete(id);
+  }
 }

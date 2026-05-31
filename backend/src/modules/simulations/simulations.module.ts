@@ -11,6 +11,7 @@ import { SimulationAiService } from './application/simulation-ai.service';
 import { SimulationResultsService } from './application/simulation-results.service';
 import { ScenariosRepository } from './application/repositories/scenarios.repository';
 import { ScenarioCategoriesRepository } from './application/repositories/scenario-categories.repository';
+import { ScenarioCharactersRepository } from './application/repositories/scenario-characters.repository';
 import { SimulationSessionsRepository } from './application/repositories/simulation-sessions.repository';
 import { SimulationMessagesRepository } from './application/repositories/simulation-messages.repository';
 import { SimulationResultsRepository } from './application/repositories/simulation-results.repository';
@@ -36,12 +37,16 @@ import { UsersModule } from '../users/users.module';
     SimulationResultsService,
     ScenariosRepository,
     ScenarioCategoriesRepository,
+    ScenarioCharactersRepository,
     SimulationSessionsRepository,
     SimulationMessagesRepository,
     SimulationResultsRepository,
   ],
   exports: [
     ScenariosService,
+    ScenariosRepository,
+    ScenarioCategoriesRepository,
+    ScenarioCharactersRepository,
     SimulationSessionService,
     SimulationAiService,
     SimulationResultsRepository,

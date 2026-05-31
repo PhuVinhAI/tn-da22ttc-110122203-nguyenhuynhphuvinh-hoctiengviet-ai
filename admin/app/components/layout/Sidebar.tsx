@@ -3,14 +3,7 @@ import { ROUTES } from '../../../lib/shared/constants'
 import {
   LayoutDashboard,
   BookOpen,
-  FolderTree,
-  FileText,
-  BookMarked,
-  Languages,
-  ClipboardList,
-  Layers,
   MessageSquare,
-  FolderOpen,
   Users,
   Settings,
   type LucideIcon,
@@ -39,24 +32,12 @@ const navigationGroups: NavigationGroup[] = [
     title: 'Học liệu',
     items: [
       { name: 'Khóa học', href: ROUTES.COURSES, icon: BookOpen },
-      { name: 'Chủ đề', href: ROUTES.TOPICS, icon: FolderTree },
-      { name: 'Bài học', href: ROUTES.LESSONS, icon: FileText },
-      { name: 'Từ vựng', href: ROUTES.VOCABULARIES, icon: BookMarked },
-      { name: 'Ngữ pháp', href: ROUTES.GRAMMAR, icon: Languages },
-    ],
-  },
-  {
-    title: 'Bài tập',
-    items: [
-      { name: 'Bài tập', href: ROUTES.EXERCISES, icon: ClipboardList },
-      { name: 'Bộ bài tập', href: ROUTES.EXERCISE_SETS, icon: Layers },
     ],
   },
   {
     title: 'Hội thoại mô phỏng',
     items: [
-      { name: 'Tình huống', href: ROUTES.SCENARIOS, icon: MessageSquare },
-      { name: 'Danh mục tình huống', href: ROUTES.SCENARIO_CATEGORIES, icon: FolderOpen },
+      { name: 'Danh mục tình huống', href: ROUTES.SCENARIO_CATEGORIES, icon: MessageSquare },
     ],
   },
   {

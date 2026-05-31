@@ -142,6 +142,10 @@ export class ExerciseSetService {
     return { sets: progresses };
   }
 
+  async findAllByLessonIdForAdmin(lessonId: string): Promise<ExerciseSet[]> {
+    return this.exerciseSetsRepository.findAllByLessonIdForAdmin(lessonId);
+  }
+
   async findByModuleId(
     moduleId: string,
     userId: string,
@@ -254,10 +258,31 @@ export class ExerciseSetService {
     return set;
   }
 
+  async findByIdForAdmin(id: string) {
+    return this.exerciseSetsRepository.findByIdWithExercises(id);
+  }
+
   async create(
     data: Partial<import('../domain/exercise-set.entity').ExerciseSet>,
   ) {
     return this.exerciseSetsRepository.create(data);
+  }
+
+  async updateForAdmin(id: string, data: Partial<ExerciseSet>) {
+    const set = await this.exerciseSetsRepository.update(id, data);
+    if (!set) {
+      throw new NotFoundException(`ExerciseSet with ID ${id} not found`);
+    }
+    return set;
+  }
+
+  async deleteForAdmin(id: string): Promise<void> {
+    const set = await this.exerciseSetsRepository.findById(id);
+    if (!set) {
+      throw new NotFoundException(`ExerciseSet with ID ${id} not found`);
+    }
+    await this.exercisesRepository.softDeleteBySetId(id);
+    await this.exerciseSetsRepository.softDelete(id);
   }
 
   async generate(

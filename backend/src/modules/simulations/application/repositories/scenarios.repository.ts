@@ -37,6 +37,26 @@ export class ScenariosRepository {
     });
   }
 
+  async findAll(filter: ScenarioFilter = {}): Promise<Scenario[]> {
+    const where: FindOptionsWhere<Scenario> = {};
+
+    if (filter.categoryId) {
+      where.categoryId = filter.categoryId;
+    }
+    if (filter.level) {
+      where.requiredLevel = filter.level;
+    }
+    if (filter.difficulty) {
+      where.difficulty = filter.difficulty;
+    }
+
+    return this.repository.find({
+      where,
+      relations: ['category', 'characters'],
+      order: { createdAt: 'DESC', characters: { orderIndex: 'ASC' } },
+    });
+  }
+
   async findById(id: string): Promise<Scenario | null> {
     return this.repository.findOne({
       where: { id },
@@ -45,5 +65,23 @@ export class ScenariosRepository {
         characters: { orderIndex: 'ASC' },
       },
     });
+  }
+
+  async create(data: Partial<Scenario>): Promise<Scenario> {
+    const scenario = this.repository.create(data);
+    return this.repository.save(scenario);
+  }
+
+  async update(id: string, data: Partial<Scenario>): Promise<Scenario> {
+    await this.repository.update(id, data);
+    const scenario = await this.findById(id);
+    if (!scenario) {
+      throw new Error('Scenario not found after update');
+    }
+    return scenario;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.repository.softDelete(id);
   }
 }

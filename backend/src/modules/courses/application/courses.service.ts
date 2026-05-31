@@ -26,6 +26,10 @@ export class CoursesService {
     );
   }
 
+  async findAllForAdmin(): Promise<Course[]> {
+    return this.coursesRepository.findAllForAdmin();
+  }
+
   async findById(id: string): Promise<Course> {
     // Use cache with 1 hour TTL
     const course = await this.cacheService.getOrSet(

@@ -7,10 +7,13 @@ import {
 } from '@nestjs/swagger';
 import { CacheService } from './cache.service';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { RequirePermissions } from '../../common/decorators';
+import { Permission } from '../../common/enums';
 
 @ApiTags('Cache')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('cache')
 export class CacheController {
   constructor(private readonly cacheService: CacheService) {}
@@ -35,6 +38,7 @@ export class CacheController {
     },
   })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @RequirePermissions(Permission.CACHE_MANAGE)
   async getStats() {
     return this.cacheService.getStats();
   }
@@ -50,6 +54,7 @@ export class CacheController {
     schema: { example: { message: 'Cache cleared successfully' } },
   })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @RequirePermissions(Permission.CACHE_MANAGE)
   async clearCache() {
     await this.cacheService.clear();
     return { message: 'Cache cleared successfully' };

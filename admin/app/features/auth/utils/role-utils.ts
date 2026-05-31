@@ -7,9 +7,18 @@ import { Role } from '../../../../lib/core/domain/enums'
  * @returns true if user has ADMIN role, false otherwise
  */
 export function hasAdminRole(user: User | null | undefined): boolean {
-  if (!user || !user.roles) {
+  if (!user) {
     return false
   }
 
-  return user.roles.some((role) => role.name === Role.ADMIN)
+  // Check both role (string) and roles (array) for compatibility
+  if (typeof (user as any).role === 'string') {
+    return (user as any).role === Role.ADMIN
+  }
+
+  if (user.roles) {
+    return user.roles.some((role) => role.name === Role.ADMIN)
+  }
+
+  return false
 }
