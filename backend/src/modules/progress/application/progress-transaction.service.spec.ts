@@ -21,6 +21,13 @@ describe('ProgressTransactionService', () => {
   let mockDataSource: jest.Mocked<DataSource>;
   let mockQueryRunner: jest.Mocked<QueryRunner>;
   let mockManager: jest.Mocked<EntityManager>;
+  let mockExerciseScopeQueryBuilder: {
+    innerJoin: jest.Mock;
+    select: jest.Mock;
+    where: jest.Mock;
+    andWhere: jest.Mock;
+    getRawMany: jest.Mock;
+  };
   let mockProgressRepo: jest.Mocked<ProgressRepository>;
   let mockExerciseResultsRepo: jest.Mocked<UserExerciseResultsRepository>;
 
@@ -38,6 +45,14 @@ describe('ProgressTransactionService', () => {
   };
 
   beforeEach(async () => {
+    mockExerciseScopeQueryBuilder = {
+      innerJoin: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getRawMany: jest.fn().mockResolvedValue([]),
+    };
+
     mockManager = {
       findOne: jest.fn().mockResolvedValue(existingProgress),
       find: jest.fn().mockResolvedValue([]),
@@ -50,6 +65,11 @@ describe('ProgressTransactionService', () => {
       delete: jest.fn().mockResolvedValue({ affected: 0 }),
       upsert: jest.fn().mockResolvedValue({ generatedMaps: [] }),
       create: jest.fn().mockImplementation((_entity, data) => data),
+      getRepository: jest.fn().mockReturnValue({
+        createQueryBuilder: jest
+          .fn()
+          .mockReturnValue(mockExerciseScopeQueryBuilder),
+      }),
     } as any;
 
     mockQueryRunner = {
@@ -463,7 +483,7 @@ describe('ProgressTransactionService', () => {
 
     it('deletes CourseProgress, ModuleProgress, UserProgress, UserExerciseResults, and soft-deletes custom ExerciseSets', async () => {
       (mockManager.findOne as jest.Mock).mockResolvedValue(mockCourse);
-      (mockManager.find as jest.Mock).mockResolvedValue([
+      mockExerciseScopeQueryBuilder.getRawMany.mockResolvedValue([
         { id: 'ex-1' },
         { id: 'ex-2' },
       ]);
@@ -497,7 +517,7 @@ describe('ProgressTransactionService', () => {
 
       expect(mockManager.update).toHaveBeenCalledWith(
         ExerciseSet,
-        { isCustom: true, courseId },
+        { isCustom: true, ownerUserId: userId, courseId },
         expect.objectContaining({ deletedAt: expect.any(Date) }),
       );
     });

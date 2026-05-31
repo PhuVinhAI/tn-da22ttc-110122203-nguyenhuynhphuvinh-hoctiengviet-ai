@@ -77,16 +77,15 @@ export class UserDataCleanupService implements TransactionalHost {
     ]);
     await qr.query(
       `DELETE FROM exercises
-       WHERE lesson_id IS NULL
-         AND set_id IN (
+       WHERE set_id IN (
            SELECT id FROM exercise_sets
-           WHERE generated_by_id = $1 AND is_custom = true
+           WHERE owner_user_id = $1 AND is_custom = true
          )`,
       [userId],
     );
     await qr.query(
       `DELETE FROM exercise_sets
-       WHERE generated_by_id = $1 AND is_custom = true`,
+       WHERE owner_user_id = $1 AND is_custom = true`,
       [userId],
     );
     await qr.query(`DELETE FROM learning_progress WHERE user_id = $1`, [

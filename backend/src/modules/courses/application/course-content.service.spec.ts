@@ -173,16 +173,12 @@ describe('CourseContentService', () => {
       expect(grammarRepo.findByLessonId).toHaveBeenCalledWith('l1');
     });
 
-    it('exposes exercises and exerciseSets loaded by LessonsRepository.findById', async () => {
+    it('exposes exerciseSets loaded by LessonsRepository.findById', async () => {
       const lesson = {
         id: 'l1',
         title: 'Lesson 1',
         contents: [],
         grammarRules: [],
-        exercises: [
-          { id: 'e1', type: 'multiple_choice' },
-          { id: 'e2', type: 'fill_blank' },
-        ],
         exerciseSets: [{ id: 'es1', title: 'Practice set' }],
       };
       lessonsRepo.findById.mockResolvedValue(lesson as any);
@@ -191,8 +187,6 @@ describe('CourseContentService', () => {
 
       const result = await service.getLessonDetail('l1');
 
-      expect(result.exercises).toHaveLength(2);
-      expect(result.exercises[0].id).toBe('e1');
       expect(result.exerciseSets).toHaveLength(1);
       expect(result.exerciseSets[0].id).toBe('es1');
     });

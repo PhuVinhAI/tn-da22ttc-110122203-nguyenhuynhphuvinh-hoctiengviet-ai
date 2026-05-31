@@ -33,19 +33,12 @@ export class Exercise extends BaseEntity {
   @Column({ name: 'difficulty_level', default: 1 })
   difficultyLevel: number;
 
-  @Column({ name: 'lesson_id', nullable: true })
-  lessonId?: string;
+  @Column({ name: 'set_id' })
+  setId: string;
 
-  @ManyToOne('Lesson', 'exercises', { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'lesson_id' })
-  lesson: any;
-
-  @Column({ name: 'set_id', nullable: true })
-  setId?: string;
-
-  @ManyToOne('ExerciseSet', 'exercises', { onDelete: 'SET NULL' })
+  @ManyToOne('ExerciseSet', 'exercises', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'set_id' })
-  exerciseSet?: any;
+  exerciseSet: any;
 
   @OneToMany('UserExerciseResult', 'exercise')
   userResults: any[];

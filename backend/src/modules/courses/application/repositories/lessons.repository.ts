@@ -43,7 +43,6 @@ export class LessonsRepository {
         'contents',
         'vocabularies',
         'grammarRules',
-        'exercises',
         'exerciseSets',
       ],
     });

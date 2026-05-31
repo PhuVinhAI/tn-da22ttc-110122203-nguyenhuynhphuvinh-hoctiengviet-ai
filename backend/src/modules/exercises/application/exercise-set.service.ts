@@ -35,6 +35,8 @@ export interface WrongQuestion {
 export interface ExerciseSetProgress {
   setId: string;
   title: string;
+  description?: string;
+  userPrompt?: string;
   isCustom: boolean;
   isAIGenerated: boolean;
   totalExercises: number;
@@ -90,8 +92,10 @@ export class ExerciseSetService {
     lessonId: string,
     userId: string,
   ): Promise<LessonExerciseSummary> {
-    const sets =
-      await this.exerciseSetsRepository.findActiveByLessonId(lessonId);
+    const sets = await this.exerciseSetsRepository.findActiveByLessonId(
+      lessonId,
+      userId,
+    );
     const progresses: ExerciseSetProgress[] = [];
 
     for (const set of sets) {
@@ -123,6 +127,8 @@ export class ExerciseSetService {
       progresses.push({
         setId: set.id,
         title: set.title,
+        description: set.description,
+        userPrompt: set.userPrompt,
         isCustom: set.isCustom,
         isAIGenerated: set.isAIGenerated,
         totalExercises,
@@ -156,8 +162,10 @@ export class ExerciseSetService {
     const completedLessonsCount = completedProgress.length;
     const eligible = completedLessonsCount > 0;
 
-    const sets =
-      await this.exerciseSetsRepository.findActiveCustomSetsByModule(moduleId);
+    const sets = await this.exerciseSetsRepository.findActiveCustomSetsByModule(
+      moduleId,
+      userId,
+    );
     const moduleSets: ExerciseSetProgress[] = [];
 
     for (const set of sets) {
@@ -185,6 +193,8 @@ export class ExerciseSetService {
       moduleSets.push({
         setId: set.id,
         title: set.title,
+        description: set.description,
+        userPrompt: set.userPrompt,
         isCustom: set.isCustom,
         isAIGenerated: set.isAIGenerated,
         totalExercises,
@@ -203,6 +213,7 @@ export class ExerciseSetService {
     if (!set) {
       throw new NotFoundException(`ExerciseSet with ID ${setId} not found`);
     }
+    this.assertSetReadable(set, userId);
 
     const exercises = await this.exercisesRepository.findBySetId(setId);
     const exerciseIds = exercises.map((e) => e.id);
@@ -234,11 +245,12 @@ export class ExerciseSetService {
     };
   }
 
-  async findById(id: string) {
+  async findById(id: string, userId: string) {
     const set = await this.exerciseSetsRepository.findByIdWithExercises(id);
     if (!set) {
       throw new NotFoundException(`ExerciseSet with ID ${id} not found`);
     }
+    this.assertSetReadable(set, userId);
     return set;
   }
 
@@ -266,13 +278,10 @@ export class ExerciseSetService {
     return exercises;
   }
 
-  async regenerate(
-    setId: string,
-    _userId: string,
-    userPromptOverride?: string,
-  ) {
+  async regenerate(setId: string, userId: string, userPromptOverride?: string) {
     return this.exerciseGenerationService.createRegeneratedSet(
       setId,
+      userId,
       userPromptOverride,
     );
   }
@@ -340,6 +349,7 @@ export class ExerciseSetService {
       title: 'Custom Practice',
       orderIndex: 100,
       userPrompt: userPrompt || undefined,
+      ownerUserId: userId,
     };
 
     if (lessonId) setData.lessonId = lessonId;
@@ -371,8 +381,10 @@ export class ExerciseSetService {
     const completedModulesCount = completedModuleProgress.length;
     const eligible = completedModulesCount > 0;
 
-    const sets =
-      await this.exerciseSetsRepository.findActiveCustomSetsByCourse(courseId);
+    const sets = await this.exerciseSetsRepository.findActiveCustomSetsByCourse(
+      courseId,
+      userId,
+    );
     const courseSets: ExerciseSetProgress[] = [];
 
     for (const set of sets) {
@@ -400,6 +412,8 @@ export class ExerciseSetService {
       courseSets.push({
         setId: set.id,
         title: set.title,
+        description: set.description,
+        userPrompt: set.userPrompt,
         isCustom: set.isCustom,
         isAIGenerated: set.isAIGenerated,
         totalExercises,
@@ -413,7 +427,7 @@ export class ExerciseSetService {
     return { eligible, completedModulesCount, totalModulesCount, courseSets };
   }
 
-  async deleteCustom(setId: string): Promise<void> {
+  async deleteCustom(setId: string, userId: string): Promise<void> {
     const set = await this.exerciseSetsRepository.findById(setId);
     if (!set) {
       throw new NotFoundException(`ExerciseSet with ID ${setId} not found`);
@@ -428,6 +442,7 @@ export class ExerciseSetService {
         'Only custom practice sets can be deleted via this endpoint',
       );
     }
+    this.assertOwnedCustomSet(set, userId);
 
     await this.exercisesRepository.softDeleteBySetId(setId);
     await this.exerciseSetsRepository.softDelete(setId);
@@ -438,6 +453,7 @@ export class ExerciseSetService {
     if (!set) {
       throw new NotFoundException(`ExerciseSet with ID ${setId} not found`);
     }
+    this.assertSetReadable(set, userId);
 
     const exercises = await this.exercisesRepository.findBySetId(setId);
     const exerciseIds = exercises.map((e) => e.id);
@@ -463,6 +479,7 @@ export class ExerciseSetService {
     if (!set) {
       throw new NotFoundException(`ExerciseSet with ID ${setId} not found`);
     }
+    this.assertSetReadable(set, userId);
 
     const exercises = await this.exercisesRepository.findBySetId(setId);
     const exerciseIds = exercises.map((e) => e.id);
@@ -478,6 +495,7 @@ export class ExerciseSetService {
     if (!set) {
       throw new NotFoundException(`ExerciseSet with ID ${setId} not found`);
     }
+    this.assertSetReadable(set, userId);
 
     const progress = await this.getSetProgress(setId, userId);
 
@@ -517,5 +535,19 @@ export class ExerciseSetService {
       },
       wrongQuestions,
     };
+  }
+
+  private assertSetReadable(set: ExerciseSet, userId: string): void {
+    if (set.isCustom && set.ownerUserId !== userId) {
+      throw new NotFoundException(`ExerciseSet with ID ${set.id} not found`);
+    }
+  }
+
+  private assertOwnedCustomSet(set: ExerciseSet, userId: string): void {
+    if (!set.isCustom || set.ownerUserId !== userId) {
+      throw new BadRequestException(
+        'Only your custom practice sets can be modified',
+      );
+    }
   }
 }

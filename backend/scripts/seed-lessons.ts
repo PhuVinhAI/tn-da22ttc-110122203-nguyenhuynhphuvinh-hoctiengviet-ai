@@ -175,25 +175,6 @@ async function main() {
           totalGrammar++;
         }
 
-        for (const exerciseData of lessonData.exercises) {
-          await client.query(
-            `INSERT INTO exercises (exercise_type, question, question_audio_url, options, correct_answer, explanation, order_index, difficulty_level, lesson_id)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-            [
-              exerciseData.exercise_type,
-              exerciseData.question,
-              exerciseData.question_audio_url || null,
-              exerciseData.options ? JSON.stringify(exerciseData.options) : null,
-              JSON.stringify(exerciseData.correct_answer),
-              exerciseData.explanation || null,
-              exerciseData.order_index,
-              exerciseData.difficulty_level || 1,
-              lessonId,
-            ],
-          );
-          totalExercises++;
-        }
-
         if (lessonData.exercises.length > 0) {
           const setRes = await client.query(
             `INSERT INTO exercise_sets (lesson_id, is_custom, is_ai_generated, title, order_index)
@@ -201,10 +182,27 @@ async function main() {
             [lessonId, false, false, 'Basic Exercises', 0],
           );
           const setId = setRes.rows[0].id;
-          await client.query(
-            `UPDATE exercises SET set_id = $1 WHERE lesson_id = $2 AND set_id IS NULL`,
-            [setId, lessonId],
-          );
+
+          for (const exerciseData of lessonData.exercises) {
+            await client.query(
+              `INSERT INTO exercises (exercise_type, question, question_audio_url, options, correct_answer, explanation, order_index, difficulty_level, set_id)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+              [
+                exerciseData.exercise_type,
+                exerciseData.question,
+                exerciseData.question_audio_url || null,
+                exerciseData.options
+                  ? JSON.stringify(exerciseData.options)
+                  : null,
+                JSON.stringify(exerciseData.correct_answer),
+                exerciseData.explanation || null,
+                exerciseData.order_index,
+                exerciseData.difficulty_level || 1,
+                setId,
+              ],
+            );
+            totalExercises++;
+          }
         }
       }
     }

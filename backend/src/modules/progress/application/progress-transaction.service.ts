@@ -3,7 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
-import { DataSource, EntityManager, In } from 'typeorm';
+import { Brackets, DataSource, EntityManager, In } from 'typeorm';
 import { Transactional, TransactionalHost } from '../../../common/decorators';
 import { ProgressRepository } from './progress.repository';
 import { UserExerciseResultsRepository } from '../../exercises/application/repositories/user-exercise-results.repository';
@@ -110,6 +110,61 @@ export class ProgressTransactionService implements TransactionalHost {
           unitType: LearningUnitType.LESSON,
         });
     return manager.save(UserProgress, entity);
+  }
+
+  private async findExerciseIdsForSetScope(
+    manager: EntityManager,
+    userId: string,
+    scope: { lessonIds?: string[]; moduleIds?: string[]; courseId?: string },
+  ): Promise<string[]> {
+    const qb = manager
+      .getRepository(Exercise)
+      .createQueryBuilder('exercise')
+      .innerJoin(ExerciseSet, 'set', 'set.id = exercise.set_id')
+      .select('exercise.id', 'id')
+      .where('exercise.deleted_at IS NULL')
+      .andWhere('set.deleted_at IS NULL')
+      .andWhere(
+        new Brackets((scopeQb) => {
+          let hasScope = false;
+
+          if (scope.lessonIds?.length) {
+            scopeQb.where('set.lesson_id IN (:...lessonIds)', {
+              lessonIds: scope.lessonIds,
+            });
+            hasScope = true;
+          }
+
+          if (scope.moduleIds?.length) {
+            const clause = 'set.module_id IN (:...moduleIds)';
+            if (hasScope) {
+              scopeQb.orWhere(clause, { moduleIds: scope.moduleIds });
+            } else {
+              scopeQb.where(clause, { moduleIds: scope.moduleIds });
+              hasScope = true;
+            }
+          }
+
+          if (scope.courseId) {
+            const clause = 'set.course_id = :courseId';
+            if (hasScope) {
+              scopeQb.orWhere(clause, { courseId: scope.courseId });
+            } else {
+              scopeQb.where(clause, { courseId: scope.courseId });
+            }
+          }
+        }),
+      )
+      .andWhere(
+        new Brackets((ownerQb) => {
+          ownerQb
+            .where('set.is_custom = false')
+            .orWhere('set.owner_user_id = :userId', { userId });
+        }),
+      );
+
+    const rows = await qb.getRawMany<{ id: string }>();
+    return rows.map((row) => row.id);
   }
 
   @Transactional()
@@ -307,10 +362,11 @@ export class ProgressTransactionService implements TransactionalHost {
         unitType: LearningUnitType.LESSON,
       });
 
-      const exercises = await manager.find(Exercise, {
-        where: { lessonId: In(lessonIds) },
-      });
-      const exerciseIds = exercises.map((e) => e.id);
+      const exerciseIds = await this.findExerciseIdsForSetScope(
+        manager,
+        userId,
+        { lessonIds, moduleIds: [moduleId] },
+      );
 
       if (exerciseIds.length > 0) {
         await manager.delete(ExerciseAttempt, {
@@ -326,14 +382,14 @@ export class ProgressTransactionService implements TransactionalHost {
 
     await manager.update(
       ExerciseSet,
-      { isCustom: true, moduleId },
+      { isCustom: true, ownerUserId: userId, moduleId },
       { deletedAt: new Date() as any },
     );
 
     if (lessonIds.length > 0) {
       await manager.update(
         ExerciseSet,
-        { isCustom: true, lessonId: In(lessonIds) },
+        { isCustom: true, ownerUserId: userId, lessonId: In(lessonIds) },
         { deletedAt: new Date() as any },
       );
     }
@@ -379,10 +435,11 @@ export class ProgressTransactionService implements TransactionalHost {
         unitType: LearningUnitType.LESSON,
       });
 
-      const exercises = await manager.find(Exercise, {
-        where: { lessonId: In(lessonIds) },
-      });
-      const exerciseIds = exercises.map((e) => e.id);
+      const exerciseIds = await this.findExerciseIdsForSetScope(
+        manager,
+        userId,
+        { lessonIds, moduleIds, courseId },
+      );
 
       if (exerciseIds.length > 0) {
         await manager.delete(ExerciseAttempt, {
@@ -398,14 +455,14 @@ export class ProgressTransactionService implements TransactionalHost {
 
     await manager.update(
       ExerciseSet,
-      { isCustom: true, courseId },
+      { isCustom: true, ownerUserId: userId, courseId },
       { deletedAt: new Date() as any },
     );
 
     if (moduleIds.length > 0) {
       await manager.update(
         ExerciseSet,
-        { isCustom: true, moduleId: In(moduleIds) },
+        { isCustom: true, ownerUserId: userId, moduleId: In(moduleIds) },
         { deletedAt: new Date() as any },
       );
     }
@@ -413,7 +470,7 @@ export class ProgressTransactionService implements TransactionalHost {
     if (lessonIds.length > 0) {
       await manager.update(
         ExerciseSet,
-        { isCustom: true, lessonId: In(lessonIds) },
+        { isCustom: true, ownerUserId: userId, lessonId: In(lessonIds) },
         { deletedAt: new Date() as any },
       );
     }

@@ -1,4 +1,12 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  Check,
+  Index,
+} from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { ExerciseType } from '../../../common/enums';
 
@@ -9,6 +17,21 @@ export interface CustomSetConfig {
 }
 
 @Entity('exercise_sets')
+@Check(
+  'CHK_exercise_sets_single_scope',
+  `(("lesson_id" IS NOT NULL)::int + ("module_id" IS NOT NULL)::int + ("course_id" IS NOT NULL)::int) = 1`,
+)
+@Check(
+  'CHK_exercise_sets_custom_owner',
+  `(("is_custom" = false AND "owner_user_id" IS NULL) OR ("is_custom" = true AND "owner_user_id" IS NOT NULL))`,
+)
+@Check(
+  'CHK_exercise_sets_custom_config',
+  `("is_custom" = false OR "custom_config" IS NOT NULL)`,
+)
+@Index(['lessonId', 'isCustom', 'ownerUserId'])
+@Index(['moduleId', 'isCustom', 'ownerUserId'])
+@Index(['courseId', 'isCustom', 'ownerUserId'])
 export class ExerciseSet extends BaseEntity {
   @Column({ name: 'lesson_id', nullable: true })
   lessonId?: string;
@@ -20,14 +43,14 @@ export class ExerciseSet extends BaseEntity {
   @Column({ name: 'module_id', nullable: true })
   moduleId?: string;
 
-  @ManyToOne('Module', 'lessons', { onDelete: 'SET NULL' })
+  @ManyToOne('Module', { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'module_id' })
   module: any;
 
   @Column({ name: 'course_id', nullable: true })
   courseId?: string;
 
-  @ManyToOne('Course', 'modules', { onDelete: 'SET NULL' })
+  @ManyToOne('Course', { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'course_id' })
   course: any;
 
@@ -64,8 +87,12 @@ export class ExerciseSet extends BaseEntity {
   @Column()
   title: string;
 
-  @Column({ name: 'generated_by_id', nullable: true })
-  generatedById?: string;
+  @Column({ name: 'owner_user_id', nullable: true })
+  ownerUserId?: string;
+
+  @ManyToOne('User', { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'owner_user_id' })
+  owner?: any;
 
   @Column({ name: 'prompt_used', type: 'text', nullable: true })
   promptUsed?: string;
@@ -83,6 +110,10 @@ export class ExerciseSet extends BaseEntity {
 
   @Column({ name: 'replaces_set_id', nullable: true })
   replacesSetId?: string;
+
+  @ManyToOne('ExerciseSet', { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'replaces_set_id' })
+  replacesSet?: any;
 
   @OneToMany('Exercise', 'exerciseSet')
   exercises: any[];

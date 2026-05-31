@@ -11,6 +11,7 @@ import { ExerciseContextLoader } from './exercise-context-loader';
 import type { LessonContext, MergedContext } from './exercise-context-loader';
 import { ExerciseType } from '../../../common/enums';
 import { Exercise } from '../domain/exercise.entity';
+import { ExerciseSet } from '../domain/exercise-set.entity';
 import type {
   ExerciseOptions,
   ExerciseAnswer,
@@ -433,6 +434,7 @@ export class ExerciseGenerationService {
     if (!set) {
       throw new BadRequestException(`ExerciseSet ${setId} not found`);
     }
+    this.assertOwnedCustomSet(set, userId);
 
     const existing = await this.exercisesRepository.findBySetId(setId);
     if (existing.length > 0) {
@@ -461,19 +463,19 @@ export class ExerciseGenerationService {
 
   async createRegeneratedSet(
     setId: string,
+    userId: string,
     userPromptOverride?: string,
-  ): Promise<import('../domain/exercise-set.entity').ExerciseSet> {
+  ): Promise<ExerciseSet> {
     const set = await this.exerciseSetsRepository.findById(setId);
     if (!set) {
       throw new BadRequestException(`ExerciseSet ${setId} not found`);
     }
+    this.assertOwnedCustomSet(set, userId);
 
     const effectiveUserPrompt =
       userPromptOverride !== undefined ? userPromptOverride : set.userPrompt;
 
-    const newSetData: Partial<
-      import('../domain/exercise-set.entity').ExerciseSet
-    > = {
+    const newSetData: Partial<ExerciseSet> = {
       lessonId: set.lessonId,
       moduleId: set.moduleId,
       courseId: set.courseId,
@@ -483,6 +485,7 @@ export class ExerciseGenerationService {
       title: 'Custom Practice',
       description: set.description,
       userPrompt: effectiveUserPrompt,
+      ownerUserId: set.ownerUserId,
       orderIndex: set.orderIndex,
       generationStatus: 'generating' as any,
       replacesSetId: setId,
@@ -513,6 +516,7 @@ export class ExerciseGenerationService {
         'generateCustom() can only be used for custom sets',
       );
     }
+    this.assertOwnedCustomSet(set, userId);
 
     const existing = await this.exercisesRepository.findBySetId(setId);
     if (existing.length > 0) {
@@ -540,7 +544,7 @@ export class ExerciseGenerationService {
   }
 
   private async doGenerate(
-    set: import('../domain/exercise-set.entity').ExerciseSet,
+    set: ExerciseSet,
     userId: string,
     userPromptOverride?: string,
   ): Promise<Exercise[]> {
@@ -621,7 +625,10 @@ export class ExerciseGenerationService {
         .flatMap((m: any) => (m.lessons || []).map((l: any) => l.id));
 
       mergedContextForExercises =
-        await this.exerciseContextLoader.loadCourseContext(completedLessonIds);
+        await this.exerciseContextLoader.loadCourseContext(
+          completedLessonIds,
+          userId,
+        );
 
       const lessonContextsStr = this.formatMergedContext(
         mergedContextForExercises,
@@ -648,7 +655,10 @@ export class ExerciseGenerationService {
       const completedLessonIds = completedProgress.map((p: any) => p.lessonId);
 
       mergedContextForExercises =
-        await this.exerciseContextLoader.loadModuleContext(completedLessonIds);
+        await this.exerciseContextLoader.loadModuleContext(
+          completedLessonIds,
+          userId,
+        );
 
       const lessonContextsStr = this.formatMergedContext(
         mergedContextForExercises,
@@ -662,7 +672,10 @@ export class ExerciseGenerationService {
       });
     } else if (set.lessonId) {
       lessonContextForExercises =
-        await this.exerciseContextLoader.loadLessonContext(set.lessonId);
+        await this.exerciseContextLoader.loadLessonContext(
+          set.lessonId,
+          userId,
+        );
 
       const lessonContext = this.formatContext(lessonContextForExercises);
       const existingExercises = this.formatExistingExercises(
@@ -708,7 +721,6 @@ export class ExerciseGenerationService {
 
     await this.exerciseSetsRepository.update(set.id, {
       isAIGenerated: true,
-      generatedById: userId,
       promptUsed: prompt,
       title: generated.title,
       description: generated.description ?? undefined,
@@ -828,7 +840,7 @@ export class ExerciseGenerationService {
 
   private async persistExercises(
     generated: z.infer<typeof GenerationResponseSchema>,
-    set: import('../domain/exercise-set.entity').ExerciseSet,
+    set: ExerciseSet,
   ): Promise<Exercise[]> {
     const exercises: Exercise[] = [];
 
@@ -842,7 +854,6 @@ export class ExerciseGenerationService {
         explanation: ex.explanation,
         orderIndex: i + 1,
         difficultyLevel: 2,
-        lessonId: set.lessonId,
         setId: set.id,
       });
       exercises.push(exercise);
@@ -860,6 +871,17 @@ export class ExerciseGenerationService {
       case 'both':
       default:
         return 'Mix of vocabulary and grammar — use a balanced variety of exercise types covering both word knowledge and grammar structure';
+    }
+  }
+
+  private assertOwnedCustomSet(set: ExerciseSet, userId: string): void {
+    if (!set.isCustom || set.ownerUserId !== userId) {
+      throw new BadRequestException(
+        'Only your custom practice sets can be generated',
+      );
+    }
+    if (!ExerciseSet.isValidCustomConfig(set.customConfig)) {
+      throw new BadRequestException('Custom practice set has invalid config');
     }
   }
 }

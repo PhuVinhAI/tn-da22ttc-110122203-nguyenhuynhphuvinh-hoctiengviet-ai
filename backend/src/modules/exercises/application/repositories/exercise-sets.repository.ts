@@ -22,15 +22,24 @@ export class ExerciseSetsRepository {
     });
   }
 
-  async findActiveByLessonId(lessonId: string): Promise<ExerciseSet[]> {
-    const sets = await this.repository.find({
-      where: {
-        lessonId,
-        deletedAt: undefined as any,
-      },
-      order: { orderIndex: 'ASC' },
-    });
-    return sets.filter((s) => s.generationStatus !== 'generating');
+  async findActiveByLessonId(
+    lessonId: string,
+    userId?: string,
+  ): Promise<ExerciseSet[]> {
+    return this.repository
+      .createQueryBuilder('set')
+      .where('set.lesson_id = :lessonId', { lessonId })
+      .andWhere('set.deleted_at IS NULL')
+      .andWhere("set.generation_status IS DISTINCT FROM 'generating'")
+      .andWhere(
+        userId
+          ? '(set.is_custom = false OR set.owner_user_id = :userId)'
+          : 'set.is_custom = false',
+        { userId },
+      )
+      .orderBy('set.order_index', 'ASC')
+      .addOrderBy('set.created_at', 'DESC')
+      .getMany();
   }
 
   async findById(id: string): Promise<ExerciseSet | null> {
@@ -56,16 +65,22 @@ export class ExerciseSetsRepository {
     await this.repository.softDelete(id);
   }
 
-  async findActiveCustomSetsByModule(moduleId: string): Promise<ExerciseSet[]> {
+  async findActiveCustomSetsByModule(
+    moduleId: string,
+    userId: string,
+  ): Promise<ExerciseSet[]> {
     return this.repository.find({
-      where: { moduleId, isCustom: true, deletedAt: undefined as any },
+      where: { moduleId, isCustom: true, ownerUserId: userId },
       order: { createdAt: 'DESC' },
     });
   }
 
-  async findActiveCustomSetsByCourse(courseId: string): Promise<ExerciseSet[]> {
+  async findActiveCustomSetsByCourse(
+    courseId: string,
+    userId: string,
+  ): Promise<ExerciseSet[]> {
     return this.repository.find({
-      where: { courseId, isCustom: true, deletedAt: undefined as any },
+      where: { courseId, isCustom: true, ownerUserId: userId },
       order: { createdAt: 'DESC' },
     });
   }

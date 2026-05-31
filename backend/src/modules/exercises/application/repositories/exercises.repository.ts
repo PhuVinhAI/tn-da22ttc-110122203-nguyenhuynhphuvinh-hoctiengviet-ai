@@ -16,11 +16,18 @@ export class ExercisesRepository {
   }
 
   async findByLessonId(lessonId: string): Promise<Exercise[]> {
-    return this.repository.find({
-      where: { lessonId },
-      order: { orderIndex: 'ASC' },
-      relations: ['lesson', 'lesson.module', 'lesson.module.course'],
-    });
+    return this.repository
+      .createQueryBuilder('exercise')
+      .innerJoinAndSelect('exercise.exerciseSet', 'exerciseSet')
+      .leftJoinAndSelect('exerciseSet.lesson', 'lesson')
+      .leftJoinAndSelect('lesson.module', 'lessonModule')
+      .leftJoinAndSelect('lessonModule.course', 'lessonCourse')
+      .where('exerciseSet.lesson_id = :lessonId', { lessonId })
+      .andWhere('exercise.deleted_at IS NULL')
+      .andWhere('exerciseSet.deleted_at IS NULL')
+      .andWhere('exerciseSet.is_custom = false')
+      .orderBy('exercise.order_index', 'ASC')
+      .getMany();
   }
 
   async findBySetId(setId: string): Promise<Exercise[]> {
@@ -47,9 +54,6 @@ export class ExercisesRepository {
     return this.repository.findOne({
       where: { id },
       relations: [
-        'lesson',
-        'lesson.module',
-        'lesson.module.course',
         'exerciseSet',
         'exerciseSet.lesson',
         'exerciseSet.lesson.module',

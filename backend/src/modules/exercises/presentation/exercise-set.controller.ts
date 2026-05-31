@@ -254,8 +254,8 @@ export class ExerciseSetController {
     description: 'Set không phải custom',
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy exercise set' })
-  async deleteCustom(@Param('id') id: string) {
-    await this.exerciseSetService.deleteCustom(id);
+  async deleteCustom(@Param('id') id: string, @CurrentUser() user: User) {
+    await this.exerciseSetService.deleteCustom(id, user.id);
     return { success: true };
   }
 
@@ -326,7 +326,7 @@ export class ExerciseSetController {
     description: 'Chi tiết exercise set với exercises',
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy exercise set' })
-  async findById(@Param('id') id: string) {
-    return this.exerciseSetService.findById(id);
+  async findById(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.exerciseSetService.findById(id, user.id);
   }
 }

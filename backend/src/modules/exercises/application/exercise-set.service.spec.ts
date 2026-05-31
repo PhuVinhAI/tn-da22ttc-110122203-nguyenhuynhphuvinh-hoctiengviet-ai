@@ -116,7 +116,7 @@ describe('ExerciseSetService', () => {
       };
       exerciseSetsRepo.findByIdWithExercises.mockResolvedValue(mockSet as any);
 
-      const result = await service.findById('set-1');
+      const result = await service.findById('set-1', 'user-1');
 
       expect(result.id).toBe('set-1');
       expect(result.exercises).toHaveLength(2);
@@ -128,7 +128,7 @@ describe('ExerciseSetService', () => {
     it('throws NotFoundException when set not found', async () => {
       exerciseSetsRepo.findByIdWithExercises.mockResolvedValue(null);
 
-      await expect(service.findById('missing')).rejects.toThrow(
+      await expect(service.findById('missing', 'user-1')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -252,6 +252,7 @@ describe('ExerciseSetService', () => {
       expect(result.id).toBe('new-set-1');
       expect(generationService.createRegeneratedSet).toHaveBeenCalledWith(
         'set-1',
+        'user-1',
         undefined,
       );
     });
@@ -264,6 +265,7 @@ describe('ExerciseSetService', () => {
 
       expect(generationService.createRegeneratedSet).toHaveBeenCalledWith(
         'set-1',
+        'user-1',
         'new prompt',
       );
     });
@@ -585,9 +587,10 @@ describe('ExerciseSetService', () => {
       exerciseSetsRepo.findById.mockResolvedValue({
         id: 'set-1',
         isCustom: true,
+        ownerUserId: 'user-1',
       } as any);
 
-      await service.deleteCustom('set-1');
+      await service.deleteCustom('set-1', 'user-1');
 
       expect(exercisesRepo.softDeleteBySetId).toHaveBeenCalledWith('set-1');
       expect(exerciseSetsRepo.softDelete).toHaveBeenCalledWith('set-1');
@@ -596,20 +599,21 @@ describe('ExerciseSetService', () => {
     it('throws NotFoundException when set missing', async () => {
       exerciseSetsRepo.findById.mockResolvedValue(null);
 
-      await expect(service.deleteCustom('missing')).rejects.toThrow(
+      await expect(service.deleteCustom('missing', 'user-1')).rejects.toThrow(
         NotFoundException,
       );
       expect(exercisesRepo.softDeleteBySetId).not.toHaveBeenCalled();
     });
 
-    it('allows deleting non-custom set when generation failed', async () => {
+    it('allows deleting failed custom set', async () => {
       exerciseSetsRepo.findById.mockResolvedValue({
         id: 'set-1',
-        isCustom: false,
+        isCustom: true,
+        ownerUserId: 'user-1',
         generationStatus: 'failed',
       } as any);
 
-      await service.deleteCustom('set-1');
+      await service.deleteCustom('set-1', 'user-1');
 
       expect(exercisesRepo.softDeleteBySetId).toHaveBeenCalledWith('set-1');
       expect(exerciseSetsRepo.softDelete).toHaveBeenCalledWith('set-1');
@@ -622,7 +626,7 @@ describe('ExerciseSetService', () => {
         generationStatus: 'ready',
       } as any);
 
-      await expect(service.deleteCustom('set-1')).rejects.toThrow(
+      await expect(service.deleteCustom('set-1', 'user-1')).rejects.toThrow(
         BadRequestException,
       );
       expect(exercisesRepo.softDeleteBySetId).not.toHaveBeenCalled();

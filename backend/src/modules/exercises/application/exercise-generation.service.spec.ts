@@ -126,6 +126,7 @@ describe('ExerciseGenerationService', () => {
         id: 'set-1',
         lessonId: 'lesson-1',
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],
@@ -172,6 +173,7 @@ describe('ExerciseGenerationService', () => {
       exerciseSetsRepo.findById.mockResolvedValue({
         id: 'set-1',
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],
@@ -191,8 +193,14 @@ describe('ExerciseGenerationService', () => {
       exerciseSetsRepo.findById.mockResolvedValue({
         id: 'set-1',
         lessonId: 'lesson-1',
-        isCustom: false,
-        title: 'Default',
+        isCustom: true,
+        ownerUserId: 'user-1',
+        customConfig: {
+          questionCount: 5,
+          exerciseTypes: [ExerciseType.MATCHING],
+          focusArea: 'both',
+        },
+        title: 'Custom Practice',
       } as any);
       exercisesRepo.findBySetId.mockResolvedValue([]);
       exercisesRepo.create.mockResolvedValue({ id: 'ex-1' } as any);
@@ -212,6 +220,8 @@ describe('ExerciseGenerationService', () => {
       exerciseSetsRepo.findById.mockResolvedValue({
         id: 'set-1',
         lessonId: 'lesson-1',
+        isCustom: true,
+        ownerUserId: 'user-1',
       } as any);
       exercisesRepo.findBySetId.mockResolvedValue([{ id: 'ex-1' }] as any);
 
@@ -225,6 +235,7 @@ describe('ExerciseGenerationService', () => {
         id: 'set-1',
         lessonId: 'lesson-1',
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],
@@ -268,6 +279,7 @@ describe('ExerciseGenerationService', () => {
         title: 'Greetings Practice',
         description: 'A practice set',
         userPrompt: 'Focus on greetings',
+        ownerUserId: 'user-1',
         orderIndex: 1,
       };
       const newSet = { ...originalSet, id: 'set-2' };
@@ -275,7 +287,7 @@ describe('ExerciseGenerationService', () => {
       exerciseSetsRepo.findById.mockResolvedValue(originalSet as any);
       exerciseSetsRepo.create.mockResolvedValue(newSet as any);
 
-      const result = await service.createRegeneratedSet('set-1');
+      const result = await service.createRegeneratedSet('set-1', 'user-1');
 
       expect(result.lessonId).toBe('lesson-1');
       expect(exerciseSetsRepo.create).toHaveBeenCalledWith(
@@ -305,6 +317,7 @@ describe('ExerciseGenerationService', () => {
         title: 'Greetings Practice',
         description: 'A practice set',
         userPrompt: 'Focus on greetings',
+        ownerUserId: 'user-1',
         orderIndex: 1,
       };
       const newSet = { ...originalSet, id: 'set-2' };
@@ -312,7 +325,11 @@ describe('ExerciseGenerationService', () => {
       exerciseSetsRepo.findById.mockResolvedValue(originalSet as any);
       exerciseSetsRepo.create.mockResolvedValue(newSet as any);
 
-      await service.createRegeneratedSet('set-1', 'new override prompt');
+      await service.createRegeneratedSet(
+        'set-1',
+        'user-1',
+        'new override prompt',
+      );
 
       expect(exerciseSetsRepo.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -336,6 +353,7 @@ describe('ExerciseGenerationService', () => {
         title: 'Greetings Practice',
         description: null,
         userPrompt: 'original prompt',
+        ownerUserId: 'user-1',
         orderIndex: 1,
       };
       const newSet = { ...originalSet, id: 'set-2' };
@@ -343,7 +361,7 @@ describe('ExerciseGenerationService', () => {
       exerciseSetsRepo.findById.mockResolvedValue(originalSet as any);
       exerciseSetsRepo.create.mockResolvedValue(newSet as any);
 
-      await service.createRegeneratedSet('set-1');
+      await service.createRegeneratedSet('set-1', 'user-1');
 
       expect(exerciseSetsRepo.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -359,6 +377,7 @@ describe('ExerciseGenerationService', () => {
         id: 'set-1',
         lessonId: 'lesson-1',
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],
@@ -397,6 +416,7 @@ describe('ExerciseGenerationService', () => {
         id: 'set-1',
         lessonId: 'lesson-1',
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [
@@ -434,6 +454,7 @@ describe('ExerciseGenerationService', () => {
         id: 'set-1',
         lessonId: 'lesson-1',
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],
@@ -471,6 +492,7 @@ describe('ExerciseGenerationService', () => {
         id: 'set-1',
         lessonId: 'lesson-1',
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],
@@ -523,6 +545,7 @@ describe('ExerciseGenerationService', () => {
         moduleId: 'module-1',
         lessonId: null,
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],
@@ -552,9 +575,10 @@ describe('ExerciseGenerationService', () => {
 
       await service.generateCustom('set-1', 'user-1');
 
-      expect(contextLoader.loadModuleContext).toHaveBeenCalledWith([
-        'lesson-1',
-      ]);
+      expect(contextLoader.loadModuleContext).toHaveBeenCalledWith(
+        ['lesson-1'],
+        'user-1',
+      );
       expect(router.renderPrompt).toHaveBeenCalledWith(
         'exercise-generation-module',
         expect.objectContaining({
@@ -571,6 +595,7 @@ describe('ExerciseGenerationService', () => {
         moduleId: 'module-1',
         lessonId: null,
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],
@@ -615,6 +640,7 @@ describe('ExerciseGenerationService', () => {
         moduleId: null,
         lessonId: null,
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],
@@ -653,10 +679,10 @@ describe('ExerciseGenerationService', () => {
 
       await service.generateCustom('set-1', 'user-1');
 
-      expect(contextLoader.loadCourseContext).toHaveBeenCalledWith([
-        'lesson-1',
-        'lesson-2',
-      ]);
+      expect(contextLoader.loadCourseContext).toHaveBeenCalledWith(
+        ['lesson-1', 'lesson-2'],
+        'user-1',
+      );
       expect(router.renderPrompt).toHaveBeenCalledWith(
         'exercise-generation-course',
         expect.objectContaining({
@@ -674,6 +700,7 @@ describe('ExerciseGenerationService', () => {
         moduleId: null,
         lessonId: null,
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],
@@ -711,10 +738,10 @@ describe('ExerciseGenerationService', () => {
 
       await service.generateCustom('set-1', 'user-1');
 
-      expect(contextLoader.loadCourseContext).toHaveBeenCalledWith([
-        'lesson-1',
-        'lesson-2',
-      ]);
+      expect(contextLoader.loadCourseContext).toHaveBeenCalledWith(
+        ['lesson-1', 'lesson-2'],
+        'user-1',
+      );
     });
 
     it('throws when courseId set has no course found', async () => {
@@ -724,6 +751,7 @@ describe('ExerciseGenerationService', () => {
         moduleId: null,
         lessonId: null,
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],
@@ -749,6 +777,7 @@ describe('ExerciseGenerationService', () => {
         id: 'set-1',
         lessonId: 'lesson-1',
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],
@@ -782,6 +811,7 @@ describe('ExerciseGenerationService', () => {
         id: 'set-1',
         lessonId: 'lesson-1',
         isCustom: true,
+        ownerUserId: 'user-1',
         customConfig: {
           questionCount: 5,
           exerciseTypes: [ExerciseType.MATCHING],

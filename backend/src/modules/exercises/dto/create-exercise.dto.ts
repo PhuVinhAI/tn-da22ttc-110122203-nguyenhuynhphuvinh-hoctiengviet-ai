@@ -62,7 +62,7 @@ export class CreateExerciseDto {
   @IsOptional()
   difficultyLevel?: number;
 
-  @ApiProperty({ example: 'uuid-of-lesson' })
+  @ApiProperty({ example: 'uuid-of-exercise-set' })
   @IsUUID()
-  lessonId: string;
+  setId: string;
 }

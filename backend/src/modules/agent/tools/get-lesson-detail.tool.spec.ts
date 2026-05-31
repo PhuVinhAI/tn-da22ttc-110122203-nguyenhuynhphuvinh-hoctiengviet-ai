@@ -65,7 +65,6 @@ describe('GetLessonDetailTool', () => {
       contents: [{ id: 'ct1' }],
       vocabularies: [{ id: 'v1' }],
       grammarRules: [{ id: 'gr1' }],
-      exercises: [{ id: 'e1' }],
       exerciseSets: [{ id: 'es1' }],
     } as any;
 
@@ -77,7 +76,6 @@ describe('GetLessonDetailTool', () => {
       expect('error' in result).toBe(false);
       if ('error' in result) return;
       expect(result.lesson).toEqual(lesson);
-      expect(result.lesson.exercises).toEqual([{ id: 'e1' }]);
       expect(result.lesson.exerciseSets).toEqual([{ id: 'es1' }]);
     });
 

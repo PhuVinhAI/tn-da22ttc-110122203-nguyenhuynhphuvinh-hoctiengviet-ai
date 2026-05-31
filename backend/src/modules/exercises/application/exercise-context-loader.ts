@@ -45,7 +45,10 @@ export class ExerciseContextLoader {
     private readonly exercisesRepository: ExercisesRepository,
   ) {}
 
-  async loadLessonContext(lessonId: string): Promise<LessonContext> {
+  async loadLessonContext(
+    lessonId: string,
+    userId?: string,
+  ): Promise<LessonContext> {
     const lessonRepo = this.dataSource.getRepository('Lesson');
     const lesson = await lessonRepo.findOne({
       where: { id: lessonId },
@@ -56,8 +59,9 @@ export class ExerciseContextLoader {
       throw new BadRequestException(`Lesson ${lessonId} not found`);
     }
 
-    const existingSets =
-      await this.exerciseSetsRepository.findActiveByLessonId(lessonId);
+    const existingSets = userId
+      ? await this.exerciseSetsRepository.findActiveByLessonId(lessonId, userId)
+      : await this.exerciseSetsRepository.findActiveByLessonId(lessonId);
 
     const existingExercises: Array<{
       exerciseType: string;
@@ -102,31 +106,38 @@ export class ExerciseContextLoader {
     };
   }
 
-  async loadModuleContext(lessonIds: string[]): Promise<MergedContext> {
+  async loadModuleContext(
+    lessonIds: string[],
+    userId?: string,
+  ): Promise<MergedContext> {
     if (lessonIds.length === 0) {
       return { vocabularies: [], grammarRules: [] };
     }
 
-    return this.mergeLessonContexts(lessonIds);
+    return this.mergeLessonContexts(lessonIds, userId);
   }
 
-  async loadCourseContext(lessonIds: string[]): Promise<MergedContext> {
+  async loadCourseContext(
+    lessonIds: string[],
+    userId?: string,
+  ): Promise<MergedContext> {
     if (lessonIds.length === 0) {
       return { vocabularies: [], grammarRules: [] };
     }
 
-    return this.mergeLessonContexts(lessonIds);
+    return this.mergeLessonContexts(lessonIds, userId);
   }
 
   private async mergeLessonContexts(
     lessonIds: string[],
+    userId?: string,
   ): Promise<MergedContext> {
     const allVocabularies: LessonContext['vocabularies'] = [];
     const allGrammarRules: LessonContext['grammarRules'] = [];
 
     for (const lessonId of lessonIds) {
       try {
-        const context = await this.loadLessonContext(lessonId);
+        const context = await this.loadLessonContext(lessonId, userId);
         allVocabularies.push(...context.vocabularies);
         allGrammarRules.push(...context.grammarRules);
       } catch {

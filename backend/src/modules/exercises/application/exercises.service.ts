@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { ExercisesRepository } from './repositories/exercises.repository';
 import { UserExerciseResultsRepository } from './repositories/user-exercise-results.repository';
@@ -52,8 +52,12 @@ export class ExercisesService implements ExerciseStatsPort {
     return this.exercisesRepository.findByLessonId(lessonId);
   }
 
-  async findBySetId(setId: string): Promise<Exercise[]> {
-    return this.exercisesRepository.findBySetId(setId);
+  async findBySetId(setId: string, userId?: string): Promise<Exercise[]> {
+    const exercises = await this.exercisesRepository.findBySetId(setId);
+    if (userId && exercises[0]) {
+      this.assertExerciseReadable(exercises[0], userId);
+    }
+    return exercises;
   }
 
   /**
@@ -119,6 +123,7 @@ export class ExercisesService implements ExerciseStatsPort {
     if (!exercise) {
       throw new NotFoundException(`Exercise with ID ${exerciseId} not found`);
     }
+    this.assertExerciseReadable(exercise, userId);
 
     const normalizedAnswer = this.answerNormalizer.normalize(
       exercise.exerciseType,
@@ -213,13 +218,6 @@ export class ExercisesService implements ExerciseStatsPort {
   }
 
   private resolveCourseLevel(exercise: Exercise): UserLevel | undefined {
-    // Path 1: Exercise → Lesson → Module → Course
-    const viaLesson = exercise.lesson?.module?.course?.level as
-      | UserLevel
-      | undefined;
-    if (viaLesson) return viaLesson;
-
-    // Path 2: Exercise → ExerciseSet → (lesson|module|course)
     const set = exercise.exerciseSet;
     if (!set) return undefined;
 
@@ -228,5 +226,12 @@ export class ExercisesService implements ExerciseStatsPort {
       (set.module?.course?.level as UserLevel | undefined) ??
       (set.course?.level as UserLevel | undefined)
     );
+  }
+
+  private assertExerciseReadable(exercise: Exercise, userId: string): void {
+    const set = exercise.exerciseSet;
+    if (set?.isCustom && set.ownerUserId !== userId) {
+      throw new NotFoundException(`Exercise with ID ${exercise.id} not found`);
+    }
   }
 }

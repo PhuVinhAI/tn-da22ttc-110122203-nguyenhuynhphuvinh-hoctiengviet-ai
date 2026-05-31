@@ -110,7 +110,8 @@ export class ExercisesController {
     return this.exercisesService.serializeExercises(exercises);
   }
 
-  @Public()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get('set/:setId')
   @ApiOperation({
     summary: 'Lấy bài tập theo exercise set',
@@ -121,8 +122,8 @@ export class ExercisesController {
     status: 200,
     description: 'Danh sách bài tập của set',
   })
-  async findBySet(@Param('setId') setId: string) {
-    const exercises = await this.exercisesService.findBySetId(setId);
+  async findBySet(@Param('setId') setId: string, @CurrentUser() user: User) {
+    const exercises = await this.exercisesService.findBySetId(setId, user.id);
     return this.exercisesService.serializeExercises(exercises);
   }
 
