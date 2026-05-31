@@ -15,6 +15,7 @@ export function ResourceForm({
   onSubmit,
   onChange,
   id,
+  hideSubmit = false,
 }: {
   fields: FieldConfig[]
   initialValue?: Record<string, unknown>
@@ -22,6 +23,7 @@ export function ResourceForm({
   onSubmit: (payload: Record<string, unknown>) => Promise<void> | void
   onChange?: (form: Record<string, unknown>) => void
   id?: string
+  hideSubmit?: boolean
 }) {
   const initialState = useMemo(
     () =>
@@ -61,15 +63,15 @@ export function ResourceForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-5" id={id}>
-      <div className="grid gap-4 md:grid-cols-2">
+    <form onSubmit={submit} className="space-y-4" id={id}>
+      <div className="grid gap-x-4 gap-y-3 md:grid-cols-2">
         {fields.map((field) => (
           <div key={field.name} className={field.fullWidth || field.type === 'textarea' || field.type === 'json' ? 'md:col-span-2' : undefined}>
             <Label htmlFor={field.name}>
               {field.label}
               {field.required ? <span className="text-destructive">*</span> : null}
             </Label>
-            <div className="mt-2">
+            <div className="mt-1.5">
               {field.type === 'textarea' ? (
                 <Textarea
                   id={field.name}
@@ -119,12 +121,14 @@ export function ResourceForm({
           </div>
         ))}
       </div>
-      <div className="flex justify-end border-t pt-4">
-        <Button type="submit" disabled={saving}>
-          <Save />
-          {saving ? 'Đang lưu...' : submitLabel}
-        </Button>
-      </div>
+      {!hideSubmit && (
+        <div className="flex justify-end border-t pt-4">
+          <Button type="submit" disabled={saving}>
+            <Save />
+            {saving ? 'Đang lưu...' : submitLabel}
+          </Button>
+        </div>
+      )}
     </form>
   )
 }

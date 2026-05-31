@@ -7,13 +7,12 @@ import {
   Users,
   Settings,
   LogOut,
-  User,
   Moon,
   Sun,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react'
 import { ScrollArea } from '../ui/scroll-area'
-import { Button } from '../ui/button'
 import { useAuth } from '../../hooks/useAuth'
 import { useTheme } from '../../hooks/useTheme'
 
@@ -31,6 +30,13 @@ const navigationItems: NavigationItem[] = [
   { name: 'Cài đặt', href: ROUTES.SETTINGS, icon: Settings },
 ]
 
+function getInitials(name?: string): string {
+  if (!name) return '?'
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
 /**
  * Sidebar Component
  */
@@ -45,74 +51,85 @@ export function Sidebar() {
   return (
     <aside className="w-[256px] border-r-2 border-border bg-card flex flex-col">
       {/* Logo */}
-      <div className="flex h-20 items-center border-b-2 border-border px-8">
-        <h1 className="text-2xl font-bold text-card-foreground">
-          LinVNix Admin
-        </h1>
+      <div className="flex h-20 items-center gap-3 border-b-2 border-border px-5">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+          <Sparkles className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
+        </div>
+        <div className="flex flex-col">
+          <h1 className="text-base font-bold text-card-foreground leading-tight tracking-tight">
+            LinVNix
+          </h1>
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Admin Panel
+          </span>
+        </div>
       </div>
 
       {/* Navigation */}
       <ScrollArea className="flex-1">
-        <nav className="space-y-2 p-4">
+        <nav className="p-3 space-y-1">
           {navigationItems.map((item) => (
             <NavLink
               key={item.name}
               to={item.href}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-4 py-2.5 text-base font-semibold transition-all ${
+                `group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
                   isActive
                     ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground hover:bg-muted'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`
               }
             >
-              <item.icon className="h-5 w-5" />
-              {item.name}
+              <item.icon className="h-[18px] w-[18px] shrink-0" />
+              <span>{item.name}</span>
             </NavLink>
           ))}
         </nav>
       </ScrollArea>
 
-      {/* Bottom Section - Theme Toggle + User + Logout */}
-      <div className="border-t-2 border-border p-3 space-y-1">
-        {/* User Info */}
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary">
-            <User className="h-4 w-4 text-primary-foreground" />
+      {/* Bottom Section */}
+      <div className="border-t-2 border-border p-3 space-y-2">
+        {/* User Card */}
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-muted">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold">
+            {getInitials(user?.fullName)}
           </div>
-          <span className="text-sm font-semibold text-foreground truncate">
-            {user?.fullName}
-          </span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate leading-tight">
+              {user?.fullName}
+            </p>
+            <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+              {user?.email}
+            </p>
+          </div>
         </div>
 
-        <div className="flex gap-1">
-          {/* Theme Toggle */}
-          <Button
-            variant="ghost"
-            size="sm"
+        {/* Action Buttons */}
+        <div className="flex gap-1.5">
+          <button
+            type="button"
             onClick={toggleTheme}
-            className="flex-1 justify-center gap-2 h-9"
+            className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors"
+            title={theme === 'dark' ? 'Chuyển sang sáng' : 'Chuyển sang tối'}
           >
             {theme === 'dark' ? (
               <Sun className="h-4 w-4" />
             ) : (
               <Moon className="h-4 w-4" />
             )}
-            <span className="text-sm font-medium">
+            <span className="text-xs font-semibold">
               {theme === 'dark' ? 'Sáng' : 'Tối'}
             </span>
-          </Button>
+          </button>
 
-          {/* Logout */}
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
+            type="button"
             onClick={handleLogout}
-            className="flex-1 justify-center gap-2 h-9 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="flex items-center justify-center h-9 w-9 rounded-lg bg-muted text-destructive hover:bg-destructive/10 transition-colors"
+            title="Đăng xuất"
           >
             <LogOut className="h-4 w-4" />
-            <span className="text-sm font-medium">Thoát</span>
-          </Button>
+          </button>
         </div>
       </div>
     </aside>

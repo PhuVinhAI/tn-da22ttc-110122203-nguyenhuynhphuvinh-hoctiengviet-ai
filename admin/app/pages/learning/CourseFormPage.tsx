@@ -14,6 +14,7 @@ export function CourseFormPage({ mode }: { mode: 'create' | 'edit' }) {
   const { data = [] } = useAdminCourses()
   const course = data.find((item) => item.id === id)
   const mutations = useLearningAdminMutation()
+  const backTo = id ? learningPath.course(id) : learningPath.courses()
 
   const submit = async (payload: Record<string, unknown>) => {
     try {
@@ -32,7 +33,7 @@ export function CourseFormPage({ mode }: { mode: 'create' | 'edit' }) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-3xl space-y-6">
       <Breadcrumbs
         items={[
           { label: 'Học liệu', href: learningPath.courses() },
@@ -41,37 +42,41 @@ export function CourseFormPage({ mode }: { mode: 'create' | 'edit' }) {
         ]}
       />
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button asChild variant="ghost" size="icon-lg">
-            <Link to={id ? learningPath.course(id) : learningPath.courses()}>
-              <ArrowLeft className="h-6 w-6" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-4xl font-bold">{mode === 'edit' ? 'Sửa khóa học' : 'Tạo khóa học mới'}</h1>
-            <p className="text-lg text-muted-foreground mt-2">
-              {mode === 'edit' ? 'Cập nhật thông tin khóa học' : 'Điền thông tin để tạo khóa học mới'}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button asChild variant="outline" size="lg">
-            <Link to={id ? learningPath.course(id) : learningPath.courses()}>Hủy</Link>
-          </Button>
-          <Button type="submit" form="course-form" size="lg">
-            <Save className="h-5 w-5" />
-            {mode === 'edit' ? 'Cập nhật' : 'Tạo khóa học'}
-          </Button>
+      {/* Compact header */}
+      <div className="flex items-center gap-3">
+        <Button asChild variant="ghost" size="icon" className="h-10 w-10 mt-0.5">
+          <Link to={backTo}>
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {mode === 'edit' ? 'Sửa khóa học' : 'Tạo khóa học mới'}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1.5">
+            {mode === 'edit' ? 'Cập nhật thông tin khóa học' : 'Điền thông tin để tạo khóa học mới'}
+          </p>
         </div>
       </div>
 
-      {/* Form */}
-      <div className="max-w-4xl">
-        <div className="rounded-2xl border-2 border-border bg-card p-8">
-          <ResourceForm id="course-form" fields={courseFields} initialValue={course} onSubmit={submit} />
-        </div>
+      {/* Inline form, no card wrapper */}
+      <ResourceForm
+        id="course-form"
+        fields={courseFields}
+        initialValue={course}
+        onSubmit={submit}
+        hideSubmit
+      />
+
+      {/* Bottom actions */}
+      <div className="flex items-center justify-end gap-2 pt-4 border-t-2 border-border">
+        <Button asChild variant="ghost">
+          <Link to={backTo}>Hủy</Link>
+        </Button>
+        <Button type="submit" form="course-form">
+          <Save className="h-4 w-4" />
+          {mode === 'edit' ? 'Cập nhật' : 'Tạo khóa học'}
+        </Button>
       </div>
     </div>
   )

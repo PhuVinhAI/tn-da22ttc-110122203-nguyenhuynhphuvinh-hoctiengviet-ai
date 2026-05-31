@@ -2,9 +2,8 @@ import type { ReactNode } from 'react'
 import { Activity, CircleAlert, GraduationCap, RefreshCw, TriangleAlert, Users } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useDashboard } from '../../hooks/useDashboard'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import { Card } from '../../components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert'
-import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Skeleton } from '../../components/ui/skeleton'
 import { AppError } from '../../../lib/shared/errors/AppError'
@@ -81,26 +80,30 @@ function StatCard({
   loading: boolean
   color: 'primary' | 'secondary' | 'accent' | 'destructive'
 }) {
-  const colorClasses = {
-    primary: 'bg-primary/5 border-primary/20',
-    secondary: 'bg-secondary/5 border-secondary/20',
-    accent: 'bg-accent/5 border-accent/20',
-    destructive: 'bg-destructive/5 border-destructive/20',
+  const iconBgClasses = {
+    primary: 'bg-primary/10',
+    secondary: 'bg-secondary/10',
+    accent: 'bg-accent/10',
+    destructive: 'bg-destructive/10',
   }
 
   return (
-    <Card className={`p-4 border-2 ${colorClasses[color]}`}>
-      <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-background p-2.5 border-2">
-          {icon}
-        </div>
+    <Card className="p-5 border-2">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            {label}
+          </p>
           {loading ? (
-            <Skeleton className="h-8 w-20 mt-1" />
+            <Skeleton className="h-9 w-24 mt-2" />
           ) : (
-            <p className="text-2xl font-bold text-foreground mt-0.5">{value ?? '—'}</p>
+            <p className="text-3xl font-bold text-foreground mt-2 tracking-tight">
+              {value ?? '—'}
+            </p>
           )}
+        </div>
+        <div className={`rounded-lg p-2.5 ${iconBgClasses[color]}`}>
+          {icon}
         </div>
       </div>
     </Card>
@@ -109,60 +112,66 @@ function StatCard({
 
 function TopCoursesCard({ courses, loading }: { courses?: TopCourse[]; loading: boolean }) {
   return (
-    <Card className="border-2">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-bold">Top khóa học theo số học viên</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <ListSkeleton />
-        ) : !courses || courses.length === 0 ? (
-          <EmptyState message="Chưa có dữ liệu khóa học" />
-        ) : (
-          <ul className="space-y-2">
-            {courses.map((course, index) => (
-              <li key={course.courseId} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold">
-                  {index + 1}
-                </div>
-                <span className="flex-1 truncate text-sm font-medium text-foreground">{course.courseTitle}</span>
-                <Badge variant="secondary" className="font-semibold">{course.userCount}</Badge>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
+    <Card className="border-2 p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-base font-bold text-foreground">Top khóa học</h2>
+        <span className="text-xs text-muted-foreground">Theo số học viên</span>
+      </div>
+      {loading ? (
+        <ListSkeleton />
+      ) : !courses || courses.length === 0 ? (
+        <EmptyState message="Chưa có dữ liệu khóa học" />
+      ) : (
+        <ul className="divide-y-2 divide-border">
+          {courses.map((course, index) => (
+            <li key={course.courseId} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted text-xs font-bold text-foreground tabular-nums">
+                {index + 1}
+              </div>
+              <span className="flex-1 truncate text-sm font-medium text-foreground">
+                {course.courseTitle}
+              </span>
+              <span className="text-sm font-bold text-muted-foreground tabular-nums">
+                {course.userCount}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </Card>
   )
 }
 
 function HighErrorExercisesCard({ exercises, loading }: { exercises?: HighErrorExercise[]; loading: boolean }) {
   return (
-    <Card className="border-2">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-bold">Bài tập có tỉ lệ lỗi cao nhất</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <ListSkeleton />
-        ) : !exercises || exercises.length === 0 ? (
-          <EmptyState message="Chưa có dữ liệu bài tập" />
-        ) : (
-          <ul className="space-y-2">
-            {exercises.map((exercise) => (
-              <li key={exercise.exerciseId} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground line-clamp-1">{exercise.question}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {exercise.type} · {exercise.incorrectCount}/{exercise.totalAttempts} sai
-                  </p>
-                </div>
-                <Badge variant="destructive" className="font-semibold shrink-0">{exercise.errorRate}</Badge>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
+    <Card className="border-2 p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-base font-bold text-foreground">Bài tập lỗi cao</h2>
+        <span className="text-xs text-muted-foreground">Tỉ lệ sai cao nhất</span>
+      </div>
+      {loading ? (
+        <ListSkeleton />
+      ) : !exercises || exercises.length === 0 ? (
+        <EmptyState message="Chưa có dữ liệu bài tập" />
+      ) : (
+        <ul className="divide-y-2 divide-border">
+          {exercises.map((exercise) => (
+            <li key={exercise.exerciseId} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground line-clamp-1">
+                  {exercise.question}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                  {exercise.type} · {exercise.incorrectCount}/{exercise.totalAttempts} sai
+                </p>
+              </div>
+              <span className="text-sm font-bold text-destructive tabular-nums shrink-0">
+                {exercise.errorRate}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </Card>
   )
 }
