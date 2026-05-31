@@ -1,9 +1,10 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { ConversationMessageRole } from '../../../common/enums';
 import { Conversation } from './conversation.entity';
 
 @Entity('conversation_messages')
+@Index(['conversationId', 'createdAt'])
 export class ConversationMessage extends BaseEntity {
   @Column({ name: 'conversation_id' })
   conversationId: string;

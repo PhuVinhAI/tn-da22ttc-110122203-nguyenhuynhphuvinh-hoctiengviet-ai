@@ -384,7 +384,7 @@ class SKo extends S {
   String get copiedToast => '복사됨';
 
   @override
-  String get copyEnglish => '영어 복사';
+  String get copyTranslation => '번역 복사';
 
   @override
   String get copyVietnamese => '베트남어 복사';

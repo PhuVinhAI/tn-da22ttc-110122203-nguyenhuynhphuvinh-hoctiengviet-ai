@@ -5,15 +5,16 @@ export class AddSimulationMessageContentEn20260528120000 implements MigrationInt
     await queryRunner.addColumn(
       'simulation_messages',
       new TableColumn({
-        name: 'content_en',
+        name: 'translation',
         type: 'text',
         isNullable: true,
-        comment: 'English translation of NPC message content',
+        comment:
+          'Translation of NPC message content in learner native language',
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropColumn('simulation_messages', 'content_en');
+    await queryRunner.dropColumn('simulation_messages', 'translation');
   }
 }

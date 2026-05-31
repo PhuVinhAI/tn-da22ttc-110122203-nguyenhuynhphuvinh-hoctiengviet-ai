@@ -1,8 +1,16 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { PartOfSpeech, Dialect } from '../../../common/enums';
 
 @Entity('vocabularies')
+@Index(['lessonId', 'difficultyLevel'])
 export class Vocabulary extends BaseEntity {
   @Column()
   word: string;

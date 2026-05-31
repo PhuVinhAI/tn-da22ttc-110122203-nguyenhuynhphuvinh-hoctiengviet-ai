@@ -384,7 +384,7 @@ class SJa extends S {
   String get copiedToast => 'コピーしました';
 
   @override
-  String get copyEnglish => '英語をコピー';
+  String get copyTranslation => '翻訳をコピー';
 
   @override
   String get copyVietnamese => 'ベトナム語をコピー';

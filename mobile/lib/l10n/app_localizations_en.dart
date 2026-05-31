@@ -393,7 +393,7 @@ class SEn extends S {
   String get copiedToast => 'Copied';
 
   @override
-  String get copyEnglish => 'Copy English';
+  String get copyTranslation => 'Copy translation';
 
   @override
   String get copyVietnamese => 'Copy Vietnamese';

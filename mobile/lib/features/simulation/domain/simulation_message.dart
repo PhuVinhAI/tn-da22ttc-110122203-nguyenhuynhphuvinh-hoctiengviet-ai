@@ -7,7 +7,7 @@ class SimulationMessage {
     required this.speakerName,
     required this.isLearner,
     required this.content,
-    this.contentEn,
+    this.translation,
     this.feedback,
     required this.orderIndex,
   });
@@ -20,7 +20,7 @@ class SimulationMessage {
       speakerName: json['speakerName'] as String? ?? '',
       isLearner: json['isLearner'] as bool? ?? false,
       content: json['content'] as String? ?? '',
-      contentEn: json['contentEn'] as String?,
+      translation: json['translation'] as String?,
       feedback: json['feedback'] == null
           ? null
           : MessageFeedback.fromJson(
@@ -35,7 +35,7 @@ class SimulationMessage {
   final String speakerName;
   final bool isLearner;
   final String content;
-  final String? contentEn;
+  final String? translation;
   final MessageFeedback? feedback;
   final int orderIndex;
 
@@ -45,7 +45,7 @@ class SimulationMessage {
         'speakerName': speakerName,
         'isLearner': isLearner,
         'content': content,
-        'contentEn': contentEn,
+        'translation': translation,
         'feedback': feedback?.toJson(),
         'orderIndex': orderIndex,
       };

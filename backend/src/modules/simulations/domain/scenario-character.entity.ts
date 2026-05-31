@@ -1,8 +1,9 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { Scenario } from './scenario.entity';
 
 @Entity('scenario_characters')
+@Index(['scenarioId', 'orderIndex'])
 export class ScenarioCharacter extends BaseEntity {
   @Column({ name: 'scenario_id' })
   scenarioId: string;

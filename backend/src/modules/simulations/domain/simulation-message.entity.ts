@@ -1,8 +1,9 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { SimulationSession } from './simulation-session.entity';
 
 @Entity('simulation_messages')
+@Index(['sessionId', 'orderIndex'])
 export class SimulationMessage extends BaseEntity {
   @Column({ name: 'session_id' })
   sessionId: string;
@@ -24,8 +25,8 @@ export class SimulationMessage extends BaseEntity {
   @Column({ type: 'text' })
   content: string;
 
-  @Column({ name: 'content_en', type: 'text', nullable: true })
-  contentEn: string | null;
+  @Column({ type: 'text', nullable: true })
+  translation: string | null;
 
   @Column({
     type: 'jsonb',

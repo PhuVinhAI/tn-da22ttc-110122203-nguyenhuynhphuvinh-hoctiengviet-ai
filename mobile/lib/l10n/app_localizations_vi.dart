@@ -395,7 +395,7 @@ class SVi extends S {
   String get copiedToast => 'Đã sao chép';
 
   @override
-  String get copyEnglish => 'Sao chép tiếng Anh';
+  String get copyTranslation => 'Sao chép bản dịch';
 
   @override
   String get copyVietnamese => 'Sao chép tiếng Việt';

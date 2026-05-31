@@ -24,11 +24,12 @@ simulation-conversation:
     - Keep each NPC utterance to 1–2 short sentences. Realistic conversation pace.
     - Do NOT monologue. If the scene needs more information, spread it across turns.
 
-    ## Bilingual output
+    ## Learner-language support
     - Every `content` field must be Vietnamese dialogue only.
-    - Every message must also include `contentEn`: an accurate natural English
-      translation of that same `content` so the learner understands it.
-    - Keep `contentEn` natural English, not word-for-word; match register/tone.
+    - Every message must also include `translation`: an accurate natural
+      translation of that same `content` in the learner's native language
+      ({{learner.nativeLanguage}}) so the learner understands it.
+    - Keep `translation` natural, not word-for-word; match register/tone.
 
     ## Turn orchestration rules
     - After each learner message, decide which NPC character(s) should respond.
@@ -91,7 +92,7 @@ simulation-conversation:
           "speakerCharacterId": "<id>",
           "speakerName": "<name>",
           "content": "<Vietnamese text>",
-          "contentEn": "<English translation>"
+          "translation": "<translation in learner native language>"
         }
       ],
       "nextTurnCharacterId": "<learner character id unless sessionEnded>",
@@ -123,6 +124,6 @@ simulation-conversation:
     - nextTurnCharacterId must be {{chosenCharacter.id}} whenever sessionEnded is false.
     - sessionEnded, endReason, totalScore, criteriaScores, aiSummary are only
       present when the session is ending.
-    - All character `content` dialogue must be in Vietnamese. `contentEn` is the
-      English translation. Feedback/review should be in the learner's native language
+    - All character `content` dialogue must be in Vietnamese. `translation` and
+      feedback/review should be in the learner's native language
       ({{learner.nativeLanguage}}).

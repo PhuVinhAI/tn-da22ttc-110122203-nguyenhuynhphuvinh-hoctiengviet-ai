@@ -395,7 +395,7 @@ class SEs extends S {
   String get copiedToast => 'Copiado';
 
   @override
-  String get copyEnglish => 'Copiar inglés';
+  String get copyTranslation => 'Copiar traducción';
 
   @override
   String get copyVietnamese => 'Copiar vietnamita';

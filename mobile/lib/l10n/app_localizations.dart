@@ -843,11 +843,11 @@ abstract class S {
   /// **'Đã sao chép'**
   String get copiedToast;
 
-  /// No description provided for @copyEnglish.
+  /// No description provided for @copyTranslation.
   ///
   /// In vi, this message translates to:
-  /// **'Sao chép tiếng Anh'**
-  String get copyEnglish;
+  /// **'Sao chép bản dịch'**
+  String get copyTranslation;
 
   /// No description provided for @copyVietnamese.
   ///

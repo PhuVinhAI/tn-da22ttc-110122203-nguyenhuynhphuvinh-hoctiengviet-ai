@@ -8,7 +8,6 @@ export enum AuthTokenPurpose {
 }
 
 @Entity('auth_tokens')
-@Index(['token'], { unique: true })
 @Index(['purpose', 'userId', 'usedAt'])
 @Index(['purpose', 'code', 'userId', 'usedAt'])
 export class AuthToken extends BaseEntity {

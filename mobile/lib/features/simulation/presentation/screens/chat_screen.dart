@@ -212,7 +212,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       speakerName: name,
       isLearner: message.isLearner,
       content: message.content,
-      contentEn: message.contentEn,
+      translation: message.translation,
       feedback: message.feedback,
       orderIndex: message.orderIndex,
     );
@@ -592,7 +592,8 @@ class _NpcBubble extends ConsumerWidget {
 
   void _showOptions(BuildContext context, WidgetRef ref) {
     final tts = ref.read(simulationTtsServiceProvider);
-    final hasEn = message.contentEn != null && message.contentEn!.isNotEmpty;
+    final hasTranslation =
+        message.translation != null && message.translation!.isNotEmpty;
 
     AppMenuBottomSheet.show(
       context,
@@ -615,12 +616,12 @@ class _NpcBubble extends ConsumerWidget {
             );
           },
         ),
-        if (hasEn)
+        if (hasTranslation)
           AppMenuBottomSheetItem(
-            label: S.of(context).copyEnglish,
+            label: S.of(context).copyTranslation,
             icon: Icons.translate_outlined,
             onTap: () {
-              Clipboard.setData(ClipboardData(text: message.contentEn!));
+              Clipboard.setData(ClipboardData(text: message.translation!));
               AppToast.show(
                 context,
                 message: S.of(context).copiedToast,
@@ -635,7 +636,8 @@ class _NpcBubble extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = AppTheme.colors(context);
-    final hasEn = message.contentEn != null && message.contentEn!.isNotEmpty;
+    final hasTranslation =
+        message.translation != null && message.translation!.isNotEmpty;
     final playingId = ref.watch(ttsPlayingMessageIdProvider);
     final isPlaying = playingId == message.id;
 
@@ -709,10 +711,10 @@ class _NpcBubble extends ConsumerWidget {
                           ],
                         ],
                       ),
-                      if (hasEn) ...[
+                      if (hasTranslation) ...[
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          message.contentEn!,
+                          message.translation!,
                           style: GoogleFonts.inter(
                             fontSize: AppTypography.bodySmall,
                             color: c.mutedForeground,

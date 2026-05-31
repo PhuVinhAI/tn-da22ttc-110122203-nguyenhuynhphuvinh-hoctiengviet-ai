@@ -398,7 +398,7 @@ class SFr extends S {
   String get copiedToast => 'Copié';
 
   @override
-  String get copyEnglish => 'Copier l\'anglais';
+  String get copyTranslation => 'Copier la traduction';
 
   @override
   String get copyVietnamese => 'Copier le vietnamien';

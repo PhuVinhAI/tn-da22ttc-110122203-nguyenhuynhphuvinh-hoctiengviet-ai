@@ -1,9 +1,17 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { UserLevel, Difficulty } from '../../../common/enums';
 import { ScenarioCategory } from './scenario-category.entity';
 
 @Entity('scenarios')
+@Index(['categoryId', 'requiredLevel', 'isPublished'])
 export class Scenario extends BaseEntity {
   @Column({ name: 'category_id' })
   categoryId: string;

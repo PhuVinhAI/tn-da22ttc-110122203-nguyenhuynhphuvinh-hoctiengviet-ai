@@ -382,7 +382,7 @@ class SZh extends S {
   String get copiedToast => '已复制';
 
   @override
-  String get copyEnglish => '复制英文';
+  String get copyTranslation => '复制翻译';
 
   @override
   String get copyVietnamese => '复制越南文';

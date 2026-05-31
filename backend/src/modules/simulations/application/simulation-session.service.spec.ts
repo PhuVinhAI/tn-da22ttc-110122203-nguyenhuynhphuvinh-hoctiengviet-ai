@@ -851,7 +851,7 @@ describe('SimulationSessionService', () => {
             speakerCharacterId: 'ch-2',
             speakerName: 'Chị Lan',
             content: 'Chào em!',
-            contentEn: undefined,
+            translation: undefined,
             orderIndex: 1,
           },
         ],

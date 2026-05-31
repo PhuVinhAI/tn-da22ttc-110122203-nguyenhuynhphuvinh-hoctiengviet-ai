@@ -1,7 +1,15 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 
 @Entity('modules')
+@Index(['courseId', 'orderIndex'])
 export class Module extends BaseEntity {
   @Column()
   title: string;

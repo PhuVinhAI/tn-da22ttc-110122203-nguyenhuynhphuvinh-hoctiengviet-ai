@@ -122,7 +122,7 @@
   "conversationLossWarning": "ความคืบหน้าการสนทนาจะสูญหายและไม่สามารถกู้คืนได้",
   "conversationProgressLost": "ความคืบหน้าของการสนทนาจะหายไปและไม่สามารถกู้คืนได้",
   "copiedToast": "คัดลอกแล้ว",
-  "copyEnglish": "คัดลอกภาษาอังกฤษ",
+  "copyTranslation": "คัดลอกคำแปล",
   "copyVietnamese": "คัดลอกภาษาเวียดนาม",
   "correctAnswers": "คำตอบที่ถูกต้อง",
   "couldNotClearData": "ไม่สามารถล้างข้อมูลได้",

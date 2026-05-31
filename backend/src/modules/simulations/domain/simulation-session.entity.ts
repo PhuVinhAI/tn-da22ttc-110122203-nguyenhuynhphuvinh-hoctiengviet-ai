@@ -1,4 +1,11 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import {
   SimulationEndReason,
@@ -8,6 +15,8 @@ import { Scenario } from './scenario.entity';
 import { ScenarioCharacter } from './scenario-character.entity';
 
 @Entity('simulation_sessions')
+@Index(['userId', 'status', 'updatedAt'])
+@Index(['scenarioId', 'status'])
 export class SimulationSession extends BaseEntity {
   @Column({ name: 'user_id' })
   userId: string;

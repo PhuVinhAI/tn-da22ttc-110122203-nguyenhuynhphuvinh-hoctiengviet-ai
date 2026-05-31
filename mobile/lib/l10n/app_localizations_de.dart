@@ -397,7 +397,7 @@ class SDe extends S {
   String get copiedToast => 'Kopiert';
 
   @override
-  String get copyEnglish => 'Englisch kopieren';
+  String get copyTranslation => 'Übersetzung kopieren';
 
   @override
   String get copyVietnamese => 'Vietnamesisch kopieren';

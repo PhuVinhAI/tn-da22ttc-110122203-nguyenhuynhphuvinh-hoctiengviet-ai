@@ -1,8 +1,9 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { ContentType } from '../../../common/enums';
 
 @Entity('lesson_contents')
+@Index(['lessonId', 'orderIndex'])
 export class LessonContent extends BaseEntity {
   @Column({
     type: 'enum',

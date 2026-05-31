@@ -2,7 +2,6 @@ import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 
 @Entity('refresh_tokens')
-@Index(['token'], { unique: true })
 @Index(['userId', 'revokedAt'])
 export class RefreshToken extends BaseEntity {
   @Column({ type: 'varchar', length: 500, unique: true })

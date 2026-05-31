@@ -122,7 +122,7 @@
   "conversationLossWarning": "El progreso de la conversación se perderá y no se podrá recuperar.",
   "conversationProgressLost": "El progreso de la conversación se perderá y no se podrá recuperar.",
   "copiedToast": "Copiado",
-  "copyEnglish": "Copiar inglés",
+  "copyTranslation": "Copiar traducción",
   "copyVietnamese": "Copiar vietnamita",
   "correctAnswers": "Respuestas correctas",
   "couldNotClearData": "No se pudieron borrar los datos",

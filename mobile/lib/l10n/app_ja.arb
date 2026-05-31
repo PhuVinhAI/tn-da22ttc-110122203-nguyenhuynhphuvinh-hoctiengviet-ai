@@ -122,7 +122,7 @@
   "conversationLossWarning": "会話の進捗状況は失われ、復元できません。",
   "conversationProgressLost": "会話の進行状況は失われ、復元することはできません。",
   "copiedToast": "コピーしました",
-  "copyEnglish": "英語をコピー",
+  "copyTranslation": "翻訳をコピー",
   "copyVietnamese": "ベトナム語をコピー",
   "correctAnswers": "正解",
   "couldNotClearData": "データを削除できませんでした",

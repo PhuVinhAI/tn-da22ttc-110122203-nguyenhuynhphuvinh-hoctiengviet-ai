@@ -1,7 +1,8 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 
 @Entity('grammar_rules')
+@Index(['lessonId', 'difficultyLevel'])
 export class GrammarRule extends BaseEntity {
   @Column()
   title: string;

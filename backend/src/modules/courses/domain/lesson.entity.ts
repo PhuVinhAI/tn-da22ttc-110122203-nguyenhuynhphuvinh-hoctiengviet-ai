@@ -1,8 +1,16 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { LessonType } from '../../../common/enums';
 
 @Entity('lessons')
+@Index(['moduleId', 'orderIndex'])
 export class Lesson extends BaseEntity {
   @Column()
   title: string;

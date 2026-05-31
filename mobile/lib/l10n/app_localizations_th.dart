@@ -391,7 +391,7 @@ class STh extends S {
   String get copiedToast => 'คัดลอกแล้ว';
 
   @override
-  String get copyEnglish => 'คัดลอกภาษาอังกฤษ';
+  String get copyTranslation => 'คัดลอกคำแปล';
 
   @override
   String get copyVietnamese => 'คัดลอกภาษาเวียดนาม';

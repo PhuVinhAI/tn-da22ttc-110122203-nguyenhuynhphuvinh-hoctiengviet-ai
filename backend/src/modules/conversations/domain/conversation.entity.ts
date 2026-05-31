@@ -1,10 +1,19 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { User } from '../../users/domain/user.entity';
 import { Course } from '../../courses/domain/course.entity';
 import { Lesson } from '../../courses/domain/lesson.entity';
 
 @Entity('conversations')
+@Index(['userId', 'updatedAt'])
+@Index(['userId', 'courseId', 'lessonId'])
 export class Conversation extends BaseEntity {
   @Column({ name: 'user_id' })
   userId: string;
