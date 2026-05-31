@@ -3,7 +3,10 @@ import { BaseEntity } from '../../../database/base/base.entity';
 import { Scenario } from './scenario.entity';
 
 @Entity('scenario_characters')
-@Index(['scenarioId', 'orderIndex'])
+@Index(['scenarioId', 'orderIndex'], {
+  unique: true,
+  where: 'deleted_at IS NULL',
+})
 export class ScenarioCharacter extends BaseEntity {
   @Column({ name: 'scenario_id' })
   scenarioId: string;

@@ -3,7 +3,10 @@ import { BaseEntity } from '../../../database/base/base.entity';
 import { ContentType } from '../../../common/enums';
 
 @Entity('lesson_contents')
-@Index(['lessonId', 'orderIndex'])
+@Index(['lessonId', 'orderIndex'], {
+  unique: true,
+  where: 'deleted_at IS NULL',
+})
 export class LessonContent extends BaseEntity {
   @Column({
     type: 'enum',

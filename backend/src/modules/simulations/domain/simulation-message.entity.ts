@@ -3,7 +3,10 @@ import { BaseEntity } from '../../../database/base/base.entity';
 import { SimulationSession } from './simulation-session.entity';
 
 @Entity('simulation_messages')
-@Index(['sessionId', 'orderIndex'])
+@Index(['sessionId', 'orderIndex'], {
+  unique: true,
+  where: 'deleted_at IS NULL',
+})
 export class SimulationMessage extends BaseEntity {
   @Column({ name: 'session_id' })
   sessionId: string;

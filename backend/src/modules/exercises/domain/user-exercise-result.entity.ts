@@ -26,7 +26,7 @@ export class UserExerciseResult extends BaseEntity {
   @Column({ name: 'best_score', type: 'int', default: 0 })
   bestScore: number;
 
-  @Column({ name: 'last_attempt_id', nullable: true })
+  @Column({ name: 'last_attempt_id', type: 'uuid', nullable: true })
   lastAttemptId?: string;
 
   @Column({ name: 'user_id' })
@@ -42,4 +42,8 @@ export class UserExerciseResult extends BaseEntity {
   @ManyToOne('Exercise', 'userResults', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'exercise_id' })
   exercise: any;
+
+  @ManyToOne('ExerciseAttempt', { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'last_attempt_id' })
+  lastAttempt?: any;
 }

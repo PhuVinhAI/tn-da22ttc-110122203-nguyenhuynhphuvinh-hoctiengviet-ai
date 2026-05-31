@@ -66,7 +66,4 @@ export class Scenario extends BaseEntity {
 
   @OneToMany('SimulationSession', 'scenario')
   sessions: any[];
-
-  @OneToMany('SimulationSession', 'scenario')
-  results: any[];
 }

@@ -5,6 +5,7 @@ import {
   OneToMany,
   JoinColumn,
   Index,
+  Check,
 } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import {
@@ -17,6 +18,22 @@ import { ScenarioCharacter } from './scenario-character.entity';
 @Entity('simulation_sessions')
 @Index(['userId', 'status', 'updatedAt'])
 @Index(['scenarioId', 'status'])
+@Index('UQ_simulation_sessions_one_incomplete_per_user', ['userId'], {
+  unique: true,
+  where: "deleted_at IS NULL AND status IN ('ACTIVE', 'PAUSED')",
+})
+@Check(
+  'CHK_simulation_sessions_total_tokens_non_negative',
+  '"total_tokens" >= 0',
+)
+@Check(
+  'CHK_simulation_sessions_total_score_range',
+  '"total_score" IS NULL OR ("total_score" >= 0 AND "total_score" <= 100)',
+)
+@Check(
+  'CHK_simulation_sessions_total_messages_non_negative',
+  '"total_messages" >= 0',
+)
 export class SimulationSession extends BaseEntity {
   @Column({ name: 'user_id' })
   userId: string;
@@ -49,8 +66,12 @@ export class SimulationSession extends BaseEntity {
   @Column({ name: 'total_tokens', default: 0 })
   totalTokens: number;
 
-  @Column({ name: 'next_turn_character_id' })
+  @Column({ name: 'next_turn_character_id', type: 'uuid' })
   nextTurnCharacterId: string;
+
+  @ManyToOne('ScenarioCharacter', { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'next_turn_character_id' })
+  nextTurnCharacter: ScenarioCharacter;
 
   @OneToMany('SimulationMessage', 'session')
   messages: any[];

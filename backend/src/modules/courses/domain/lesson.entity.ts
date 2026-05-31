@@ -10,7 +10,10 @@ import { BaseEntity } from '../../../database/base/base.entity';
 import { LessonType } from '../../../common/enums';
 
 @Entity('lessons')
-@Index(['moduleId', 'orderIndex'])
+@Index(['moduleId', 'orderIndex'], {
+  unique: true,
+  where: 'deleted_at IS NULL',
+})
 export class Lesson extends BaseEntity {
   @Column()
   title: string;

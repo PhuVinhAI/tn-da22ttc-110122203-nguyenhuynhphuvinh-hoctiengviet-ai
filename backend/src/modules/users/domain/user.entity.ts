@@ -1,12 +1,24 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, Index, Check } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { UserLevel, Dialect, Role } from '../../../common/enums';
 import { getRoleView } from '../../../common/auth/role-permissions';
 
 @Entity('users')
+@Index('UQ_users_active_email', ['email'], {
+  unique: true,
+  where: 'deleted_at IS NULL',
+})
+@Index('UQ_users_active_google_id', ['googleId'], {
+  unique: true,
+  where: 'deleted_at IS NULL AND google_id IS NOT NULL',
+})
+@Check(
+  'CHK_users_notification_time_format',
+  `"notification_time" ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$'`,
+)
 export class User extends BaseEntity {
-  @Column({ unique: true })
+  @Column()
   email: string;
 
   @Column({ nullable: true })

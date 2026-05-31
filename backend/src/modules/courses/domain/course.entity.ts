@@ -1,8 +1,17 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, Index, Check } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { UserLevel } from '../../../common/enums';
 
 @Entity('courses')
+@Index('UQ_courses_active_order_index', ['orderIndex'], {
+  unique: true,
+  where: 'deleted_at IS NULL',
+})
+@Check('CHK_courses_order_index_non_negative', '"order_index" >= 0')
+@Check(
+  'CHK_courses_estimated_hours_non_negative',
+  '"estimated_hours" IS NULL OR "estimated_hours" >= 0',
+)
 export class Course extends BaseEntity {
   @Column()
   title: string;

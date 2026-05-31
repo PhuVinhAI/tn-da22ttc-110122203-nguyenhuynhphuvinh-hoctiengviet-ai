@@ -11,7 +11,10 @@ import { ExerciseType } from '../../../common/enums';
 import type { ExerciseOptions, ExerciseAnswer } from './exercise-options.types';
 
 @Entity('exercises')
-@Index(['setId', 'orderIndex'])
+@Index(['setId', 'orderIndex'], {
+  unique: true,
+  where: 'deleted_at IS NULL',
+})
 export class Exercise extends BaseEntity {
   @Column({
     type: 'enum',

@@ -1,9 +1,16 @@
-import { Entity, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index, Check } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { User } from '../../users/domain/user.entity';
 
 @Entity('daily_goal_progress')
-@Unique(['userId', 'date'])
+@Index('UQ_daily_goal_progress_active_user_date', ['userId', 'date'], {
+  unique: true,
+  where: 'deleted_at IS NULL',
+})
+@Check(
+  'CHK_daily_goal_progress_counts_non_negative',
+  '"exercises_completed" >= 0 AND "lessons_completed" >= 0',
+)
 export class DailyGoalProgress extends BaseEntity {
   @Column({ name: 'user_id' })
   userId: string;

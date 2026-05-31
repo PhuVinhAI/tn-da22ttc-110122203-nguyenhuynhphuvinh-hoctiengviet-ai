@@ -183,7 +183,8 @@ async function main() {
           );
           const setId = setRes.rows[0].id;
 
-          for (const exerciseData of lessonData.exercises) {
+          for (let i = 0; i < lessonData.exercises.length; i++) {
+            const exerciseData = lessonData.exercises[i];
             await client.query(
               `INSERT INTO exercises (exercise_type, question, question_audio_url, options, correct_answer, explanation, order_index, difficulty_level, set_id)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
@@ -196,7 +197,7 @@ async function main() {
                   : null,
                 JSON.stringify(exerciseData.correct_answer),
                 exerciseData.explanation || null,
-                exerciseData.order_index,
+                i + 1,
                 exerciseData.difficulty_level || 1,
                 setId,
               ],

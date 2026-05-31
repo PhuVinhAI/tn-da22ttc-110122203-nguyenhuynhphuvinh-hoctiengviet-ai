@@ -9,7 +9,10 @@ import {
 import { BaseEntity } from '../../../database/base/base.entity';
 
 @Entity('modules')
-@Index(['courseId', 'orderIndex'])
+@Index(['courseId', 'orderIndex'], {
+  unique: true,
+  where: 'deleted_at IS NULL',
+})
 export class Module extends BaseEntity {
   @Column()
   title: string;

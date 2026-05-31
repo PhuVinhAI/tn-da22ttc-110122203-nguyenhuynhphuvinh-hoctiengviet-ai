@@ -1,9 +1,16 @@
-import { Entity, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index, Check } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { User } from '../../users/domain/user.entity';
 
 @Entity('daily_streaks')
-@Unique(['userId'])
+@Index('UQ_daily_streaks_active_user', ['userId'], {
+  unique: true,
+  where: 'deleted_at IS NULL',
+})
+@Check(
+  'CHK_daily_streaks_counts_valid',
+  '"current_streak" >= 0 AND "longest_streak" >= "current_streak"',
+)
 export class DailyStreak extends BaseEntity {
   @Column({ name: 'user_id' })
   userId: string;
