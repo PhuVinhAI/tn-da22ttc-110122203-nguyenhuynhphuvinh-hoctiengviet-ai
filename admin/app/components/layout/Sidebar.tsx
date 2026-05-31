@@ -59,29 +59,29 @@ const navigationGroups: NavigationGroup[] = [
  */
 export function Sidebar() {
   return (
-    <aside className="w-64 border-r-2 border-border bg-card">
+    <aside className="w-[280px] border-r-2 border-border bg-card">
       {/* Logo */}
-      <div className="flex h-16 items-center border-b-2 border-border px-6">
-        <h1 className="text-xl font-bold text-card-foreground">
+      <div className="flex h-20 items-center border-b-2 border-border px-8">
+        <h1 className="text-2xl font-bold text-card-foreground">
           LinVNix Admin
         </h1>
       </div>
 
       {/* Navigation */}
-      <ScrollArea className="h-[calc(100vh-4rem)]">
-        <nav className="space-y-6 p-5">
+      <ScrollArea className="h-[calc(100vh-5rem)]">
+        <nav className="space-y-8 p-6">
           {navigationGroups.map((group) => (
             <div key={group.title}>
-              <h3 className="mb-2 px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <h3 className="mb-3 px-4 text-sm font-bold uppercase tracking-wider text-muted-foreground">
                 {group.title}
               </h3>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {group.items.map((item) => (
                   <NavLink
                     key={item.name}
                     to={item.href}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 rounded-lg px-4 py-3 text-base font-semibold transition-all ${
+                      `flex items-center gap-4 rounded-xl px-4 py-3 text-base font-semibold transition-all ${
                         isActive
                           ? 'bg-primary text-primary-foreground'
                           : 'text-foreground hover:bg-muted'

@@ -22,7 +22,7 @@ export function AppLayout() {
           <Header />
 
           {/* Page Content */}
-          <main className="flex-1 overflow-y-auto p-8">
+          <main className="flex-1 overflow-y-auto p-10">
             <Outlet />
           </main>
         </div>

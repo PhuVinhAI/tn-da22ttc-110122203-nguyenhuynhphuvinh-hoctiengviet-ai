@@ -23,7 +23,7 @@ export function Header() {
   }
 
   return (
-    <header className="flex h-16 items-center justify-between border-b-2 border-border bg-card px-6">
+    <header className="flex h-20 items-center justify-between border-b-2 border-border bg-card px-8">
       {/* Left - Breadcrumb hoặc Page Title */}
       <div>
         <h2 className="text-xl font-bold text-card-foreground">
