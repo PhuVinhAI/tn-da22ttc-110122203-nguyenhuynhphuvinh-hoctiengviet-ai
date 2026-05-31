@@ -1,10 +1,9 @@
 import { Outlet } from 'react-router';
 import { Sidebar } from './Sidebar';
-import { Header } from './Header';
 import { TitleBar } from './TitleBar';
 
 /**
- * App Layout - Main layout với sidebar và header
+ * App Layout - Main layout với sidebar
  */
 export function AppLayout() {
   return (
@@ -17,15 +16,9 @@ export function AppLayout() {
         <Sidebar />
 
         {/* Main Content */}
-        <div className="flex flex-1 flex-col overflow-hidden">
-          {/* Header */}
-          <Header />
-
-          {/* Page Content */}
-          <main className="flex-1 overflow-y-auto p-10">
-            <Outlet />
-          </main>
-        </div>
+        <main className="flex-1 overflow-y-auto p-10">
+          <Outlet />
+        </main>
       </div>
     </div>
   );
