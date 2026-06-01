@@ -30,11 +30,12 @@ const Tag = href ? 'a' : 'div';
 
 <Tag href={href} class={`inline-flex items-center gap-2 ${className}`}>
 	<img
-		src="/icon.svg"
+		src="/icon.png"
 		alt="LinVNix"
 		width="40"
 		height="40"
-		class={iconSizes[size]}
+		class={`${iconSizes[size]} rounded-md select-none`}
+		draggable="false"
 	/>
 	{withText && (
 		<span class={`font-bold tracking-tight ${textSizes[size]}`}>LinVNix</span>

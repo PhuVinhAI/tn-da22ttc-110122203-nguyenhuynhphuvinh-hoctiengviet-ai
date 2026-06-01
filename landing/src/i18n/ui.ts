@@ -9,6 +9,9 @@ export const ui = {
 		'nav.signIn': 'Sign in',
 		'nav.getStarted': 'Download demo',
 
+		'theme.light': 'Switch to light mode',
+		'theme.dark': 'Switch to dark mode',
+
 		'hero.badge': 'AI-powered Vietnamese learning',
 		'hero.title1': 'Learn Vietnamese,',
 		'hero.title2': 'the smart way.',
@@ -132,6 +135,9 @@ export const ui = {
 		'nav.faq': 'Câu hỏi',
 		'nav.signIn': 'Đăng nhập',
 		'nav.getStarted': 'Tải bản demo',
+
+		'theme.light': 'Chuyển sang chế độ sáng',
+		'theme.dark': 'Chuyển sang chế độ tối',
 
 		'hero.badge': 'Học tiếng Việt với AI',
 		'hero.title1': 'Học tiếng Việt,',
@@ -261,6 +267,9 @@ export const ui = {
 		'nav.signIn': 'Anmelden',
 		'nav.getStarted': 'Demo herunterladen',
 
+		'theme.light': 'Zum hellen Modus wechseln',
+		'theme.dark': 'Zum dunklen Modus wechseln',
+
 		'hero.badge': 'KI-gestütztes Vietnamesisch-Lernen',
 		'hero.title1': 'Vietnamesisch lernen,',
 		'hero.title2': 'auf die schlaue Art.',
@@ -387,6 +396,9 @@ export const ui = {
 		'nav.faq': 'FAQ',
 		'nav.signIn': 'Iniciar sesión',
 		'nav.getStarted': 'Descargar demo',
+
+		'theme.light': 'Cambiar a modo claro',
+		'theme.dark': 'Cambiar a modo oscuro',
 
 		'hero.badge': 'Aprendizaje de vietnamita con IA',
 		'hero.title1': 'Aprende vietnamita,',
@@ -515,6 +527,9 @@ export const ui = {
 		'nav.signIn': 'Connexion',
 		'nav.getStarted': 'Télécharger la démo',
 
+		'theme.light': 'Passer en mode clair',
+		'theme.dark': 'Passer en mode sombre',
+
 		'hero.badge': 'Apprentissage du vietnamien avec IA',
 		'hero.title1': 'Apprenez le vietnamien,',
 		'hero.title2': 'intelligemment.',
@@ -642,6 +657,9 @@ export const ui = {
 		'nav.signIn': 'ログイン',
 		'nav.getStarted': 'デモをダウンロード',
 
+		'theme.light': 'ライトモードに切り替え',
+		'theme.dark': 'ダークモードに切り替え',
+
 		'hero.badge': 'AI搭載のベトナム語学習',
 		'hero.title1': 'ベトナム語を、',
 		'hero.title2': '賢く学ぼう。',
@@ -758,6 +776,9 @@ export const ui = {
 		'nav.faq': 'FAQ',
 		'nav.signIn': '로그인',
 		'nav.getStarted': '데모 다운로드',
+
+		'theme.light': '라이트 모드로 전환',
+		'theme.dark': '다크 모드로 전환',
 
 		'hero.badge': 'AI 기반 베트남어 학습',
 		'hero.title1': '베트남어를,',
@@ -876,6 +897,9 @@ export const ui = {
 		'nav.signIn': 'เข้าสู่ระบบ',
 		'nav.getStarted': 'ดาวน์โหลดเดโม',
 
+		'theme.light': 'สลับเป็นโหมดสว่าง',
+		'theme.dark': 'สลับเป็นโหมดมืด',
+
 		'hero.badge': 'เรียนภาษาเวียดนามด้วย AI',
 		'hero.title1': 'เรียนภาษาเวียดนาม',
 		'hero.title2': 'อย่างชาญฉลาด',
@@ -992,6 +1016,9 @@ export const ui = {
 		'nav.faq': '常见问题',
 		'nav.signIn': '登录',
 		'nav.getStarted': '下载演示版',
+
+		'theme.light': '切换到浅色模式',
+		'theme.dark': '切换到深色模式',
 
 		'hero.badge': 'AI 驱动的越南语学习',
 		'hero.title1': '学越南语，',

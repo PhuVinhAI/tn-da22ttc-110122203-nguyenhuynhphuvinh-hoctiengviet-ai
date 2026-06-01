@@ -2,8 +2,9 @@
 import Container from '../ui/Container.astro';
 import Button from '../ui/Button.astro';
 import Logo from '../ui/Logo.astro';
-import LanguageSwitcher from './LanguageSwitcher.astro';
-import { type Lang, defaultLang } from '../../i18n/config';
+import { LanguageSwitcher } from './LanguageSwitcher.tsx';
+import { ThemeToggle } from './ThemeToggle.tsx';
+import { type Lang, defaultLang, languages, localeOrder } from '../../i18n/config';
 import { localizedPath, useTranslations } from '../../i18n/utils';
 import { DEMO_APK_URL, DEMO_APK_FILENAME } from '../../config';
 
@@ -21,6 +22,9 @@ const navItems = [
 	{ label: t('nav.pricing'), href: `${base}#pricing` },
 	{ label: t('nav.faq'), href: `${base}#faq` },
 ];
+
+const langOptions = localeOrder.map((code) => ({ code, label: languages[code] }));
+const langHrefs = Object.fromEntries(localeOrder.map((code) => [code, localizedPath(code)]));
 ---
 
 <header class="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur">
@@ -33,7 +37,7 @@ const navItems = [
 					navItems.map((item) => (
 						<a
 							href={item.href}
-							class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+							class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
 						>
 							{item.label}
 						</a>
@@ -41,13 +45,23 @@ const navItems = [
 				}
 			</nav>
 
-			<div class="flex items-center gap-3">
-				<LanguageSwitcher lang={lang} />
+			<div class="flex items-center gap-2 sm:gap-3">
+				<ThemeToggle
+					client:idle
+					labels={{ light: t('theme.light'), dark: t('theme.dark') }}
+				/>
+				<LanguageSwitcher
+					client:idle
+					current={lang}
+					currentLabel={languages[lang]}
+					options={langOptions}
+					hrefs={langHrefs}
+				/>
 				<Button
 					href={DEMO_APK_URL}
 					download={DEMO_APK_FILENAME}
 					variant="primary"
-					size="md"
+					size="sm"
 				>
 					{t('nav.getStarted')}
 				</Button>
