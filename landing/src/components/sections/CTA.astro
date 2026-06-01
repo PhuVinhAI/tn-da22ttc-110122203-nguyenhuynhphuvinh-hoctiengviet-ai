@@ -20,16 +20,16 @@ const t = useTranslations(lang);
 	<!-- Rotating decorative orbit -->
 	<div
 		aria-hidden="true"
-		class="absolute -right-40 -top-32 size-[42rem] text-background/15 pointer-events-none"
+		class="hidden sm:block absolute -right-40 -top-32 size-[42rem] text-background/15 pointer-events-none"
 		data-rotate-on-scroll="180"
 	>
 		<OrbitDecor class="size-full" />
 	</div>
 
-	<!-- Floating decorative marks -->
+	<!-- Floating decorative marks (md+ only to avoid clutter on phones) -->
 	<div
 		aria-hidden="true"
-		class="absolute left-[10%] top-[20%] size-12 text-primary"
+		class="hidden md:block absolute left-[10%] top-[20%] size-12 text-primary"
 		data-float
 		data-float-duration="5"
 	>
@@ -37,7 +37,7 @@ const t = useTranslations(lang);
 	</div>
 	<div
 		aria-hidden="true"
-		class="absolute right-[8%] bottom-[28%] size-9 text-background/30"
+		class="hidden md:block absolute right-[8%] bottom-[28%] size-9 text-background/30"
 		data-float
 		data-float-duration="6"
 	>
@@ -60,7 +60,7 @@ const t = useTranslations(lang);
 			</h2>
 
 			<!-- Subtitle + CTAs row -->
-			<div class="mt-12 md:mt-20 grid md:grid-cols-12 gap-8 md:gap-12 items-end">
+			<div class="mt-10 sm:mt-12 md:mt-20 grid md:grid-cols-12 gap-6 sm:gap-8 md:gap-12 items-end">
 				<p
 					class="md:col-span-6 lg:col-span-5 text-base md:text-lg text-background/75 leading-[1.6] max-w-md"
 					data-reveal="up"

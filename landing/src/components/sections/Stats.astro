@@ -52,16 +52,16 @@ const stats = [
 <section class="border-b border-border bg-card relative">
 	<Container size="xl">
 		<div
-			class="py-14 md:py-20 grid md:grid-cols-12 gap-x-6 gap-y-12 md:gap-y-0 divide-y md:divide-y-0 divide-border"
+			class="py-10 sm:py-14 md:py-20 grid md:grid-cols-12 gap-x-6 gap-y-10 sm:gap-y-12 md:gap-y-0 divide-y md:divide-y-0 divide-border"
 		>
 			{
 				stats.map((s, i) => (
 					<article
-						class={`${s.span} ${i > 0 ? 'md:border-l md:border-border md:pl-6' : ''} pt-12 md:pt-0`}
+						class={`${s.span} ${i > 0 ? 'md:border-l md:border-border md:pl-6' : ''} pt-10 sm:pt-12 md:pt-0`}
 						data-reveal="up"
 						data-reveal-delay={`${i * 0.08}`}
 					>
-						<div class="flex items-baseline justify-between mb-6 md:mb-10">
+						<div class="flex items-baseline justify-between mb-5 sm:mb-6 md:mb-10">
 							<span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground num-tabular">
 								{s.idx}
 							</span>
@@ -72,7 +72,7 @@ const stats = [
 
 						<div class="font-bold tracking-tight num-tabular leading-none">
 							{s.isCount ? (
-								<span class="block text-6xl md:text-7xl lg:text-8xl whitespace-nowrap">
+								<span class="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl whitespace-nowrap">
 									<span
 										data-count={s.value}
 										data-count-suffix={s.suffix}
@@ -81,7 +81,7 @@ const stats = [
 									</span>
 								</span>
 							) : (
-								<span class="block text-6xl md:text-7xl lg:text-8xl text-primary whitespace-nowrap">
+								<span class="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-primary whitespace-nowrap">
 									{s.text}
 								</span>
 							)}

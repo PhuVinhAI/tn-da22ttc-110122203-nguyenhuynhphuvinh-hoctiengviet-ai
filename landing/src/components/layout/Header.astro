@@ -26,9 +26,9 @@ const langOptions = localeOrder.map((code) => ({ code, label: languages[code] })
 const langHrefs = Object.fromEntries(localeOrder.map((code) => [code, localizedPath(code)]));
 ---
 
-<header class="fixed top-4 md:top-6 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
+<header class="fixed top-3 md:top-6 inset-x-0 z-50 flex justify-center px-3 sm:px-4 pointer-events-none">
 	<div
-		class="pointer-events-auto inline-flex items-center gap-1 md:gap-2 rounded-full border border-border bg-background/75 backdrop-blur-xl pl-3 pr-1.5 md:pl-5 md:pr-2 py-1.5 md:py-2 max-w-[calc(100vw-2rem)]"
+		class="pointer-events-auto inline-flex items-center gap-1 md:gap-2 rounded-full border border-border bg-background/75 backdrop-blur-xl pl-2.5 pr-1.5 md:pl-5 md:pr-2 py-1.5 md:py-2 max-w-[calc(100vw-1.5rem)]"
 		data-reveal="down"
 		data-reveal-trigger="load"
 	>

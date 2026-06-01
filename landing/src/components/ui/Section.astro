@@ -10,6 +10,6 @@ const { id, class: className = '', bordered = false } = Astro.props;
 const borderClass = bordered ? 'border-b border-border' : '';
 ---
 
-<section id={id} class={`py-20 md:py-28 ${borderClass} ${className}`}>
+<section id={id} class={`py-14 sm:py-20 md:py-28 ${borderClass} ${className}`}>
 	<slot />
 </section>

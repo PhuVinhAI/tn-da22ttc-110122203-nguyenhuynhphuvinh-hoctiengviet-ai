@@ -79,7 +79,7 @@ const features = [
 <Section id="features" bordered class="bg-card">
 	<Container size="xl">
 		<!-- editorial section header -->
-		<div class="grid md:grid-cols-12 gap-8 mb-16 md:mb-20 items-end">
+		<div class="grid md:grid-cols-12 gap-6 sm:gap-8 mb-12 sm:mb-16 md:mb-20 items-end">
 			<div class="md:col-span-7" data-reveal="up">
 				<div class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
 					/ {t('feat.eyebrow')} — chapter 03
@@ -109,7 +109,7 @@ const features = [
 						data-reveal="up"
 						data-reveal-delay={`${i * 0.06}`}
 					>
-						<div class={`h-full flex flex-col p-6 md:p-8 ${f.featured ? 'md:p-10 min-h-[26rem]' : 'min-h-[22rem]'}`}>
+						<div class={`h-full flex flex-col p-5 sm:p-6 md:p-8 ${f.featured ? 'md:p-10 min-h-[20rem] sm:min-h-[24rem] md:min-h-[26rem]' : 'min-h-[18rem] sm:min-h-[20rem] md:min-h-[22rem]'}`}>
 							<!-- Top meta row -->
 							<div class="flex items-baseline justify-between">
 								<div class="flex items-center gap-3">
