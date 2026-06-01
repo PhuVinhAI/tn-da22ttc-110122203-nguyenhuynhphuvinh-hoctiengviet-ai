@@ -1,0 +1,57 @@
+---
+import Container from '../ui/Container.astro';
+import Button from '../ui/Button.astro';
+import Logo from '../ui/Logo.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { type Lang, defaultLang } from '../../i18n/config';
+import { localizedPath, useTranslations } from '../../i18n/utils';
+import { DEMO_APK_URL, DEMO_APK_FILENAME } from '../../config';
+
+interface Props {
+	lang?: Lang;
+}
+
+const { lang = defaultLang } = Astro.props;
+const t = useTranslations(lang);
+const base = localizedPath(lang);
+
+const navItems = [
+	{ label: t('nav.features'), href: `${base}#features` },
+	{ label: t('nav.howItWorks'), href: `${base}#how-it-works` },
+	{ label: t('nav.pricing'), href: `${base}#pricing` },
+	{ label: t('nav.faq'), href: `${base}#faq` },
+];
+---
+
+<header class="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur">
+	<Container size="xl">
+		<div class="flex h-16 items-center justify-between gap-6">
+			<Logo href={base} size="md" />
+
+			<nav class="hidden md:flex items-center gap-7">
+				{
+					navItems.map((item) => (
+						<a
+							href={item.href}
+							class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+						>
+							{item.label}
+						</a>
+					))
+				}
+			</nav>
+
+			<div class="flex items-center gap-3">
+				<LanguageSwitcher lang={lang} />
+				<Button
+					href={DEMO_APK_URL}
+					download={DEMO_APK_FILENAME}
+					variant="primary"
+					size="md"
+				>
+					{t('nav.getStarted')}
+				</Button>
+			</div>
+		</div>
+	</Container>
+</header>

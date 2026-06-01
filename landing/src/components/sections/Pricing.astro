@@ -1,0 +1,90 @@
+---
+import { Icon } from 'astro-icon/components';
+import Container from '../ui/Container.astro';
+import Section from '../ui/Section.astro';
+import Button from '../ui/Button.astro';
+import { defaultLang, type Lang } from '../../i18n/config';
+import { useTranslations } from '../../i18n/utils';
+import { DEMO_APK_URL, DEMO_APK_FILENAME } from '../../config';
+
+interface Props {
+	lang?: Lang;
+}
+
+const { lang = defaultLang } = Astro.props;
+const t = useTranslations(lang);
+
+const features = [
+	t('pricing.demoF1'),
+	t('pricing.demoF2'),
+	t('pricing.demoF3'),
+	t('pricing.demoF4'),
+	t('pricing.demoF5'),
+	t('pricing.demoF6'),
+];
+---
+
+<Section id="pricing" bordered>
+	<Container size="md">
+		<div class="text-center mb-12 space-y-4">
+			<div class="text-sm font-medium text-primary">{t('pricing.eyebrow')}</div>
+			<h2 class="text-4xl md:text-5xl font-bold tracking-tight">
+				{t('pricing.title')}
+			</h2>
+			<p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+				{t('pricing.subtitle')}
+			</p>
+		</div>
+
+		<div class="relative mx-auto max-w-xl rounded-2xl border border-primary ring-1 ring-primary bg-background p-8 md:p-10">
+			<div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium">
+				{t('pricing.demoBadge')}
+			</div>
+
+			<div class="text-center space-y-1">
+				<div class="text-lg font-semibold">{t('pricing.demoName')}</div>
+				<div class="text-sm text-muted-foreground max-w-sm mx-auto">
+					{t('pricing.demoDesc')}
+				</div>
+			</div>
+
+			<div class="mt-8 text-center">
+				<div class="inline-flex items-baseline gap-1.5">
+					<span class="text-6xl font-bold tracking-tight text-primary">
+						{t('pricing.demoPrice')}
+					</span>
+				</div>
+			</div>
+
+			<ul class="mt-10 space-y-3.5">
+				{
+					features.map((f) => (
+						<li class="flex items-start gap-3 text-sm">
+							<Icon
+								name="lucide:check"
+								class="size-5 mt-0.5 text-primary shrink-0"
+							/>
+							<span class="text-foreground/90">{f}</span>
+						</li>
+					))
+				}
+			</ul>
+
+			<div class="mt-10 flex flex-col items-center gap-3">
+				<Button
+					href={DEMO_APK_URL}
+					download={DEMO_APK_FILENAME}
+					variant="primary"
+					size="lg"
+					class="w-full"
+				>
+					<Icon name="lucide:download" class="size-5 mr-2" />
+					{t('pricing.demoCta')}
+				</Button>
+				<p class="text-xs text-muted-foreground text-center">
+					{t('pricing.demoNote')}
+				</p>
+			</div>
+		</div>
+	</Container>
+</Section>

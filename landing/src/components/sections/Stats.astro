@@ -1,0 +1,37 @@
+---
+import Container from '../ui/Container.astro';
+import Section from '../ui/Section.astro';
+import { defaultLang, type Lang } from '../../i18n/config';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props {
+	lang?: Lang;
+}
+
+const { lang = defaultLang } = Astro.props;
+const t = useTranslations(lang);
+
+const stats = [
+	{ value: '500+', label: t('stats.lessons') },
+	{ value: 'A1–C2', label: t('stats.levels') },
+	{ value: '9', label: t('stats.languages') },
+	{ value: '3', label: t('stats.dialects') },
+];
+---
+
+<Section bordered class="py-14 md:py-16">
+	<Container size="xl">
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-border border border-border rounded-xl overflow-hidden">
+			{
+				stats.map((s) => (
+					<div class="bg-background p-8 text-center">
+						<div class="text-3xl md:text-4xl font-bold tracking-tight text-primary">
+							{s.value}
+						</div>
+						<div class="mt-2 text-sm text-muted-foreground">{s.label}</div>
+					</div>
+				))
+			}
+		</div>
+	</Container>
+</Section>

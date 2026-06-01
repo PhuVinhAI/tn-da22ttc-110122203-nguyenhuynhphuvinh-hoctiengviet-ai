@@ -1,0 +1,43 @@
+---
+interface Props {
+	href?: string;
+	variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+	size?: 'md' | 'lg';
+	class?: string;
+	download?: string | boolean;
+}
+
+const {
+	href,
+	variant = 'primary',
+	size = 'md',
+	class: className = '',
+	download,
+} = Astro.props;
+
+const base =
+	'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+
+const variants = {
+	primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+	secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
+	outline:
+		'border border-border bg-transparent text-foreground hover:bg-muted',
+	ghost: 'bg-transparent text-foreground hover:bg-muted',
+};
+
+const sizes = {
+	md: 'h-11 px-5 rounded-lg text-sm',
+	lg: 'h-13 px-7 rounded-lg text-base',
+};
+
+const classes = `${base} ${variants[variant]} ${sizes[size]} ${className}`;
+
+const Tag = href ? 'a' : 'button';
+const downloadAttr =
+	typeof download === 'string' ? download : download ? '' : undefined;
+---
+
+<Tag class={classes} href={href} download={downloadAttr}>
+	<slot />
+</Tag>

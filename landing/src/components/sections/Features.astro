@@ -1,0 +1,53 @@
+---
+import { Icon } from 'astro-icon/components';
+import Container from '../ui/Container.astro';
+import Section from '../ui/Section.astro';
+import { defaultLang, type Lang } from '../../i18n/config';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props {
+	lang?: Lang;
+}
+
+const { lang = defaultLang } = Astro.props;
+const t = useTranslations(lang);
+
+const features = [
+	{ icon: 'lucide:graduation-cap', title: t('feat.f1Title'), description: t('feat.f1Desc') },
+	{ icon: 'lucide:book-open-text', title: t('feat.f2Title'), description: t('feat.f2Desc') },
+	{ icon: 'lucide:languages', title: t('feat.f3Title'), description: t('feat.f3Desc') },
+	{ icon: 'lucide:list-checks', title: t('feat.f4Title'), description: t('feat.f4Desc') },
+	{ icon: 'lucide:message-circle', title: t('feat.f5Title'), description: t('feat.f5Desc') },
+	{ icon: 'lucide:flame', title: t('feat.f6Title'), description: t('feat.f6Desc') },
+];
+---
+
+<Section id="features" bordered>
+	<Container size="xl">
+		<div class="text-center mb-16 space-y-4">
+			<div class="text-sm font-medium text-primary">{t('feat.eyebrow')}</div>
+			<h2 class="text-4xl md:text-5xl font-bold tracking-tight">
+				{t('feat.title')}
+			</h2>
+			<p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+				{t('feat.subtitle')}
+			</p>
+		</div>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border border border-border rounded-xl overflow-hidden">
+			{
+				features.map((f) => (
+					<div class="bg-background p-8 space-y-3">
+						<div class="size-11 rounded-lg bg-primary/10 flex items-center justify-center">
+							<Icon name={f.icon} class="size-5 text-primary" />
+						</div>
+						<h3 class="text-lg font-semibold">{f.title}</h3>
+						<p class="text-sm text-muted-foreground leading-relaxed">
+							{f.description}
+						</p>
+					</div>
+				))
+			}
+		</div>
+	</Container>
+</Section>

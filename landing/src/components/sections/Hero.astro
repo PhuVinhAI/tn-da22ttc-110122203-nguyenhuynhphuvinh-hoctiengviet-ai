@@ -1,0 +1,59 @@
+---
+import Container from '../ui/Container.astro';
+import Button from '../ui/Button.astro';
+import Section from '../ui/Section.astro';
+import { defaultLang, type Lang } from '../../i18n/config';
+import { useTranslations } from '../../i18n/utils';
+import { DEMO_APK_URL, DEMO_APK_FILENAME } from '../../config';
+
+interface Props {
+	lang?: Lang;
+}
+
+const { lang = defaultLang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<Section id="hero" bordered>
+	<Container size="lg">
+		<div class="text-center space-y-8">
+			<img
+				src="/icon.svg"
+				alt="LinVNix"
+				width="80"
+				height="80"
+				class="mx-auto size-20"
+			/>
+
+			<div
+				class="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-4 py-1.5 text-xs font-medium text-muted-foreground"
+			>
+				<span class="size-1.5 rounded-full bg-primary"></span>
+				{t('hero.badge')}
+			</div>
+
+			<h1 class="text-5xl md:text-6xl font-bold tracking-tight leading-tight">
+				{t('hero.title1')}<br />
+				<span class="text-primary">{t('hero.title2')}</span>
+			</h1>
+
+			<p class="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+				{t('hero.subtitle')}
+			</p>
+
+			<div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+				<Button
+					href={DEMO_APK_URL}
+					download={DEMO_APK_FILENAME}
+					variant="primary"
+					size="lg"
+				>
+					{t('hero.ctaPrimary')}
+				</Button>
+				<Button href="#how-it-works" variant="outline" size="lg">
+					{t('hero.ctaSecondary')}
+				</Button>
+			</div>
+		</div>
+	</Container>
+</Section>

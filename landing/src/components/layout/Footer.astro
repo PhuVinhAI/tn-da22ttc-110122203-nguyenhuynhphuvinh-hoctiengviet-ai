@@ -1,0 +1,81 @@
+---
+import Container from '../ui/Container.astro';
+import Logo from '../ui/Logo.astro';
+import { defaultLang, type Lang } from '../../i18n/config';
+import { localizedPath, useTranslations } from '../../i18n/utils';
+
+interface Props {
+	lang?: Lang;
+}
+
+const { lang = defaultLang } = Astro.props;
+const t = useTranslations(lang);
+const base = localizedPath(lang);
+const year = 2026;
+
+const columns = [
+	{
+		title: t('footer.product'),
+		links: [
+			{ label: t('nav.features'), href: `${base}#features` },
+			{ label: t('nav.pricing'), href: `${base}#pricing` },
+			{ label: t('nav.howItWorks'), href: `${base}#how-it-works` },
+		],
+	},
+	{
+		title: t('footer.company'),
+		links: [
+			{ label: t('footer.about'), href: '/about' },
+			{ label: t('footer.contact'), href: '/contact' },
+			{ label: t('footer.careers'), href: '/careers' },
+		],
+	},
+	{
+		title: t('footer.legal'),
+		links: [
+			{ label: t('footer.terms'), href: '/terms' },
+			{ label: t('footer.privacy'), href: '/privacy' },
+		],
+	},
+];
+---
+
+<footer class="border-t border-border bg-background">
+	<Container size="xl">
+		<div class="py-16 grid grid-cols-2 md:grid-cols-4 gap-10">
+			<div class="col-span-2 md:col-span-1">
+				<Logo size="md" />
+				<p class="mt-4 text-sm text-muted-foreground max-w-xs leading-relaxed">
+					{t('footer.tagline')}
+				</p>
+			</div>
+
+			{
+				columns.map((col) => (
+					<div>
+						<div class="text-sm font-semibold">{col.title}</div>
+						<ul class="mt-4 space-y-3">
+							{col.links.map((link) => (
+								<li>
+									<a
+										href={link.href}
+										class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+									>
+										{link.label}
+									</a>
+								</li>
+							))}
+						</ul>
+					</div>
+				))
+			}
+		</div>
+
+		<div class="py-6 border-t border-border flex flex-col md:flex-row items-center justify-between gap-3">
+			<div class="text-xs text-muted-foreground">
+				© {year} LinVNix. {t('footer.copyright')}
+			</div>
+			<div class="text-xs text-muted-foreground">{t('footer.madeIn')}</div>
+		</div>
+	</Container>
+</footer>

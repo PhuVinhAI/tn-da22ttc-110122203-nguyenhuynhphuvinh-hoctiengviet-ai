@@ -1,0 +1,53 @@
+---
+import { Icon } from 'astro-icon/components';
+import Container from '../ui/Container.astro';
+import Section from '../ui/Section.astro';
+import { defaultLang, type Lang } from '../../i18n/config';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props {
+	lang?: Lang;
+}
+
+const { lang = defaultLang } = Astro.props;
+const t = useTranslations(lang);
+
+const steps = [
+	{ n: '01', icon: 'lucide:gauge', title: t('how.s1Title'), desc: t('how.s1Desc') },
+	{ n: '02', icon: 'lucide:sparkles', title: t('how.s2Title'), desc: t('how.s2Desc') },
+	{ n: '03', icon: 'lucide:trending-up', title: t('how.s3Title'), desc: t('how.s3Desc') },
+];
+---
+
+<Section id="how-it-works" bordered>
+	<Container size="xl">
+		<div class="text-center mb-16 space-y-4">
+			<div class="text-sm font-medium text-primary">{t('how.eyebrow')}</div>
+			<h2 class="text-4xl md:text-5xl font-bold tracking-tight">
+				{t('how.title')}
+			</h2>
+			<p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+				{t('how.subtitle')}
+			</p>
+		</div>
+
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-border border border-border rounded-xl overflow-hidden">
+			{
+				steps.map((s) => (
+					<div class="bg-background p-8 space-y-4">
+						<div class="flex items-center justify-between">
+							<div class="size-11 rounded-lg bg-primary/10 flex items-center justify-center">
+								<Icon name={s.icon} class="size-5 text-primary" />
+							</div>
+							<div class="text-sm font-mono font-semibold text-muted-foreground">
+								{s.n}
+							</div>
+						</div>
+						<h3 class="text-xl font-semibold">{s.title}</h3>
+						<p class="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+					</div>
+				))
+			}
+		</div>
+	</Container>
+</Section>

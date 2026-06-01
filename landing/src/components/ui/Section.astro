@@ -1,0 +1,15 @@
+---
+interface Props {
+	id?: string;
+	class?: string;
+	bordered?: boolean;
+}
+
+const { id, class: className = '', bordered = false } = Astro.props;
+
+const borderClass = bordered ? 'border-b border-border' : '';
+---
+
+<section id={id} class={`py-20 md:py-28 ${borderClass} ${className}`}>
+	<slot />
+</section>
