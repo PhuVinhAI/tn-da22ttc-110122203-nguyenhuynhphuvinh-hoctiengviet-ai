@@ -1,7 +1,7 @@
 name: linvnix
 description: "Vietnamese language learning mobile app"
 publish_to: 'none'
-version: 0.0.30052026+30052026
+version: 0.0.3062026+3062026
 
 environment:
   sdk: ^3.11.1

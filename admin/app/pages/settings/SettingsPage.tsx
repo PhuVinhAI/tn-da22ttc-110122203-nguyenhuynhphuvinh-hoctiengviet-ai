@@ -140,7 +140,7 @@ export function SettingsPage() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <InfoCard icon={Cpu} label="Phiên bản ứng dụng" value="1.0.0" />
+          <InfoCard icon={Cpu} label="Phiên bản ứng dụng" value="0.0.03062026" />
           <InfoCard icon={Globe} label="Phiên bản API" value="v1" />
           <InfoCard
             icon={Calendar}

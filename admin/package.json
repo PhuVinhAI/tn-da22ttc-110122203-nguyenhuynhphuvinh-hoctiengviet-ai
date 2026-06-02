@@ -1,6 +1,6 @@
 {
   "name": "linvnix-admin",
-  "version": "1.0.0",
+  "version": "0.0.03062026",
   "description": "LinVNix Admin Panel - Universal app chạy được cả Web và Desktop (Electron)",
   "main": "./out/main/main.js",
   "license": "MIT",

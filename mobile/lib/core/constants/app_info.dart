@@ -3,5 +3,5 @@
 library;
 
 const String appName = 'LinVNix';
-const String appVersion = '0.0.30052026';
+const String appVersion = '0.0.03062026';
 const String appTagline = 'Learn Vietnamese, your way';
