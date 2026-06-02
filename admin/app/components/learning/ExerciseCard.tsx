@@ -379,28 +379,30 @@ function FillBlankBody({ exercise, meta }: { exercise: Exercise; meta: TypeMeta 
 function MatchingBody({ exercise, meta }: { exercise: Exercise; meta: TypeMeta }) {
   const opts = exercise.options as { pairs?: Array<{ left?: string; right?: string }> } | null | undefined
   const pairs = Array.isArray(opts?.pairs) ? opts.pairs : []
-  const visible = pairs.slice(0, 2)
+  const first = pairs[0]
   return (
     <>
-      <Row label="Cặp ghép">
-        {pairs.length === 0 ? (
-          <span className="italic text-muted-foreground">Chưa có cặp</span>
+      <Row label="Vế trái">
+        {first ? (
+          <span className="line-clamp-1">{first.left || '—'}</span>
         ) : (
-          <div className="space-y-1">
-            {visible.map((p, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm">
-                <span className="flex-1 truncate text-foreground">{p.left || '—'}</span>
-                <ArrowRight className={`h-3.5 w-3.5 shrink-0 ${meta.text}`} />
-                <span className="flex-1 truncate text-right text-foreground">{p.right || '—'}</span>
-              </div>
-            ))}
-          </div>
+          <span className="italic text-muted-foreground">Chưa có cặp</span>
         )}
       </Row>
-      <MutedRow label="Tổng">
-        <span className="font-semibold text-foreground">{pairs.length}</span>
-        {pairs.length > visible.length && ` cặp · còn ${pairs.length - visible.length} cặp khác`}
-        {pairs.length <= visible.length && ' cặp'}
+      <MutedRow label="Vế phải">
+        {first ? (
+          <span className="inline-flex items-center gap-1.5 max-w-full">
+            <ArrowRight className={`h-3.5 w-3.5 shrink-0 ${meta.text}`} />
+            <span className="text-foreground font-semibold truncate">{first.right || '—'}</span>
+            {pairs.length > 1 && (
+              <span className="text-xs text-muted-foreground/70 shrink-0 ml-auto">
+                +{pairs.length - 1} cặp
+              </span>
+            )}
+          </span>
+        ) : (
+          <span className="italic">—</span>
+        )}
       </MutedRow>
     </>
   )

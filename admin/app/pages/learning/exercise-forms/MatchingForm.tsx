@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Trash2, Link2 } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { InlineEditable } from '../../../components/admin/InlineEditable'
 import type { ExerciseFormProps } from './types'
 import { getCorrectAnswerObject, getOptionsObject } from './types'
@@ -78,25 +78,18 @@ export function MatchingForm({ initial, onChange }: ExerciseFormProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-2">
-          <Link2 className="h-3.5 w-3.5" />
+        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           Các cặp ghép
         </p>
         <p className="text-xs text-muted-foreground">
-          Mobile sẽ xáo trộn vế phải khi học viên làm bài
+          Mobile sẽ tự xáo vế phải khi học viên làm bài
         </p>
-      </div>
-
-      <div className="grid grid-cols-[1fr_auto_1fr] gap-3 px-2 pb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-        <span>Vế trái</span>
-        <span aria-hidden></span>
-        <span>Vế phải</span>
       </div>
 
       <div className="space-y-2.5">
         {state.pairs.map((pair, i) => (
           <div key={i} className="group flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground tabular-nums">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-950/40 text-sm font-bold text-purple-700 dark:text-purple-300 tabular-nums">
               {i + 1}
             </span>
             <div className="flex-1 grid grid-cols-[1fr_auto_1fr] gap-3 items-center rounded-2xl border-2 border-border bg-card px-5 py-3.5 min-h-[64px]">

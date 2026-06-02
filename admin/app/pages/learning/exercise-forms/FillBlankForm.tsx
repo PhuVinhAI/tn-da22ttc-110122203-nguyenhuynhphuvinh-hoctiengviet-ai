@@ -1,31 +1,33 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Plus, Trash2, X } from 'lucide-react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Plus, X, Trash2 } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
-import { InlineEditable } from '../../../components/admin/InlineEditable'
 import type { ExerciseFormProps } from './types'
 import { getOptionsObject } from './types'
 
 type Part =
-  | { kind: 'text'; value: string }
-  | { kind: 'blank'; answers: string[] }
+  | { id: string; kind: 'text'; value: string }
+  | { id: string; kind: 'blank'; answers: string[] }
 
 interface DraftState {
   parts: Part[]
 }
 
 const BLANK_MARKER = /_{3,}/g
+let nextId = 1
+const genId = () => `p-${nextId++}`
 
 function partsFromSentence(sentence: string, accepted: string[][]): Part[] {
-  if (!sentence) return [{ kind: 'text', value: '' }]
+  if (!sentence) return [{ id: genId(), kind: 'text', value: '' }]
   const parts: Part[] = []
   let cursor = 0
   let blankIndex = 0
   for (const match of sentence.matchAll(BLANK_MARKER)) {
     if (match.index === undefined) continue
     if (match.index > cursor) {
-      parts.push({ kind: 'text', value: sentence.slice(cursor, match.index) })
+      parts.push({ id: genId(), kind: 'text', value: sentence.slice(cursor, match.index) })
     }
     parts.push({
+      id: genId(),
       kind: 'blank',
       answers: accepted[blankIndex] ?? [''],
     })
@@ -33,15 +35,13 @@ function partsFromSentence(sentence: string, accepted: string[][]): Part[] {
     blankIndex++
   }
   if (cursor < sentence.length) {
-    parts.push({ kind: 'text', value: sentence.slice(cursor) })
+    parts.push({ id: genId(), kind: 'text', value: sentence.slice(cursor) })
   }
-  // Normalise: ensure first and last are text segments so the user can always
-  // type at either end of the sentence.
   if (parts.length === 0 || parts[0].kind === 'blank') {
-    parts.unshift({ kind: 'text', value: '' })
+    parts.unshift({ id: genId(), kind: 'text', value: '' })
   }
   if (parts[parts.length - 1].kind === 'blank') {
-    parts.push({ kind: 'text', value: '' })
+    parts.push({ id: genId(), kind: 'text', value: '' })
   }
   return parts
 }
@@ -59,6 +59,8 @@ function initialFromProps(initial: ExerciseFormProps['initial']): DraftState {
 
 export function FillBlankForm({ initial, onChange }: ExerciseFormProps) {
   const [state, setState] = useState<DraftState>(() => initialFromProps(initial))
+  const [activeTextId, setActiveTextId] = useState<string | null>(null)
+  const activeCursorRef = useRef<number | null>(null)
 
   useEffect(() => {
     setState(initialFromProps(initial))
@@ -90,7 +92,7 @@ export function FillBlankForm({ initial, onChange }: ExerciseFormProps) {
 
   const validate = () => {
     const sentence = payload.options.sentence.trim()
-    if (!sentence) return 'Hãy nhập câu có chỗ trống'
+    if (!sentence && blanks.length === 0) return 'Hãy nhập câu có chỗ trống'
     if (blanks.length === 0) return 'Cần ít nhất 1 chỗ trống'
     if (blanks.some((b) => !b.answers.some((a) => a.trim())))
       return 'Mỗi chỗ trống cần ít nhất 1 đáp án'
@@ -102,50 +104,76 @@ export function FillBlankForm({ initial, onChange }: ExerciseFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payload])
 
-  const setTextAt = (i: number, value: string) =>
-    setState((prev) => {
-      const next = [...prev.parts]
-      next[i] = { kind: 'text', value }
-      return { parts: next }
-    })
+  const setTextAt = (id: string, value: string) =>
+    setState((prev) => ({
+      parts: prev.parts.map((p) =>
+        p.id === id && p.kind === 'text' ? { ...p, value } : p,
+      ),
+    }))
 
-  const setBlankAnswersAt = (i: number, answers: string[]) =>
-    setState((prev) => {
-      const next = [...prev.parts]
-      next[i] = { kind: 'blank', answers: answers.length ? answers : [''] }
-      return { parts: next }
-    })
+  const setBlankAnswers = (id: string, answers: string[]) =>
+    setState((prev) => ({
+      parts: prev.parts.map((p) =>
+        p.id === id && p.kind === 'blank'
+          ? { ...p, answers: answers.length ? answers : [''] }
+          : p,
+      ),
+    }))
 
-  const removeBlankAt = (i: number) =>
+  const removeBlank = (id: string) =>
     setState((prev) => {
-      const next = [...prev.parts]
-      // Replace blank with empty text, then merge adjacent text segments.
-      next[i] = { kind: 'text', value: '' }
+      const next = prev.parts.filter((p) => p.id !== id)
+      // Merge adjacent text segments
       const merged: Part[] = []
       for (const part of next) {
         const last = merged[merged.length - 1]
         if (last && last.kind === 'text' && part.kind === 'text') {
           merged[merged.length - 1] = {
-            kind: 'text',
+            ...last,
             value: last.value + part.value,
           }
         } else {
           merged.push(part)
         }
       }
-      return { parts: merged.length ? merged : [{ kind: 'text', value: '' }] }
+      if (merged.length === 0) merged.push({ id: genId(), kind: 'text', value: '' })
+      if (merged[0].kind === 'blank') merged.unshift({ id: genId(), kind: 'text', value: '' })
+      if (merged[merged.length - 1].kind === 'blank')
+        merged.push({ id: genId(), kind: 'text', value: '' })
+      return { parts: merged }
     })
 
-  const appendBlank = () =>
+  // Insert a blank at the cursor position of whatever text segment last had focus.
+  const insertBlank = () => {
     setState((prev) => {
-      const last = prev.parts[prev.parts.length - 1]
-      const needsLeadingText = !last || last.kind === 'blank'
-      const next: Part[] = [...prev.parts]
-      if (needsLeadingText) next.push({ kind: 'text', value: ' ' })
-      next.push({ kind: 'blank', answers: [''] })
-      next.push({ kind: 'text', value: ' ' })
+      const targetId = activeTextId ?? prev.parts[prev.parts.length - 1]?.id
+      const cursor = activeCursorRef.current
+      const idx = prev.parts.findIndex((p) => p.id === targetId)
+      if (idx < 0 || prev.parts[idx].kind !== 'text') {
+        // No active text — append at end
+        const last = prev.parts[prev.parts.length - 1]
+        const next: Part[] = [...prev.parts]
+        if (!last || last.kind === 'blank') {
+          next.push({ id: genId(), kind: 'text', value: ' ' })
+        }
+        next.push({ id: genId(), kind: 'blank', answers: [''] })
+        next.push({ id: genId(), kind: 'text', value: ' ' })
+        return { parts: next }
+      }
+      const target = prev.parts[idx] as Extract<Part, { kind: 'text' }>
+      const pos = cursor ?? target.value.length
+      const before = target.value.slice(0, pos)
+      const after = target.value.slice(pos)
+      const next: Part[] = [
+        ...prev.parts.slice(0, idx),
+        { id: genId(), kind: 'text', value: before },
+        { id: genId(), kind: 'blank', answers: [''] },
+        { id: genId(), kind: 'text', value: after },
+        ...prev.parts.slice(idx + 1),
+      ]
       return { parts: next }
     })
+  }
 
   return (
     <div className="space-y-4">
@@ -154,27 +182,32 @@ export function FillBlankForm({ initial, onChange }: ExerciseFormProps) {
           Câu có chỗ trống
         </p>
         <p className="text-xs text-muted-foreground">
-          Gõ câu thường rồi bấm <span className="font-bold">+ Thêm chỗ trống</span> để chèn ô đáp án
+          Gõ câu rồi bấm <span className="font-bold">+ Thêm chỗ trống</span> để chèn ô đáp án tại con trỏ
         </p>
       </div>
 
       <div className="rounded-2xl border-2 border-border bg-card px-5 py-5">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-3 text-2xl font-semibold leading-relaxed text-foreground">
-          {state.parts.map((part, i) =>
+        <div className="text-2xl font-semibold leading-relaxed text-foreground"
+             style={{ wordBreak: 'break-word' }}>
+          {state.parts.map((part, idx) =>
             part.kind === 'text' ? (
-              <TextSegment
-                key={`t-${i}`}
+              <FlowingText
+                key={part.id}
                 value={part.value}
-                onChange={(v) => setTextAt(i, v)}
-                placeholder={i === 0 ? 'Bắt đầu nhập câu...' : ''}
+                onChange={(v) => setTextAt(part.id, v)}
+                onFocus={() => setActiveTextId(part.id)}
+                onSelectionChange={(pos) => {
+                  activeCursorRef.current = pos
+                }}
+                placeholder={idx === 0 && part.value === '' ? 'Bắt đầu nhập câu...' : ''}
               />
             ) : (
-              <BlankChip
-                key={`b-${i}`}
-                index={blanks.findIndex((b) => b === part)}
+              <BlankInput
+                key={part.id}
+                index={blanks.findIndex((b) => b.id === part.id)}
                 answers={part.answers}
-                onChange={(a) => setBlankAnswersAt(i, a)}
-                onRemove={() => removeBlankAt(i)}
+                onChange={(a) => setBlankAnswers(part.id, a)}
+                onRemove={() => removeBlank(part.id)}
               />
             ),
           )}
@@ -183,39 +216,93 @@ export function FillBlankForm({ initial, onChange }: ExerciseFormProps) {
 
       <button
         type="button"
-        onClick={appendBlank}
+        onClick={insertBlank}
         className="w-full inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-transparent px-4 py-3 text-sm font-semibold text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
       >
         <Plus className="h-4 w-4" />
-        Thêm chỗ trống
+        Thêm chỗ trống tại con trỏ
       </button>
     </div>
   )
 }
 
-function TextSegment({
+/**
+ * Inline text input that visually behaves like flowing prose: no border, no
+ * background, auto-grows with its content.
+ *
+ * Width is measured via a hidden mirror span with the same font/size so the
+ * input is exactly as wide as the rendered text (no trailing padding). Using
+ * `ch` doesn't work for proportional fonts — Vietnamese text widths vary.
+ */
+function FlowingText({
   value,
   onChange,
+  onFocus,
+  onSelectionChange,
   placeholder,
 }: {
   value: string
   onChange: (v: string) => void
+  onFocus?: () => void
+  onSelectionChange?: (pos: number) => void
   placeholder?: string
 }) {
+  const ref = useRef<HTMLInputElement>(null)
+  const measureRef = useRef<HTMLSpanElement>(null)
+  const [width, setWidth] = useState<number>(20)
+
+  useLayoutEffect(() => {
+    if (measureRef.current) {
+      const w = measureRef.current.offsetWidth
+      // +2px so caret has room and last char isn't cropped
+      setWidth(Math.max(w + 2, 8))
+    }
+  }, [value, placeholder])
+
+  const measured = value.length > 0 ? value : placeholder ?? ''
+
   return (
-    <span className="min-w-[24px] inline-flex">
-      <InlineEditable
+    <>
+      <span
+        ref={measureRef}
+        aria-hidden
+        className="invisible absolute whitespace-pre text-2xl font-semibold leading-relaxed"
+        style={{ left: '-9999px', top: 0 }}
+      >
+        {measured}
+      </span>
+      <input
+        ref={ref}
         value={value}
-        onChange={onChange}
+        onChange={(e) => {
+          onChange(e.target.value)
+          onSelectionChange?.(e.target.selectionStart ?? e.target.value.length)
+        }}
+        onFocus={(e) => {
+          onFocus?.()
+          onSelectionChange?.(e.target.selectionStart ?? e.target.value.length)
+        }}
+        onSelect={(e) => {
+          const el = e.target as HTMLInputElement
+          onSelectionChange?.(el.selectionStart ?? el.value.length)
+        }}
+        onKeyUp={(e) => {
+          const el = e.target as HTMLInputElement
+          onSelectionChange?.(el.selectionStart ?? el.value.length)
+        }}
         placeholder={placeholder}
-        multiline={false}
-        className="text-2xl font-semibold leading-relaxed"
+        style={{ width }}
+        className="inline bg-transparent border-none outline-none p-0 m-0 text-2xl font-semibold leading-relaxed text-foreground placeholder:text-muted-foreground/40 placeholder:italic"
       />
-    </span>
+    </>
   )
 }
 
-function BlankChip({
+/**
+ * Blank chip with an inline editable answer. Click the body to type the
+ * primary answer directly. Use the popover (+ icon) to add variants.
+ */
+function BlankInput({
   index,
   answers,
   onChange,
@@ -226,45 +313,77 @@ function BlankChip({
   onChange: (a: string[]) => void
   onRemove: () => void
 }) {
-  const display = answers[0]?.trim() || '___'
+  const primary = answers[0] ?? ''
+  const variants = answers.slice(1)
+  const measureRef = useRef<HTMLSpanElement>(null)
+  const [inputWidth, setInputWidth] = useState<number>(60)
+  useLayoutEffect(() => {
+    if (measureRef.current) {
+      setInputWidth(Math.max(measureRef.current.offsetWidth + 2, 60))
+    }
+  }, [primary])
+  const measured = primary.length > 0 ? primary : 'đáp án'
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1.5 text-base font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors"
-        >
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-[10px] font-bold tabular-nums">
-            {index + 1}
-          </span>
-          <span>{display}</span>
+    <span className="mx-0.5 inline-flex items-baseline gap-1.5 rounded-lg border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 pl-2 pr-1.5 py-0.5 align-baseline">
+      <span className="self-center flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-[11px] font-bold text-white tabular-nums">
+        {index + 1}
+      </span>
+      <span
+        ref={measureRef}
+        aria-hidden
+        className="invisible absolute whitespace-pre text-2xl font-bold leading-relaxed"
+        style={{ left: '-9999px', top: 0 }}
+      >
+        {measured}
+      </span>
+      <input
+        value={primary}
+        onChange={(e) => onChange([e.target.value, ...variants])}
+        placeholder="đáp án"
+        style={{ width: inputWidth }}
+        className="inline bg-transparent border-none outline-none p-0 m-0 text-2xl font-bold leading-relaxed text-emerald-700 dark:text-emerald-300 placeholder:text-emerald-700/50 dark:placeholder:text-emerald-300/50 placeholder:italic placeholder:font-semibold"
+      />
+      {variants.length > 0 && (
+        <span className="self-center text-xs font-bold text-emerald-700/70 dark:text-emerald-300/70">
+          +{variants.length}
+        </span>
+      )}
+      <Popover>
+        <PopoverTrigger asChild>
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              onRemove()
-            }}
-            className="ml-1 -mr-1 h-5 w-5 rounded-full text-emerald-700/60 hover:bg-emerald-700/10 hover:text-emerald-700 dark:text-emerald-300/70 dark:hover:bg-emerald-300/10 dark:hover:text-emerald-200"
-            aria-label="Xóa chỗ trống"
+            className="self-center h-6 w-6 rounded-full text-emerald-700/60 hover:bg-emerald-700/10 hover:text-emerald-700 dark:text-emerald-300/70 dark:hover:bg-emerald-300/10 dark:hover:text-emerald-200"
+            aria-label="Biến thể đáp án"
+            title="Thêm biến thể đáp án"
           >
-            <X className="h-3.5 w-3.5 mx-auto" />
+            <Plus className="h-3.5 w-3.5 mx-auto" />
           </button>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-72 p-3 space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Đáp án chấp nhận
-          </span>
-          <span className="text-xs text-muted-foreground">Chỗ trống #{index + 1}</span>
-        </div>
-        <AnswerEditor answers={answers} onChange={onChange} />
-      </PopoverContent>
-    </Popover>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-72 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Biến thể đáp án
+            </span>
+            <span className="text-xs text-muted-foreground">Chỗ trống #{index + 1}</span>
+          </div>
+          <VariantEditor answers={answers} onChange={onChange} />
+        </PopoverContent>
+      </Popover>
+      <button
+        type="button"
+        onClick={onRemove}
+        className="self-center h-6 w-6 rounded-full text-emerald-700/60 hover:bg-emerald-700/10 hover:text-emerald-700 dark:text-emerald-300/70 dark:hover:bg-emerald-300/10 dark:hover:text-emerald-200"
+        aria-label="Xóa chỗ trống"
+        title="Xóa chỗ trống"
+      >
+        <X className="h-3.5 w-3.5 mx-auto" />
+      </button>
+    </span>
   )
 }
 
-function AnswerEditor({
+function VariantEditor({
   answers,
   onChange,
 }: {
@@ -276,6 +395,9 @@ function AnswerEditor({
     <div className="space-y-1.5">
       {items.map((it, i) => (
         <div key={i} className="flex items-center gap-1.5">
+          <span className="text-[10px] font-bold text-muted-foreground w-12 shrink-0">
+            {i === 0 ? 'Chính' : `Biến thể ${i}`}
+          </span>
           <input
             value={it}
             onChange={(e) => {
@@ -283,15 +405,14 @@ function AnswerEditor({
               next[i] = e.target.value
               onChange(next)
             }}
-            placeholder={i === 0 ? 'Đáp án chính' : `Biến thể ${i + 1}`}
-            autoFocus={i === 0 && it === ''}
-            className="flex-1 rounded-lg border-2 border-input bg-card px-3 py-2 text-sm outline-none focus-visible:border-primary"
+            placeholder={i === 0 ? 'Đáp án chính' : `Biến thể ${i}`}
+            className="flex-1 rounded-lg border-2 border-input bg-card px-3 py-1.5 text-sm outline-none focus-visible:border-primary"
           />
-          {items.length > 1 && (
+          {items.length > 1 && i > 0 && (
             <button
               type="button"
               onClick={() => onChange(items.filter((_, idx) => idx !== i))}
-              className="h-8 w-8 rounded-md text-muted-foreground/60 hover:bg-destructive/10 hover:text-destructive transition-colors"
+              className="h-7 w-7 rounded-md text-muted-foreground/60 hover:bg-destructive/10 hover:text-destructive transition-colors"
               aria-label="Xóa biến thể"
             >
               <Trash2 className="h-3.5 w-3.5 mx-auto" />

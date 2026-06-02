@@ -1,13 +1,25 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Plus, Trash2, ArrowDown, Languages } from 'lucide-react'
 import type { ExerciseFormProps } from './types'
-import { LANGUAGE_OPTIONS, getOptionsObject } from './types'
+import { getOptionsObject } from './types'
 
 interface DraftState {
   sourceText: string
   sourceLanguage: string
   targetLanguage: string
   translations: string[]
+}
+
+function normaliseLang(value: string, fallback: string): string {
+  const map: Record<string, string> = {
+    vi: 'vi', vietnamese: 'vi',
+    en: 'en', english: 'en',
+    fr: 'fr', french: 'fr',
+    ja: 'ja', japanese: 'ja',
+    ko: 'ko', korean: 'ko',
+    zh: 'zh', chinese: 'zh',
+  }
+  return map[value.toLowerCase()] ?? fallback
 }
 
 function initialFromProps(initial: ExerciseFormProps['initial']): DraftState {
@@ -17,14 +29,13 @@ function initialFromProps(initial: ExerciseFormProps['initial']): DraftState {
     : []
   const correct = (initial?.correctAnswer ?? {}) as { translation?: unknown }
   const translation = typeof correct.translation === 'string' ? correct.translation : ''
-  // Make sure the canonical translation is the first entry
   const merged: string[] = []
   if (translation) merged.push(translation)
   for (const t of accepted) if (!merged.includes(t)) merged.push(t)
   return {
     sourceText: String(opts.sourceText ?? initial?.question ?? ''),
-    sourceLanguage: String(opts.sourceLanguage ?? 'en'),
-    targetLanguage: String(opts.targetLanguage ?? 'vi'),
+    sourceLanguage: normaliseLang(String(opts.sourceLanguage ?? 'en'), 'en'),
+    targetLanguage: normaliseLang(String(opts.targetLanguage ?? 'vi'), 'vi'),
     translations: merged.length ? merged : [''],
   }
 }
@@ -56,8 +67,6 @@ export function TranslationForm({ initial, onChange }: ExerciseFormProps) {
     if (!state.sourceText.trim()) return 'Hãy nhập văn bản cần dịch'
     const cleaned = state.translations.filter((t) => t.trim())
     if (cleaned.length === 0) return 'Cần ít nhất 1 bản dịch'
-    if (state.sourceLanguage === state.targetLanguage)
-      return 'Ngôn ngữ nguồn và đích phải khác nhau'
     return null
   }
 
@@ -80,26 +89,30 @@ export function TranslationForm({ initial, onChange }: ExerciseFormProps) {
         : { ...prev, translations: prev.translations.filter((_, idx) => idx !== i) },
     )
 
+  const srcBadge = state.sourceLanguage.toUpperCase()
+  const tgtBadge = state.targetLanguage.toUpperCase()
+
   return (
     <div className="space-y-6">
-      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-2">
-        <Languages className="h-3.5 w-3.5" />
-        Bài dịch thuật
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-2">
+          <Languages className="h-3.5 w-3.5" />
+          Dịch {srcBadge} → {tgtBadge}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Học viên dịch từ văn bản gốc sang bản dịch
+        </p>
+      </div>
 
-      {/* Source section */}
+      {/* Source */}
       <div className="rounded-2xl border-2 border-border bg-card overflow-hidden">
-        <div className="flex items-center justify-between gap-3 px-5 py-3 border-b-2 border-border bg-muted/30">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-              Văn bản gốc
-            </span>
-          </div>
-          <LanguagePicker
-            value={state.sourceLanguage}
-            onChange={(v) => setState((prev) => ({ ...prev, sourceLanguage: v }))}
-            ariaLabel="Ngôn ngữ nguồn"
-          />
+        <div className="flex items-center gap-2 px-5 py-2.5 border-b-2 border-border bg-muted/30">
+          <span className="rounded-md bg-amber-100 dark:bg-amber-950/40 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:text-amber-300">
+            {srcBadge}
+          </span>
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Văn bản gốc
+          </span>
         </div>
         <textarea
           value={state.sourceText}
@@ -112,35 +125,31 @@ export function TranslationForm({ initial, onChange }: ExerciseFormProps) {
         />
       </div>
 
-      {/* Direction indicator */}
+      {/* Arrow */}
       <div className="flex justify-center">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
           <ArrowDown className="h-5 w-5 text-muted-foreground" />
         </div>
       </div>
 
-      {/* Target section */}
+      {/* Target */}
       <div className="rounded-2xl border-2 border-border bg-card overflow-hidden">
-        <div className="flex items-center justify-between gap-3 px-5 py-3 border-b-2 border-border bg-muted/30">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              Bản dịch chấp nhận
-            </span>
-            <span className="text-xs text-muted-foreground">
-              · bản đầu tiên là đáp án chính
-            </span>
-          </div>
-          <LanguagePicker
-            value={state.targetLanguage}
-            onChange={(v) => setState((prev) => ({ ...prev, targetLanguage: v }))}
-            ariaLabel="Ngôn ngữ đích"
-          />
+        <div className="flex items-center gap-2 px-5 py-2.5 border-b-2 border-border bg-muted/30">
+          <span className="rounded-md bg-emerald-100 dark:bg-emerald-950/40 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+            {tgtBadge}
+          </span>
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Bản dịch chấp nhận
+          </span>
+          <span className="text-xs text-muted-foreground">
+            · bản đầu tiên là đáp án chính
+          </span>
         </div>
         <div className="p-4 space-y-2">
           {state.translations.map((t, i) => (
             <div
               key={i}
-              className={`group flex items-start gap-3 rounded-xl border-2 px-4 py-3 ${
+              className={`group flex items-center gap-3 rounded-xl border-2 px-4 min-h-[56px] ${
                 i === 0
                   ? 'border-emerald-500 bg-emerald-50/30 dark:bg-emerald-950/20'
                   : 'border-border'
@@ -155,12 +164,11 @@ export function TranslationForm({ initial, onChange }: ExerciseFormProps) {
               >
                 {i === 0 ? '★' : i + 1}
               </span>
-              <textarea
+              <input
                 value={t}
                 onChange={(e) => setTrans(i, e.target.value)}
-                rows={1}
                 placeholder={i === 0 ? 'Bản dịch chính...' : `Biến thể ${i}`}
-                className="flex-1 bg-transparent text-lg font-semibold leading-snug outline-none resize-none"
+                className="flex-1 bg-transparent text-lg font-semibold leading-snug outline-none py-3"
               />
               {state.translations.length > 1 && (
                 <button
@@ -190,30 +198,5 @@ export function TranslationForm({ initial, onChange }: ExerciseFormProps) {
         </div>
       </div>
     </div>
-  )
-}
-
-function LanguagePicker({
-  value,
-  onChange,
-  ariaLabel,
-}: {
-  value: string
-  onChange: (v: string) => void
-  ariaLabel: string
-}) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      aria-label={ariaLabel}
-      className="rounded-lg border-2 border-input bg-card px-3 py-1.5 text-sm font-semibold outline-none focus-visible:border-primary cursor-pointer"
-    >
-      {LANGUAGE_OPTIONS.map((l) => (
-        <option key={l.value} value={l.value}>
-          {l.label}
-        </option>
-      ))}
-    </select>
   )
 }

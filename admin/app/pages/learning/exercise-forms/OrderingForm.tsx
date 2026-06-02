@@ -1,12 +1,43 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Trash2, GripVertical } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
 import { InlineEditable } from '../../../components/admin/InlineEditable'
+import { SortableRow } from '../../../components/admin/shared/SortableRow'
+import { DragHandle } from '../../../components/admin/shared/DragHandle'
 import type { ExerciseFormProps } from './types'
 import { getCorrectAnswerObject, getOptionsObject } from './types'
 
+interface Item {
+  id: string
+  value: string
+}
+
 interface DraftState {
   question: string
-  items: string[]
+  items: Item[]
+}
+
+let nextLocalId = 1
+function genId() {
+  return `item-${nextLocalId++}`
+}
+
+function toItems(values: string[]): Item[] {
+  return values.map((v) => ({ id: genId(), value: v }))
 }
 
 function initialFromProps(initial: ExerciseFormProps['initial']): DraftState {
@@ -21,7 +52,7 @@ function initialFromProps(initial: ExerciseFormProps['initial']): DraftState {
   if (items.length === 0) items = ['', '']
   return {
     question: String(initial?.question ?? ''),
-    items,
+    items: toItems(items),
   }
 }
 
@@ -33,8 +64,13 @@ export function OrderingForm({ initial, onChange }: ExerciseFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initial?.id])
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
   const payload = useMemo(() => {
-    const items = state.items.filter(Boolean)
+    const items = state.items.map((it) => it.value).filter(Boolean)
     return {
       question: state.question,
       options: { type: 'ordering' as const, items },
@@ -44,7 +80,7 @@ export function OrderingForm({ initial, onChange }: ExerciseFormProps) {
 
   const validate = () => {
     if (!state.question.trim()) return 'Hãy nhập câu hỏi / hướng dẫn'
-    const items = state.items.filter(Boolean)
+    const items = state.items.map((it) => it.value).filter(Boolean)
     if (items.length < 2) return 'Cần ít nhất 2 mục để sắp xếp'
     return null
   }
@@ -54,27 +90,27 @@ export function OrderingForm({ initial, onChange }: ExerciseFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payload])
 
-  const setItem = (i: number, text: string) =>
-    setState((prev) => {
-      const next = [...prev.items]
-      next[i] = text
-      return { ...prev, items: next }
-    })
+  const setItem = (id: string, text: string) =>
+    setState((prev) => ({
+      ...prev,
+      items: prev.items.map((it) => (it.id === id ? { ...it, value: text } : it)),
+    }))
 
-  const remove = (i: number) =>
+  const remove = (id: string) =>
     setState((prev) =>
       prev.items.length <= 2
         ? prev
-        : { ...prev, items: prev.items.filter((_, idx) => idx !== i) },
+        : { ...prev, items: prev.items.filter((it) => it.id !== id) },
     )
 
-  const move = (i: number, dir: -1 | 1) => {
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
     setState((prev) => {
-      const j = i + dir
-      if (j < 0 || j >= prev.items.length) return prev
-      const next = [...prev.items]
-      ;[next[i], next[j]] = [next[j], next[i]]
-      return { ...prev, items: next }
+      const oldIndex = prev.items.findIndex((it) => it.id === active.id)
+      const newIndex = prev.items.findIndex((it) => it.id === over.id)
+      if (oldIndex < 0 || newIndex < 0) return prev
+      return { ...prev, items: arrayMove(prev.items, oldIndex, newIndex) }
     })
   }
 
@@ -94,62 +130,66 @@ export function OrderingForm({ initial, onChange }: ExerciseFormProps) {
       </div>
 
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
-          Thứ tự đúng (dùng mũi tên để đổi chỗ)
-        </p>
-        <div className="space-y-2.5">
-          {state.items.map((it, i) => (
-            <div
-              key={i}
-              className="group flex items-center gap-3 rounded-2xl border-2 border-border bg-card px-4 py-3 min-h-[64px]"
-            >
-              <div className="flex flex-col gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => move(i, -1)}
-                  disabled={i === 0}
-                  className="h-5 w-5 inline-flex items-center justify-center text-xs text-muted-foreground/50 hover:text-foreground disabled:opacity-20 disabled:pointer-events-none"
-                  aria-label="Lên"
-                >
-                  ▲
-                </button>
-                <button
-                  type="button"
-                  onClick={() => move(i, 1)}
-                  disabled={i === state.items.length - 1}
-                  className="h-5 w-5 inline-flex items-center justify-center text-xs text-muted-foreground/50 hover:text-foreground disabled:opacity-20 disabled:pointer-events-none"
-                  aria-label="Xuống"
-                >
-                  ▼
-                </button>
-              </div>
-              <GripVertical className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary tabular-nums">
-                {i + 1}
-              </span>
-              <InlineEditable
-                value={it}
-                onChange={(v) => setItem(i, v)}
-                placeholder={`Mục ${i + 1}`}
-                className="text-lg font-semibold flex-1"
-                multiline={false}
-              />
-              <button
-                type="button"
-                onClick={() => remove(i)}
-                disabled={state.items.length <= 2}
-                className="h-9 w-9 rounded-full text-muted-foreground/50 hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity disabled:pointer-events-none"
-                aria-label="Xóa"
-              >
-                <Trash2 className="h-4 w-4 mx-auto" />
-              </button>
-            </div>
-          ))}
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Thứ tự đúng
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Kéo nắm bên trái để đổi thứ tự
+          </p>
         </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={state.items.map((it) => it.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2.5">
+              {state.items.map((it, i) => (
+                <SortableRow key={it.id} id={it.id}>
+                  {({ listeners, attributes, isDragging }) => (
+                    <div
+                      className={`group flex items-center gap-3 rounded-2xl border-2 border-border bg-card px-4 py-3 min-h-[64px] ${
+                        isDragging ? 'shadow-lg ring-2 ring-primary/30' : ''
+                      }`}
+                    >
+                      <DragHandle {...listeners} {...attributes} />
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary tabular-nums">
+                        {i + 1}
+                      </span>
+                      <InlineEditable
+                        value={it.value}
+                        onChange={(v) => setItem(it.id, v)}
+                        placeholder={`Mục ${i + 1}`}
+                        className="text-lg font-semibold flex-1"
+                        multiline={false}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => remove(it.id)}
+                        disabled={state.items.length <= 2}
+                        className="h-9 w-9 rounded-full text-muted-foreground/50 hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity disabled:pointer-events-none"
+                        aria-label="Xóa"
+                      >
+                        <Trash2 className="h-4 w-4 mx-auto" />
+                      </button>
+                    </div>
+                  )}
+                </SortableRow>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
         <button
           type="button"
           onClick={() =>
-            setState((prev) => ({ ...prev, items: [...prev.items, ''] }))
+            setState((prev) => ({
+              ...prev,
+              items: [...prev.items, { id: genId(), value: '' }],
+            }))
           }
           className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border px-4 py-3 text-sm font-semibold text-muted-foreground hover:border-primary hover:text-primary transition-colors"
         >
