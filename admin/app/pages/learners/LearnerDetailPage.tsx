@@ -4,7 +4,7 @@ import {
   Mail, Flame, Award, CheckCircle2, XCircle, Clock, Calendar,
   ChevronRight, ListChecks, TextCursorInput, ArrowLeftRight, ListOrdered,
   Languages, Headphones, Mic, BookMarked, User2, Image as ImageIcon,
-  GraduationCap, Layers, FileQuestion,
+  GraduationCap, Layers, FileQuestion, MessageCircle,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Tabs, TabsContent } from '../../components/ui/tabs'
@@ -58,7 +58,13 @@ const STATUS_LABELS: Record<string, string> = {
   in_progress: 'Đang học',
   not_started: 'Chưa bắt đầu',
   active: 'Đang diễn ra',
+  paused: 'Tạm dừng',
+  abandoned: 'Bỏ dở',
   ended: 'Kết thúc',
+  ACTIVE: 'Đang diễn ra',
+  PAUSED: 'Tạm dừng',
+  COMPLETED: 'Hoàn thành',
+  ABANDONED: 'Bỏ dở',
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -66,7 +72,13 @@ const STATUS_COLORS: Record<string, string> = {
   in_progress: 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300',
   not_started: 'bg-muted text-muted-foreground',
   active: 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300',
+  paused: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300',
+  abandoned: 'bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300',
   ended: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300',
+  ACTIVE: 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300',
+  PAUSED: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300',
+  COMPLETED: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300',
+  ABANDONED: 'bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300',
 }
 
 const UNIT_TYPE_LABELS: Record<string, string> = {
@@ -482,97 +494,117 @@ export function LearnerDetailPage() {
               )}
             </TabsContent>
 
-            {/* SIMULATIONS — clickable cards */}
-            <TabsContent value="simulations" className="mt-4 space-y-2">
+            {/* SIMULATIONS — rich cards matching other tabs */}
+            <TabsContent value="simulations" className="mt-4 space-y-2.5">
               {data.simulations.length === 0 ? (
                 <EmptyState icon={MessageSquare} message="Chưa có phiên mô phỏng" />
               ) : (
-                data.simulations.map((row) => (
-                  <button
-                    key={row.id}
-                    type="button"
-                    onClick={() =>
-                      learnerId && navigate(learnerPath.simulation(learnerId, row.id))
-                    }
-                    className="w-full flex items-center gap-3 rounded-lg border-2 border-border bg-card p-3 text-left transition-colors hover:border-primary"
-                  >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400">
-                      <MessageSquare className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-foreground truncate">
-                        {row.scenario?.title ?? 'Tình huống'}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                        {row.chosenCharacter?.name && (
-                          <>
-                            <span>Vai: {row.chosenCharacter.name}</span>
-                            <span>·</span>
-                          </>
-                        )}
-                        <span>{row.totalMessages} tin nhắn</span>
+                data.simulations.map((row) => {
+                  const messageCount = row.messageCount ?? row.totalMessages ?? 0
+                  return (
+                    <button
+                      key={row.id}
+                      type="button"
+                      onClick={() =>
+                        learnerId && navigate(learnerPath.simulation(learnerId, row.id))
+                      }
+                      className="w-full flex items-start gap-4 rounded-xl border-2 border-border bg-card p-4 text-left transition-colors hover:border-primary"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400">
+                        <MessageCircle className="h-5 w-5" />
                       </div>
-                    </div>
-                    {row.totalScore != null && (
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                          <span className="inline-flex items-center rounded-md bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                            Mô phỏng
+                          </span>
+                          <StatusPill status={row.status} />
+                          {row.chosenCharacter?.name && (
+                            <span className="inline-flex items-center rounded-md border-2 border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                              Vai · {row.chosenCharacter.name}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[15px] font-bold text-foreground line-clamp-2 leading-snug">
+                          {row.scenario?.title ?? 'Tình huống'}
+                        </p>
+                        <div className="flex items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mt-2 flex-wrap">
+                          <span className="inline-flex items-center gap-1">
+                            <MessageSquare className="h-3.5 w-3.5" />
+                            {messageCount} tin nhắn
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <Calendar className="h-3.5 w-3.5" />
+                            {formatDate(row.updatedAt)}
+                          </span>
+                        </div>
+                      </div>
                       <div className="text-right shrink-0">
-                        <p className="text-xs text-muted-foreground">Điểm</p>
-                        <p className="text-base font-bold tabular-nums">{row.totalScore}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Điểm
+                        </p>
+                        <p className="text-2xl font-bold tabular-nums text-foreground leading-none mt-0.5">
+                          {row.totalScore != null ? row.totalScore : '—'}
+                        </p>
                       </div>
-                    )}
-                    <StatusPill status={row.status} />
-                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                  </button>
-                ))
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 self-center" />
+                    </button>
+                  )
+                })
               )}
             </TabsContent>
 
-            {/* AI — conversation cards */}
-            <TabsContent value="ai" className="mt-4 space-y-2">
+            {/* AI — rich conversation cards */}
+            <TabsContent value="ai" className="mt-4 space-y-2.5">
               {data.conversations.length === 0 ? (
                 <EmptyState icon={Bot} message="Chưa có hội thoại AI" />
               ) : (
-                data.conversations.map((row) => (
-                  <button
-                    key={row.id}
-                    type="button"
-                    onClick={() =>
-                      learnerId && navigate(learnerPath.conversation(learnerId, row.id))
-                    }
-                    className="w-full flex items-center gap-3 rounded-lg border-2 border-border bg-card p-3 text-left transition-colors hover:border-primary"
-                  >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
-                      <Bot className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-foreground truncate">
-                        {row.title || 'Hội thoại không có tiêu đề'}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                        <code className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">
-                          {row.model}
-                        </code>
-                        {(row.lesson?.title || row.course?.title) && (
-                          <>
-                            <span>·</span>
-                            <span className="truncate">
-                              {row.lesson?.title ?? row.course?.title}
-                            </span>
-                          </>
-                        )}
+                data.conversations.map((row) => {
+                  const contextLabel =
+                    [row.course?.title, row.lesson?.title].filter(Boolean).join(' › ')
+                  return (
+                    <button
+                      key={row.id}
+                      type="button"
+                      onClick={() =>
+                        learnerId && navigate(learnerPath.conversation(learnerId, row.id))
+                      }
+                      className="w-full flex items-start gap-4 rounded-xl border-2 border-border bg-card p-4 text-left transition-colors hover:border-primary"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+                        <Bot className="h-5 w-5" />
                       </div>
-                    </div>
-                    <div className="text-right shrink-0 hidden sm:block">
-                      <p className="text-xs text-muted-foreground">Token</p>
-                      <p className="text-sm font-bold tabular-nums">
-                        {row.totalTokens.toLocaleString('vi-VN')}
-                      </p>
-                    </div>
-                    <span className="text-xs text-muted-foreground tabular-nums shrink-0 hidden md:block">
-                      {formatDate(row.updatedAt)}
-                    </span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                  </button>
-                ))
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                          <span className="inline-flex items-center rounded-md bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                            Hội thoại AI
+                          </span>
+                          {contextLabel && (
+                            <span className="inline-flex items-center rounded-md border-2 border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground line-clamp-1">
+                              {contextLabel}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[15px] font-bold text-foreground line-clamp-2 leading-snug">
+                          {row.title || 'Hội thoại không có tiêu đề'}
+                        </p>
+                        <div className="flex items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mt-2 flex-wrap">
+                          {row.messageCount != null && (
+                            <span className="inline-flex items-center gap-1">
+                              <MessageSquare className="h-3.5 w-3.5" />
+                              {row.messageCount} tin nhắn
+                            </span>
+                          )}
+                          <span className="inline-flex items-center gap-1">
+                            <Calendar className="h-3.5 w-3.5" />
+                            {formatDate(row.updatedAt)}
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 self-center" />
+                    </button>
+                  )
+                })
               )}
             </TabsContent>
 

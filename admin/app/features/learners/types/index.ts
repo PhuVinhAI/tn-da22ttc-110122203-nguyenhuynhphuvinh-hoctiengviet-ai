@@ -53,18 +53,45 @@ export interface ConversationDetail {
   messages: ConversationMessage[]
 }
 
+export interface ConversationMessageToolCall {
+  name: string
+  arguments: unknown
+}
+
+export interface ConversationMessageToolResult {
+  name: string
+  result: unknown
+}
+
 export interface ConversationMessage {
   id: string
-  role: string
+  role: 'user' | 'assistant' | 'tool' | string
   content: string
   tokenCount: number
   interrupted: boolean
   createdAt: string
+  toolCalls?: ConversationMessageToolCall[] | null
+  toolResults?: ConversationMessageToolResult[] | null
 }
 
 export interface SimulationDetail {
   session: SimulationSession
   messages: SimulationMessage[]
+}
+
+export interface SimulationFeedbackCorrection {
+  original: string
+  corrected: string
+  type: 'spelling' | 'grammar'
+  severity: 'error' | 'warning'
+  startIndex: number
+  endIndex: number
+}
+
+export interface SimulationFeedback {
+  corrections: SimulationFeedbackCorrection[]
+  review: string | null
+  reviewAvailable: boolean
 }
 
 export interface SimulationMessage {
@@ -73,8 +100,9 @@ export interface SimulationMessage {
   content: string
   translation?: string | null
   orderIndex: number
-  feedback?: unknown
+  feedback?: SimulationFeedback | null
   speakerCharacter?: { id: string; name: string } | null
+  speakerCharacterId?: string | null
 }
 
 export interface LearnerProgress {
@@ -200,11 +228,23 @@ export interface Bookmark {
   createdAt: string
 }
 
+export interface SimulationCriteriaScore {
+  name: string
+  score: number
+  maxScore: number
+  comment: string
+}
+
 export interface SimulationSession {
   id: string
   status: string
   totalScore?: number | null
   totalMessages: number
+  totalTokens?: number
+  messageCount?: number
+  criteriaScores?: SimulationCriteriaScore[]
+  aiSummary?: string | null
+  endReason?: string | null
   resultCreatedAt?: string | null
   scenario?: { id: string; title: string }
   chosenCharacter?: { id: string; name: string }
@@ -216,6 +256,7 @@ export interface Conversation {
   title: string
   model: string
   totalTokens: number
+  messageCount?: number
   course?: { id: string; title: string } | null
   lesson?: { id: string; title: string } | null
   updatedAt: string

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProgressStatus, SimulationSessionStatus } from '../../../common/enums';
+import { ProgressStatus, Role, SimulationSessionStatus } from '../../../common/enums';
 import { User } from '../../users/domain/user.entity';
 import { LearningProgress } from '../../progress/domain/learning-progress.entity';
 import { DailyGoal } from '../../daily-goals/domain/daily-goal.entity';
@@ -49,6 +49,7 @@ export class AdminLearnersService {
 
   async findAll() {
     const users = await this.usersRepository.find({
+      where: { role: Role.USER },
       order: { updatedAt: 'DESC' },
       take: 200,
     });
@@ -169,6 +170,67 @@ export class AdminLearnersService {
       (item) => item.status === SimulationSessionStatus.COMPLETED,
     );
 
+    const simulationMessageCounts = simulations.length
+      ? await this.simulationMessagesRepository
+          .createQueryBuilder('m')
+          .select('m.session_id', 'sessionId')
+          .addSelect('COUNT(*)', 'count')
+          .where('m.session_id IN (:...ids)', {
+            ids: simulations.map((s) => s.id),
+          })
+          .andWhere('m.deleted_at IS NULL')
+          .groupBy('m.session_id')
+          .getRawMany<{ sessionId: string; count: string }>()
+      : [];
+    const simulationCountMap = new Map(
+      simulationMessageCounts.map((row) => [row.sessionId, Number(row.count)]),
+    );
+
+    const conversationMessageStats = conversations.length
+      ? await this.conversationMessagesRepository
+          .createQueryBuilder('m')
+          .select('m.conversation_id', 'conversationId')
+          .addSelect('COUNT(*)', 'count')
+          .addSelect('COALESCE(SUM(m.token_count), 0)', 'tokens')
+          .where('m.conversation_id IN (:...ids)', {
+            ids: conversations.map((c) => c.id),
+          })
+          .andWhere('m.deleted_at IS NULL')
+          .groupBy('m.conversation_id')
+          .getRawMany<{ conversationId: string; count: string; tokens: string }>()
+      : [];
+    const conversationStatsMap = new Map(
+      conversationMessageStats.map((row) => [
+        row.conversationId,
+        { count: Number(row.count), tokens: Number(row.tokens) },
+      ]),
+    );
+
+    const simulationsWithCounts = simulations.map((session) => {
+      const actualCount = simulationCountMap.get(session.id) ?? 0;
+      return {
+        ...session,
+        messageCount: actualCount,
+        totalMessages:
+          session.totalMessages && session.totalMessages > 0
+            ? session.totalMessages
+            : actualCount,
+      };
+    });
+
+    const conversationsWithCounts = conversations.map((conversation) => {
+      const stats = conversationStatsMap.get(conversation.id);
+      const totalTokens =
+        conversation.totalTokens && conversation.totalTokens > 0
+          ? conversation.totalTokens
+          : stats?.tokens ?? 0;
+      return {
+        ...conversation,
+        messageCount: stats?.count ?? 0,
+        totalTokens,
+      };
+    });
+
     return {
       user: user.toJSON(),
       summary: {
@@ -192,8 +254,8 @@ export class AdminLearnersService {
       exerciseAttempts,
       personalVocabularies,
       bookmarks,
-      simulations,
-      conversations,
+      simulations: simulationsWithCounts,
+      conversations: conversationsWithCounts,
     };
   }
 
@@ -214,7 +276,23 @@ export class AdminLearnersService {
       order: { createdAt: 'ASC' },
     });
 
-    return { conversation, messages };
+    const messageTokenSum = messages.reduce(
+      (sum, message) => sum + (message.tokenCount ?? 0),
+      0,
+    );
+    const totalTokens =
+      conversation.totalTokens && conversation.totalTokens > 0
+        ? conversation.totalTokens
+        : messageTokenSum;
+
+    return {
+      conversation: {
+        ...conversation,
+        totalTokens,
+        messageCount: messages.length,
+      },
+      messages,
+    };
   }
 
   async findSimulation(userId: string, sessionId: string) {
@@ -233,7 +311,17 @@ export class AdminLearnersService {
       order: { orderIndex: 'ASC' },
     });
 
-    return { session, messages };
+    return {
+      session: {
+        ...session,
+        messageCount: messages.length,
+        totalMessages:
+          session.totalMessages && session.totalMessages > 0
+            ? session.totalMessages
+            : messages.length,
+      },
+      messages,
+    };
   }
 
   private async ensureExists(userId: string) {
