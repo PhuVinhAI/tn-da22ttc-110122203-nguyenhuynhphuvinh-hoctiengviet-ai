@@ -36,9 +36,16 @@ const NEW_DEFAULTS = {
 } as const
 
 export function GrammarEditor({ lessonId }: { lessonId: string }) {
-  const inline = useLessonChildInline<GrammarRule>({ kind: 'grammar', lessonId })
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [focusId, setFocusId] = useState<string | null>(null)
+  const inline = useLessonChildInline<GrammarRule>({
+    kind: 'grammar',
+    lessonId,
+    onPromote: (tempId, newId) => {
+      setExpandedId((prev) => (prev === tempId ? newId : prev))
+      setFocusId((prev) => (prev === tempId ? newId : prev))
+    },
+  })
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),

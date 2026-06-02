@@ -40,9 +40,16 @@ const ROW_GRID =
   'grid grid-cols-[2rem_minmax(0,1.4fr)_minmax(0,1.4fr)_5rem_7rem_6rem_2rem_2rem] gap-1 items-center'
 
 export function VocabularyEditor({ lessonId }: { lessonId: string }) {
-  const inline = useLessonChildInline<Vocabulary>({ kind: 'vocabularies', lessonId })
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [focusId, setFocusId] = useState<string | null>(null)
+  const inline = useLessonChildInline<Vocabulary>({
+    kind: 'vocabularies',
+    lessonId,
+    onPromote: (tempId, newId) => {
+      setExpandedId((prev) => (prev === tempId ? newId : prev))
+      setFocusId((prev) => (prev === tempId ? newId : prev))
+    },
+  })
   const [bulkOpen, setBulkOpen] = useState(false)
 
   const sensors = useSensors(

@@ -56,8 +56,14 @@ const NEW_DEFAULTS = {
 } as const
 
 export function ContentEditor({ lessonId }: { lessonId: string }) {
-  const inline = useLessonChildInline<LessonContent>({ kind: 'contents', lessonId })
   const [focusId, setFocusId] = useState<string | null>(null)
+  const inline = useLessonChildInline<LessonContent>({
+    kind: 'contents',
+    lessonId,
+    onPromote: (tempId, newId) => {
+      setFocusId((prev) => (prev === tempId ? newId : prev))
+    },
+  })
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),

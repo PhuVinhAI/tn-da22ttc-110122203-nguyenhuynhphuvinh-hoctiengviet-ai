@@ -26,9 +26,11 @@ export type InlineRow = { id: string; orderIndex: number }
 export function useLessonChildInline<T extends InlineRow>({
   kind,
   lessonId,
+  onPromote,
 }: {
   kind: ChildKind
   lessonId: string
+  onPromote?: (tempId: string, newId: string) => void
 }) {
   const qc = useQueryClient()
   const field = FIELD_BY_KIND[kind]
@@ -37,6 +39,8 @@ export function useLessonChildInline<T extends InlineRow>({
   const buffersRef = useRef<Map<string, Buffer>>(new Map())
   const fadeTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
   const [states, setStates] = useState<Record<string, SaveState>>({})
+  const onPromoteRef = useRef(onPromote)
+  onPromoteRef.current = onPromote
 
   const { data: rows = [] } = useQuery({
     queryKey: lessonKey,
@@ -122,6 +126,7 @@ export function useLessonChildInline<T extends InlineRow>({
             })
           }
           setRows((arr) => arr.map((r) => (r.id === id ? created : r)))
+          onPromoteRef.current?.(id, created.id)
           setStates((prev) => {
             const { [id]: _, ...rest } = prev
             return { ...rest, [created.id]: 'saved' }
