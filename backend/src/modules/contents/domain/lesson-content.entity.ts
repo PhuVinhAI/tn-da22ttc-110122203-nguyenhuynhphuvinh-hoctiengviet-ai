@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { ContentType } from '../../../common/enums';
-import { DialogueData } from './dialogue-data.types';
+import type { DialogueData } from './dialogue-data.types';
 
 @Entity('lesson_contents')
 @Index(['lessonId', 'orderIndex'], {

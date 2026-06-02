@@ -270,13 +270,22 @@ export function ScenarioCategoryDetailPage() {
                   )}
 
                   {/* Opening message preview */}
-                  {scenario.openingMessage && (
+                  {scenario.openingMessage ? (
                     <div className="mt-3 rounded-lg border border-border bg-muted/20 px-3 py-2">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
                         Lời chào mở đầu
                       </p>
                       <p className="text-xs italic text-foreground line-clamp-1">
                         &quot;{scenario.openingMessage}&quot;
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mt-3 rounded-lg border border-dashed border-border bg-muted/10 px-3 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mb-1">
+                        Lời chào mở đầu
+                      </p>
+                      <p className="text-xs italic text-muted-foreground/60 line-clamp-1">
+                        Chưa có lời chào mở đầu
                       </p>
                     </div>
                   )}
