@@ -214,7 +214,7 @@ export class UserExerciseResultsRepository {
         'incorrectCount',
       )
       .addSelect(
-        'CAST(SUM(CASE WHEN result.isCorrect = false THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*) * 100',
+        'CAST(SUM(CASE WHEN result.isCorrect = false THEN 1 ELSE 0 END) AS FLOAT) / CAST(COUNT(*) AS FLOAT) * 100',
         'errorRate',
       )
       .groupBy('exercise.id')

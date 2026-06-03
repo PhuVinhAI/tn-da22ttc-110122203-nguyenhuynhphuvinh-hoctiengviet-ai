@@ -48,12 +48,23 @@ function buildDataSource(synchronize: boolean): DataSource {
 }
 
 async function resetDatabase() {
-  console.log('[1/5] Dropping schema public...');
+  console.log('[1/5] Dropping all objects in public schema...');
   const ds = buildDataSource(false);
   await ds.initialize();
-  await ds.query('DROP SCHEMA IF EXISTS public CASCADE');
-  await ds.query('CREATE SCHEMA public');
-  await ds.query('GRANT ALL ON SCHEMA public TO public');
+
+  const tables: Array<{ table_name: string }> = await ds.query(
+    "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'",
+  );
+  for (const { table_name } of tables) {
+    await ds.query(`DROP TABLE IF EXISTS "${table_name}" CASCADE`);
+  }
+
+  const types: Array<{ typname: string }> = await ds.query(
+    "SELECT t.typname FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typtype = 'e'",
+  );
+  for (const { typname } of types) {
+    await ds.query(`DROP TYPE IF EXISTS "${typname}"`);
+  }
   await ds.destroy();
 
   console.log('[1/5] Syncing schema from entities...');
