@@ -151,7 +151,7 @@ describe('CourseContentService', () => {
         title: 'Lesson 1',
         contents: [],
         grammarRules: [],
-        questions: [],
+        exercises: [],
       };
       const contents = [
         { id: 'ct1', contentType: 'text', vietnameseText: 'Xin chào' },
@@ -178,7 +178,7 @@ describe('CourseContentService', () => {
         title: 'Lesson 1',
         contents: [],
         grammarRules: [],
-        questions: [{ id: 'es1', title: 'Practice exercise' }],
+        exercises: [{ id: 'es1', title: 'Practice exercise' }],
       };
       lessonsRepo.findById.mockResolvedValue(lesson as any);
       contentsRepo.findByLessonId.mockResolvedValue([]);
@@ -186,8 +186,8 @@ describe('CourseContentService', () => {
 
       const result = await service.getLessonDetail('l1');
 
-      expect(result.questions).toHaveLength(1);
-      expect(result.questions[0].id).toBe('es1');
+      expect(result.exercises).toHaveLength(1);
+      expect(result.exercises[0].id).toBe('es1');
     });
 
     it('throws NotFoundException when lesson not found', async () => {

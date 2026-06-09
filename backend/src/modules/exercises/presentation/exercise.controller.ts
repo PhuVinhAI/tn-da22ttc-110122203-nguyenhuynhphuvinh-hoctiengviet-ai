@@ -25,7 +25,7 @@ import { CreateCustomExerciseDto } from '../dto/create-custom-exercise.dto';
 import { GenerateDto } from '../dto/generate.dto';
 
 @ApiTags('Exercises')
-@Controller('questions')
+@Controller('exercises')
 export class ExerciseController {
   constructor(private readonly exerciseService: ExerciseService) {}
 

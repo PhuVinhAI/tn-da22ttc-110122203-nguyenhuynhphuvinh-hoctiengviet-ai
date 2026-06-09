@@ -293,7 +293,7 @@ function ensureSpeakingExercise(
   lesson: Record<string, unknown>,
   generated: Map<string, string>,
 ): boolean {
-  const exercises = lesson.questions as Array<Record<string, unknown>>;
+  const exercises = lesson.exercises as Array<Record<string, unknown>>;
   if (!Array.isArray(exercises)) return false;
 
   const hasSpeaking = exercises.some(

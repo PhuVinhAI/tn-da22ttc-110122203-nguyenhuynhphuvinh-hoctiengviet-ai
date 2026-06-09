@@ -45,7 +45,7 @@ export class LessonsRepository {
       where: { id },
       order: {
         contents: { orderIndex: 'ASC' },
-        questions: { orderIndex: 'ASC' },
+        exercises: { orderIndex: 'ASC' },
       },
       relations: [
         'module',

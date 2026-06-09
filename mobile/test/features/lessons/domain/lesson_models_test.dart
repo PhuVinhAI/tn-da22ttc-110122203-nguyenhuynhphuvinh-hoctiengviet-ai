@@ -45,8 +45,9 @@ void main() {
         'exercises': [
           {
             'id': 'exercise-1',
-            'questionType': 'multiple_choice',
-            'question': 'What does xin chào mean?',
+            'title': 'Basic Exercises',
+            'description': 'Practice greetings',
+            'orderIndex': 0,
           },
         ],
       };
@@ -223,15 +224,17 @@ void main() {
     test('creates from JSON', () {
       final json = {
         'id': 'e1',
-        'questionType': 'multiple_choice',
-        'question': 'What does xin chào mean?',
+        'title': 'Basic Exercises',
+        'description': 'Practice greetings',
+        'orderIndex': 1,
       };
 
       final exercise = ExerciseStub.fromJson(json);
 
       expect(exercise.id, 'e1');
-      expect(exercise.questionType, 'multiple_choice');
-      expect(exercise.question, 'What does xin chào mean?');
+      expect(exercise.title, 'Basic Exercises');
+      expect(exercise.description, 'Practice greetings');
+      expect(exercise.orderIndex, 1);
     });
   });
 }

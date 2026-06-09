@@ -199,8 +199,8 @@ class LessonRepository {
         cancelToken: cancelToken,
       );
       final data = response.data!;
-      final setMap = data['set'] as Map<String, dynamic>;
-      return ExerciseModel.fromJson(setMap);
+      final exerciseMap = data['exercise'] as Map<String, dynamic>;
+      return ExerciseModel.fromJson(exerciseMap);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -244,8 +244,8 @@ class LessonRepository {
         cancelToken: cancelToken,
       );
       final data = response.data!;
-      final setMap = data['set'] as Map<String, dynamic>;
-      return ExerciseModel.fromJson(setMap);
+      final exerciseMap = data['exercise'] as Map<String, dynamic>;
+      return ExerciseModel.fromJson(exerciseMap);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -267,8 +267,8 @@ class LessonRepository {
         cancelToken: cancelToken,
       );
       final data = response.data!;
-      final setMap = data['set'] as Map<String, dynamic>;
-      return ExerciseModel.fromJson(setMap);
+      final exerciseMap = data['exercise'] as Map<String, dynamic>;
+      return ExerciseModel.fromJson(exerciseMap);
     } on DioException catch (e) {
       throw mapDioException(e);
     }

@@ -41,16 +41,6 @@ const TYPES: Array<{ value: string; label: string; Icon: LucideIcon; tone: strin
 const DIFFICULTY_LABELS = ['', 'Rất dễ', 'Dễ', 'Trung bình', 'Khó', 'Rất khó']
 const DIFFICULTY_DOT = ['', 'bg-emerald-500', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-red-600']
 
-const TYPE_TO_ENUM: Record<string, string> = {
-  multiple_choice: 'MULTIPLE_CHOICE',
-  fill_blank: 'FILL_BLANK',
-  matching: 'MATCHING',
-  ordering: 'ORDERING',
-  translation: 'TRANSLATION',
-  listening: 'LISTENING',
-  speaking: 'SPEAKING',
-}
-
 interface CommonState {
   questionType: string
   questionAudioUrl: string
@@ -124,7 +114,7 @@ export function QuestionFormPage({ mode }: { mode: 'create' | 'edit' }) {
       }
 
       const body: Record<string, unknown> = {
-        questionType: TYPE_TO_ENUM[common.questionType] ?? common.questionType.toUpperCase(),
+        questionType: common.questionType,
         question: payload.question,
         questionAudioUrl: common.questionAudioUrl || null,
         explanation: common.explanation || null,

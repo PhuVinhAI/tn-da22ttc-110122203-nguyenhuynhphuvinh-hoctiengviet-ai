@@ -23,7 +23,7 @@ export class QuestionsRepository {
   async findByLessonId(lessonId: string): Promise<Question[]> {
     return this.repository
       .createQueryBuilder('question')
-      .innerJoinAndSelect('question.exercise', 'question')
+      .innerJoinAndSelect('question.exercise', 'exercise')
       .leftJoinAndSelect('exercise.lesson', 'lesson')
       .leftJoinAndSelect('lesson.module', 'lessonModule')
       .leftJoinAndSelect('lessonModule.course', 'lessonCourse')

@@ -204,9 +204,9 @@ export class UserQuestionResultsRepository {
       errorRate: string;
     }[] = await this.attemptsRepository
       .createQueryBuilder('result')
-      .innerJoin('result.exercise', 'question')
-      .select('exercise.id', 'questionId')
-      .addSelect('exercise.question', 'exerciseQuestion')
+      .innerJoin('result.question', 'question')
+      .select('question.id', 'questionId')
+      .addSelect('question.question', 'exerciseQuestion')
       .addSelect('question.questionType', 'questionType')
       .addSelect('COUNT(*)', 'totalAttempts')
       .addSelect(
@@ -217,8 +217,8 @@ export class UserQuestionResultsRepository {
         'CAST(SUM(CASE WHEN result.isCorrect = false THEN 1 ELSE 0 END) AS FLOAT) / CAST(COUNT(*) AS FLOAT) * 100',
         'errorRate',
       )
-      .groupBy('exercise.id')
-      .addGroupBy('exercise.question')
+      .groupBy('question.id')
+      .addGroupBy('question.question')
       .addGroupBy('question.questionType')
       .having('COUNT(*) >= :minAttempts', { minAttempts })
       .orderBy('"errorRate"', 'DESC')

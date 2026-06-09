@@ -1,4 +1,4 @@
-﻿import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { QuestionsRepository } from './repositories/questions.repository';
 import { UserQuestionResultsRepository } from './repositories/user-question-results.repository';
@@ -8,7 +8,7 @@ import { Transactional } from '../../../common/decorators';
 import { Question } from '../domain/question.entity';
 import { QuestionAttempt } from '../domain/question-attempt.entity';
 import { UserQuestionResult } from '../domain/user-question-result.entity';
-import { UserLevel } from '../../../common/enums';
+import { QuestionType, UserLevel } from '../../../common/enums';
 import type { AssessmentContext } from '../domain/assessment.types';
 import {
   QuestionStatsPort,
@@ -45,6 +45,9 @@ export class QuestionsService implements QuestionStatsPort {
   }
 
   async create(data: Partial<Question>): Promise<Question> {
+    if (data.questionType) {
+      data.questionType = this.normalizeQuestionType(data.questionType);
+    }
     return this.questionsRepository.create(data);
   }
 
@@ -103,6 +106,9 @@ export class QuestionsService implements QuestionStatsPort {
 
   async update(id: string, data: Partial<Question>): Promise<Question> {
     await this.findById(id);
+    if (data.questionType) {
+      data.questionType = this.normalizeQuestionType(data.questionType);
+    }
     return this.questionsRepository.update(id, data);
   }
 
@@ -114,28 +120,28 @@ export class QuestionsService implements QuestionStatsPort {
   @Transactional()
   async submitAnswer(
     userId: string,
-    exerciseId: string,
+    questionId: string,
     userAnswer: any,
     timeTaken?: number,
   ): Promise<QuestionAttempt> {
-    const exercise =
-      await this.questionsRepository.findByIdWithCourseLevel(exerciseId);
-    if (!exercise) {
-      throw new NotFoundException(`Exercise with ID ${exerciseId} not found`);
+    const question =
+      await this.questionsRepository.findByIdWithCourseLevel(questionId);
+    if (!question) {
+      throw new NotFoundException(`Question with ID ${questionId} not found`);
     }
-    this.assertQuestionReadable(exercise, userId);
+    this.assertQuestionReadable(question, userId);
 
     const normalizedAnswer = this.answerNormalizer.normalize(
-      exercise.questionType,
+      question.questionType,
       userAnswer,
     );
 
-    const context = this.buildAssessmentContext(exercise);
+    const context = this.buildAssessmentContext(question);
 
     const { isCorrect } = this.answerAssessment.assessAnswer(
-      exercise.questionType,
+      question.questionType,
       normalizedAnswer,
-      exercise.correctAnswer,
+      question.correctAnswer,
       context,
     );
 
@@ -147,7 +153,7 @@ export class QuestionsService implements QuestionStatsPort {
 
     const attempt = await manager.save(QuestionAttempt, {
       userId,
-      exerciseId,
+      questionId,
       userAnswer,
       isCorrect,
       score,
@@ -156,7 +162,7 @@ export class QuestionsService implements QuestionStatsPort {
     });
 
     const existing = await manager.findOne(UserQuestionResult, {
-      where: { userId, exerciseId },
+      where: { userId, questionId },
     });
 
     if (existing) {
@@ -172,7 +178,7 @@ export class QuestionsService implements QuestionStatsPort {
     } else {
       await manager.save(UserQuestionResult, {
         userId,
-        exerciseId,
+        questionId,
         userAnswer,
         isCorrect,
         score,
@@ -233,5 +239,14 @@ export class QuestionsService implements QuestionStatsPort {
     if (set?.isCustom && set.ownerUserId !== userId) {
       throw new NotFoundException(`Exercise with ID ${exercise.id} not found`);
     }
+  }
+
+  private normalizeQuestionType(type: QuestionType | string): QuestionType {
+    if (Object.values(QuestionType).includes(type as QuestionType)) {
+      return type as QuestionType;
+    }
+    const fromKey = (QuestionType as Record<string, QuestionType>)[String(type)];
+    if (fromKey) return fromKey;
+    throw new BadRequestException(`Invalid questionType: ${type}`);
   }
 }

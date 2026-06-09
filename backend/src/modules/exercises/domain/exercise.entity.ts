@@ -115,6 +115,6 @@ export class Exercise extends BaseEntity {
   @JoinColumn({ name: 'replaces_exercise_id' })
   replacesExercise?: any;
 
-  @OneToMany('Question', 'question')
+  @OneToMany('Question', 'exercise')
   questions: any[];
 }

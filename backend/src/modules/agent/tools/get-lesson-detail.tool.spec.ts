@@ -65,7 +65,7 @@ describe('GetLessonDetailTool', () => {
       contents: [{ id: 'ct1' }],
       vocabularies: [{ id: 'v1' }],
       grammarRules: [{ id: 'gr1' }],
-      questions: [{ id: 'es1' }],
+      exercises: [{ id: 'es1' }],
     } as any;
 
     it('returns { lesson } shape with the full lesson body', async () => {
@@ -76,7 +76,7 @@ describe('GetLessonDetailTool', () => {
       expect('error' in result).toBe(false);
       if ('error' in result) return;
       expect(result.lesson).toEqual(lesson);
-      expect(result.lesson.questions).toEqual([{ id: 'es1' }]);
+      expect(result.lesson.exercises).toEqual([{ id: 'es1' }]);
     });
 
     it('forwards lessonId verbatim to the service', async () => {
