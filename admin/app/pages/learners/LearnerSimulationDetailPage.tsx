@@ -8,7 +8,7 @@ import { Button } from '../../components/ui/button'
 import { Breadcrumbs } from '../../components/admin/Breadcrumbs'
 import { ConversationSkeleton, MetricCardsSkeleton } from '../../components/admin/PageSkeletons'
 import { ErrorState, errorMessage } from '../../components/admin/ErrorState'
-import { useAdminLearner, useAdminLearnerSimulation } from '../../features/learners/api/use-learners-admin'
+import { useAdminLearnerAnalytics, useAdminLearnerSimulation } from '../../features/learners/api/use-learners-admin'
 import type { SimulationMessage } from '../../features/learners/types'
 import { learnerPath } from './route-utils'
 
@@ -76,7 +76,7 @@ function statusMeta(status?: string) {
 
 export function LearnerSimulationDetailPage() {
   const { learnerId, sessionId } = useParams()
-  const { data: learnerData } = useAdminLearner(learnerId)
+  const { data: learnerData } = useAdminLearnerAnalytics(learnerId)
   const { data, isLoading, error, refetch, isFetching } = useAdminLearnerSimulation(learnerId, sessionId)
 
   const learner = learnerData?.user

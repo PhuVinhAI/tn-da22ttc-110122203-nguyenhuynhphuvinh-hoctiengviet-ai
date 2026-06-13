@@ -9,7 +9,7 @@ import { Breadcrumbs } from '../../components/admin/Breadcrumbs'
 import { ConversationSkeleton, MetricCardsSkeleton } from '../../components/admin/PageSkeletons'
 import { ErrorState, errorMessage } from '../../components/admin/ErrorState'
 import { MarkdownContent } from '../../components/admin/MarkdownContent'
-import { useAdminLearner, useAdminLearnerConversation } from '../../features/learners/api/use-learners-admin'
+import { useAdminLearnerAnalytics, useAdminLearnerConversation } from '../../features/learners/api/use-learners-admin'
 import type {
   ConversationMessage, ConversationMessageToolCall, ConversationMessageToolResult,
 } from '../../features/learners/types'
@@ -43,7 +43,7 @@ function hashColor(id: string): string {
 
 export function LearnerConversationDetailPage() {
   const { learnerId, conversationId } = useParams()
-  const { data: learnerData } = useAdminLearner(learnerId)
+  const { data: learnerData } = useAdminLearnerAnalytics(learnerId)
   const { data, isLoading, error, refetch, isFetching } = useAdminLearnerConversation(learnerId, conversationId)
 
   const learner = learnerData?.user

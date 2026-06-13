@@ -1,3 +1,7 @@
+// Shapes shared giữa danh sách học viên (LearnersPage) và các trang chi tiết
+// (hội thoại / mô phỏng). Toàn bộ phần phân tích dashboard 360° nằm trong
+// LearnerAnalytics — tách riêng để chart pieces dễ tái sử dụng.
+
 export interface Learner {
   id: string
   email: string
@@ -20,32 +24,6 @@ export interface Learner {
     personalVocabularyCount: number
     simulationCount: number
   }
-}
-
-export interface LearnerDetail {
-  user: Learner
-  summary: {
-    progressCount: number
-    completedProgressCount: number
-    questionResultsCount: number
-    correctQuestionResultsCount: number
-    personalVocabularyCount: number
-    bookmarkCount: number
-    simulationCount: number
-    completedSimulationCount: number
-    conversationCount: number
-    currentStreak: number
-    longestStreak: number
-  }
-  progress: LearnerProgress[]
-  dailyGoals: DailyGoal[]
-  dailyProgress: DailyProgress[]
-  questionResults: QuestionResult[]
-  questionAttempts: QuestionAttempt[]
-  personalVocabularies: PersonalVocabulary[]
-  bookmarks: Bookmark[]
-  simulations: SimulationSession[]
-  conversations: Conversation[]
 }
 
 export interface ConversationDetail {
@@ -105,126 +83,6 @@ export interface SimulationMessage {
   speakerCharacterId?: string | null
 }
 
-export interface LearnerProgress {
-  id: string
-  unitType: string
-  status: string
-  score?: number | null
-  timeSpent: number
-  completedAt?: string | null
-  lastAccessedAt?: string | null
-  course?: { id: string; title: string }
-  module?: { id: string; title: string }
-  lesson?: { id: string; title: string }
-}
-
-export interface DailyGoal {
-  id: string
-  goalType: string
-  targetValue: number
-}
-
-export interface DailyProgress {
-  id: string
-  date: string
-  questionsCompleted: number
-  lessonsCompleted: number
-}
-
-export interface QuestionOptionsLike {
-  type?: string
-  // multiple_choice
-  choices?: string[]
-  // fill_blank
-  sentence?: string
-  blanks?: number
-  // matching
-  pairs?: Array<{ left: string; right: string }>
-  // ordering
-  items?: string[]
-  // translation
-  sourceText?: string
-  sourceLanguage?: string
-  targetLanguage?: string
-  // listening / speaking
-  audioUrl?: string
-  promptText?: string
-  promptAudioUrl?: string
-  transcriptType?: 'exact' | 'keywords'
-  keywords?: string[]
-}
-
-export interface QuestionResult {
-  id: string
-  isCorrect: boolean
-  score: number
-  bestScore: number
-  attemptCount: number
-  attemptedAt: string
-  exercise?: {
-    id: string
-    question?: string | null
-    questionAudioUrl?: string | null
-    questionType: string
-    difficultyLevel?: number
-    options?: QuestionOptionsLike | null
-    exercise?: { id: string; title: string }
-  }
-  lastAttempt?: {
-    id: string
-    isCorrect: boolean
-    score: number
-    attemptedAt: string
-  } | null
-}
-
-export interface QuestionAttempt {
-  id: string
-  isCorrect: boolean
-  score: number
-  attemptedAt: string
-  exercise?: {
-    id: string
-    question?: string | null
-    questionType: string
-    options?: QuestionOptionsLike | null
-  }
-}
-
-export interface PersonalVocabulary {
-  id: string
-  word: string
-  translation: string
-  source: string
-  partOfSpeech?: string | null
-  exampleSentence?: string | null
-}
-
-export interface BookmarkVocabularyRef {
-  id: string
-  word: string
-  translation: string
-  partOfSpeech?: string | null
-  exampleSentence?: string | null
-  region?: string | null
-}
-
-export interface BookmarkPersonalVocabularyRef {
-  id: string
-  word: string
-  translation: string
-  source: string
-  partOfSpeech?: string | null
-  exampleSentence?: string | null
-}
-
-export interface Bookmark {
-  id: string
-  vocabulary?: BookmarkVocabularyRef | null
-  personalVocabulary?: BookmarkPersonalVocabularyRef | null
-  createdAt: string
-}
-
 export interface SimulationCriteriaScore {
   name: string
   score: number
@@ -257,4 +115,244 @@ export interface Conversation {
   course?: { id: string; title: string } | null
   lesson?: { id: string; title: string } | null
   updatedAt: string
+}
+
+// ─── Analytics dashboard (Học viên 360°) ─────────────────────────────────────
+
+export type HealthStatus = 'active' | 'at_risk' | 'dormant' | 'new'
+export type SkillStrength = 'strong' | 'average' | 'weak' | 'untested'
+export type InsightSeverity = 'success' | 'info' | 'warning' | 'critical'
+export type VocabularySource = 'system' | 'manual' | 'image' | 'other'
+
+export interface LearnerHealth {
+  status: HealthStatus
+  lastActiveAt: string | null
+  daysSinceLastActivity: number | null
+  riskScore: number
+  riskReasons: string[]
+  engagementScore: number
+  engagementBreakdown: {
+    consistency: number
+    accuracy: number
+    breadth: number
+    volume: number
+  }
+}
+
+export interface LearnerOverview {
+  joinedAt: string
+  daysSinceJoined: number
+  activeDays: number
+  activeDaysRate: number
+  totalLearningTime: number
+  currentStreak: number
+  longestStreak: number
+  totalQuestionsAttempted: number
+  correctAttempts: number
+  overallAccuracy: number
+  uniqueQuestionsAnswered: number
+  completedLessons: number
+  completedModules: number
+  completedCourses: number
+  lessonsInProgress: number
+  vocabularyBookmarks: number
+  personalVocabulary: number
+  aiConversations: number
+  aiTokensUsed: number
+  simulationSessions: number
+  completedSimulations: number
+  avgSimulationScore: number | null
+  bestSimulationScore: number | null
+}
+
+export interface CalendarDay {
+  date: string
+  value: number
+  tier: 0 | 1 | 2 | 3 | 4
+}
+
+export interface ActivityCalendar {
+  windowDays: number
+  max: number
+  totalActiveDays: number
+  longestActiveRun: number
+  days: CalendarDay[]
+}
+
+export interface HourHeatmapCell {
+  weekday: number
+  hour: number
+  count: number
+}
+
+export interface TrendPoint {
+  date: string
+  attempts: number
+  correct: number
+  accuracy: number | null
+  lessonsCompleted: number
+  vocabularyAdded: number
+  aiMessages: number
+  activeMinutes: number
+}
+
+export interface LearnerTrends {
+  range: number
+  series: TrendPoint[]
+}
+
+export interface SkillRadarEntry {
+  questionType: string
+  attempts: number
+  correct: number
+  accuracy: number
+  avgTimeMs: number | null
+  strength: SkillStrength
+}
+
+export interface DifficultyEntry {
+  difficulty: number
+  attempts: number
+  correct: number
+  accuracy: number
+}
+
+export interface SpeedBucket {
+  bucket: string
+  count: number
+  correct: number
+  correctRate: number
+}
+
+export interface VocabularyByPos {
+  partOfSpeech: string
+  count: number
+}
+
+export interface RecentVocabulary {
+  id: string
+  word: string
+  translation: string
+  partOfSpeech: string | null
+  source: VocabularySource
+  createdAt: string
+}
+
+export interface VocabularyInsights {
+  totalBookmarks: number
+  systemBookmarks: number
+  personalManual: number
+  personalImage: number
+  addedLast30Days: number
+  byPartOfSpeech: VocabularyByPos[]
+  recentlyAdded: RecentVocabulary[]
+}
+
+export interface CourseProgressRow {
+  courseId: string
+  title: string
+  level: string
+  status: string
+  completedLessons: number
+  totalLessons: number
+  completion: number
+  timeSpent: number
+  lastAccessedAt: string | null
+  score: number | null
+}
+
+export interface AiConversationSummary {
+  total: number
+  messages: number
+  tokens: number
+  avgMessages: number
+  avgTokensPerSession: number
+  recent: Array<{
+    id: string
+    title: string
+    model: string
+    totalTokens: number
+    messageCount: number
+    courseTitle: string | null
+    lessonTitle: string | null
+    updatedAt: string
+  }>
+}
+
+export interface SimulationCriteriaAverage {
+  name: string
+  avgScore: number
+  maxScore: number
+  samples: number
+}
+
+export interface AiSimulationSummary {
+  total: number
+  completed: number
+  avgScore: number | null
+  bestScore: number | null
+  avgMessages: number
+  totalTokens: number
+  criteriaAverages: SimulationCriteriaAverage[]
+  recent: Array<{
+    id: string
+    scenarioTitle: string
+    characterName: string | null
+    totalScore: number | null
+    status: string
+    endReason: string | null
+    messageCount: number
+    updatedAt: string
+  }>
+}
+
+export interface AiUsage {
+  conversations: AiConversationSummary
+  simulations: AiSimulationSummary
+}
+
+export interface GoalDailyEntry {
+  date: string
+  questions: number
+  lessons: number
+  questionsTarget: number
+  lessonsTarget: number
+  met: boolean
+}
+
+export interface GoalsSection {
+  daily: Array<{ goalType: string; targetValue: number }>
+  goalCompletionLast30Days: GoalDailyEntry[]
+  goalCompletionRate: number
+  streakSummary: {
+    currentStreak: number
+    longestStreak: number
+    lastGoalMetDate: string | null
+    todayMet: boolean
+  }
+}
+
+export interface LearnerInsight {
+  severity: InsightSeverity
+  title: string
+  message: string
+}
+
+export interface LearnerAnalytics {
+  generatedAt: string
+  today: string
+  user: Learner
+  health: LearnerHealth
+  overview: LearnerOverview
+  activityCalendar: ActivityCalendar
+  hourHeatmap: HourHeatmapCell[]
+  trends: LearnerTrends
+  skillRadar: SkillRadarEntry[]
+  difficultyBreakdown: DifficultyEntry[]
+  speedHistogram: SpeedBucket[]
+  vocabularyInsights: VocabularyInsights
+  courseProgress: CourseProgressRow[]
+  aiUsage: AiUsage
+  goals: GoalsSection
+  insights: LearnerInsight[]
 }

@@ -8,10 +8,10 @@ export function useAdminLearners() {
   })
 }
 
-export function useAdminLearner(learnerId?: string) {
+export function useAdminLearnerAnalytics(learnerId?: string) {
   return useQuery({
-    queryKey: ['admin-learners', learnerId],
-    queryFn: () => learnersAdminRepository.getLearner(learnerId as string),
+    queryKey: ['admin-learners', learnerId, 'analytics'],
+    queryFn: () => learnersAdminRepository.getAnalytics(learnerId as string),
     enabled: !!learnerId,
   })
 }
@@ -19,7 +19,11 @@ export function useAdminLearner(learnerId?: string) {
 export function useAdminLearnerConversation(learnerId?: string, conversationId?: string) {
   return useQuery({
     queryKey: ['admin-learners', learnerId, 'conversation', conversationId],
-    queryFn: () => learnersAdminRepository.getConversation(learnerId as string, conversationId as string),
+    queryFn: () =>
+      learnersAdminRepository.getConversation(
+        learnerId as string,
+        conversationId as string,
+      ),
     enabled: !!learnerId && !!conversationId,
   })
 }
@@ -27,7 +31,11 @@ export function useAdminLearnerConversation(learnerId?: string, conversationId?:
 export function useAdminLearnerSimulation(learnerId?: string, sessionId?: string) {
   return useQuery({
     queryKey: ['admin-learners', learnerId, 'simulation', sessionId],
-    queryFn: () => learnersAdminRepository.getSimulation(learnerId as string, sessionId as string),
+    queryFn: () =>
+      learnersAdminRepository.getSimulation(
+        learnerId as string,
+        sessionId as string,
+      ),
     enabled: !!learnerId && !!sessionId,
   })
 }

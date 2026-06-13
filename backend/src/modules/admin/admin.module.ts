@@ -11,6 +11,7 @@ import { AdminLearnerInsightsService } from './application/admin-learner-insight
 import { AdminLearningService } from './application/admin-learning.service';
 import { AdminSimulationsService } from './application/admin-simulations.service';
 import { AdminLearnersService } from './application/admin-learners.service';
+import { AdminLearnerAnalyticsService } from './application/admin-learner-analytics.service';
 import { UsersModule } from '../users/users.module';
 import { CoursesModule } from '../courses/courses.module';
 import { ExercisesModule } from '../exercises/exercises.module';
@@ -91,6 +92,7 @@ import { ConversationMessage } from '../conversations/domain/conversation-messag
     AdminLearningService,
     AdminSimulationsService,
     AdminLearnersService,
+    AdminLearnerAnalyticsService,
   ],
   exports: [
     AdminPulseService,
@@ -100,6 +102,7 @@ import { ConversationMessage } from '../conversations/domain/conversation-messag
     AdminLearningService,
     AdminSimulationsService,
     AdminLearnersService,
+    AdminLearnerAnalyticsService,
   ],
 })
 export class AdminModule {}

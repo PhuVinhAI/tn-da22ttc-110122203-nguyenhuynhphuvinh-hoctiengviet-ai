@@ -1,25 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  ProgressStatus,
-  Role,
-  SimulationSessionStatus,
-} from '../../../common/enums';
+import { ProgressStatus, Role } from '../../../common/enums';
 import { User } from '../../users/domain/user.entity';
 import { LearningProgress } from '../../progress/domain/learning-progress.entity';
-import { DailyGoal } from '../../daily-goals/domain/daily-goal.entity';
-import { DailyGoalProgress } from '../../daily-goals/domain/daily-goal-progress.entity';
-import { DailyStreak } from '../../daily-goals/domain/daily-streak.entity';
-import { UserQuestionResult } from '../../exercises/domain/user-question-result.entity';
-import { QuestionAttempt } from '../../exercises/domain/question-attempt.entity';
 import { PersonalVocabulary } from '../../personal-vocabularies/domain/personal-vocabulary.entity';
-import { Bookmark } from '../../vocabularies/domain/bookmark.entity';
+import { UserQuestionResult } from '../../exercises/domain/user-question-result.entity';
 import { SimulationSession } from '../../simulations/domain/simulation-session.entity';
 import { SimulationMessage } from '../../simulations/domain/simulation-message.entity';
 import { Conversation } from '../../conversations/domain/conversation.entity';
 import { ConversationMessage } from '../../conversations/domain/conversation-message.entity';
 
+/**
+ * Tra cứu cơ bản về học viên cho danh sách & các trang chi tiết hội thoại /
+ * mô phỏng. Phần phân tích dashboard 360° đã được tách sang
+ * AdminLearnerAnalyticsService.
+ */
 @Injectable()
 export class AdminLearnersService {
   constructor(
@@ -27,20 +23,10 @@ export class AdminLearnersService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(LearningProgress)
     private readonly progressRepository: Repository<LearningProgress>,
-    @InjectRepository(DailyGoal)
-    private readonly dailyGoalsRepository: Repository<DailyGoal>,
-    @InjectRepository(DailyGoalProgress)
-    private readonly dailyGoalProgressRepository: Repository<DailyGoalProgress>,
-    @InjectRepository(DailyStreak)
-    private readonly dailyStreaksRepository: Repository<DailyStreak>,
     @InjectRepository(UserQuestionResult)
     private readonly questionResultsRepository: Repository<UserQuestionResult>,
-    @InjectRepository(QuestionAttempt)
-    private readonly questionAttemptsRepository: Repository<QuestionAttempt>,
     @InjectRepository(PersonalVocabulary)
     private readonly personalVocabulariesRepository: Repository<PersonalVocabulary>,
-    @InjectRepository(Bookmark)
-    private readonly bookmarksRepository: Repository<Bookmark>,
     @InjectRepository(SimulationSession)
     private readonly simulationSessionsRepository: Repository<SimulationSession>,
     @InjectRepository(SimulationMessage)
@@ -93,178 +79,6 @@ export class AdminLearnersService {
         };
       }),
     );
-  }
-
-  async findOne(userId: string) {
-    const user = await this.usersRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException(`Learner with ID ${userId} not found`);
-    }
-
-    const [
-      progress,
-      dailyGoals,
-      dailyProgress,
-      dailyStreak,
-      questionResults,
-      questionAttempts,
-      personalVocabularies,
-      bookmarks,
-      simulations,
-      conversations,
-    ] = await Promise.all([
-      this.progressRepository.find({
-        where: { userId },
-        relations: ['course', 'module', 'lesson'],
-        order: { updatedAt: 'DESC' },
-        take: 100,
-      }),
-      this.dailyGoalsRepository.find({
-        where: { userId },
-        order: { goalType: 'ASC' },
-      }),
-      this.dailyGoalProgressRepository.find({
-        where: { userId },
-        order: { date: 'DESC' },
-        take: 30,
-      }),
-      this.dailyStreaksRepository.findOne({ where: { userId } }),
-      this.questionResultsRepository.find({
-        where: { userId },
-        relations: ['question', 'question.exercise', 'lastAttempt'],
-        order: { attemptedAt: 'DESC' },
-        take: 50,
-      }),
-      this.questionAttemptsRepository.find({
-        where: { userId },
-        relations: ['question'],
-        order: { attemptedAt: 'DESC' },
-        take: 50,
-      }),
-      this.personalVocabulariesRepository.find({
-        where: { userId },
-        order: { updatedAt: 'DESC' },
-        take: 100,
-      }),
-      this.bookmarksRepository.find({
-        where: { userId },
-        relations: ['vocabulary', 'personalVocabulary'],
-        order: { createdAt: 'DESC' },
-        take: 100,
-      }),
-      this.simulationSessionsRepository.find({
-        where: { userId },
-        relations: ['scenario', 'chosenCharacter'],
-        order: { updatedAt: 'DESC' },
-        take: 50,
-      }),
-      this.conversationsRepository.find({
-        where: { userId },
-        relations: ['course', 'lesson'],
-        order: { updatedAt: 'DESC' },
-        take: 50,
-      }),
-    ]);
-
-    const correctResults = questionResults.filter((item) => item.isCorrect);
-    const completedProgress = progress.filter(
-      (item) => item.status === ProgressStatus.COMPLETED,
-    );
-    const completedSimulations = simulations.filter(
-      (item) => item.status === SimulationSessionStatus.COMPLETED,
-    );
-
-    const simulationMessageCounts = simulations.length
-      ? await this.simulationMessagesRepository
-          .createQueryBuilder('m')
-          .select('m.session_id', 'sessionId')
-          .addSelect('COUNT(*)', 'count')
-          .where('m.session_id IN (:...ids)', {
-            ids: simulations.map((s) => s.id),
-          })
-          .andWhere('m.deleted_at IS NULL')
-          .groupBy('m.session_id')
-          .getRawMany<{ sessionId: string; count: string }>()
-      : [];
-    const simulationCountMap = new Map(
-      simulationMessageCounts.map((row) => [row.sessionId, Number(row.count)]),
-    );
-
-    const conversationMessageStats = conversations.length
-      ? await this.conversationMessagesRepository
-          .createQueryBuilder('m')
-          .select('m.conversation_id', 'conversationId')
-          .addSelect('COUNT(*)', 'count')
-          .addSelect('COALESCE(SUM(m.token_count), 0)', 'tokens')
-          .where('m.conversation_id IN (:...ids)', {
-            ids: conversations.map((c) => c.id),
-          })
-          .andWhere('m.deleted_at IS NULL')
-          .groupBy('m.conversation_id')
-          .getRawMany<{
-            conversationId: string;
-            count: string;
-            tokens: string;
-          }>()
-      : [];
-    const conversationStatsMap = new Map(
-      conversationMessageStats.map((row) => [
-        row.conversationId,
-        { count: Number(row.count), tokens: Number(row.tokens) },
-      ]),
-    );
-
-    const simulationsWithCounts = simulations.map((session) => {
-      const actualCount = simulationCountMap.get(session.id) ?? 0;
-      return {
-        ...session,
-        messageCount: actualCount,
-        totalMessages:
-          session.totalMessages && session.totalMessages > 0
-            ? session.totalMessages
-            : actualCount,
-      };
-    });
-
-    const conversationsWithCounts = conversations.map((conversation) => {
-      const stats = conversationStatsMap.get(conversation.id);
-      const totalTokens =
-        conversation.totalTokens && conversation.totalTokens > 0
-          ? conversation.totalTokens
-          : (stats?.tokens ?? 0);
-      return {
-        ...conversation,
-        messageCount: stats?.count ?? 0,
-        totalTokens,
-      };
-    });
-
-    return {
-      user: user.toJSON(),
-      summary: {
-        progressCount: progress.length,
-        completedProgressCount: completedProgress.length,
-        questionResultsCount: questionResults.length,
-        correctQuestionResultsCount: correctResults.length,
-        personalVocabularyCount: personalVocabularies.length,
-        bookmarkCount: bookmarks.length,
-        simulationCount: simulations.length,
-        completedSimulationCount: completedSimulations.length,
-        conversationCount: conversations.length,
-        currentStreak: dailyStreak?.currentStreak ?? 0,
-        longestStreak: dailyStreak?.longestStreak ?? 0,
-      },
-      progress,
-      dailyGoals,
-      dailyProgress,
-      dailyStreak,
-      questionResults,
-      questionAttempts,
-      personalVocabularies,
-      bookmarks,
-      simulations: simulationsWithCounts,
-      conversations: conversationsWithCounts,
-    };
   }
 
   async findConversation(userId: string, conversationId: string) {

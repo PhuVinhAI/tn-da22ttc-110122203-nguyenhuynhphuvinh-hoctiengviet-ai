@@ -4,13 +4,17 @@ import { RequirePermissions } from '../../../common/decorators';
 import { Permission } from '../../../common/enums';
 import { PermissionsGuard } from '../../../common/guards/permissions.guard';
 import { AdminLearnersService } from '../application/admin-learners.service';
+import { AdminLearnerAnalyticsService } from '../application/admin-learner-analytics.service';
 
 @ApiTags('Admin Learners')
 @ApiBearerAuth()
 @Controller('admin/learners')
 @UseGuards(PermissionsGuard)
 export class AdminLearnersController {
-  constructor(private readonly service: AdminLearnersService) {}
+  constructor(
+    private readonly service: AdminLearnersService,
+    private readonly analyticsService: AdminLearnerAnalyticsService,
+  ) {}
 
   @Get()
   @RequirePermissions(Permission.USER_LIST)
@@ -19,11 +23,16 @@ export class AdminLearnersController {
     return this.service.findAll();
   }
 
+  /**
+   * Bảng phân tích tổng hợp cho từng học viên — thay cho findOne cũ.
+   * Trả về toàn bộ dữ liệu chart/heatmap/insights để render dashboard
+   * "Học viên 360°" trên admin.
+   */
   @Get(':userId')
   @RequirePermissions(Permission.USER_READ)
-  @ApiOperation({ summary: 'Get learner profile and learning data' })
-  findOne(@Param('userId') userId: string) {
-    return this.service.findOne(userId);
+  @ApiOperation({ summary: 'Get learner analytics dashboard payload' })
+  getAnalytics(@Param('userId') userId: string) {
+    return this.analyticsService.getAnalytics(userId);
   }
 
   @Get(':userId/conversations/:conversationId')
