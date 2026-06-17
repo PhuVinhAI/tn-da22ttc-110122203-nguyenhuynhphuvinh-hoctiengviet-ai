@@ -109,10 +109,7 @@ export class AgentService {
         const tool = this.toolMap.get(fc.name);
         if (!tool) {
           this.logger.warn(`Tool ${fc.name} not found`);
-          functionResults.push({
-            name: fc.name,
-            result: { error: `Tool ${fc.name} not found` },
-          });
+          functionResults.push(this.shapeToolNotFound(fc.name));
           continue;
         }
 
@@ -124,10 +121,7 @@ export class AgentService {
             this.logger.warn(
               `Invalid parameters for tool ${fc.name}: ${error.message}`,
             );
-            functionResults.push({
-              name: fc.name,
-              result: { error: `Invalid parameters: ${error.message}` },
-            });
+            functionResults.push(this.shapeInvalidParams(fc.name, error));
             continue;
           }
           throw error;
@@ -135,16 +129,10 @@ export class AgentService {
 
         try {
           const result = await tool.execute(validatedParams, ctx);
-          functionResults.push({
-            name: fc.name,
-            result,
-          });
+          functionResults.push({ name: fc.name, result });
         } catch (error) {
           this.logger.error(`Tool ${fc.name} execution failed: ${error}`);
-          functionResults.push({
-            name: fc.name,
-            result: { error: `Tool execution failed: ${error.message}` },
-          });
+          functionResults.push(this.shapeExecutionError(fc.name, error));
         }
       }
 
@@ -156,17 +144,10 @@ export class AgentService {
         tokenCount: 0,
       });
 
-      aiMessages.push(
-        ...response.functionCalls.map((fc) => ({
-          role: 'assistant' as const,
-          content: '',
-          functionCall: fc,
-        })),
-        ...functionResults.map((fr) => ({
-          role: 'function' as const,
-          content: '',
-          functionResult: fr,
-        })),
+      this.appendToolTurnToHistory(
+        aiMessages,
+        response.functionCalls,
+        functionResults,
       );
     }
 
@@ -415,10 +396,7 @@ export class AgentService {
 
         if (!tool) {
           this.logger.warn(`Tool ${fc.name} not found`);
-          functionResults.push({
-            name: fc.name,
-            result: { error: `Tool ${fc.name} not found` },
-          });
+          functionResults.push(this.shapeToolNotFound(fc.name));
           yield { type: 'tool_result', name: fc.name, ok: false };
           continue;
         }
@@ -431,10 +409,7 @@ export class AgentService {
             this.logger.warn(
               `Invalid parameters for tool ${fc.name}: ${error.message}`,
             );
-            functionResults.push({
-              name: fc.name,
-              result: { error: `Invalid parameters: ${error.message}` },
-            });
+            functionResults.push(this.shapeInvalidParams(fc.name, error));
             yield { type: 'tool_result', name: fc.name, ok: false };
             continue;
           }
@@ -443,17 +418,12 @@ export class AgentService {
 
         try {
           const result = await tool.execute(validatedParams, ctx);
-          const ok = !(result && result.error);
+          const ok = this.computeToolOk(result);
           functionResults.push({ name: fc.name, result });
           yield { type: 'tool_result', name: fc.name, ok };
         } catch (error) {
           this.logger.error(`Tool ${fc.name} execution failed: ${error}`);
-          functionResults.push({
-            name: fc.name,
-            result: {
-              error: `Tool execution failed: ${(error as Error).message}`,
-            },
-          });
+          functionResults.push(this.shapeExecutionError(fc.name, error));
           yield { type: 'tool_result', name: fc.name, ok: false };
         }
       }
@@ -474,18 +444,7 @@ export class AgentService {
         break;
       }
 
-      aiMessages.push(
-        ...calls.map((fc) => ({
-          role: 'assistant' as const,
-          content: '',
-          functionCall: fc,
-        })),
-        ...functionResults.map((fr) => ({
-          role: 'function' as const,
-          content: '',
-          functionResult: fr,
-        })),
-      );
+      this.appendToolTurnToHistory(aiMessages, calls, functionResults);
     }
 
     if (iterations >= AI_TOOL_MAX_ITERATIONS && !finalAssistantMessage) {
@@ -613,6 +572,65 @@ export class AgentService {
       systemInstruction += `\nCurrent lesson ID: ${conversation.lessonId}`;
     }
     return systemInstruction;
+  }
+
+  // ---- Shared tool-loop helpers (used by both runTurn and runTurnStream) ----
+  // These extract the verbatim-duplicated error-shaping + history-append
+  // logic so the two loops cannot silently diverge. The loops keep their own
+  // orchestration (streaming yields, abort control flow, debug snapshots).
+
+  /** Shape the result for an unknown tool name. Identical string in both loops. */
+  private shapeToolNotFound(name: string): AiFunctionResult {
+    return { name, result: { error: `Tool ${name} not found` } };
+  }
+
+  /** Shape the result for a ZodError during parameter validation. */
+  private shapeInvalidParams(name: string, error: ZodError): AiFunctionResult {
+    return { name, result: { error: `Invalid parameters: ${error.message}` } };
+  }
+
+  /**
+   * Shape the result for a tool execution failure. Uses the explicit
+   * `(error as Error).message` cast form so behavior is identical for Error
+   * instances and safer under strict catch-variable typing.
+   */
+  private shapeExecutionError(name: string, error: unknown): AiFunctionResult {
+    return {
+      name,
+      result: { error: `Tool execution failed: ${(error as Error).message}` },
+    };
+  }
+
+  /**
+   * Stream-only `ok` flag: a successfully-executed tool that returns an
+   * `{ error }` payload is reported as `ok: false`. Kept as a helper so the
+   * contract lives in one place.
+   */
+  private computeToolOk(result: unknown): boolean {
+    return !(result && (result as { error?: unknown }).error);
+  }
+
+  /**
+   * Append one tool turn (the model's function calls + the tool results) to
+   * the running AI message history. Verbatim-identical between both loops.
+   */
+  private appendToolTurnToHistory(
+    aiMessages: AiMessage[],
+    calls: NonNullable<AiChatResponse['functionCalls']>,
+    functionResults: AiFunctionResult[],
+  ): void {
+    aiMessages.push(
+      ...calls.map((fc) => ({
+        role: 'assistant' as const,
+        content: '',
+        functionCall: fc,
+      })),
+      ...functionResults.map((fr) => ({
+        role: 'function' as const,
+        content: '',
+        functionResult: fr,
+      })),
+    );
   }
 
   private serializeAiRequestForDebug(

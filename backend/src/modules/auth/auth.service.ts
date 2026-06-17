@@ -9,7 +9,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
+import { Repository, LessThan, IsNull } from 'typeorm';
 import { OAuth2Client } from 'google-auth-library';
 import { UsersService } from '../users/application/users.service';
 import { User } from '../users/domain/user.entity';
@@ -161,7 +161,7 @@ export class AuthService {
     await this.usersService.update(result.userId, {
       emailVerified: true,
       emailVerifiedAt: new Date(),
-    } as any);
+    });
 
     await this.emailQueueService.sendWelcomeEmail(
       result.email,
@@ -197,7 +197,7 @@ export class AuthService {
     await this.usersService.update(result.userId, {
       emailVerified: true,
       emailVerifiedAt: new Date(),
-    } as any);
+    });
 
     const tokens = await this.generateTokens(
       user.id,
@@ -267,7 +267,7 @@ export class AuthService {
 
     await this.usersService.update(result.userId, {
       password: newPassword,
-    } as any);
+    });
 
     const user = await this.usersService.findById(result.userId);
 
@@ -351,9 +351,14 @@ export class AuthService {
     // Generate access token (short-lived)
     const expiresIn =
       this.configService.get<string>('jwt.accessTokenExpiresIn') || '15m';
+    // `expiresIn` is a string like '15m'; @nestjs/jwt's JwtSignOptions.expiresIn
+    // is typed as `number | StringValue | undefined` where StringValue is an
+    // ms-style branded type. A plain string works at runtime but doesn't satisfy
+    // the branded type, so cast just this field (narrower than the old whole-
+    // object `as any`).
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn,
-    } as any);
+      expiresIn: expiresIn as unknown as number,
+    });
 
     // Generate refresh token (long-lived)
     const refreshTokenValue = randomBytes(64).toString('hex');
@@ -422,7 +427,7 @@ export class AuthService {
           avatarUrl: avatarUrl || user.avatarUrl,
           emailVerified: true,
           emailVerifiedAt: new Date(),
-        } as any);
+        });
       }
       return user;
     }
@@ -525,7 +530,7 @@ export class AuthService {
 
     // Find refresh token (only non-revoked)
     const refreshToken = await this.refreshTokenRepository.findOne({
-      where: { token: tokenValue, revokedAt: null as any },
+      where: { token: tokenValue, revokedAt: IsNull() },
       relations: ['user'],
     });
 
@@ -584,7 +589,7 @@ export class AuthService {
 
   async revokeAllUserTokens(userId: string) {
     await this.refreshTokenRepository.update(
-      { userId, revokedAt: null as any },
+      { userId, revokedAt: IsNull() },
       { revokedAt: new Date() },
     );
 

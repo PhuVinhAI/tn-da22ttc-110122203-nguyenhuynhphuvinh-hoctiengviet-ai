@@ -3,6 +3,14 @@ import { Exclude } from 'class-transformer';
 import { BaseEntity } from '../../../database/base/base.entity';
 import { UserLevel, Dialect, Role } from '../../../common/enums';
 import { getRoleView } from '../../../common/auth/role-permissions';
+// Type-only imports keep the string-target @OneToMany decorators (which avoid
+// circular runtime imports) while giving the relation fields real types.
+// Erased at runtime — the decorator metadata, not these types, drives loading.
+import type { LearningProgress } from '../../progress/domain/learning-progress.entity';
+import type { UserQuestionResult } from '../../exercises/domain/user-question-result.entity';
+import type { QuestionAttempt } from '../../exercises/domain/question-attempt.entity';
+import type { RefreshToken } from '../../auth/domain/refresh-token.entity';
+import type { PersonalVocabulary } from '../../personal-vocabularies/domain/personal-vocabulary.entity';
 
 @Entity('users')
 @Index('UQ_users_active_email', ['email'], {
@@ -77,19 +85,19 @@ export class User extends BaseEntity {
   }
 
   @OneToMany('LearningProgress', 'user')
-  progress: any[];
+  progress: LearningProgress[];
 
   @OneToMany('UserQuestionResult', 'user')
-  questionResults: any[];
+  questionResults: UserQuestionResult[];
 
   @OneToMany('QuestionAttempt', 'user')
-  questionAttempts: any[];
+  questionAttempts: QuestionAttempt[];
 
   @OneToMany('RefreshToken', 'user')
-  refreshTokens: any[];
+  refreshTokens: RefreshToken[];
 
   @OneToMany('PersonalVocabulary', 'user')
-  personalVocabularies: any[];
+  personalVocabularies: PersonalVocabulary[];
 
   @Column({ name: 'notification_enabled', default: false })
   notificationEnabled: boolean;
