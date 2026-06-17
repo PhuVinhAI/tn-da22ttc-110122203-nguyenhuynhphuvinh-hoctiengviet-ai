@@ -112,11 +112,17 @@ export class AiController {
             (error as any)?.stack,
           );
           try {
+            // Only surface the provider-mapped code to the client; a generic
+            // message avoids leaking internal error detail (DB strings, stack
+            // fragments) over SSE. The full message is logged server-side above.
+            const isMappedAiError = Boolean(error.code);
             subscriber.next(
               this.sseEventEncoder.encode({
                 type: 'error',
                 code: error.code ?? 'AI_SERVICE_UNAVAILABLE',
-                message: error.message || 'Internal error',
+                message: isMappedAiError
+                  ? error.message || 'AI service error'
+                  : 'AI service unavailable',
               }),
             );
             subscriber.complete();

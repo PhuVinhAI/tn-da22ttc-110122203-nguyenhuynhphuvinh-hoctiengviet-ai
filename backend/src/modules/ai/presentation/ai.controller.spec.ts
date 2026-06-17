@@ -271,7 +271,12 @@ describe('AiController', () => {
       const events = await collect(observable);
       const errorEvt = events.find((e) => e.type === 'error');
       expect(errorEvt).toBeDefined();
-      expect(JSON.parse(errorEvt!.data as string).message).toBe('boom');
+      // Generic (non-AiException) errors are sanitized to a safe message;
+      // the raw 'boom' must not leak to the client. Code defaults to
+      // AI_SERVICE_UNAVAILABLE when the error has no `code`.
+      const errorPayload = JSON.parse(errorEvt!.data as string);
+      expect(errorPayload.code).toBe('AI_SERVICE_UNAVAILABLE');
+      expect(errorPayload.message).toBe('AI service unavailable');
     });
   });
 

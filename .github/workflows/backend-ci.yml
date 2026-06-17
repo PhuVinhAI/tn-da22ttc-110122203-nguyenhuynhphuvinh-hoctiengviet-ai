@@ -1,0 +1,56 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'packages/shared/**'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'packages/shared/**'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/backend-ci.yml'
+
+permissions:
+  contents: read
+
+# Lint → typecheck → test (per AGENTS.md check order). Only jest unit tests run
+# here — e2e/integration suites require postgres + redis (db:up) and are not
+# suitable for a fast PR gate.
+jobs:
+  lint-typecheck-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (monorepo root)
+        working-directory: .
+        run: bun install --frozen-lockfile
+
+      - name: Build shared package
+        working-directory: .
+        run: bun --filter=@linvnix/shared run build
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Unit tests
+        run: bun run test

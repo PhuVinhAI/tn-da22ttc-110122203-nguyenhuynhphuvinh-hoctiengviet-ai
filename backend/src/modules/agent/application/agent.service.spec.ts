@@ -537,6 +537,8 @@ describe('AgentService', () => {
     };
     let mkdirSyncSpy: jest.SpyInstance;
     let writeFileSyncSpy: jest.SpyInstance;
+    let writeFileSpy: jest.SpyInstance;
+    let mkdirSpy: jest.SpyInstance;
 
     async function collect<T>(iter: AsyncIterable<T>): Promise<T[]> {
       const out: T[] = [];
@@ -551,6 +553,15 @@ describe('AgentService', () => {
       writeFileSyncSpy = jest
         .spyOn(fs, 'writeFileSync')
         .mockImplementation(() => undefined);
+      // P1.6: agent.service now writes debug snapshots via fs.promises
+      // (async, dev-only). Spy on the async path too so the snapshot test
+      // below can assert the written content without touching disk.
+      mkdirSpy = jest
+        .spyOn(fs.promises, 'mkdir')
+        .mockResolvedValue(undefined);
+      writeFileSpy = jest
+        .spyOn(fs.promises, 'writeFile')
+        .mockResolvedValue(undefined);
 
       conversationService.findById.mockResolvedValue({
         id: conversationId,
@@ -609,6 +620,8 @@ describe('AgentService', () => {
     afterEach(() => {
       mkdirSyncSpy.mockRestore();
       writeFileSyncSpy.mockRestore();
+      mkdirSpy.mockRestore();
+      writeFileSpy.mockRestore();
     });
 
     it('yields conversation_started + text_chunk + done for a plain text response (no tool calls)', async () => {
@@ -1025,16 +1038,16 @@ describe('AgentService', () => {
         ),
       );
 
-      expect(writeFileSyncSpy).toHaveBeenCalledTimes(1);
-      const [, rawContent] = writeFileSyncSpy.mock.calls[0];
+      // P1.6: snapshot is written via fs.promises.writeFile (async, dev-only)
+      // and contains only non-PII metadata — userMessage and screen-context
+      // content are intentionally excluded.
+      expect(writeFileSpy).toHaveBeenCalledTimes(1);
+      const [, rawContent] = writeFileSpy.mock.calls[0];
       const snapshot = JSON.parse(rawContent as string);
       expect(snapshot).toEqual(
         expect.objectContaining({
           userId: 'user-1',
           conversationId,
-          userMessage,
-          incomingScreenContext,
-          effectiveScreenContext: incomingScreenContext,
           iterations: [
             expect.objectContaining({
               iteration: 1,
@@ -1050,6 +1063,11 @@ describe('AgentService', () => {
         }),
       );
       expect(snapshot.iterations[0].request.abortSignal).toBeUndefined();
+      // PII must not be persisted to the debug snapshot.
+      expect(snapshot).not.toHaveProperty('userMessage');
+      expect(snapshot).not.toHaveProperty('incomingScreenContext');
+      expect(snapshot).not.toHaveProperty('effectiveScreenContext');
+      expect(snapshot).not.toHaveProperty('conversation');
     });
 
     it('persists a partial assistant message with interrupted=true when aborted mid-loop', async () => {

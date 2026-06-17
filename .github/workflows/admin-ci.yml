@@ -1,0 +1,47 @@
+name: Admin CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'admin/**'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/admin-ci.yml'
+  pull_request:
+    paths:
+      - 'admin/**'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/admin-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  lint-typecheck-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: admin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (monorepo root)
+        working-directory: .
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun run test

@@ -36,8 +36,17 @@ COPY --from=builder /app/backend/src/infrastructure/mail/templates ./backend/src
 
 WORKDIR /app/backend
 
-RUN mkdir -p uploads logs
+RUN mkdir -p uploads logs \
+    && chown -R bun:bun /app
+
+# Drop root privileges — the oven/bun alpine image ships a non-root `bun` user.
+USER bun
 
 EXPOSE 3000
+
+# Liveness probe hits the @Public() /health endpoint under the global API
+# prefix. wget is available in alpine; --spider checks the URL without saving.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD wget -qO- --spider http://127.0.0.1:3000/api/v1/health || exit 1
 
 CMD ["bun", "dist/main.js"]

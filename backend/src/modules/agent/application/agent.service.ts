@@ -286,16 +286,8 @@ export class AgentService {
       timestamp: new Date().toISOString(),
       userId,
       conversationId: activeConversationId,
-      userMessage,
-      conversation: {
-        id: conversation.id,
-        userId: conversation.userId,
-        lessonId: conversation.lessonId,
-        courseId: conversation.courseId,
-        screenContext: conversation.screenContext ?? {},
-      },
-      incomingScreenContext: screenContext ?? null,
-      effectiveScreenContext,
+      lessonId: conversation.lessonId,
+      courseId: conversation.courseId,
       iterations: [] as Array<{
         iteration: number;
         request: Omit<AiChatRequest, 'abortSignal'>;
@@ -636,38 +628,43 @@ export class AgentService {
     timestamp: string;
     userId: string;
     conversationId: string;
-    userMessage: string;
-    conversation: {
-      id: string;
-      userId: string;
-      lessonId?: string;
-      courseId?: string;
-      screenContext: Record<string, any>;
-    };
-    incomingScreenContext: Record<string, any> | null;
-    effectiveScreenContext: Record<string, any>;
+    lessonId?: string | null;
+    courseId?: string | null;
     iterations: Array<{
       iteration: number;
       request: Omit<AiChatRequest, 'abortSignal'>;
     }>;
   }): void {
+    // Dev-only: never write debug snapshots in production (PII risk + event-loop
+    // blocking from sync fs writes). Even in dev, write asynchronously so the
+    // request path is not blocked, and only persist non-PII metadata (IDs +
+    // iteration request shapes) — the user message and screen-context content
+    // are intentionally excluded.
+    if (process.env.NODE_ENV === 'production') {
+      return;
+    }
     try {
       const debugDir = path.join(process.cwd(), 'debug');
-      fs.mkdirSync(debugDir, { recursive: true });
-
       const filePath = path.join(debugDir, input.fileName);
       const content = {
         timestamp: input.timestamp,
         userId: input.userId,
         conversationId: input.conversationId,
-        userMessage: input.userMessage,
-        conversation: input.conversation,
-        incomingScreenContext: input.incomingScreenContext,
-        effectiveScreenContext: input.effectiveScreenContext,
+        lessonId: input.lessonId,
+        courseId: input.courseId,
         iterations: input.iterations,
       };
+      const serialized = JSON.stringify(content, null, 2);
 
-      fs.writeFileSync(filePath, JSON.stringify(content, null, 2), 'utf8');
+      // Async mkdir + write so the request path is not blocked under load.
+      fs.promises
+        .mkdir(debugDir, { recursive: true })
+        .then(() => fs.promises.writeFile(filePath, serialized, 'utf8'))
+        .catch((error: NodeJS.ErrnoException) =>
+          this.logger.warn(
+            `Failed to write AI debug snapshot: ${error.message}`,
+          ),
+        );
 
       this.logger.debug(`AI debug snapshot written to debug/${input.fileName}`);
     } catch (error) {

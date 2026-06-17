@@ -716,14 +716,22 @@ export class ExerciseGenerationService {
 
     const systemInstruction = this.buildSystemInstruction();
 
-    const debugDir = path.join(process.cwd(), 'debug');
-    if (!fs.existsSync(debugDir)) fs.mkdirSync(debugDir, { recursive: true });
-    const debugId = `${exercise.id}-${Date.now()}`;
-    fs.writeFileSync(
-      path.join(debugDir, `prompt-${debugId}.txt`),
-      `=== SYSTEM INSTRUCTION ===\n${systemInstruction}\n\n=== USER PROMPT ===\n${prompt}\n\n=== SCHEMA ===\n${JSON.stringify(responseSchema, null, 2)}`,
-    );
-    this.logger.log(`Debug prompt written to debug/prompt-${debugId}.txt`);
+    // Dev-only debug dump of the generation prompt. Never in production (disk
+    // bloat + sync I/O on the request path); async in dev so the event loop
+    // is not blocked.
+    if (process.env.NODE_ENV !== 'production') {
+      const debugDir = path.join(process.cwd(), 'debug');
+      const debugId = `${exercise.id}-${Date.now()}`;
+      const filePath = path.join(debugDir, `prompt-${debugId}.txt`);
+      const serialized = `=== SYSTEM INSTRUCTION ===\n${systemInstruction}\n\n=== USER PROMPT ===\n${prompt}\n\n=== SCHEMA ===\n${JSON.stringify(responseSchema, null, 2)}`;
+      fs.promises
+        .mkdir(debugDir, { recursive: true })
+        .then(() => fs.promises.writeFile(filePath, serialized, 'utf8'))
+        .catch((error: NodeJS.ErrnoException) =>
+          this.logger.warn(`Failed to write debug prompt: ${error.message}`),
+        );
+      this.logger.debug(`Debug prompt queued for debug/prompt-${debugId}.txt`);
+    }
 
     const { result: generated } = await withParseRetry(
       () =>

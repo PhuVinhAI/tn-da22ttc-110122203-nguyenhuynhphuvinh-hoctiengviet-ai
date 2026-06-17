@@ -1,0 +1,43 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  analyze-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Fetch dependencies
+        run: flutter pub get
+
+      # Static analysis catches type errors and unused imports without the
+      # build cost of a full compile. Treated as warnings gate — fail on any
+      # analyzer error.
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        run: flutter test
