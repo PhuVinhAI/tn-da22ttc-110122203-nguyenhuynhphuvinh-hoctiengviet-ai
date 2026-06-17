@@ -19,6 +19,9 @@ import {
 import { QuestionsService } from '../application/questions.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators';
+import { RequirePermissions } from '../../../common/decorators';
+import { PermissionsGuard } from '../../../common/guards/permissions.guard';
+import { Permission } from '../../../common/enums';
 import { User } from '../../users/domain/user.entity';
 import { Public } from '../../../common/decorators';
 import { CreateQuestionDto } from '../dto/create-question.dto';
@@ -162,8 +165,9 @@ export class QuestionsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Post()
+  @RequirePermissions(Permission.EXERCISE_CREATE)
   @ApiOperation({
     summary: 'Tạo bài tập mới',
     description: 'Tạo bài tập mới trong lesson - yêu cầu quyền Admin',
@@ -171,13 +175,15 @@ export class QuestionsController {
   @ApiBody({ type: CreateQuestionDto })
   @ApiResponse({ status: 201, description: 'Tạo bài tập thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 403, description: 'Không có quyền EXERCISE_CREATE' })
   async create(@Body() createQuestionDto: CreateQuestionDto) {
     return this.questionsService.create(createQuestionDto);
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Patch(':id')
+  @RequirePermissions(Permission.EXERCISE_UPDATE)
   @ApiOperation({
     summary: 'Cập nhật bài tập',
     description: 'Cập nhật thông tin bài tập - yêu cầu quyền Admin',
@@ -185,6 +191,7 @@ export class QuestionsController {
   @ApiParam({ name: 'id', description: 'ID của bài tập' })
   @ApiBody({ type: CreateQuestionDto })
   @ApiResponse({ status: 200, description: 'Cập nhật thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền EXERCISE_UPDATE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy bài tập' })
   async update(
     @Param('id') id: string,
@@ -194,8 +201,9 @@ export class QuestionsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Delete(':id')
+  @RequirePermissions(Permission.EXERCISE_DELETE)
   @ApiOperation({
     summary: 'Xóa bài tập',
     description: 'Xóa bài tập khỏi lesson - yêu cầu quyền Admin',
@@ -206,6 +214,7 @@ export class QuestionsController {
     description: 'Xóa thành công',
     schema: { example: { message: 'Exercise deleted successfully' } },
   })
+  @ApiResponse({ status: 403, description: 'Không có quyền EXERCISE_DELETE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy bài tập' })
   async remove(@Param('id') id: string) {
     return this.questionsService.delete(id);

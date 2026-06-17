@@ -17,14 +17,17 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { CourseContentService } from '../application/course-content.service';
-import { Public } from '../../../common/decorators';
+import { Public, RequirePermissions } from '../../../common/decorators';
 import { CurrentUser } from '../../../common/decorators';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../../common/guards/permissions.guard';
+import { Permission } from '../../../common/enums';
 import { User } from '../../users/domain/user.entity';
 import { CreateLessonDto } from '../dto/lessons/create-lesson.dto';
 
 @ApiTags('Lessons')
 @Controller('lessons')
+@UseGuards(PermissionsGuard)
 export class LessonsController {
   constructor(private readonly courseContentService: CourseContentService) {}
 
@@ -78,8 +81,8 @@ export class LessonsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post()
+  @RequirePermissions(Permission.LESSON_CREATE)
   @ApiOperation({
     summary: 'Tạo lesson mới',
     description: 'Tạo lesson mới trong module - yêu cầu quyền Admin',
@@ -87,13 +90,14 @@ export class LessonsController {
   @ApiBody({ type: CreateLessonDto })
   @ApiResponse({ status: 201, description: 'Tạo lesson thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 403, description: 'Không có quyền LESSON_CREATE' })
   async create(@Body() createLessonDto: CreateLessonDto) {
     return this.courseContentService.createLesson(createLessonDto);
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
+  @RequirePermissions(Permission.LESSON_UPDATE)
   @ApiOperation({
     summary: 'Cập nhật lesson',
     description: 'Cập nhật thông tin lesson - yêu cầu quyền Admin',
@@ -101,6 +105,7 @@ export class LessonsController {
   @ApiParam({ name: 'id', description: 'ID của lesson' })
   @ApiBody({ type: CreateLessonDto })
   @ApiResponse({ status: 200, description: 'Cập nhật thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền LESSON_UPDATE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy lesson' })
   async update(
     @Param('id') id: string,
@@ -110,8 +115,8 @@ export class LessonsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
+  @RequirePermissions(Permission.LESSON_DELETE)
   @ApiOperation({
     summary: 'Xóa lesson',
     description: 'Xóa lesson khỏi module - yêu cầu quyền Admin',
@@ -122,6 +127,7 @@ export class LessonsController {
     description: 'Xóa thành công',
     schema: { example: { message: 'Lesson deleted successfully' } },
   })
+  @ApiResponse({ status: 403, description: 'Không có quyền LESSON_DELETE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy lesson' })
   async remove(@Param('id') id: string) {
     return this.courseContentService.deleteLesson(id);

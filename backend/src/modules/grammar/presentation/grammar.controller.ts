@@ -17,12 +17,14 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { CourseContentService } from '../../courses/application/course-content.service';
-import { Public } from '../../../common/decorators';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { Public, RequirePermissions } from '../../../common/decorators';
+import { PermissionsGuard } from '../../../common/guards/permissions.guard';
+import { Permission } from '../../../common/enums';
 import { CreateGrammarDto } from '../dto/create-grammar.dto';
 
 @ApiTags('Grammar')
 @Controller('grammar')
+@UseGuards(PermissionsGuard)
 export class GrammarController {
   constructor(private readonly courseContentService: CourseContentService) {}
 
@@ -87,8 +89,8 @@ export class GrammarController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post()
+  @RequirePermissions(Permission.GRAMMAR_CREATE)
   @ApiOperation({
     summary: 'Tạo ngữ pháp mới',
     description: 'Tạo quy tắc ngữ pháp mới trong lesson - yêu cầu quyền Admin',
@@ -96,13 +98,14 @@ export class GrammarController {
   @ApiBody({ type: CreateGrammarDto })
   @ApiResponse({ status: 201, description: 'Tạo ngữ pháp thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 403, description: 'Không có quyền GRAMMAR_CREATE' })
   async create(@Body() createGrammarDto: CreateGrammarDto) {
     return this.courseContentService.createGrammarRule(createGrammarDto);
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
+  @RequirePermissions(Permission.GRAMMAR_UPDATE)
   @ApiOperation({
     summary: 'Cập nhật ngữ pháp',
     description: 'Cập nhật thông tin ngữ pháp - yêu cầu quyền Admin',
@@ -110,6 +113,7 @@ export class GrammarController {
   @ApiParam({ name: 'id', description: 'ID của ngữ pháp' })
   @ApiBody({ type: CreateGrammarDto })
   @ApiResponse({ status: 200, description: 'Cập nhật thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền GRAMMAR_UPDATE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy ngữ pháp' })
   async update(
     @Param('id') id: string,
@@ -119,8 +123,8 @@ export class GrammarController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
+  @RequirePermissions(Permission.GRAMMAR_DELETE)
   @ApiOperation({
     summary: 'Xóa ngữ pháp',
     description: 'Xóa quy tắc ngữ pháp khỏi lesson - yêu cầu quyền Admin',
@@ -131,6 +135,7 @@ export class GrammarController {
     description: 'Xóa thành công',
     schema: { example: { message: 'Grammar deleted successfully' } },
   })
+  @ApiResponse({ status: 403, description: 'Không có quyền GRAMMAR_DELETE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy ngữ pháp' })
   async remove(@Param('id') id: string) {
     return this.courseContentService.deleteGrammarRule(id);

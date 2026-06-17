@@ -28,8 +28,10 @@ bun run typecheck      # tsc --noEmit
 bun run lint           # eslint --fix
 bun run test           # jest unit tests (*.spec.ts)
 bun run test:e2e       # jest e2e tests (*.e2e-spec.ts)
-bun run test:integration  # custom bun scripts (NOT jest)
-bun run test:integration:auth   # run a single integration suite
+bun run test:integration:bookmarks          # custom bun integration suite (NOT jest)
+bun run test:integration:personal-vocabularies
+bun run test:integration:search-vocabulary
+bun run test:integration:simulations-seed
 bun run admin:create   # create admin user
 
 # Admin (from admin/)
@@ -68,8 +70,8 @@ bun run lint
 ## Testing
 
 - Unit tests: jest, files matching `*.spec.ts` in `src/`
-- E2E tests: jest with `test/jest-e2e.json`, files matching `*.e2e-spec.ts` in `test/`
-- Integration tests: custom bun scripts in `scripts/test/suites/` — **not jest**, run via `bun run test:integration:*`
+- E2E tests: jest with `test/jest-e2e.json` (with `setupFiles: ['./setup-env.ts']` providing required env), files matching `*.e2e-spec.ts` in `test/`
+- Integration tests: custom bun scripts in `scripts/test/suites/` — **not jest**. Currently 4 active suites: `bookmarks`, `personal-vocabularies`, `search-vocabulary`, `simulations-seed` (run via `bun run test:integration:<suite>`). Coverage gaps for auth/refresh-token/email-queue/courses-CRUD/vocabularies-CRUD/scenarios are tracked as future work.
 - Integration and e2e tests require `db:up` (postgres + redis running)
 
 ## Environment

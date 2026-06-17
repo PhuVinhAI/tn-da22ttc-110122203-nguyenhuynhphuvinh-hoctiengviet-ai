@@ -26,7 +26,9 @@ import { BookmarksService } from '../application/bookmarks.service';
 import { StorageService } from '../../../infrastructure/storage/storage.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../../auth/guards/optional-jwt-auth.guard';
-import { CurrentUser } from '../../../common/decorators';
+import { CurrentUser, RequirePermissions } from '../../../common/decorators';
+import { PermissionsGuard } from '../../../common/guards/permissions.guard';
+import { Permission } from '../../../common/enums';
 import { User } from '../../users/domain/user.entity';
 import { Public } from '../../../common/decorators';
 import { CreateVocabularyDto } from '../dto/create-vocabulary.dto';
@@ -204,8 +206,9 @@ export class VocabulariesController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Post()
+  @RequirePermissions(Permission.VOCABULARY_CREATE)
   @ApiOperation({
     summary: 'Tạo từ vựng mới',
     description: 'Tạo từ vựng mới trong lesson - yêu cầu quyền Admin',
@@ -213,13 +216,15 @@ export class VocabulariesController {
   @ApiBody({ type: CreateVocabularyDto })
   @ApiResponse({ status: 201, description: 'Tạo từ vựng thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 403, description: 'Không có quyền VOCABULARY_CREATE' })
   async create(@Body() createVocabularyDto: CreateVocabularyDto) {
     return this.vocabulariesService.create(createVocabularyDto);
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Patch(':id')
+  @RequirePermissions(Permission.VOCABULARY_UPDATE)
   @ApiOperation({
     summary: 'Cập nhật từ vựng',
     description: 'Cập nhật thông tin từ vựng - yêu cầu quyền Admin',
@@ -227,6 +232,7 @@ export class VocabulariesController {
   @ApiParam({ name: 'id', description: 'ID của từ vựng' })
   @ApiBody({ type: CreateVocabularyDto })
   @ApiResponse({ status: 200, description: 'Cập nhật thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền VOCABULARY_UPDATE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy từ vựng' })
   async update(
     @Param('id') id: string,
@@ -236,8 +242,9 @@ export class VocabulariesController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Delete(':id')
+  @RequirePermissions(Permission.VOCABULARY_DELETE)
   @ApiOperation({
     summary: 'Xóa từ vựng',
     description: 'Xóa từ vựng khỏi lesson - yêu cầu quyền Admin',
@@ -248,14 +255,16 @@ export class VocabulariesController {
     description: 'Xóa thành công',
     schema: { example: { message: 'Vocabulary deleted successfully' } },
   })
+  @ApiResponse({ status: 403, description: 'Không có quyền VOCABULARY_DELETE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy từ vựng' })
   async remove(@Param('id') id: string) {
     return this.vocabulariesService.delete(id);
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Post('upload-audio')
+  @RequirePermissions(Permission.ADMIN_ACCESS)
   @ApiOperation({
     summary: 'Upload audio cho từ vựng',
     description: 'Upload file audio phát âm cho từ vựng',
@@ -296,8 +305,9 @@ export class VocabulariesController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Post('upload-image')
+  @RequirePermissions(Permission.ADMIN_ACCESS)
   @ApiOperation({
     summary: 'Upload hình ảnh cho từ vựng',
     description: 'Upload file hình ảnh minh họa cho từ vựng',

@@ -62,6 +62,7 @@ describe('AgentService', () => {
       findByUser: jest.fn(),
       updateScreenContext: jest.fn(),
       softDelete: jest.fn(),
+      lastUserMessageExists: jest.fn().mockResolvedValue(true),
     } as any;
 
     genaiService = {

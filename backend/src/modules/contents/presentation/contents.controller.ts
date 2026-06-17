@@ -17,12 +17,14 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { CourseContentService } from '../../courses/application/course-content.service';
-import { Public } from '../../../common/decorators';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { Public, RequirePermissions } from '../../../common/decorators';
+import { PermissionsGuard } from '../../../common/guards/permissions.guard';
+import { Permission } from '../../../common/enums';
 import { CreateContentDto } from '../dto/create-content.dto';
 
 @ApiTags('Contents')
 @Controller('contents')
+@UseGuards(PermissionsGuard)
 export class ContentsController {
   constructor(private readonly courseContentService: CourseContentService) {}
 
@@ -90,8 +92,8 @@ export class ContentsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post()
+  @RequirePermissions(Permission.CONTENT_CREATE)
   @ApiOperation({
     summary: 'Tạo nội dung mới',
     description: 'Tạo nội dung học mới trong lesson - yêu cầu quyền Admin',
@@ -99,13 +101,14 @@ export class ContentsController {
   @ApiBody({ type: CreateContentDto })
   @ApiResponse({ status: 201, description: 'Tạo nội dung thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 403, description: 'Không có quyền CONTENT_CREATE' })
   async create(@Body() createContentDto: CreateContentDto) {
     return this.courseContentService.createContent(createContentDto);
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
+  @RequirePermissions(Permission.CONTENT_UPDATE)
   @ApiOperation({
     summary: 'Cập nhật nội dung',
     description: 'Cập nhật thông tin nội dung - yêu cầu quyền Admin',
@@ -113,6 +116,7 @@ export class ContentsController {
   @ApiParam({ name: 'id', description: 'ID của nội dung' })
   @ApiBody({ type: CreateContentDto })
   @ApiResponse({ status: 200, description: 'Cập nhật thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền CONTENT_UPDATE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy nội dung' })
   async update(
     @Param('id') id: string,
@@ -122,8 +126,8 @@ export class ContentsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
+  @RequirePermissions(Permission.CONTENT_DELETE)
   @ApiOperation({
     summary: 'Xóa nội dung',
     description: 'Xóa nội dung khỏi lesson - yêu cầu quyền Admin',
@@ -134,6 +138,7 @@ export class ContentsController {
     description: 'Xóa thành công',
     schema: { example: { message: 'Content deleted successfully' } },
   })
+  @ApiResponse({ status: 403, description: 'Không có quyền CONTENT_DELETE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy nội dung' })
   async remove(@Param('id') id: string) {
     return this.courseContentService.deleteContent(id);

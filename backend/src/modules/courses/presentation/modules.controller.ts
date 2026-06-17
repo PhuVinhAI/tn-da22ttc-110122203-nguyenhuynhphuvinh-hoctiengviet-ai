@@ -17,12 +17,14 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { CourseContentService } from '../application/course-content.service';
-import { Public } from '../../../common/decorators';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { Public, RequirePermissions } from '../../../common/decorators';
+import { PermissionsGuard } from '../../../common/guards/permissions.guard';
+import { Permission } from '../../../common/enums';
 import { CreateModuleDto } from '../dto/modules/create-module.dto';
 
 @ApiTags('Modules')
 @Controller('modules')
+@UseGuards(PermissionsGuard)
 export class ModulesController {
   constructor(private readonly courseContentService: CourseContentService) {}
 
@@ -87,8 +89,8 @@ export class ModulesController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post()
+  @RequirePermissions(Permission.MODULE_CREATE)
   @ApiOperation({
     summary: 'Tạo module mới',
     description: 'Tạo module mới trong khóa học - yêu cầu quyền Admin',
@@ -96,13 +98,14 @@ export class ModulesController {
   @ApiBody({ type: CreateModuleDto })
   @ApiResponse({ status: 201, description: 'Tạo module thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 403, description: 'Không có quyền MODULE_CREATE' })
   async create(@Body() createModuleDto: CreateModuleDto) {
     return this.courseContentService.createModule(createModuleDto);
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
+  @RequirePermissions(Permission.MODULE_UPDATE)
   @ApiOperation({
     summary: 'Cập nhật module',
     description: 'Cập nhật thông tin module - yêu cầu quyền Admin',
@@ -110,6 +113,7 @@ export class ModulesController {
   @ApiParam({ name: 'id', description: 'ID của module' })
   @ApiBody({ type: CreateModuleDto })
   @ApiResponse({ status: 200, description: 'Cập nhật thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền MODULE_UPDATE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy module' })
   async update(
     @Param('id') id: string,
@@ -119,8 +123,8 @@ export class ModulesController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
+  @RequirePermissions(Permission.MODULE_DELETE)
   @ApiOperation({
     summary: 'Xóa module',
     description: 'Xóa module khỏi khóa học - yêu cầu quyền Admin',
@@ -131,6 +135,7 @@ export class ModulesController {
     description: 'Xóa thành công',
     schema: { example: { message: 'Module deleted successfully' } },
   })
+  @ApiResponse({ status: 403, description: 'Không có quyền MODULE_DELETE' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy module' })
   async remove(@Param('id') id: string) {
     return this.courseContentService.deleteModule(id);

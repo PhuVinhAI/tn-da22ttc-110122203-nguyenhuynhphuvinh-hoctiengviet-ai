@@ -24,8 +24,10 @@ import { RefreshToken } from './domain/refresh-token.entity';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        const secret =
-          configService.get<string>('jwt.secret') || 'default-secret';
+        const secret = configService.get<string>('jwt.secret');
+        if (!secret) {
+          throw new Error('jwt.secret is missing — check JWT_SECRET env var');
+        }
         const expiresIn =
           configService.get<string>('jwt.accessTokenExpiresIn') || '15m';
         return {
