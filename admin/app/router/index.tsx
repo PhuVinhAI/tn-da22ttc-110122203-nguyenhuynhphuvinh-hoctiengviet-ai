@@ -28,10 +28,6 @@ import { ScenarioCategoryDetailPage } from '../pages/simulations/ScenarioCategor
 import { ScenarioFormPage } from '../pages/simulations/ScenarioFormPage'
 import { ScenarioDetailPage } from '../pages/simulations/ScenarioDetailPage'
 import { ScenarioCharacterFormPage } from '../pages/simulations/ScenarioCharacterFormPage'
-import { LearnersPage } from '../pages/learners/LearnersPage'
-import { LearnerDetailPage } from '../pages/learners/LearnerDetailPage'
-import { LearnerConversationDetailPage } from '../pages/learners/LearnerConversationDetailPage'
-import { LearnerSimulationDetailPage } from '../pages/learners/LearnerSimulationDetailPage'
 import { SettingsPage } from '../pages/settings/SettingsPage'
 
 /**
@@ -199,23 +195,6 @@ export const router = createBrowserRouter([
       {
         path: ROUTES.SCENARIO_CHARACTER_EDIT,
         element: <ScenarioCharacterFormPage mode="edit" />,
-      },
-      // Người dùng
-      {
-        path: ROUTES.LEARNERS,
-        element: <LearnersPage />,
-      },
-      {
-        path: ROUTES.LEARNER_DETAIL,
-        element: <LearnerDetailPage />,
-      },
-      {
-        path: ROUTES.LEARNER_CONVERSATION_DETAIL,
-        element: <LearnerConversationDetailPage />,
-      },
-      {
-        path: ROUTES.LEARNER_SIMULATION_DETAIL,
-        element: <LearnerSimulationDetailPage />,
       },
       // Cài đặt
       {

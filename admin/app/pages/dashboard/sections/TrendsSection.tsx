@@ -27,7 +27,6 @@ import {
   GREEN,
   INDIGO,
   SectionCard,
-  VIOLET,
 } from './dashboard-ui'
 
 const WINDOW_OPTIONS: { value: ActivityWindow; label: string }[] = [
@@ -37,10 +36,8 @@ const WINDOW_OPTIONS: { value: ActivityWindow; label: string }[] = [
 ]
 
 const SERIES_NAMES: Record<string, string> = {
-  activeLearners: 'Học viên hoạt động',
   questionAttempts: 'Lượt trả lời',
   lessonsCompleted: 'Bài học hoàn thành',
-  newUsers: 'Học viên mới',
 }
 
 /** Xu hướng hoạt động: chart đa chuỗi theo cửa sổ ngày + heatmap giờ học. */
@@ -80,7 +77,7 @@ export function TrendsSection() {
   return (
     <SectionCard
       title="Xu hướng hoạt động"
-      hint="Theo ngày lịch Việt Nam — học viên hoạt động, lượt trả lời, bài học hoàn thành, học viên mới"
+      hint="Theo ngay lich Viet Nam - luot tra loi, bai hoc hoan thanh va phien AI"
       icon={TrendingUp}
       iconTint={INDIGO}
       actions={windowPicker}
@@ -101,18 +98,7 @@ export function TrendsSection() {
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <WindowTotal
-              label="Học viên hoạt động"
-              value={data.totals.activeLearners}
-              tint={INDIGO}
-              hint={`Distinct trong ${data.days} ngày`}
-            />
-            <WindowTotal
-              label="Học viên mới"
-              value={data.totals.newUsers}
-              tint={VIOLET}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <WindowTotal
               label="Lượt trả lời"
               value={data.totals.questionAttempts}
@@ -173,27 +159,9 @@ export function TrendsSection() {
                   <Line
                     yAxisId="counts"
                     type="monotone"
-                    dataKey="activeLearners"
-                    stroke={INDIGO}
-                    strokeWidth={2.5}
-                    dot={false}
-                    activeDot={{ r: 4 }}
-                  />
-                  <Line
-                    yAxisId="counts"
-                    type="monotone"
                     dataKey="lessonsCompleted"
                     stroke={GREEN}
                     strokeWidth={2.5}
-                    dot={false}
-                    activeDot={{ r: 4 }}
-                  />
-                  <Line
-                    yAxisId="counts"
-                    type="monotone"
-                    dataKey="newUsers"
-                    stroke={VIOLET}
-                    strokeWidth={2}
                     dot={false}
                     activeDot={{ r: 4 }}
                   />

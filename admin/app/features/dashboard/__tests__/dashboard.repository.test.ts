@@ -4,11 +4,9 @@ import { apiClient } from '../../../../lib/core/infrastructure/api/client'
 import type {
   DashboardAttention,
   DashboardActivity,
-  DashboardLearners,
   DashboardPulse,
 } from '../types'
 
-// Mock api client - không gọi mạng thật
 vi.mock('../../../../lib/core/infrastructure/api/client', () => ({
   apiClient: {
     get: vi.fn(),
@@ -26,18 +24,14 @@ const pulseMetric = {
 
 const mockPulse: DashboardPulse = {
   generatedAt: '2026-06-11T03:00:00.000Z',
-  activeLearners: pulseMetric,
   questionAttempts: {
     ...pulseMetric,
     accuracyToday: 0.82,
     accuracyYesterday: 0.75,
   },
   lessonsCompleted: pulseMetric,
-  newUsers: pulseMetric,
   aiSessions: pulseMetric,
-  goals: { achievedToday: 5, streaksAtRisk: 3 },
   totals: {
-    learners: 150,
     courses: 6,
     publishedCourses: 4,
     lessons: 120,
@@ -57,7 +51,7 @@ const mockAttention: DashboardAttention = {
       {
         questionId: 'q1',
         exerciseId: 'e1',
-        question: 'Dịch: Xin chào',
+        question: 'Dich: Xin chao',
         type: 'translation',
         totalAttempts: 120,
         incorrectCount: 85,
@@ -70,11 +64,11 @@ const mockAttention: DashboardAttention = {
     items: [
       {
         lessonId: 'l1',
-        title: 'Chào hỏi cơ bản',
+        title: 'Chao hoi co ban',
         lessonType: 'vocabulary',
         moduleId: 'm1',
-        moduleTitle: 'Chào hỏi & Giới thiệu',
-        courseTitle: 'Tiếng Việt A1',
+        moduleTitle: 'Chao hoi & Gioi thieu',
+        courseTitle: 'Tieng Viet A1',
         createdAt: '2026-06-01T00:00:00.000Z',
       },
     ],
@@ -91,8 +85,6 @@ const mockActivity: DashboardActivity = {
   series: [
     {
       date: '2026-06-11',
-      activeLearners: 12,
-      newUsers: 2,
       questionAttempts: 80,
       lessonsCompleted: 6,
       simulationsCompleted: 3,
@@ -102,73 +94,9 @@ const mockActivity: DashboardActivity = {
   ],
   heatmap: [{ weekday: 1, hour: 20, count: 14 }],
   totals: {
-    activeLearners: 40,
-    newUsers: 9,
     questionAttempts: 420,
     lessonsCompleted: 30,
   },
-}
-
-const mockLearners: DashboardLearners = {
-  generatedAt: '2026-06-11T03:00:00.000Z',
-  today: '2026-06-11',
-  funnel: {
-    registered: 150,
-    onboarded: 120,
-    startedLearning: 95,
-    completedALesson: 70,
-    activeLast7Days: 45,
-  },
-  usersByLevel: [{ level: 'A1', count: 80 }],
-  topStreaks: [
-    {
-      userId: 'u1',
-      fullName: 'Nguyễn Văn A',
-      email: 'a@example.com',
-      avatarUrl: null,
-      currentLevel: 'A2',
-      currentStreak: 21,
-      longestStreak: 30,
-      lastGoalMetDate: '2026-06-11',
-    },
-  ],
-  streaksAtRisk: {
-    count: 1,
-    items: [
-      {
-        userId: 'u2',
-        fullName: 'Trần Thị B',
-        email: 'b@example.com',
-        avatarUrl: null,
-        currentLevel: 'B1',
-        currentStreak: 9,
-        longestStreak: 12,
-      },
-    ],
-  },
-  recentUsers: [
-    {
-      userId: 'u3',
-      fullName: 'Lê Văn C',
-      email: 'c@example.com',
-      avatarUrl: null,
-      currentLevel: 'A1',
-      role: 'USER',
-      onboardingCompleted: false,
-      createdAt: '2026-06-10T08:00:00.000Z',
-    },
-  ],
-  topCourses: [
-    {
-      courseId: 'c1',
-      title: 'Tiếng Việt cho người mới',
-      level: 'A1',
-      isPublished: true,
-      learnerCount: 80,
-      completedCount: 12,
-      avgCompletion: 0.45,
-    },
-  ],
 }
 
 describe('DashboardRepository', () => {
@@ -180,7 +108,7 @@ describe('DashboardRepository', () => {
   })
 
   describe('getPulse', () => {
-    it('gọi GET /admin/dashboard/pulse và bóc envelope { data }', async () => {
+    it('calls GET /admin/dashboard/pulse and unwraps { data }', async () => {
       vi.mocked(apiClient.get).mockResolvedValue({ data: { data: mockPulse } } as any)
 
       const result = await repository.getPulse()
@@ -189,7 +117,7 @@ describe('DashboardRepository', () => {
       expect(result).toEqual(mockPulse)
     })
 
-    it('chấp nhận body không bọc envelope', async () => {
+    it('accepts an unwrapped response body', async () => {
       vi.mocked(apiClient.get).mockResolvedValue({ data: mockPulse } as any)
 
       const result = await repository.getPulse()
@@ -197,7 +125,7 @@ describe('DashboardRepository', () => {
       expect(result).toEqual(mockPulse)
     })
 
-    it('lan truyền lỗi từ api client', async () => {
+    it('propagates API client errors', async () => {
       vi.mocked(apiClient.get).mockRejectedValue(new Error('Network error'))
 
       await expect(repository.getPulse()).rejects.toThrow('Network error')
@@ -205,7 +133,7 @@ describe('DashboardRepository', () => {
   })
 
   describe('getAttention', () => {
-    it('gọi GET /admin/dashboard/attention và bóc envelope { data }', async () => {
+    it('calls GET /admin/dashboard/attention and unwraps { data }', async () => {
       vi.mocked(apiClient.get).mockResolvedValue({
         data: { data: mockAttention },
       } as any)
@@ -219,7 +147,7 @@ describe('DashboardRepository', () => {
   })
 
   describe('getActivity', () => {
-    it('truyền tham số days và bóc envelope { data }', async () => {
+    it('passes days and unwraps { data }', async () => {
       vi.mocked(apiClient.get).mockResolvedValue({
         data: { data: mockActivity },
       } as any)
@@ -230,25 +158,6 @@ describe('DashboardRepository', () => {
         params: { days: 7 },
       })
       expect(result).toEqual(mockActivity)
-    })
-  })
-
-  describe('getLearners', () => {
-    it('gọi GET /admin/dashboard/learners và bóc envelope { data }', async () => {
-      vi.mocked(apiClient.get).mockResolvedValue({
-        data: { data: mockLearners },
-      } as any)
-
-      const result = await repository.getLearners()
-
-      expect(apiClient.get).toHaveBeenCalledWith('/admin/dashboard/learners')
-      expect(result).toEqual(mockLearners)
-    })
-
-    it('lan truyền lỗi từ api client', async () => {
-      vi.mocked(apiClient.get).mockRejectedValue(new Error('Forbidden'))
-
-      await expect(repository.getLearners()).rejects.toThrow('Forbidden')
     })
   })
 })

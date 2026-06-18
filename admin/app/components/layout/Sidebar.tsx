@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   BookOpen,
   MessageSquare,
-  Users,
   Settings,
   LogOut,
   Moon,
@@ -26,7 +25,6 @@ const navigationItems: NavigationItem[] = [
   { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: LayoutDashboard },
   { name: 'Khóa học', href: ROUTES.COURSES, icon: BookOpen },
   { name: 'Tình huống', href: ROUTES.SCENARIO_CATEGORIES, icon: MessageSquare },
-  { name: 'Học viên', href: ROUTES.LEARNERS, icon: Users },
   { name: 'Cài đặt', href: ROUTES.SETTINGS, icon: Settings },
 ]
 

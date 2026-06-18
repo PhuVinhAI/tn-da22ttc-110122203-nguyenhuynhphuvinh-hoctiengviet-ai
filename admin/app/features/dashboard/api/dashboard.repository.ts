@@ -3,7 +3,6 @@ import type {
   ActivityWindow,
   DashboardActivity,
   DashboardAttention,
-  DashboardLearners,
   DashboardPulse,
   IDashboardRepository,
 } from '../types'
@@ -35,13 +34,6 @@ export class DashboardRepository implements IDashboardRepository {
     const response = await apiClient.get<{ data: DashboardActivity }>(
       '/admin/dashboard/activity',
       { params: { days } },
-    )
-    return unwrap(response.data)
-  }
-
-  async getLearners(): Promise<DashboardLearners> {
-    const response = await apiClient.get<{ data: DashboardLearners }>(
-      '/admin/dashboard/learners',
     )
     return unwrap(response.data)
   }

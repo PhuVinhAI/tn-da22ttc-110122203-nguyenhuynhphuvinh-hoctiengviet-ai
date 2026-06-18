@@ -248,7 +248,7 @@ function GroupList({
               title={item.title}
               meta={
                 item.ownerName
-                  ? `Của học viên: ${item.ownerName} (${item.ownerEmail})`
+                  ? `Chủ sở hữu: ${item.ownerName} (${item.ownerEmail})`
                   : 'Không rõ chủ sở hữu'
               }
               badge={

@@ -8,7 +8,6 @@ export const dashboardKeys = {
   attention: () => [...dashboardKeys.all, 'attention'] as const,
   activity: (days: ActivityWindow) =>
     [...dashboardKeys.all, 'activity', days] as const,
-  learners: () => [...dashboardKeys.all, 'learners'] as const,
 }
 
 const COMMON_OPTIONS = {
@@ -16,7 +15,6 @@ const COMMON_OPTIONS = {
   staleTime: 60_000,
 } as const
 
-/** Nhịp đập hôm nay — KPI so với hôm qua + sparkline 14 ngày. */
 export function useDashboardPulse() {
   return useQuery({
     queryKey: dashboardKeys.pulse(),
@@ -25,7 +23,6 @@ export function useDashboardPulse() {
   })
 }
 
-/** Việc cần xử lý về nội dung (câu hỏi sai nhiều, bài học trống...). */
 export function useDashboardAttention() {
   return useQuery({
     queryKey: dashboardKeys.attention(),
@@ -34,20 +31,10 @@ export function useDashboardAttention() {
   })
 }
 
-/** Xu hướng hoạt động theo cửa sổ 7/30/90 ngày + heatmap giờ học. */
 export function useDashboardActivity(days: ActivityWindow) {
   return useQuery({
     queryKey: dashboardKeys.activity(days),
     queryFn: () => dashboardRepository.getActivity(days),
-    ...COMMON_OPTIONS,
-  })
-}
-
-/** Góc nhìn học viên & khóa học. */
-export function useDashboardLearners() {
-  return useQuery({
-    queryKey: dashboardKeys.learners(),
-    queryFn: () => dashboardRepository.getLearners(),
     ...COMMON_OPTIONS,
   })
 }

@@ -148,7 +148,7 @@ export class AdminAttentionService {
     );
   }
 
-  /** Bài tập công khai chưa soạn câu hỏi nào — học viên mở ra sẽ trống. */
+  /** Bai tap cong khai chua soan cau hoi nao. */
   private exercisesWithoutQuestions() {
     return this.group<{
       exerciseId: string;

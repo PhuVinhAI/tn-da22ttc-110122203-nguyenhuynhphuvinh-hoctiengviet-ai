@@ -55,10 +55,6 @@ export const ROUTES = {
   SCENARIO_CHARACTER_NEW: '/scenarios/:scenarioId/characters/new',
   SCENARIO_CHARACTER_EDIT: '/scenarios/:scenarioId/characters/:id/edit',
   // Người dùng
-  LEARNERS: '/learners',
-  LEARNER_DETAIL: '/learners/:learnerId',
-  LEARNER_CONVERSATION_DETAIL: '/learners/:learnerId/conversations/:conversationId',
-  LEARNER_SIMULATION_DETAIL: '/learners/:learnerId/simulations/:sessionId',
   // Cài đặt
   SETTINGS: '/settings',
 } as const;

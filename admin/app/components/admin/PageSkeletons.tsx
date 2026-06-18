@@ -162,59 +162,6 @@ export function ConversationSkeleton({ count = 6 }: { count?: number }) {
   )
 }
 
-export function LearnerDetailSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="rounded-xl border-2 border-border bg-card p-5">
-        <div className="flex items-start gap-4 flex-wrap">
-          <Skeleton className="h-20 w-20 rounded-2xl" />
-          <div className="flex-1 min-w-0 space-y-2">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-4 w-16" />
-            </div>
-            <Skeleton className="h-7 w-1/2" />
-            <Skeleton className="h-4 w-64" />
-          </div>
-          <Skeleton className="h-16 w-56 rounded-lg" />
-        </div>
-        <div className="mt-4 pt-4 border-t-2 border-border grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Skeleton className="h-3 w-32" />
-            <Skeleton className="h-2 w-full rounded-full" />
-            <Skeleton className="h-3 w-40" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-3 w-32" />
-            <Skeleton className="h-2 w-full rounded-full" />
-            <Skeleton className="h-3 w-40" />
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-lg border-2 border-border bg-card p-4">
-            <Skeleton className="h-9 w-9 rounded-lg" />
-            <Skeleton className="mt-3 h-3 w-20" />
-            <Skeleton className="mt-1 h-7 w-12" />
-          </div>
-        ))}
-      </div>
-
-      <div className="border-b-2 border-border">
-        <div className="flex gap-4 px-1 py-2 overflow-hidden">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-9 w-28" />
-          ))}
-        </div>
-      </div>
-
-      <ListRowsSkeleton count={4} />
-    </div>
-  )
-}
-
 export function LessonContentSkeleton() {
   return (
     <div className="space-y-4">

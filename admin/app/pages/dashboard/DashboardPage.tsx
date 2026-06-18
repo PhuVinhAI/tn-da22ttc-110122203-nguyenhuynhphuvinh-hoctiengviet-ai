@@ -6,15 +6,12 @@ import { dashboardKeys } from '../../features/dashboard'
 import { PulseSection } from './sections/PulseSection'
 import { AttentionSection } from './sections/AttentionSection'
 import { TrendsSection } from './sections/TrendsSection'
-import { LearnersSection } from './sections/LearnersSection'
-import { CoursesSection } from './sections/CoursesSection'
 
 /**
- * Bảng điều khiển trả lời 4 câu hỏi của quản trị viên, theo thứ tự:
+ * Bang dieu khien tra loi 3 cau hoi cua quan tri vien, theo thu tu:
  * 1. Hôm nay hệ thống thế nào?       → Nhịp đập (PulseSection)
  * 2. Tôi cần làm gì ngay?            → Cần xử lý (AttentionSection)
  * 3. Xu hướng ra sao?                → Xu hướng + giờ học cao điểm (TrendsSection)
- * 4. Học viên & khóa học thế nào?    → LearnersSection + CoursesSection
  * Mỗi section tự tải dữ liệu — phần chậm không chặn phần nhanh.
  */
 export function DashboardPage() {
@@ -55,8 +52,6 @@ export function DashboardPage() {
       <PulseSection />
       <AttentionSection />
       <TrendsSection />
-      <LearnersSection />
-      <CoursesSection />
     </div>
   )
 }

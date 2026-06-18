@@ -1,13 +1,5 @@
 import type { ComponentType } from 'react'
-import {
-  Activity,
-  BookOpenCheck,
-  Bot,
-  Flame,
-  ListChecks,
-  Target,
-  UserPlus,
-} from 'lucide-react'
+import { BookOpenCheck, Bot, ListChecks } from 'lucide-react'
 import { Skeleton } from '../../../components/ui/skeleton'
 import { ErrorState } from '../../../components/admin/ErrorState'
 import {
@@ -16,19 +8,15 @@ import {
   type SystemTotals,
 } from '../../../features/dashboard'
 import {
-  AMBER,
   CYAN,
   DeltaBadge,
   formatNumber,
   formatPercent,
   GREEN,
-  INDIGO,
   Sparkline,
   TEAL,
-  VIOLET,
 } from './dashboard-ui'
 
-/** Nhịp đập hôm nay: 6 thẻ KPI so với hôm qua + dải quy mô hệ thống. */
 export function PulseSection() {
   const { data, isLoading, isError, error, refetch, isFetching } =
     useDashboardPulse()
@@ -36,8 +24,8 @@ export function PulseSection() {
   if (isError) {
     return (
       <ErrorState
-        title="Không tải được nhịp đập hôm nay"
-        message={error instanceof Error ? error.message : 'Lỗi không xác định'}
+        title="Khong tai duoc nhip dap hom nay"
+        message={error instanceof Error ? error.message : 'Loi khong xac dinh'}
         onRetry={() => refetch()}
         retrying={isFetching}
         size="sm"
@@ -47,27 +35,19 @@ export function PulseSection() {
 
   const accuracyHint = data
     ? data.questionAttempts.accuracyToday == null
-      ? 'Chưa có lượt làm hôm nay'
-      : `Đúng ${formatPercent(data.questionAttempts.accuracyToday)}${
-          data.questionAttempts.accuracyYesterday == null
-            ? ''
-            : ` · hôm qua ${formatPercent(data.questionAttempts.accuracyYesterday)}`
-        }`
+      ? 'Chua co luot lam hom nay'
+      : data.questionAttempts.accuracyYesterday == null
+        ? `Dung ${formatPercent(data.questionAttempts.accuracyToday)}`
+        : `Dung ${formatPercent(data.questionAttempts.accuracyToday)} - hom qua ${formatPercent(
+            data.questionAttempts.accuracyYesterday,
+          )}`
     : undefined
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
         <PulseTile
-          label="Học viên hoạt động"
-          metric={data?.activeLearners}
-          icon={Activity}
-          tint={INDIGO}
-          hint="Có hành vi học thật trong hôm nay"
-          loading={isLoading}
-        />
-        <PulseTile
-          label="Lượt trả lời câu hỏi"
+          label="Luot tra loi cau hoi"
           metric={data?.questionAttempts}
           icon={ListChecks}
           tint={CYAN}
@@ -75,32 +55,19 @@ export function PulseSection() {
           loading={isLoading}
         />
         <PulseTile
-          label="Bài học hoàn thành"
+          label="Bai hoc hoan thanh"
           metric={data?.lessonsCompleted}
           icon={BookOpenCheck}
           tint={GREEN}
-          hint="Học viên hoàn thành trong hôm nay"
+          hint="So bai hoc duoc hoan thanh trong hom nay"
           loading={isLoading}
         />
         <PulseTile
-          label="Học viên mới"
-          metric={data?.newUsers}
-          icon={UserPlus}
-          tint={VIOLET}
-          hint="Tài khoản đăng ký trong hôm nay"
-          loading={isLoading}
-        />
-        <PulseTile
-          label="Phiên AI mới"
+          label="Phien AI moi"
           metric={data?.aiSessions}
           icon={Bot}
           tint={TEAL}
-          hint="Mô phỏng bắt đầu + hội thoại tạo mới"
-          loading={isLoading}
-        />
-        <GoalTile
-          achievedToday={data?.goals.achievedToday}
-          streaksAtRisk={data?.goals.streaksAtRisk}
+          hint="Mo phong bat dau + hoi thoai tao moi"
           loading={isLoading}
         />
       </div>
@@ -161,68 +128,8 @@ function PulseTile({
           <div className="mt-3">
             <Sparkline points={metric.series} color={tint} />
             <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-              14 ngày gần nhất
+              14 ngay gan nhat
             </p>
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
-
-/** Thẻ Mục tiêu ngày: số học viên đạt đủ hôm nay + cảnh báo sắp mất chuỗi. */
-function GoalTile({
-  achievedToday,
-  streaksAtRisk,
-  loading,
-}: {
-  achievedToday?: number
-  streaksAtRisk?: number
-  loading: boolean
-}) {
-  return (
-    <div className="rounded-xl border-2 border-border bg-card p-5">
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-          Đạt mục tiêu hôm nay
-        </p>
-        <div
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-          style={{ backgroundColor: `${AMBER}1F`, color: AMBER }}
-        >
-          <Target className="h-5 w-5" />
-        </div>
-      </div>
-
-      {loading || achievedToday == null ? (
-        <>
-          <Skeleton className="mt-2 h-9 w-24" />
-          <Skeleton className="mt-2 h-3 w-36" />
-          <Skeleton className="mt-3 h-9 w-full" />
-        </>
-      ) : (
-        <>
-          <div className="mt-1 flex items-center gap-2.5">
-            <span className="text-3xl font-bold tracking-tight tabular-nums">
-              {formatNumber(achievedToday)}
-            </span>
-          </div>
-          <p className="mt-1.5 text-xs text-muted-foreground">
-            học viên đã đạt đủ Mục tiêu ngày
-          </p>
-          <div
-            className={`mt-3 flex items-center gap-2 rounded-lg px-3 py-2 ${
-              (streaksAtRisk ?? 0) > 0
-                ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
-                : 'bg-muted/40 text-muted-foreground'
-            }`}
-          >
-            <Flame className="h-4 w-4 shrink-0" />
-            <span className="text-xs font-bold">
-              {(streaksAtRisk ?? 0) > 0
-                ? `${formatNumber(streaksAtRisk)} học viên sắp mất chuỗi hôm nay`
-                : 'Không ai sắp mất chuỗi hôm nay'}
-            </span>
           </div>
         </>
       )}
@@ -234,16 +141,14 @@ const TOTAL_ITEMS: {
   key: keyof SystemTotals
   label: string
 }[] = [
-  { key: 'learners', label: 'Học viên' },
-  { key: 'courses', label: 'Khóa học' },
-  { key: 'lessons', label: 'Bài học' },
-  { key: 'questions', label: 'Câu hỏi' },
-  { key: 'vocabularies', label: 'Từ vựng' },
-  { key: 'simulations', label: 'Phiên mô phỏng' },
-  { key: 'conversations', label: 'Hội thoại AI' },
+  { key: 'courses', label: 'Khoa hoc' },
+  { key: 'lessons', label: 'Bai hoc' },
+  { key: 'questions', label: 'Cau hoi' },
+  { key: 'vocabularies', label: 'Tu vung' },
+  { key: 'simulations', label: 'Phien mo phong' },
+  { key: 'conversations', label: 'Hoi thoai AI' },
 ]
 
-/** Dải quy mô hệ thống — các con số tổng, gọn một hàng. */
 function TotalsStrip({
   totals,
   loading,
@@ -268,7 +173,7 @@ function TotalsStrip({
             </p>
             {item.key === 'courses' && (
               <p className="text-[10px] text-muted-foreground whitespace-nowrap">
-                {formatNumber(totals.publishedCourses)} đã xuất bản
+                {formatNumber(totals.publishedCourses)} da xuat ban
               </p>
             )}
           </div>

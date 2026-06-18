@@ -1,15 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../users/domain/user.entity';
+import { Question } from '../../exercises/domain/question.entity';
 import {
   fillDailySeries,
   startOfVnDay,
   vnDateRange,
 } from './dashboard-time.util';
 import {
-  activeLearnersDaily,
-  activeLearnersTotal,
   attemptsDaily,
   attemptsHeatmap,
   createdDaily,
@@ -20,15 +18,11 @@ import {
 export const ACTIVITY_WINDOWS = [7, 30, 90] as const;
 const DEFAULT_WINDOW = 30;
 
-/**
- * Xu hướng hoạt động theo ngày (7/30/90 ngày, lịch Việt Nam) + bản đồ nhiệt
- * giờ học cao điểm (thứ × giờ) tính từ lượt trả lời câu hỏi.
- */
 @Injectable()
 export class AdminActivityService {
   constructor(
-    @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    @InjectRepository(Question)
+    private readonly questionsRepository: Repository<Question>,
   ) {}
 
   async getActivity(daysInput?: number) {
@@ -39,31 +33,24 @@ export class AdminActivityService {
       : DEFAULT_WINDOW;
 
     const now = new Date();
-    const manager = this.usersRepository.manager;
+    const manager = this.questionsRepository.manager;
     const since = startOfVnDay(now, days - 1);
     const range = vnDateRange(days, now);
 
     const [
-      activeRows,
       attemptRows,
       lessonRows,
-      newUserRows,
       simulationRows,
       conversationRows,
       heatmapRows,
-      windowActiveLearners,
     ] = await Promise.all([
-      activeLearnersDaily(manager, since),
       attemptsDaily(manager, since),
       lessonsCompletedDaily(manager, since),
-      createdDaily(manager, 'users', since),
       simulationsCompletedDaily(manager, since),
       createdDaily(manager, 'conversations', since),
       attemptsHeatmap(manager, since),
-      activeLearnersTotal(manager, since),
     ]);
 
-    const active = fillDailySeries(range, activeRows);
     const attempts = fillDailySeries(
       range,
       attemptRows.map((r) => ({ day: r.day, count: r.total })),
@@ -72,7 +59,6 @@ export class AdminActivityService {
       attemptRows.map((r) => [String(r.day), Number(r.correct)]),
     );
     const lessons = fillDailySeries(range, lessonRows);
-    const newUsers = fillDailySeries(range, newUserRows);
     const simulations = fillDailySeries(range, simulationRows);
     const conversations = fillDailySeries(range, conversationRows);
 
@@ -81,8 +67,6 @@ export class AdminActivityService {
       const correct = correctByDay.get(date) ?? 0;
       return {
         date,
-        activeLearners: active[i].value,
-        newUsers: newUsers[i].value,
         questionAttempts: attemptCount,
         lessonsCompleted: lessons[i].value,
         simulationsCompleted: simulations[i].value,
@@ -107,8 +91,6 @@ export class AdminActivityService {
         count: Number(cell.count),
       })),
       totals: {
-        activeLearners: windowActiveLearners,
-        newUsers: sum(newUsers),
         questionAttempts: sum(attempts),
         lessonsCompleted: sum(lessons),
       },

@@ -2,8 +2,8 @@
  * Tiện ích thời gian cho dashboard admin.
  *
  * Mọi số liệu "theo ngày" trên dashboard đều tính theo ngày lịch giờ Việt Nam
- * (Asia/Ho_Chi_Minh, UTC+7, không có DST) — nhất quán với cách tính Chuỗi mục
- * tiêu của học viên. DB lưu timestamp dạng UTC (timestamp without time zone).
+ * (Asia/Ho_Chi_Minh, UTC+7, khong co DST). DB luu timestamp dang UTC
+ * (timestamp without time zone).
  */
 
 export const VN_TIMEZONE = 'Asia/Ho_Chi_Minh';
