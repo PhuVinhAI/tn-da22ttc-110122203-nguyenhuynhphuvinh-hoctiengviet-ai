@@ -54,7 +54,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Xin ___ ! Tôi là Nam."
+                    "sentence": "Xin ___ ! Tôi là Nam.",
+                    "wordBank": [
+                      "chào",
+                      "chào buổi sáng",
+                      "xin lỗi",
+                      "hẹn gặp lại"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -739,7 +745,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi ___ sinh viên. (Điền copula)"
+                    "sentence": "Tôi ___ sinh viên. (Điền copula)",
+                    "wordBank": [
+                      "là",
+                      "em",
+                      "tên",
+                      "bạn"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -803,7 +815,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi ___ hiểu. (Phủ định: I don't understand)"
+                    "sentence": "Tôi ___ hiểu. (Phủ định: I don't understand)",
+                    "wordBank": [
+                      "không",
+                      "là",
+                      "tôi",
+                      "chị"
+                    ]
                   },
                   "order_index": 6,
                   "question": null,
@@ -1243,7 +1261,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Từ ___ (falling tone) có nghĩa là grandmother. (Điền từ: ba với thanh huyền)"
+                    "sentence": "Từ ___ (falling tone) có nghĩa là grandmother. (Điền từ: ba với thanh huyền)",
+                    "wordBank": [
+                      "bà",
+                      "ba",
+                      "năm",
+                      "khỏe"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -1654,7 +1678,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "25 = hai mươi ___ (Điền từ: lăm hay năm?)"
+                    "sentence": "25 = hai mươi ___ (Điền từ: lăm hay năm?)",
+                    "wordBank": [
+                      "lăm",
+                      "trăm",
+                      "bảy",
+                      "một"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -2048,7 +2078,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hai ___ mèo. (Điền classifier cho động vật)"
+                    "sentence": "Hai ___ mèo. (Điền classifier cho động vật)",
+                    "wordBank": [
+                      "con",
+                      "chiếc",
+                      "người",
+                      "bài"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -2537,7 +2573,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hai thanh dễ nhầm lẫn nhất là thanh ___ và thanh ngã."
+                    "sentence": "Hai thanh dễ nhầm lẫn nhất là thanh ___ và thanh ngã.",
+                    "wordBank": [
+                      "hỏi",
+                      "phút",
+                      "giờ",
+                      "tuần"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -2774,7 +2816,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "___ gái tôi học lớp năm. (younger sister)"
+                    "sentence": "___ gái tôi học lớp năm. (younger sister)",
+                    "wordBank": [
+                      "Em",
+                      "cậu",
+                      "cháu",
+                      "bố"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -3224,7 +3272,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "___ yêu mẹ. (I, as a child, love mother)"
+                    "sentence": "___ yêu mẹ. (I, as a child, love mother)",
+                    "wordBank": [
+                      "Con",
+                      "nhà",
+                      "của",
+                      "của"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -3294,7 +3348,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nhà ___ tôi ở Hà Nội. (possessive: of)"
+                    "sentence": "Nhà ___ tôi ở Hà Nội. (possessive: of)",
+                    "wordBank": [
+                      "của",
+                      "Con",
+                      "nhà",
+                      "gia đình"
+                    ]
                   },
                   "order_index": 5,
                   "question": null,
@@ -3775,7 +3835,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi ___ cà phê. (I drink coffee)"
+                    "sentence": "Tôi ___ cà phê. (I drink coffee)",
+                    "wordBank": [
+                      "uống",
+                      "bún",
+                      "thích",
+                      "bánh mì"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -4184,7 +4250,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi ___ ăn cơm. (Past tense: I ate rice)"
+                    "sentence": "Tôi ___ ăn cơm. (Past tense: I ate rice)",
+                    "wordBank": [
+                      "đã",
+                      "sẽ",
+                      "sẽ",
+                      "đang"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -4207,7 +4279,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi ___ đi chợ. (Future: I will go to market)"
+                    "sentence": "Tôi ___ đi chợ. (Future: I will go to market)",
+                    "wordBank": [
+                      "sẽ",
+                      "rất",
+                      "đang",
+                      "đã"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -4230,7 +4308,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi ___ uống cà phê. (Progressive: I am drinking)"
+                    "sentence": "Tôi ___ uống cà phê. (Progressive: I am drinking)",
+                    "wordBank": [
+                      "đang",
+                      "sẽ",
+                      "đã",
+                      "rất"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -4672,7 +4756,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "___ tôi một ly nước. (Give me a glass of water)"
+                    "sentence": "___ tôi một ly nước. (Give me a glass of water)",
+                    "wordBank": [
+                      "Cho",
+                      "ly",
+                      "đây",
+                      "tính tiền"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -5022,7 +5112,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Đi ___. (Go straight)"
+                    "sentence": "Đi ___. (Go straight)",
+                    "wordBank": [
+                      "thẳng",
+                      "đây",
+                      "xe máy",
+                      "ô tô"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -5462,7 +5558,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "Tôi đi ___ Hà Nội ___ Sài Gòn. (from...to)"
+                    "sentence": "Tôi đi ___ Hà Nội ___ Sài Gòn. (from...to)",
+                    "wordBank": [
+                      "từ",
+                      "đến",
+                      "đâu",
+                      "xa"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -5875,7 +5977,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Xe số ___ đi chợ. (bus number five)"
+                    "sentence": "Xe số ___ đi chợ. (bus number five)",
+                    "wordBank": [
+                      "năm",
+                      "bệnh viện",
+                      "gần nhất",
+                      "mất"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,

@@ -167,6 +167,7 @@ class FillBlankOptions extends QuestionOptions {
     required this.sentence,
     required this.blanks,
     this.acceptedAnswers,
+    this.wordBank = const <String>[],
   });
   factory FillBlankOptions.fromJson(Map<String, dynamic> json) {
     return FillBlankOptions(
@@ -178,17 +179,22 @@ class FillBlankOptions extends QuestionOptions {
                 (group as List<dynamic>).map((e) => e as String).toList(),
           )
           .toList(),
+      wordBank:
+          (json['wordBank'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          const <String>[],
     );
   }
   final String sentence;
   final int blanks;
   final List<List<String>>? acceptedAnswers;
+  final List<String> wordBank;
 
   @override
   Map<String, dynamic> toJson() => {
     'sentence': sentence,
     'blanks': blanks,
     'acceptedAnswers': acceptedAnswers,
+    'wordBank': wordBank,
   };
 }
 

@@ -44,6 +44,9 @@ Map<String, dynamic> optionsForAssistantContext(
     case QuestionType.fillBlank:
       return {
         if (raw['blanks'] != null) 'blanks': raw['blanks'],
+        // wordBank is shown to the learner — safe to share with the AI so it
+        // can ground hints in the actual chips available.
+        if (raw['wordBank'] != null) 'wordBank': raw['wordBank'],
       };
     case QuestionType.matching:
       // pairs.left ↔ pairs.right IS the answer. Split into independent

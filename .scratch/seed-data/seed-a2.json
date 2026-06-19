@@ -54,7 +54,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Ở chợ Việt Nam người ta hay _____ giá khi mua hàng."
+                    "sentence": "Ở chợ Việt Nam người ta hay _____ giá khi mua hàng.",
+                    "wordBank": [
+                      "trả",
+                      "giá",
+                      "mua",
+                      "rẻ"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -514,7 +520,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Chợ này rẻ _____ chợ kia."
+                    "sentence": "Chợ này rẻ _____ chợ kia.",
+                    "wordBank": [
+                      "hơn",
+                      "nhiều",
+                      "ít",
+                      "sạch"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -931,7 +943,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tổng _____ bao nhiêu? (How much in total?)"
+                    "sentence": "Tổng _____ bao nhiêu? (How much in total?)",
+                    "wordBank": [
+                      "cộng",
+                      "rau muống",
+                      "mớ",
+                      "cà chua"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -1138,7 +1156,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Siêu thị sạch _____ chợ. (Supermarkets are cleaner than markets.)"
+                    "sentence": "Siêu thị sạch _____ chợ. (Supermarkets are cleaner than markets.)",
+                    "wordBank": [
+                      "hơn",
+                      "sớm",
+                      "tiêu"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -1381,7 +1404,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi phải _____ thuốc ba lần một ngày. (I have to ___ medicine three times a day.)"
+                    "sentence": "Tôi phải _____ thuốc ba lần một ngày. (I have to ___ medicine three times a day.)",
+                    "wordBank": [
+                      "uống",
+                      "ho",
+                      "đơn thuốc",
+                      "nhà thuốc"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -1741,7 +1770,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi _____ cảm rồi, không đi làm được."
+                    "sentence": "Tôi _____ cảm rồi, không đi làm được.",
+                    "wordBank": [
+                      "bị",
+                      "ốm",
+                      "phải",
+                      "khỏe"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -2122,7 +2157,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Phòng khám tư nhân _____ hơn bệnh viện công nhưng đắt hơn."
+                    "sentence": "Phòng khám tư nhân _____ hơn bệnh viện công nhưng đắt hơn.",
+                    "wordBank": [
+                      "sạch",
+                      "phòng khám",
+                      "công",
+                      "tư nhân"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -2359,7 +2400,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Trời _____ mưa to quá!"
+                    "sentence": "Trời _____ mưa to quá!",
+                    "wordBank": [
+                      "đang",
+                      "mùa",
+                      "mùa khô",
+                      "lạnh"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -2736,7 +2783,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Trời _____ mưa to. Chờ tạnh rồi đi."
+                    "sentence": "Trời _____ mưa to. Chờ tạnh rồi đi.",
+                    "wordBank": [
+                      "đang",
+                      "tạnh",
+                      "mưa rào"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -3057,7 +3109,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nhớ mang _____ khi ra ngoài mùa mưa."
+                    "sentence": "Nhớ mang _____ khi ra ngoài mùa mưa.",
+                    "wordBank": [
+                      "ô",
+                      "dự báo",
+                      "nhiệt độ"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -3311,7 +3368,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Căn hộ có hai phòng _____ và một bếp."
+                    "sentence": "Căn hộ có hai phòng _____ và một bếp.",
+                    "wordBank": [
+                      "ngủ",
+                      "tầng",
+                      "khách sạn",
+                      "bếp"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -3672,7 +3735,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi _____ quận Ba Đình, Hà Nội."
+                    "sentence": "Tôi _____ quận Ba Đình, Hà Nội.",
+                    "wordBank": [
+                      "ở",
+                      "vườn",
+                      "riêng",
+                      "phòng khách"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -4041,7 +4110,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Cuối tuần mình đi _____ nhé! (Let's hang out this weekend!)"
+                    "sentence": "Cuối tuần mình đi _____ nhé! (Let's hang out this weekend!)",
+                    "wordBank": [
+                      "chơi",
+                      "đọc",
+                      "sách",
+                      "bóng đá"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -4389,7 +4464,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi thích nghe nhạc _____ đọc sách."
+                    "sentence": "Tôi thích nghe nhạc _____ đọc sách.",
+                    "wordBank": [
+                      "và",
+                      "thèm",
+                      "mà",
+                      "mà"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -4483,7 +4564,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Cái áo _____ tôi thích đã bán rồi. (The shirt ___ I like has been sold.)"
+                    "sentence": "Cái áo _____ tôi thích đã bán rồi. (The shirt ___ I like has been sold.)",
+                    "wordBank": [
+                      "mà",
+                      "và",
+                      "và",
+                      "thèm"
+                    ]
                   },
                   "order_index": 5,
                   "question": null,
@@ -4753,7 +4840,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Môn thể thao _____ tôi thích nhất là bóng đá."
+                    "sentence": "Môn thể thao _____ tôi thích nhất là bóng đá.",
+                    "wordBank": [
+                      "mà",
+                      "bạn bè",
+                      "hấp dẫn"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,

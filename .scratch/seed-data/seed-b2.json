@@ -54,7 +54,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Công ty _____ 50 triệu đô la vào dự án xây dựng nhà máy mới."
+                    "sentence": "Công ty _____ 50 triệu đô la vào dự án xây dựng nhà máy mới.",
+                    "wordBank": [
+                      "đầu tư",
+                      "kinh tế",
+                      "ngân hàng",
+                      "thị trường"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -538,7 +544,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nếu chính phủ _____ tăng lãi suất sớm hơn, thì lạm phát đã không tăng cao như vậy."
+                    "sentence": "Nếu chính phủ _____ tăng lãi suất sớm hơn, thì lạm phát đã không tăng cao như vậy.",
+                    "wordBank": [
+                      "đã",
+                      "lãi suất",
+                      "chi phí",
+                      "Có"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -606,7 +618,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "_____ vốn mạnh _____ dám đầu tư vào thị trường này."
+                    "sentence": "_____ vốn mạnh _____ dám đầu tư vào thị trường này.",
+                    "wordBank": [
+                      "Có",
+                      "mới",
+                      "lãi suất",
+                      "chi phí"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -915,7 +933,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Trong trường hợp lạm phát vượt _____ 5%, ngân hàng trung ương sẽ tăng lãi suất."
+                    "sentence": "Trong trường hợp lạm phát vượt _____ 5%, ngân hàng trung ương sẽ tăng lãi suất.",
+                    "wordBank": [
+                      "ngưỡng",
+                      "bình diện",
+                      "thể chế",
+                      "phá sản"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -1103,7 +1127,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "_____ chiến lược quản lý chi phí hiệu quả _____ duy trì được sức cạnh tranh."
+                    "sentence": "_____ chiến lược quản lý chi phí hiệu quả _____ duy trì được sức cạnh tranh.",
+                    "wordBank": [
+                      "Có",
+                      "mới",
+                      "chuỗi cung ứng",
+                      "biên lợi nhuận"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -1325,7 +1355,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Mỗi công dân có _____ bầu cử và ứng cử theo luật định."
+                    "sentence": "Mỗi công dân có _____ bầu cử và ứng cử theo luật định.",
+                    "wordBank": [
+                      "quyền",
+                      "chính phủ",
+                      "đảng",
+                      "quốc hội"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -1698,7 +1734,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "_____ sự tham gia của người dân _____ tạo ra sức mạnh cho cải cách."
+                    "sentence": "_____ sự tham gia của người dân _____ tạo ra sức mạnh cho cải cách.",
+                    "wordBank": [
+                      "Chính là",
+                      "mới",
+                      "tham vấn",
+                      "bất công"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -1762,7 +1804,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ một chính sách phi lý! (nhấn mạnh xác nhận cảm xúc)"
+                    "sentence": "_____ một chính sách phi lý! (nhấn mạnh xác nhận cảm xúc)",
+                    "wordBank": [
+                      "Đúng là",
+                      "tham vấn",
+                      "Chính là",
+                      "mới"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -2218,7 +2266,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Dân biết, dân bàn, dân làm, dân _____, dân giám sát, dân thụ hưởng."
+                    "sentence": "Dân biết, dân bàn, dân làm, dân _____, dân giám sát, dân thụ hưởng.",
+                    "wordBank": [
+                      "kiểm tra",
+                      "lập pháp",
+                      "tập trung dân chủ",
+                      "giám sát"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -2448,7 +2502,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ nhân tạo đang thay đổi mọi ngành công nghiệp."
+                    "sentence": "_____ nhân tạo đang thay đổi mọi ngành công nghiệp.",
+                    "wordBank": [
+                      "Trí tuệ",
+                      "vệ tinh",
+                      "trí tuệ nhân tạo",
+                      "năng lượng"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -2832,7 +2892,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nghiên cứu _____ tại phòng thí nghiệm quốc gia cho thấy kết quả tích cực. (rút gọn mệnh đề quan hệ)"
+                    "sentence": "Nghiên cứu _____ tại phòng thí nghiệm quốc gia cho thấy kết quả tích cực. (rút gọn mệnh đề quan hệ)",
+                    "wordBank": [
+                      "tiến hành",
+                      "mô hình",
+                      "kiểm chứng",
+                      "giả thuyết"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -3099,7 +3165,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Sau khi _____ độc lập tại ba bệnh viện khác, kết quả xác nhận tính khả thi."
+                    "sentence": "Sau khi _____ độc lập tại ba bệnh viện khác, kết quả xác nhận tính khả thi.",
+                    "wordBank": [
+                      "kiểm chứng",
+                      "học sâu",
+                      "chẩn đoán"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -3291,7 +3362,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Truyện Kiều là _____ của Nguyễn Du."
+                    "sentence": "Truyện Kiều là _____ của Nguyễn Du.",
+                    "wordBank": [
+                      "kiệt tác",
+                      "biểu diễn",
+                      "phê bình",
+                      "đương đại"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -3745,7 +3822,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "Tác phẩm _____ sâu sắc _____ tinh tế. (cấu trúc song hành)"
+                    "sentence": "Tác phẩm _____ sâu sắc _____ tinh tế. (cấu trúc song hành)",
+                    "wordBank": [
+                      "vừa",
+                      "vừa",
+                      "lá khoai",
+                      "âm hưởng"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -3789,7 +3872,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nỗ lực của anh ấy như nước đổ _____ — hoàn toàn vô tác dụng."
+                    "sentence": "Nỗ lực của anh ấy như nước đổ _____ — hoàn toàn vô tác dụng.",
+                    "wordBank": [
+                      "lá khoai",
+                      "vừa",
+                      "âm hưởng",
+                      "chiều sâu"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -4039,7 +4128,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "Truyện Kiều mang âm hưởng _____ dầm _____ lâu."
+                    "sentence": "Truyện Kiều mang âm hưởng _____ dầm _____ lâu.",
+                    "wordBank": [
+                      "mưa",
+                      "thấm",
+                      "khát vọng",
+                      "nét bút"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -4167,7 +4262,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "_____ quả nhớ _____ trồng cây. (lòng biết ơn)"
+                    "sentence": "_____ quả nhớ _____ trồng cây. (lòng biết ơn)",
+                    "wordBank": [
+                      "Ăn",
+                      "kẻ",
+                      "ca dao",
+                      "dân gian"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -4397,7 +4498,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ không khí ở Hà Nội vượt mức cảnh báo."
+                    "sentence": "_____ không khí ở Hà Nội vượt mức cảnh báo.",
+                    "wordBank": [
+                      "Ô nhiễm",
+                      "carbon",
+                      "bảo tồn",
+                      "phát triển bền vững"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -4812,7 +4919,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Việt Nam phát triển nhanh. _____, vẫn còn nhiều thách thức về môi trường."
+                    "sentence": "Việt Nam phát triển nhanh. _____, vẫn còn nhiều thách thức về môi trường.",
+                    "wordBank": [
+                      "Tuy nhiên",
+                      "phát thải",
+                      "sinh kế",
+                      "Thay vì"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -4876,7 +4989,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ dùng túi nilon, hãy dùng túi vải."
+                    "sentence": "_____ dùng túi nilon, hãy dùng túi vải.",
+                    "wordBank": [
+                      "Thay vì",
+                      "lộ trình",
+                      "phát thải",
+                      "Tuy nhiên"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -5134,7 +5253,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ theo đuổi lợi nhuận ngắn hạn, doanh nghiệp cần tích hợp trách nhiệm xã hội."
+                    "sentence": "_____ theo đuổi lợi nhuận ngắn hạn, doanh nghiệp cần tích hợp trách nhiệm xã hội.",
+                    "wordBank": [
+                      "Thay vì",
+                      "bão lũ",
+                      "trách nhiệm xã hội",
+                      "ngập mặn"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -5341,7 +5466,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "Không _____ giúp bảo vệ môi trường _____ tiết kiệm chi phí."
+                    "sentence": "Không _____ giúp bảo vệ môi trường _____ tiết kiệm chi phí.",
+                    "wordBank": [
+                      "những",
+                      "mà còn",
+                      "sụt lún",
+                      "thiên tai"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,

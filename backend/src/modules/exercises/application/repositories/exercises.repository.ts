@@ -73,6 +73,7 @@ export class ExercisesRepository {
         'lesson',
         'lesson.module',
         'lesson.module.course',
+        'lesson.vocabularies',
         'questions',
       ],
       order: { questions: { orderIndex: 'ASC' } },

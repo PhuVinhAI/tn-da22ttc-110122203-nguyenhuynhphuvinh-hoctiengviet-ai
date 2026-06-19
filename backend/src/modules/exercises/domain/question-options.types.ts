@@ -21,6 +21,7 @@ export interface FillBlankOptions extends BaseQuestionOptions {
   sentence: string; // Câu có chỗ trống, mỗi chỗ trống đánh dấu bằng ___ (3 dấu gạch dưới)
   blanks: number; // Số chỗ trống (= số ___ trong sentence)
   acceptedAnswers?: string[][]; // Mảng các đáp án chấp nhận được cho mỗi chỗ trống
+  wordBank: string[]; // Kho từ học viên chọn để điền — mobile UX click-to-fill
 }
 
 export interface FillBlankAnswer {

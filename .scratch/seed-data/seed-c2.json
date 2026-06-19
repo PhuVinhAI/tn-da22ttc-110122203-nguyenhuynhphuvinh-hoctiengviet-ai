@@ -111,7 +111,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Điền từ phương ngữ Trung: \"_____ mà trờ nay nóng rứa?\" (Sao mà hôm nay nóng vậy?)"
+                    "sentence": "Điền từ phương ngữ Trung: \"_____ mà trờ nay nóng rứa?\" (Sao mà hôm nay nóng vậy?)",
+                    "wordBank": [
+                      "răng",
+                      "từ địa phương",
+                      "giọng Bắc",
+                      "giọng Trung"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -558,7 +564,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Điền trợ từ phù hợp phương ngữ Bắc: \"Cháu chào cô _____!\""
+                    "sentence": "Điền trợ từ phù hợp phương ngữ Bắc: \"Cháu chào cô _____!\"",
+                    "wordBank": [
+                      "ạ",
+                      "nè",
+                      "cơ",
+                      "nghe"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -1093,7 +1105,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "Người Nam gộp hai thanh _____ và _____ vào nhau."
+                    "sentence": "Người Nam gộp hai thanh _____ và _____ vào nhau.",
+                    "wordBank": [
+                      "hỏi",
+                      "ngã",
+                      "âm cuối",
+                      "phụ âm đầu"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -1338,7 +1356,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Điền tiền tố Hán Việt: \"_____ hình\" nghĩa là \"không có hình dáng\""
+                    "sentence": "Điền tiền tố Hán Việt: \"_____ hình\" nghĩa là \"không có hình dáng\"",
+                    "wordBank": [
+                      "vô",
+                      "ngoại lai",
+                      "Hán Việt",
+                      "ngôn ngữ học"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -1726,7 +1750,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Điền hậu tố Hán Việt: \"tâm lý _____\" nghĩa là ngành nghiên cứu tâm lý"
+                    "sentence": "Điền hậu tố Hán Việt: \"tâm lý _____\" nghĩa là ngành nghiên cứu tâm lý",
+                    "wordBank": [
+                      "học",
+                      "quốc gia",
+                      "sơn hà"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -2232,7 +2261,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "\"Mỹ\" là dịch âm Hán Việt từ chữ 美 của tên nước _____"
+                    "sentence": "\"Mỹ\" là dịch âm Hán Việt từ chữ 美 của tên nước _____",
+                    "wordBank": [
+                      "Mỹ",
+                      "Bồ Đào Nha",
+                      "sơ mi",
+                      "xà phòng"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -2433,7 +2468,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hoàn thành câu lục bát nổi tiếng: \"Trăm năm trong cõi người _____\""
+                    "sentence": "Hoàn thành câu lục bát nổi tiếng: \"Trăm năm trong cõi người _____\"",
+                    "wordBank": [
+                      "ta",
+                      "Hán Nôm",
+                      "vịnh",
+                      "lục bát"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -2727,7 +2768,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Trong câu cổ \"Dời non lấp biển, nghiệp nhóm nên\", _____ đã bị lược bỏ."
+                    "sentence": "Trong câu cổ \"Dời non lấp biển, nghiệp nhóm nên\", _____ đã bị lược bỏ.",
+                    "wordBank": [
+                      "chủ ngữ",
+                      "biền ngẫu",
+                      "đối ngẫu"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -2919,7 +2965,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hoàn thành vần chân: \"Trăm năm trong cõi người ta / Chữ tài chữ mệnh khéo là ghét _____\""
+                    "sentence": "Hoàn thành vần chân: \"Trăm năm trong cõi người ta / Chữ tài chữ mệnh khéo là ghét _____\"",
+                    "wordBank": [
+                      "nhau",
+                      "vần chân",
+                      "bằng trắc"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -3043,7 +3094,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Điền từ phù hợp câu bát (chữ 6 vần với \"ta\"): \"Chữ tài chữ mệnh khéo _____ ghét nhau\""
+                    "sentence": "Điền từ phù hợp câu bát (chữ 6 vần với \"ta\"): \"Chữ tài chữ mệnh khéo _____ ghét nhau\"",
+                    "wordBank": [
+                      "là",
+                      "vần giàu",
+                      "vần nghèo"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -3253,7 +3309,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hồ Xuân Hương nổi tiếng về nghệ thuật _____ trong thơ Nôm."
+                    "sentence": "Hồ Xuân Hương nổi tiếng về nghệ thuật _____ trong thơ Nôm.",
+                    "wordBank": [
+                      "chơi chữ",
+                      "tục ngữ",
+                      "uyển chuyển",
+                      "lóng"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -3542,7 +3604,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "\"Thòng lèo\" nói lái thành _____"
+                    "sentence": "\"Thòng lèo\" nói lái thành _____",
+                    "wordBank": [
+                      "lèo thòng",
+                      "ẩn dụ",
+                      "hoán dụ"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -3777,7 +3844,11 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "\"Đánh trống bỏ _____\" nghĩa là nói một đằng làm một nẻo."
+                    "sentence": "\"Đánh trống bỏ _____\" nghĩa là nói một đằng làm một nẻo.",
+                    "wordBank": [
+                      "dùi",
+                      "bà xã"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -4150,7 +4221,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "\"Có công mài sắt có ngày nên _____\" — tục ngữ khuyên kiên trì."
+                    "sentence": "\"Có công mài sắt có ngày nên _____\" — tục ngữ khuyên kiên trì.",
+                    "wordBank": [
+                      "kim",
+                      "thành ngữ",
+                      "phong tục",
+                      "ca dao"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -4488,7 +4565,11 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hoàn thành ca dao: \"Công cha như núi Thái Sơn / Nghĩa mẹ như nước trong _____ chảy ra\""
+                    "sentence": "Hoàn thành ca dao: \"Công cha như núi Thái Sơn / Nghĩa mẹ như nước trong _____ chảy ra\"",
+                    "wordBank": [
+                      "nguồn",
+                      "từ láy"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -4706,7 +4787,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "\"_____ quả nhớ kẻ trồng cây\" — khuyên biết ơn."
+                    "sentence": "\"_____ quả nhớ kẻ trồng cây\" — khuyên biết ơn.",
+                    "wordBank": [
+                      "Ăn",
+                      "thâm thúy",
+                      "gượng ép"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,

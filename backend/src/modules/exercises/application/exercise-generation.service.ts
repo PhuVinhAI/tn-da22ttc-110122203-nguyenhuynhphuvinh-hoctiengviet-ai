@@ -70,9 +70,9 @@ const EXERCISE_TYPE_PROMPT_META: Record<
   },
   [QuestionType.FILL_BLANK]: {
     languageMix:
-      '  - fill_blank: Vietnamese sentences with ___ blanks (no question field)',
+      '  - fill_blank: Vietnamese sentences with ___ blanks (no question field). Always provide wordBank: contains the correct words plus 1-3 plausible distractors so the learner taps a chip to fill each blank — never types.',
     shape:
-      '- fill_blank: question=null, options={sentence:"Xin ___ ! Tôi là Nam.",blanks:1,acceptedAnswers:[["chào"]]}, correctAnswer={answers:["chào"]}',
+      '- fill_blank: question=null, options={sentence:"Xin ___ ! Tôi là Nam.",blanks:1,acceptedAnswers:[["chào"]],wordBank:["chào","tạm biệt","cảm ơn"]}, correctAnswer={answers:["chào"]}',
   },
   [QuestionType.MATCHING]: {
     languageMix: '  - matching: Vietnamese↔English pairs (no question field)',
@@ -113,7 +113,7 @@ const EXERCISE_TYPE_SCHEMA_FIELDS: Record<
     correctAnswer: ['selectedChoice'],
   },
   [QuestionType.FILL_BLANK]: {
-    options: ['sentence', 'blanks', 'acceptedAnswers'],
+    options: ['sentence', 'blanks', 'acceptedAnswers', 'wordBank'],
     correctAnswer: ['answers'],
   },
   [QuestionType.MATCHING]: {
@@ -199,6 +199,13 @@ const EXERCISE_RESPONSE_SCHEMA_BASE = {
                 },
                 description:
                   'fill_blank: array of arrays of accepted answers per blank',
+                nullable: true,
+              },
+              wordBank: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING, nullable: false },
+                description:
+                  'fill_blank: list of word chips the learner taps to fill blanks. Must include every correct answer plus 1-3 distractors.',
                 nullable: true,
               },
               pairs: {

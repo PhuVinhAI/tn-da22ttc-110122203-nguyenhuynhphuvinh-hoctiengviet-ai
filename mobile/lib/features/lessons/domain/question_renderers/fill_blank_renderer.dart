@@ -57,6 +57,7 @@ class FillBlankRenderer extends QuestionRenderer {
             )
           : segments,
       answers: answers,
+      wordBank: options.wordBank,
       onAnswerChanged: onAnswerChanged,
     );
   }
@@ -67,7 +68,6 @@ class FillBlankRenderer extends QuestionRenderer {
   }
 }
 
-/// One token in the rendered sentence: either literal text or a blank to fill.
 sealed class _Segment {
   const _Segment();
 }
@@ -103,11 +103,13 @@ class _FillBlankInput extends StatefulWidget {
   const _FillBlankInput({
     required this.segments,
     required this.answers,
+    required this.wordBank,
     required this.onAnswerChanged,
   });
 
   final List<_Segment> segments;
   final List<String> answers;
+  final List<String> wordBank;
   final ValueChanged<dynamic> onAnswerChanged;
 
   @override
@@ -116,58 +118,91 @@ class _FillBlankInput extends StatefulWidget {
 
 class _FillBlankInputState extends State<_FillBlankInput> {
   late int _blankCount;
-  late List<TextEditingController> _controllers;
-  late List<FocusNode> _focusNodes;
+  // Per word-bank slot: how many times this word is currently consumed by
+  // blanks. Keyed by index in [_bankWords] so duplicate words behave
+  // independently (the same word can sit twice in the bank for two blanks).
+  late List<String> _bankWords;
+  late List<bool> _bankUsed;
+  // For each blank: index into _bankWords (-1 = empty) of the chip placed.
+  late List<int> _placement;
 
   @override
   void initState() {
     super.initState();
-    _blankCount = widget.segments.whereType<_BlankSegment>().length;
-    _controllers = List.generate(
-      _blankCount,
-      (i) => TextEditingController(
-        text: i < widget.answers.length ? widget.answers[i] : '',
-      ),
-    );
-    _focusNodes = List.generate(_blankCount, (_) => FocusNode());
+    _initState();
   }
 
   @override
   void didUpdateWidget(covariant _FillBlankInput oldWidget) {
     super.didUpdateWidget(oldWidget);
     final newCount = widget.segments.whereType<_BlankSegment>().length;
-    if (newCount != _blankCount) {
-      for (final c in _controllers) {
-        c.dispose();
-      }
-      for (final f in _focusNodes) {
-        f.dispose();
-      }
-      _blankCount = newCount;
-      _controllers = List.generate(
-        _blankCount,
-        (i) => TextEditingController(
-          text: i < widget.answers.length ? widget.answers[i] : '',
-        ),
-      );
-      _focusNodes = List.generate(_blankCount, (_) => FocusNode());
+    final wordBankChanged = !_listEq(oldWidget.wordBank, widget.wordBank);
+    if (newCount != _blankCount || wordBankChanged) {
+      _initState();
     }
   }
 
-  @override
-  void dispose() {
-    for (final c in _controllers) {
-      c.dispose();
+  void _initState() {
+    _blankCount = widget.segments.whereType<_BlankSegment>().length;
+    _bankWords = List<String>.from(widget.wordBank);
+    _bankUsed = List<bool>.filled(_bankWords.length, false);
+    _placement = List<int>.filled(_blankCount, -1);
+    // Restore prior answers if any chip text matches an unused slot in the bank.
+    for (int i = 0; i < _blankCount && i < widget.answers.length; i++) {
+      final ans = widget.answers[i];
+      if (ans.isEmpty) continue;
+      final match = _firstUnusedMatch(ans);
+      if (match >= 0) {
+        _bankUsed[match] = true;
+        _placement[i] = match;
+      }
     }
-    for (final f in _focusNodes) {
-      f.dispose();
-    }
-    super.dispose();
   }
 
-  void _onChanged() {
-    final updated = _controllers.map((c) => c.text).toList();
-    widget.onAnswerChanged(updated);
+  int _firstUnusedMatch(String word) {
+    final target = word.trim().toLowerCase();
+    for (int i = 0; i < _bankWords.length; i++) {
+      if (_bankUsed[i]) continue;
+      if (_bankWords[i].trim().toLowerCase() == target) return i;
+    }
+    return -1;
+  }
+
+  bool _listEq(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  void _emit() {
+    final out = List<String>.generate(_blankCount, (i) {
+      final p = _placement[i];
+      return p >= 0 ? _bankWords[p] : '';
+    });
+    widget.onAnswerChanged(out);
+  }
+
+  void _placeWord(int bankIndex) {
+    if (_bankUsed[bankIndex]) return;
+    final firstEmpty = _placement.indexOf(-1);
+    if (firstEmpty < 0) return;
+    setState(() {
+      _placement[firstEmpty] = bankIndex;
+      _bankUsed[bankIndex] = true;
+    });
+    _emit();
+  }
+
+  void _clearBlank(int blankIndex) {
+    final p = _placement[blankIndex];
+    if (p < 0) return;
+    setState(() {
+      _placement[blankIndex] = -1;
+      _bankUsed[p] = false;
+    });
+    _emit();
   }
 
   @override
@@ -176,16 +211,14 @@ class _FillBlankInputState extends State<_FillBlankInput> {
     final visuals = getQuestionVisuals(context, QuestionType.fillBlank);
 
     int blankIndex = 0;
-    final widgets = <Widget>[];
+    final inlineWidgets = <Widget>[];
     for (final seg in widget.segments) {
       switch (seg) {
         case _TextSegment(:final text):
-          // Split text on spaces but keep them as separators so the wrap can
-          // break naturally between words.
           final parts = text.split(RegExp(r'(\s+)'));
           for (final part in parts) {
             if (part.isEmpty) continue;
-            widgets.add(
+            inlineWidgets.add(
               Text(
                 part,
                 style: GoogleFonts.inter(
@@ -199,19 +232,14 @@ class _FillBlankInputState extends State<_FillBlankInput> {
           }
         case _BlankSegment():
           final i = blankIndex;
-          widgets.add(
-            _InlineBlankField(
-              controller: _controllers[i],
-              focusNode: _focusNodes[i],
+          final p = _placement[i];
+          inlineWidgets.add(
+            _BlankSlot(
+              filledWord: p >= 0 ? _bankWords[p] : null,
               accent: visuals.accent,
               fillColor: c.muted,
-              onChanged: (_) => _onChanged(),
-              isLast: i == _blankCount - 1,
-              onSubmitted: () {
-                if (i < _blankCount - 1) {
-                  _focusNodes[i + 1].requestFocus();
-                }
-              },
+              foreground: c.foreground,
+              onTap: () => _clearBlank(i),
             ),
           );
           blankIndex++;
@@ -221,8 +249,6 @@ class _FillBlankInputState extends State<_FillBlankInput> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Count hint shown only when there's more than one blank — for a
-        // single blank the parent header pill already says "Fill in the Blank".
         if (_blankCount > 1) ...[
           Container(
             padding: const EdgeInsets.symmetric(
@@ -240,7 +266,7 @@ class _FillBlankInputState extends State<_FillBlankInput> {
             child: Row(
               children: [
                 Icon(
-                  Icons.edit_note_rounded,
+                  Icons.touch_app_rounded,
                   size: 20,
                   color: visuals.accent,
                 ),
@@ -261,7 +287,6 @@ class _FillBlankInputState extends State<_FillBlankInput> {
           const SizedBox(height: AppSpacing.xl),
         ],
 
-        // Sentence with inline blanks
         Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
@@ -274,7 +299,46 @@ class _FillBlankInputState extends State<_FillBlankInput> {
             runSpacing: 10,
             alignment: WrapAlignment.start,
             crossAxisAlignment: WrapCrossAlignment.center,
-            children: widgets,
+            children: inlineWidgets,
+          ),
+        ),
+
+        const SizedBox(height: AppSpacing.xl),
+
+        // Word bank
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: c.muted.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: c.border, width: 1),
+          ),
+          child: Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            alignment: WrapAlignment.center,
+            children: [
+              for (int i = 0; i < _bankWords.length; i++)
+                _BankChip(
+                  label: _bankWords[i],
+                  used: _bankUsed[i],
+                  accent: visuals.accent,
+                  background: c.card,
+                  foreground: c.foreground,
+                  onTap: _bankUsed[i] ? null : () => _placeWord(i),
+                ),
+              if (_bankWords.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Text(
+                    'No words available',
+                    style: GoogleFonts.inter(
+                      color: c.mutedForeground,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ],
@@ -282,109 +346,48 @@ class _FillBlankInputState extends State<_FillBlankInput> {
   }
 }
 
-class _InlineBlankField extends StatefulWidget {
-  const _InlineBlankField({
-    required this.controller,
-    required this.focusNode,
+class _BlankSlot extends StatelessWidget {
+  const _BlankSlot({
+    required this.filledWord,
     required this.accent,
     required this.fillColor,
-    required this.onChanged,
-    required this.isLast,
-    required this.onSubmitted,
+    required this.foreground,
+    required this.onTap,
   });
 
-  final TextEditingController controller;
-  final FocusNode focusNode;
+  final String? filledWord;
   final Color accent;
   final Color fillColor;
-  final ValueChanged<String> onChanged;
-  final bool isLast;
-  final VoidCallback onSubmitted;
-
-  @override
-  State<_InlineBlankField> createState() => _InlineBlankFieldState();
-}
-
-class _InlineBlankFieldState extends State<_InlineBlankField> {
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(_handleTextChanged);
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_handleTextChanged);
-    super.dispose();
-  }
-
-  void _handleTextChanged() {
-    if (mounted) setState(() {});
-  }
+  final Color foreground;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final c = AppTheme.colors(context);
-    final isFilled = widget.controller.text.trim().isNotEmpty;
-    // Width grows with content; min keeps it tappable, max prevents overflow.
-    final textLen = widget.controller.text.length;
-    final width = (textLen * 14.0 + 56).clamp(96.0, 220.0);
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: width, minWidth: 96),
-      child: SizedBox(
-        height: 42,
-        child: TextField(
-          controller: widget.controller,
-          focusNode: widget.focusNode,
-          onChanged: widget.onChanged,
-          textInputAction:
-              widget.isLast ? TextInputAction.done : TextInputAction.next,
-          onSubmitted: (_) => widget.onSubmitted(),
-          textAlign: TextAlign.center,
-          textAlignVertical: TextAlignVertical.center,
-          style: GoogleFonts.inter(
-            fontSize: AppTypography.titleSmall,
-            fontWeight: FontWeight.w700,
-            color: isFilled ? widget.accent : c.foreground,
-            height: 1.8,
+    final filled = filledWord != null && filledWord!.isNotEmpty;
+    final label = filled ? filledWord! : '____';
+    final paddingH = filled ? 14.0 : 24.0;
+    return InkWell(
+      onTap: filled ? onTap : null,
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 80, minHeight: 42),
+        padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: 6),
+        decoration: BoxDecoration(
+          color: filled ? accent.withValues(alpha: 0.10) : fillColor,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
+            color: filled ? accent : accent.withValues(alpha: 0.40),
+            width: filled ? 2 : 1.5,
           ),
-          decoration: InputDecoration(
-            hintText: '____',
-            hintStyle: GoogleFonts.inter(
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
               fontSize: AppTypography.titleSmall,
-              fontWeight: FontWeight.w600,
-              color: c.mutedForeground.withValues(alpha: 0.5),
-              height: 1.8,
-            ),
-            filled: true,
-            fillColor: isFilled
-                ? widget.accent.withValues(alpha: 0.08)
-                : widget.fillColor,
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: 0,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              borderSide: BorderSide(
-                color: widget.accent.withValues(alpha: 0.40),
-                width: 1.5,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              borderSide: BorderSide(
-                color: isFilled
-                    ? widget.accent
-                    : widget.accent.withValues(alpha: 0.40),
-                width: 1.5,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              borderSide: BorderSide(color: widget.accent, width: 2),
+              fontWeight: FontWeight.w700,
+              color: filled ? accent : foreground.withValues(alpha: 0.5),
+              height: 1.4,
             ),
           ),
         ),
@@ -393,6 +396,68 @@ class _InlineBlankFieldState extends State<_InlineBlankField> {
   }
 }
 
-// Hint to avoid an unused-import warning when S is only referenced indirectly.
+class _BankChip extends StatelessWidget {
+  const _BankChip({
+    required this.label,
+    required this.used,
+    required this.accent,
+    required this.background,
+    required this.foreground,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool used;
+  final Color accent;
+  final Color background;
+  final Color foreground;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 150),
+      opacity: used ? 0.20 : 1.0,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: background,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(
+                color: used
+                    ? Colors.transparent
+                    : accent.withValues(alpha: 0.30),
+                width: 1.5,
+              ),
+              boxShadow: used
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+            ),
+            child: Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: AppTypography.bodyLarge,
+                fontWeight: FontWeight.w700,
+                color: foreground,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ignore: unused_element
 String _typeAnswerHint(BuildContext context) => S.of(context).typeAnswerHint;

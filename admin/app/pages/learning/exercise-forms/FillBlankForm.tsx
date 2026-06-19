@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Plus, X, Trash2 } from 'lucide-react'
+import { Plus, X, Trash2, Library } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
+import { useAdminExercise } from '../../../features/learning/api/use-learning-admin'
+import { useParams } from 'react-router'
 import type { QuestionFormProps } from './types'
 import { getOptionsObject } from './types'
 
@@ -10,6 +12,7 @@ type Part =
 
 interface DraftState {
   parts: Part[]
+  wordBank: string[]
 }
 
 const BLANK_MARKER = /_{3,}/g
@@ -54,10 +57,17 @@ function initialFromProps(initial: QuestionFormProps['initial']): DraftState {
         Array.isArray(g) ? (g as unknown[]).map((s) => String(s)) : [String(g)],
       )
     : []
-  return { parts: partsFromSentence(sentence, accepted) }
+  const wordBank = Array.isArray(opts.wordBank)
+    ? (opts.wordBank as unknown[]).map((s) => String(s)).filter(Boolean)
+    : []
+  return { parts: partsFromSentence(sentence, accepted), wordBank }
 }
 
 export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
+  const { exerciseId } = useParams()
+  const { data: exercise } = useAdminExercise(exerciseId)
+  const lessonVocab = exercise?.lesson?.vocabularies ?? []
+
   const [state, setState] = useState<DraftState>(() => initialFromProps(initial))
   const [activeTextId, setActiveTextId] = useState<string | null>(null)
   const activeCursorRef = useRef<number | null>(null)
@@ -78,6 +88,18 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
       .join('')
     const acceptedAnswers = blanks.map((b) => b.answers.filter(Boolean))
     const answers = blanks.map((b) => b.answers[0] ?? '')
+    // Auto-include every primary answer in wordBank so the bank always
+    // contains at least the correct words. Distractors come from the user.
+    const bankSet = new Set<string>()
+    for (const w of state.wordBank) {
+      const t = w.trim()
+      if (t) bankSet.add(t)
+    }
+    for (const a of answers) {
+      const t = a.trim()
+      if (t) bankSet.add(t)
+    }
+    const wordBank = Array.from(bankSet)
     return {
       question: null,
       options: {
@@ -85,10 +107,11 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
         sentence,
         blanks: blanks.length,
         acceptedAnswers,
+        wordBank,
       },
       correctAnswer: { answers },
     }
-  }, [state.parts, blanks])
+  }, [state.parts, state.wordBank, blanks])
 
   const validate = () => {
     const sentence = payload.options.sentence.trim()
@@ -96,6 +119,8 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
     if (blanks.length === 0) return 'Cần ít nhất 1 chỗ trống'
     if (blanks.some((b) => !b.answers.some((a) => a.trim())))
       return 'Mỗi chỗ trống cần ít nhất 1 đáp án'
+    if (payload.options.wordBank.length < blanks.length)
+      return 'Kho từ phải có đủ số từ cho các chỗ trống'
     return null
   }
 
@@ -106,6 +131,7 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
 
   const setTextAt = (id: string, value: string) =>
     setState((prev) => ({
+      ...prev,
       parts: prev.parts.map((p) =>
         p.id === id && p.kind === 'text' ? { ...p, value } : p,
       ),
@@ -113,6 +139,7 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
 
   const setBlankAnswers = (id: string, answers: string[]) =>
     setState((prev) => ({
+      ...prev,
       parts: prev.parts.map((p) =>
         p.id === id && p.kind === 'blank'
           ? { ...p, answers: answers.length ? answers : [''] }
@@ -123,7 +150,6 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
   const removeBlank = (id: string) =>
     setState((prev) => {
       const next = prev.parts.filter((p) => p.id !== id)
-      // Merge adjacent text segments
       const merged: Part[] = []
       for (const part of next) {
         const last = merged[merged.length - 1]
@@ -140,17 +166,15 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
       if (merged[0].kind === 'blank') merged.unshift({ id: genId(), kind: 'text', value: '' })
       if (merged[merged.length - 1].kind === 'blank')
         merged.push({ id: genId(), kind: 'text', value: '' })
-      return { parts: merged }
+      return { ...prev, parts: merged }
     })
 
-  // Insert a blank at the cursor position of whatever text segment last had focus.
   const insertBlank = () => {
     setState((prev) => {
       const targetId = activeTextId ?? prev.parts[prev.parts.length - 1]?.id
       const cursor = activeCursorRef.current
       const idx = prev.parts.findIndex((p) => p.id === targetId)
       if (idx < 0 || prev.parts[idx].kind !== 'text') {
-        // No active text — append at end
         const last = prev.parts[prev.parts.length - 1]
         const next: Part[] = [...prev.parts]
         if (!last || last.kind === 'blank') {
@@ -158,7 +182,7 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
         }
         next.push({ id: genId(), kind: 'blank', answers: [''] })
         next.push({ id: genId(), kind: 'text', value: ' ' })
-        return { parts: next }
+        return { ...prev, parts: next }
       }
       const target = prev.parts[idx] as Extract<Part, { kind: 'text' }>
       const pos = cursor ?? target.value.length
@@ -171,12 +195,51 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
         { id: genId(), kind: 'text', value: after },
         ...prev.parts.slice(idx + 1),
       ]
-      return { parts: next }
+      return { ...prev, parts: next }
     })
   }
 
+  const addWord = (word: string) => {
+    const t = word.trim()
+    if (!t) return
+    setState((prev) =>
+      prev.wordBank.some((w) => w.toLowerCase() === t.toLowerCase())
+        ? prev
+        : { ...prev, wordBank: [...prev.wordBank, t] },
+    )
+  }
+
+  const removeWord = (word: string) =>
+    setState((prev) => ({
+      ...prev,
+      wordBank: prev.wordBank.filter((w) => w !== word),
+    }))
+
+  const addAllVocab = () => {
+    if (lessonVocab.length === 0) return
+    setState((prev) => {
+      const set = new Set(prev.wordBank.map((w) => w.toLowerCase()))
+      const next = [...prev.wordBank]
+      for (const v of lessonVocab) {
+        const t = v.word?.trim()
+        if (t && !set.has(t.toLowerCase())) {
+          set.add(t.toLowerCase())
+          next.push(t)
+        }
+      }
+      return { ...prev, wordBank: next }
+    })
+  }
+
+  // Words that already match a primary correct answer — pinned (cannot remove)
+  const correctSet = new Set(
+    blanks
+      .map((b) => (b.answers[0] ?? '').trim().toLowerCase())
+      .filter(Boolean),
+  )
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           Câu có chỗ trống
@@ -222,18 +285,128 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
         <Plus className="h-4 w-4" />
         Thêm chỗ trống tại con trỏ
       </button>
+
+      <WordBankEditor
+        words={state.wordBank}
+        correctSet={correctSet}
+        onAdd={addWord}
+        onRemove={removeWord}
+        onAddAllVocab={addAllVocab}
+        vocabCount={lessonVocab.length}
+      />
     </div>
   )
 }
 
-/**
- * Inline text input that visually behaves like flowing prose: no border, no
- * background, auto-grows with its content.
- *
- * Width is measured via a hidden mirror span with the same font/size so the
- * input is exactly as wide as the rendered text (no trailing padding). Using
- * `ch` doesn't work for proportional fonts — Vietnamese text widths vary.
- */
+function WordBankEditor({
+  words,
+  correctSet,
+  onAdd,
+  onRemove,
+  onAddAllVocab,
+  vocabCount,
+}: {
+  words: string[]
+  correctSet: Set<string>
+  onAdd: (word: string) => void
+  onRemove: (word: string) => void
+  onAddAllVocab: () => void
+  vocabCount: number
+}) {
+  const [draft, setDraft] = useState('')
+  const submit = () => {
+    const t = draft.trim()
+    if (!t) return
+    onAdd(t)
+    setDraft('')
+  }
+  return (
+    <div className="rounded-2xl border-2 border-border bg-card p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-foreground">
+            Kho từ — học viên bấm chọn để điền
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Đáp án chính tự động có trong kho. Thêm các từ gây nhiễu để học viên phải lựa chọn.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onAddAllVocab}
+          disabled={vocabCount === 0}
+          className="inline-flex items-center gap-1.5 rounded-full border-2 border-border bg-card px-3 py-1.5 text-xs font-bold hover:border-primary hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          title={vocabCount === 0 ? 'Bài học chưa có từ vựng' : `Thêm ${vocabCount} từ của bài`}
+        >
+          <Library className="h-3.5 w-3.5" />
+          Thêm tất cả từ vựng ({vocabCount})
+        </button>
+      </div>
+
+      {words.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {words.map((w) => {
+            const isCorrect = correctSet.has(w.trim().toLowerCase())
+            return (
+              <span
+                key={w}
+                className={`inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1 text-sm font-bold ${
+                  isCorrect
+                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
+                    : 'border-border bg-muted/50 text-foreground'
+                }`}
+              >
+                {w}
+                {isCorrect ? (
+                  <span
+                    className="text-[10px] uppercase font-bold tracking-wider text-emerald-700/70 dark:text-emerald-300/70"
+                    title="Đáp án — luôn nằm trong kho"
+                  >
+                    đáp án
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onRemove(w)}
+                    className="h-4 w-4 inline-flex items-center justify-center rounded-full text-muted-foreground/70 hover:bg-destructive/15 hover:text-destructive"
+                    aria-label={`Xóa từ ${w}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+              </span>
+            )
+          })}
+        </div>
+      )}
+
+      <div className="flex items-center gap-2">
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              submit()
+            }
+          }}
+          placeholder="Thêm một từ rồi nhấn Enter..."
+          className="flex-1 rounded-lg border-2 border-input bg-card px-3 py-2 text-sm outline-none focus-visible:border-primary"
+        />
+        <button
+          type="button"
+          onClick={submit}
+          disabled={!draft.trim()}
+          className="inline-flex items-center gap-1.5 rounded-lg border-2 border-border bg-card px-3 py-2 text-sm font-bold hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Thêm từ
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function FlowingText({
   value,
   onChange,
@@ -254,7 +427,6 @@ function FlowingText({
   useLayoutEffect(() => {
     if (measureRef.current) {
       const w = measureRef.current.offsetWidth
-      // +2px so caret has room and last char isn't cropped
       setWidth(Math.max(w + 2, 8))
     }
   }, [value, placeholder])
@@ -298,10 +470,6 @@ function FlowingText({
   )
 }
 
-/**
- * Blank chip with an inline editable answer. Click the body to type the
- * primary answer directly. Use the popover (+ icon) to add variants.
- */
 function BlankInput({
   index,
   answers,

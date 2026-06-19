@@ -27,6 +27,7 @@ describe('Exercise Options Types', () => {
         type: QuestionType.FILL_BLANK,
         sentence: '___ là ___ .',
         blanks: 2,
+        wordBank: ['answer1a', 'answer2a'],
         acceptedAnswers: [
           ['answer1a', 'answer1b'],
           ['answer2a', 'answer2b'],
@@ -70,6 +71,7 @@ describe('Exercise Options Types', () => {
         type: QuestionType.FILL_BLANK,
         sentence: '___',
         blanks: 1,
+        wordBank: [],
       };
 
       if (isFillBlankOptions(options)) {
@@ -111,6 +113,7 @@ describe('Exercise Options Types', () => {
           type: QuestionType.FILL_BLANK,
           sentence: '___ ___',
           blanks: 2,
+          wordBank: [],
         },
         {
           type: QuestionType.MATCHING,

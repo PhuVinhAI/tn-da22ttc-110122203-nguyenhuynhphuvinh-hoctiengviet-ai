@@ -54,7 +54,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Xin ___ ! Tôi là Nam."
+                    "sentence": "Xin ___ ! Tôi là Nam.",
+                    "wordBank": [
+                      "chào",
+                      "chào buổi sáng",
+                      "xin lỗi",
+                      "hẹn gặp lại"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -739,7 +745,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi ___ sinh viên. (Điền copula)"
+                    "sentence": "Tôi ___ sinh viên. (Điền copula)",
+                    "wordBank": [
+                      "là",
+                      "em",
+                      "tên",
+                      "bạn"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -803,7 +815,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi ___ hiểu. (Phủ định: I don't understand)"
+                    "sentence": "Tôi ___ hiểu. (Phủ định: I don't understand)",
+                    "wordBank": [
+                      "không",
+                      "là",
+                      "tôi",
+                      "chị"
+                    ]
                   },
                   "order_index": 6,
                   "question": null,
@@ -1243,7 +1261,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Từ ___ (falling tone) có nghĩa là grandmother. (Điền từ: ba với thanh huyền)"
+                    "sentence": "Từ ___ (falling tone) có nghĩa là grandmother. (Điền từ: ba với thanh huyền)",
+                    "wordBank": [
+                      "bà",
+                      "ba",
+                      "năm",
+                      "khỏe"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -1654,7 +1678,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "25 = hai mươi ___ (Điền từ: lăm hay năm?)"
+                    "sentence": "25 = hai mươi ___ (Điền từ: lăm hay năm?)",
+                    "wordBank": [
+                      "lăm",
+                      "trăm",
+                      "bảy",
+                      "một"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -2048,7 +2078,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hai ___ mèo. (Điền classifier cho động vật)"
+                    "sentence": "Hai ___ mèo. (Điền classifier cho động vật)",
+                    "wordBank": [
+                      "con",
+                      "chiếc",
+                      "người",
+                      "bài"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -2537,7 +2573,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hai thanh dễ nhầm lẫn nhất là thanh ___ và thanh ngã."
+                    "sentence": "Hai thanh dễ nhầm lẫn nhất là thanh ___ và thanh ngã.",
+                    "wordBank": [
+                      "hỏi",
+                      "phút",
+                      "giờ",
+                      "tuần"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -2774,7 +2816,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "___ gái tôi học lớp năm. (younger sister)"
+                    "sentence": "___ gái tôi học lớp năm. (younger sister)",
+                    "wordBank": [
+                      "Em",
+                      "cậu",
+                      "cháu",
+                      "bố"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -3224,7 +3272,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "___ yêu mẹ. (I, as a child, love mother)"
+                    "sentence": "___ yêu mẹ. (I, as a child, love mother)",
+                    "wordBank": [
+                      "Con",
+                      "nhà",
+                      "của",
+                      "của"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -3294,7 +3348,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nhà ___ tôi ở Hà Nội. (possessive: of)"
+                    "sentence": "Nhà ___ tôi ở Hà Nội. (possessive: of)",
+                    "wordBank": [
+                      "của",
+                      "Con",
+                      "nhà",
+                      "gia đình"
+                    ]
                   },
                   "order_index": 5,
                   "question": null,
@@ -3775,7 +3835,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi ___ cà phê. (I drink coffee)"
+                    "sentence": "Tôi ___ cà phê. (I drink coffee)",
+                    "wordBank": [
+                      "uống",
+                      "bún",
+                      "thích",
+                      "bánh mì"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -4184,7 +4250,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi ___ ăn cơm. (Past tense: I ate rice)"
+                    "sentence": "Tôi ___ ăn cơm. (Past tense: I ate rice)",
+                    "wordBank": [
+                      "đã",
+                      "sẽ",
+                      "sẽ",
+                      "đang"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -4207,7 +4279,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi ___ đi chợ. (Future: I will go to market)"
+                    "sentence": "Tôi ___ đi chợ. (Future: I will go to market)",
+                    "wordBank": [
+                      "sẽ",
+                      "rất",
+                      "đang",
+                      "đã"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -4230,7 +4308,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi ___ uống cà phê. (Progressive: I am drinking)"
+                    "sentence": "Tôi ___ uống cà phê. (Progressive: I am drinking)",
+                    "wordBank": [
+                      "đang",
+                      "sẽ",
+                      "đã",
+                      "rất"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -4672,7 +4756,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "___ tôi một ly nước. (Give me a glass of water)"
+                    "sentence": "___ tôi một ly nước. (Give me a glass of water)",
+                    "wordBank": [
+                      "Cho",
+                      "ly",
+                      "đây",
+                      "tính tiền"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -5022,7 +5112,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Đi ___. (Go straight)"
+                    "sentence": "Đi ___. (Go straight)",
+                    "wordBank": [
+                      "thẳng",
+                      "đây",
+                      "xe máy",
+                      "ô tô"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -5462,7 +5558,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "Tôi đi ___ Hà Nội ___ Sài Gòn. (from...to)"
+                    "sentence": "Tôi đi ___ Hà Nội ___ Sài Gòn. (from...to)",
+                    "wordBank": [
+                      "từ",
+                      "đến",
+                      "đâu",
+                      "xa"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -5875,7 +5977,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Xe số ___ đi chợ. (bus number five)"
+                    "sentence": "Xe số ___ đi chợ. (bus number five)",
+                    "wordBank": [
+                      "năm",
+                      "bệnh viện",
+                      "gần nhất",
+                      "mất"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -6158,7 +6266,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Ở chợ Việt Nam người ta hay _____ giá khi mua hàng."
+                    "sentence": "Ở chợ Việt Nam người ta hay _____ giá khi mua hàng.",
+                    "wordBank": [
+                      "trả",
+                      "giá",
+                      "mua",
+                      "rẻ"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -6618,7 +6732,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Chợ này rẻ _____ chợ kia."
+                    "sentence": "Chợ này rẻ _____ chợ kia.",
+                    "wordBank": [
+                      "hơn",
+                      "nhiều",
+                      "ít",
+                      "sạch"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -7035,7 +7155,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tổng _____ bao nhiêu? (How much in total?)"
+                    "sentence": "Tổng _____ bao nhiêu? (How much in total?)",
+                    "wordBank": [
+                      "cộng",
+                      "rau muống",
+                      "mớ",
+                      "cà chua"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -7242,7 +7368,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Siêu thị sạch _____ chợ. (Supermarkets are cleaner than markets.)"
+                    "sentence": "Siêu thị sạch _____ chợ. (Supermarkets are cleaner than markets.)",
+                    "wordBank": [
+                      "hơn",
+                      "sớm",
+                      "tiêu"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -7485,7 +7616,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi phải _____ thuốc ba lần một ngày. (I have to ___ medicine three times a day.)"
+                    "sentence": "Tôi phải _____ thuốc ba lần một ngày. (I have to ___ medicine three times a day.)",
+                    "wordBank": [
+                      "uống",
+                      "ho",
+                      "đơn thuốc",
+                      "nhà thuốc"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -7845,7 +7982,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi _____ cảm rồi, không đi làm được."
+                    "sentence": "Tôi _____ cảm rồi, không đi làm được.",
+                    "wordBank": [
+                      "bị",
+                      "ốm",
+                      "phải",
+                      "khỏe"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -8226,7 +8369,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Phòng khám tư nhân _____ hơn bệnh viện công nhưng đắt hơn."
+                    "sentence": "Phòng khám tư nhân _____ hơn bệnh viện công nhưng đắt hơn.",
+                    "wordBank": [
+                      "sạch",
+                      "phòng khám",
+                      "công",
+                      "tư nhân"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -8463,7 +8612,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Trời _____ mưa to quá!"
+                    "sentence": "Trời _____ mưa to quá!",
+                    "wordBank": [
+                      "đang",
+                      "mùa",
+                      "mùa khô",
+                      "lạnh"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -8840,7 +8995,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Trời _____ mưa to. Chờ tạnh rồi đi."
+                    "sentence": "Trời _____ mưa to. Chờ tạnh rồi đi.",
+                    "wordBank": [
+                      "đang",
+                      "tạnh",
+                      "mưa rào"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -9161,7 +9321,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nhớ mang _____ khi ra ngoài mùa mưa."
+                    "sentence": "Nhớ mang _____ khi ra ngoài mùa mưa.",
+                    "wordBank": [
+                      "ô",
+                      "dự báo",
+                      "nhiệt độ"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -9415,7 +9580,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Căn hộ có hai phòng _____ và một bếp."
+                    "sentence": "Căn hộ có hai phòng _____ và một bếp.",
+                    "wordBank": [
+                      "ngủ",
+                      "tầng",
+                      "khách sạn",
+                      "bếp"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -9776,7 +9947,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi _____ quận Ba Đình, Hà Nội."
+                    "sentence": "Tôi _____ quận Ba Đình, Hà Nội.",
+                    "wordBank": [
+                      "ở",
+                      "vườn",
+                      "riêng",
+                      "phòng khách"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -10145,7 +10322,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Cuối tuần mình đi _____ nhé! (Let's hang out this weekend!)"
+                    "sentence": "Cuối tuần mình đi _____ nhé! (Let's hang out this weekend!)",
+                    "wordBank": [
+                      "chơi",
+                      "đọc",
+                      "sách",
+                      "bóng đá"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -10493,7 +10676,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi thích nghe nhạc _____ đọc sách."
+                    "sentence": "Tôi thích nghe nhạc _____ đọc sách.",
+                    "wordBank": [
+                      "và",
+                      "thèm",
+                      "mà",
+                      "mà"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -10587,7 +10776,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Cái áo _____ tôi thích đã bán rồi. (The shirt ___ I like has been sold.)"
+                    "sentence": "Cái áo _____ tôi thích đã bán rồi. (The shirt ___ I like has been sold.)",
+                    "wordBank": [
+                      "mà",
+                      "và",
+                      "và",
+                      "thèm"
+                    ]
                   },
                   "order_index": 5,
                   "question": null,
@@ -10857,7 +11052,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Môn thể thao _____ tôi thích nhất là bóng đá."
+                    "sentence": "Môn thể thao _____ tôi thích nhất là bóng đá.",
+                    "wordBank": [
+                      "mà",
+                      "bạn bè",
+                      "hấp dẫn"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -11076,7 +11276,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi đã _____ vào vị trí quản lý dự án."
+                    "sentence": "Tôi đã _____ vào vị trí quản lý dự án.",
+                    "wordBank": [
+                      "ứng tuyển",
+                      "nghề",
+                      "hợp đồng",
+                      "phòng ban"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -11613,7 +11819,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Cửa hàng _____ trộm đêm qua. (bị/được)"
+                    "sentence": "Cửa hàng _____ trộm đêm qua. (bị/được)",
+                    "wordBank": [
+                      "bị",
+                      "phạt",
+                      "được",
+                      "mắng"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -11636,7 +11848,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Dự án mới _____ hội đồng duyệt tuần trước. (bị/được)"
+                    "sentence": "Dự án mới _____ hội đồng duyệt tuần trước. (bị/được)",
+                    "wordBank": [
+                      "được",
+                      "bị",
+                      "thưởng",
+                      "phạt"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -12007,7 +12225,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Lan _____ sếp giao thêm một dự án mới. (bị/được)"
+                    "sentence": "Lan _____ sếp giao thêm một dự án mới. (bị/được)",
+                    "wordBank": [
+                      "được",
+                      "cơm trưa",
+                      "làm thêm giờ",
+                      "xuất nhập khẩu"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -12170,7 +12394,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Đi làm _____ bị coi là thiếu tôn trọng ở Việt Nam."
+                    "sentence": "Đi làm _____ bị coi là thiếu tôn trọng ở Việt Nam.",
+                    "wordBank": [
+                      "muộn",
+                      "giám đốc",
+                      "thứ bậc",
+                      "xưng hô"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -12416,7 +12646,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Em _____ nhận học bổng toàn phần năm nay. (bị/được)"
+                    "sentence": "Em _____ nhận học bổng toàn phần năm nay. (bị/được)",
+                    "wordBank": [
+                      "được",
+                      "môn học",
+                      "đại học",
+                      "sinh viên"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -12831,7 +13067,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ bạn học chăm thì bạn sẽ thi đậu."
+                    "sentence": "_____ bạn học chăm thì bạn sẽ thi đậu.",
+                    "wordBank": [
+                      "Nếu",
+                      "thi đậu",
+                      "thì",
+                      "thi rớt"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -12929,7 +13171,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Bạn phải đi ngay, _____ không thì sẽ muộn."
+                    "sentence": "Bạn phải đi ngay, _____ không thì sẽ muộn.",
+                    "wordBank": [
+                      "nếu",
+                      "thì",
+                      "thi rớt",
+                      "thi đậu"
+                    ]
                   },
                   "order_index": 5,
                   "question": null,
@@ -13203,7 +13451,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ chúng ta được học hành tốt thì sẽ có nhiều cơ hội trong cuộc sống."
+                    "sentence": "_____ chúng ta được học hành tốt thì sẽ có nhiều cơ hội trong cuộc sống.",
+                    "wordBank": [
+                      "Nếu",
+                      "kết bài",
+                      "mở bài",
+                      "thân bài"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -13405,7 +13659,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Em đã _____ vé máy bay đi Đà Nẵng rồi."
+                    "sentence": "Em đã _____ vé máy bay đi Đà Nẵng rồi.",
+                    "wordBank": [
+                      "đặt",
+                      "khách sạn",
+                      "sân bay",
+                      "tham quan"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -13786,7 +14046,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ xe rồi rẽ trái là đến khách sạn."
+                    "sentence": "_____ xe rồi rẽ trái là đến khách sạn.",
+                    "wordBank": [
+                      "Xuống",
+                      "lên",
+                      "ra",
+                      "vào"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -14152,7 +14418,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Cửa cổng sẽ _____ lúc hai giờ bốn mươi lăm."
+                    "sentence": "Cửa cổng sẽ _____ lúc hai giờ bốn mươi lăm.",
+                    "wordBank": [
+                      "đóng",
+                      "cổng",
+                      "chuyến bay",
+                      "cất cánh"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -14603,7 +14875,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tình yêu cần sự _____ và thấu hiểu."
+                    "sentence": "Tình yêu cần sự _____ và thấu hiểu.",
+                    "wordBank": [
+                      "tin tưởng",
+                      "tình bạn",
+                      "ly hôn",
+                      "hẹn hò"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -14984,7 +15262,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ trời mưa, tôi vẫn đi làm."
+                    "sentence": "_____ trời mưa, tôi vẫn đi làm.",
+                    "wordBank": [
+                      "Dù",
+                      "chính là",
+                      "Chính",
+                      "mặc dù"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -15075,7 +15359,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ là tình bạn mới giúp tôi vượt qua khó khăn."
+                    "sentence": "_____ là tình bạn mới giúp tôi vượt qua khó khăn.",
+                    "wordBank": [
+                      "Chính",
+                      "vẫn",
+                      "mặc dù",
+                      "chính là"
+                    ]
                   },
                   "order_index": 5,
                   "question": null,
@@ -15346,7 +15636,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Dù cãi nhau, họ _____ yêu nhau."
+                    "sentence": "Dù cãi nhau, họ _____ yêu nhau.",
+                    "wordBank": [
+                      "vẫn",
+                      "hạnh phúc",
+                      "cãi nhau",
+                      "xin lỗi"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -15638,7 +15934,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ xe ở trung tâm rất khó và đắt."
+                    "sentence": "_____ xe ở trung tâm rất khó và đắt.",
+                    "wordBank": [
+                      "Đậu",
+                      "xe buýt",
+                      "đi chậm",
+                      "mũ bảo hiểm"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -16055,7 +16357,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ đi quá nhanh! Nguy hiểm lắm."
+                    "sentence": "_____ đi quá nhanh! Nguy hiểm lắm.",
+                    "wordBank": [
+                      "Đừng",
+                      "nhé",
+                      "hãy",
+                      "đi"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -16146,7 +16454,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hãy ngồi xuống _____. (đi/rồi)"
+                    "sentence": "Hãy ngồi xuống _____. (đi/rồi)",
+                    "wordBank": [
+                      "đi",
+                      "đừng",
+                      "nha",
+                      "hãy"
+                    ]
                   },
                   "order_index": 6,
                   "question": null,
@@ -16422,7 +16736,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hãy _____ mũ bảo hiểm khi đi xe máy."
+                    "sentence": "Hãy _____ mũ bảo hiểm khi đi xe máy.",
+                    "wordBank": [
+                      "đội",
+                      "vi phạm",
+                      "tuân thủ",
+                      "tử vong"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -16608,7 +16928,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Công ty _____ 50 triệu đô la vào dự án xây dựng nhà máy mới."
+                    "sentence": "Công ty _____ 50 triệu đô la vào dự án xây dựng nhà máy mới.",
+                    "wordBank": [
+                      "đầu tư",
+                      "kinh tế",
+                      "ngân hàng",
+                      "thị trường"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -17092,7 +17418,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nếu chính phủ _____ tăng lãi suất sớm hơn, thì lạm phát đã không tăng cao như vậy."
+                    "sentence": "Nếu chính phủ _____ tăng lãi suất sớm hơn, thì lạm phát đã không tăng cao như vậy.",
+                    "wordBank": [
+                      "đã",
+                      "lãi suất",
+                      "chi phí",
+                      "Có"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -17160,7 +17492,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "_____ vốn mạnh _____ dám đầu tư vào thị trường này."
+                    "sentence": "_____ vốn mạnh _____ dám đầu tư vào thị trường này.",
+                    "wordBank": [
+                      "Có",
+                      "mới",
+                      "lãi suất",
+                      "chi phí"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -17469,7 +17807,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Trong trường hợp lạm phát vượt _____ 5%, ngân hàng trung ương sẽ tăng lãi suất."
+                    "sentence": "Trong trường hợp lạm phát vượt _____ 5%, ngân hàng trung ương sẽ tăng lãi suất.",
+                    "wordBank": [
+                      "ngưỡng",
+                      "bình diện",
+                      "thể chế",
+                      "phá sản"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -17657,7 +18001,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "_____ chiến lược quản lý chi phí hiệu quả _____ duy trì được sức cạnh tranh."
+                    "sentence": "_____ chiến lược quản lý chi phí hiệu quả _____ duy trì được sức cạnh tranh.",
+                    "wordBank": [
+                      "Có",
+                      "mới",
+                      "chuỗi cung ứng",
+                      "biên lợi nhuận"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -17879,7 +18229,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Mỗi công dân có _____ bầu cử và ứng cử theo luật định."
+                    "sentence": "Mỗi công dân có _____ bầu cử và ứng cử theo luật định.",
+                    "wordBank": [
+                      "quyền",
+                      "chính phủ",
+                      "đảng",
+                      "quốc hội"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -18252,7 +18608,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "_____ sự tham gia của người dân _____ tạo ra sức mạnh cho cải cách."
+                    "sentence": "_____ sự tham gia của người dân _____ tạo ra sức mạnh cho cải cách.",
+                    "wordBank": [
+                      "Chính là",
+                      "mới",
+                      "tham vấn",
+                      "bất công"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -18316,7 +18678,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ một chính sách phi lý! (nhấn mạnh xác nhận cảm xúc)"
+                    "sentence": "_____ một chính sách phi lý! (nhấn mạnh xác nhận cảm xúc)",
+                    "wordBank": [
+                      "Đúng là",
+                      "tham vấn",
+                      "Chính là",
+                      "mới"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -18772,7 +19140,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Dân biết, dân bàn, dân làm, dân _____, dân giám sát, dân thụ hưởng."
+                    "sentence": "Dân biết, dân bàn, dân làm, dân _____, dân giám sát, dân thụ hưởng.",
+                    "wordBank": [
+                      "kiểm tra",
+                      "lập pháp",
+                      "tập trung dân chủ",
+                      "giám sát"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -19002,7 +19376,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ nhân tạo đang thay đổi mọi ngành công nghiệp."
+                    "sentence": "_____ nhân tạo đang thay đổi mọi ngành công nghiệp.",
+                    "wordBank": [
+                      "Trí tuệ",
+                      "vệ tinh",
+                      "trí tuệ nhân tạo",
+                      "năng lượng"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -19386,7 +19766,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nghiên cứu _____ tại phòng thí nghiệm quốc gia cho thấy kết quả tích cực. (rút gọn mệnh đề quan hệ)"
+                    "sentence": "Nghiên cứu _____ tại phòng thí nghiệm quốc gia cho thấy kết quả tích cực. (rút gọn mệnh đề quan hệ)",
+                    "wordBank": [
+                      "tiến hành",
+                      "mô hình",
+                      "kiểm chứng",
+                      "giả thuyết"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -19653,7 +20039,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Sau khi _____ độc lập tại ba bệnh viện khác, kết quả xác nhận tính khả thi."
+                    "sentence": "Sau khi _____ độc lập tại ba bệnh viện khác, kết quả xác nhận tính khả thi.",
+                    "wordBank": [
+                      "kiểm chứng",
+                      "học sâu",
+                      "chẩn đoán"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -19845,7 +20236,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Truyện Kiều là _____ của Nguyễn Du."
+                    "sentence": "Truyện Kiều là _____ của Nguyễn Du.",
+                    "wordBank": [
+                      "kiệt tác",
+                      "biểu diễn",
+                      "phê bình",
+                      "đương đại"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -20299,7 +20696,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "Tác phẩm _____ sâu sắc _____ tinh tế. (cấu trúc song hành)"
+                    "sentence": "Tác phẩm _____ sâu sắc _____ tinh tế. (cấu trúc song hành)",
+                    "wordBank": [
+                      "vừa",
+                      "vừa",
+                      "lá khoai",
+                      "âm hưởng"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -20343,7 +20746,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nỗ lực của anh ấy như nước đổ _____ — hoàn toàn vô tác dụng."
+                    "sentence": "Nỗ lực của anh ấy như nước đổ _____ — hoàn toàn vô tác dụng.",
+                    "wordBank": [
+                      "lá khoai",
+                      "vừa",
+                      "âm hưởng",
+                      "chiều sâu"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -20593,7 +21002,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "Truyện Kiều mang âm hưởng _____ dầm _____ lâu."
+                    "sentence": "Truyện Kiều mang âm hưởng _____ dầm _____ lâu.",
+                    "wordBank": [
+                      "mưa",
+                      "thấm",
+                      "khát vọng",
+                      "nét bút"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -20721,7 +21136,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "_____ quả nhớ _____ trồng cây. (lòng biết ơn)"
+                    "sentence": "_____ quả nhớ _____ trồng cây. (lòng biết ơn)",
+                    "wordBank": [
+                      "Ăn",
+                      "kẻ",
+                      "ca dao",
+                      "dân gian"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -20951,7 +21372,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ không khí ở Hà Nội vượt mức cảnh báo."
+                    "sentence": "_____ không khí ở Hà Nội vượt mức cảnh báo.",
+                    "wordBank": [
+                      "Ô nhiễm",
+                      "carbon",
+                      "bảo tồn",
+                      "phát triển bền vững"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -21366,7 +21793,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Việt Nam phát triển nhanh. _____, vẫn còn nhiều thách thức về môi trường."
+                    "sentence": "Việt Nam phát triển nhanh. _____, vẫn còn nhiều thách thức về môi trường.",
+                    "wordBank": [
+                      "Tuy nhiên",
+                      "phát thải",
+                      "sinh kế",
+                      "Thay vì"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -21430,7 +21863,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ dùng túi nilon, hãy dùng túi vải."
+                    "sentence": "_____ dùng túi nilon, hãy dùng túi vải.",
+                    "wordBank": [
+                      "Thay vì",
+                      "lộ trình",
+                      "phát thải",
+                      "Tuy nhiên"
+                    ]
                   },
                   "order_index": 4,
                   "question": null,
@@ -21688,7 +22127,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ theo đuổi lợi nhuận ngắn hạn, doanh nghiệp cần tích hợp trách nhiệm xã hội."
+                    "sentence": "_____ theo đuổi lợi nhuận ngắn hạn, doanh nghiệp cần tích hợp trách nhiệm xã hội.",
+                    "wordBank": [
+                      "Thay vì",
+                      "bão lũ",
+                      "trách nhiệm xã hội",
+                      "ngập mặn"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -21895,7 +22340,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "Không _____ giúp bảo vệ môi trường _____ tiết kiệm chi phí."
+                    "sentence": "Không _____ giúp bảo vệ môi trường _____ tiết kiệm chi phí.",
+                    "wordBank": [
+                      "những",
+                      "mà còn",
+                      "sụt lún",
+                      "thiên tai"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -22078,7 +22529,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Chủ nghĩa _____ cho rằng vật chất quyết định ý thức."
+                    "sentence": "Chủ nghĩa _____ cho rằng vật chất quyết định ý thức.",
+                    "wordBank": [
+                      "duy vật",
+                      "triết học",
+                      "nhận thức",
+                      "biện chứng"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -22099,7 +22556,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Triết học _____ nhấn mạnh sự tồn tại cá nhân."
+                    "sentence": "Triết học _____ nhấn mạnh sự tồn tại cá nhân.",
+                    "wordBank": [
+                      "hiện sinh",
+                      "tư tưởng",
+                      "duy tâm",
+                      "biện chứng"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -22532,7 +22995,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ nói là, tư tưởng triết học chịu ảnh hưởng từ bối cảnh lịch sử."
+                    "sentence": "_____ nói là, tư tưởng triết học chịu ảnh hưởng từ bối cảnh lịch sử.",
+                    "wordBank": [
+                      "Có thể",
+                      "chủ quan",
+                      "mâu thuẫn",
+                      "khách quan"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -22834,7 +23303,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Mâu thuẫn chủ yếu không phải giữa tư sản và _____, mà giữa dân tộc và đế quốc."
+                    "sentence": "Mâu thuẫn chủ yếu không phải giữa tư sản và _____, mà giữa dân tộc và đế quốc.",
+                    "wordBank": [
+                      "vô sản",
+                      "di sản",
+                      "yên dân",
+                      "phương pháp luận"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -23055,7 +23530,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ quan điểm duy vật biện chứng, vật chất có trước ý thức."
+                    "sentence": "_____ quan điểm duy vật biện chứng, vật chất có trước ý thức.",
+                    "wordBank": [
+                      "Theo",
+                      "tựu trung lại",
+                      "luận điểm",
+                      "chứng cứ"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -23282,7 +23763,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Quốc hội thực hiện quyền _____ pháp."
+                    "sentence": "Quốc hội thực hiện quyền _____ pháp.",
+                    "wordBank": [
+                      "lập",
+                      "bị đơn",
+                      "bản án",
+                      "nguyên đơn"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -23659,7 +24146,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ quy định tại Điều 10 Luật Đất đai, người sử dụng đất có quyền chuyển nhượng."
+                    "sentence": "_____ quy định tại Điều 10 Luật Đất đai, người sử dụng đất có quyền chuyển nhượng.",
+                    "wordBank": [
+                      "Theo",
+                      "căn cứ",
+                      "đề nghị",
+                      "còn"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -23722,7 +24215,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "Cá nhân này không _____ vi phạm quy định mà _____ chống đối công vụ."
+                    "sentence": "Cá nhân này không _____ vi phạm quy định mà _____ chống đối công vụ.",
+                    "wordBank": [
+                      "những",
+                      "còn",
+                      "căn cứ",
+                      "vi phạm"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -23968,7 +24467,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Mỗi hành vi chỉ bị xử phạt một lần bởi cơ quan có _____."
+                    "sentence": "Mỗi hành vi chỉ bị xử phạt một lần bởi cơ quan có _____.",
+                    "wordBank": [
+                      "thẩm quyền",
+                      "tái phạm",
+                      "nghiêm cấm"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -24175,7 +24679,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ sớm giúp nâng cao hiệu quả điều trị."
+                    "sentence": "_____ sớm giúp nâng cao hiệu quả điều trị.",
+                    "wordBank": [
+                      "Chẩn đoán",
+                      "lâm sàng",
+                      "sức khỏe cộng đồng",
+                      "triệu chứng"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -24551,7 +25061,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Ung thư là _____ đặc trưng bởi tăng sinh không kiểm soát."
+                    "sentence": "Ung thư là _____ đặc trưng bởi tăng sinh không kiểm soát.",
+                    "wordBank": [
+                      "bệnh lý",
+                      "hoại tử",
+                      "tăng sinh",
+                      "viêm"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -24805,7 +25321,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nghiên cứu _____ vắc-xin đang ở giai đoạn 3."
+                    "sentence": "Nghiên cứu _____ vắc-xin đang ở giai đoạn 3.",
+                    "wordBank": [
+                      "lâm sàng",
+                      "biến chứng",
+                      "phục hồi",
+                      "ngăn ngừa"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -25012,7 +25534,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Ngày 2/9/1945, Việt Nam tuyên bố _____."
+                    "sentence": "Ngày 2/9/1945, Việt Nam tuyên bố _____.",
+                    "wordBank": [
+                      "độc lập",
+                      "di tích",
+                      "di sản",
+                      "kháng chiến"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -25408,7 +25936,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ truyền rằng Lý Thường Kiệt đọc Nam quốc sơn hà trong đêm kháng chiến."
+                    "sentence": "_____ truyền rằng Lý Thường Kiệt đọc Nam quốc sơn hà trong đêm kháng chiến.",
+                    "wordBank": [
+                      "Tương",
+                      "ám chỉ",
+                      "tương truyền",
+                      "thi vị"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -25725,7 +26259,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ sắc văn hóa cần được bảo tồn và phát huy."
+                    "sentence": "_____ sắc văn hóa cần được bảo tồn và phát huy.",
+                    "wordBank": [
+                      "Bản",
+                      "hồn cốt",
+                      "bản sắc",
+                      "truyền thống"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -25865,7 +26405,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Sử ký ghi từ thời Hồng Bàng đến thời _____ sơ."
+                    "sentence": "Sử ký ghi từ thời Hồng Bàng đến thời _____ sơ.",
+                    "wordBank": [
+                      "Lê",
+                      "sử ký",
+                      "biên niên",
+                      "khởi nghĩa"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -26072,7 +26618,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nguyễn Du được mệnh danh đại thi hào _____."
+                    "sentence": "Nguyễn Du được mệnh danh đại thi hào _____.",
+                    "wordBank": [
+                      "dân tộc",
+                      "thơ ca",
+                      "hậu hiện đại",
+                      "truyện ngắn"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -26490,7 +27042,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Ông ấy đã _____ — nói giảm thay 'chết'."
+                    "sentence": "Ông ấy đã _____ — nói giảm thay 'chết'.",
+                    "wordBank": [
+                      "đi xa",
+                      "hoán dụ",
+                      "nói giảm",
+                      "ngoại dụ"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -26807,7 +27365,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Người đã _____ nhưng hương hồn còn mãi — nói giảm."
+                    "sentence": "Người đã _____ nhưng hương hồn còn mãi — nói giảm.",
+                    "wordBank": [
+                      "khuất",
+                      "trữ tình",
+                      "thi liệu",
+                      "tả thực"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -26992,7 +27556,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Truyện Kiều gồm 3254 câu _____."
+                    "sentence": "Truyện Kiều gồm 3254 câu _____.",
+                    "wordBank": [
+                      "lục bát",
+                      "song thất lục bát",
+                      "chữ Nôm"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -27291,7 +27860,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Điền từ phương ngữ Trung: \"_____ mà trờ nay nóng rứa?\" (Sao mà hôm nay nóng vậy?)"
+                    "sentence": "Điền từ phương ngữ Trung: \"_____ mà trờ nay nóng rứa?\" (Sao mà hôm nay nóng vậy?)",
+                    "wordBank": [
+                      "răng",
+                      "từ địa phương",
+                      "giọng Bắc",
+                      "giọng Trung"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -27738,7 +28313,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Điền trợ từ phù hợp phương ngữ Bắc: \"Cháu chào cô _____!\""
+                    "sentence": "Điền trợ từ phù hợp phương ngữ Bắc: \"Cháu chào cô _____!\"",
+                    "wordBank": [
+                      "ạ",
+                      "nè",
+                      "cơ",
+                      "nghe"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -28273,7 +28854,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "Người Nam gộp hai thanh _____ và _____ vào nhau."
+                    "sentence": "Người Nam gộp hai thanh _____ và _____ vào nhau.",
+                    "wordBank": [
+                      "hỏi",
+                      "ngã",
+                      "âm cuối",
+                      "phụ âm đầu"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -28518,7 +29105,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Điền tiền tố Hán Việt: \"_____ hình\" nghĩa là \"không có hình dáng\""
+                    "sentence": "Điền tiền tố Hán Việt: \"_____ hình\" nghĩa là \"không có hình dáng\"",
+                    "wordBank": [
+                      "vô",
+                      "ngoại lai",
+                      "Hán Việt",
+                      "ngôn ngữ học"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -28906,7 +29499,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Điền hậu tố Hán Việt: \"tâm lý _____\" nghĩa là ngành nghiên cứu tâm lý"
+                    "sentence": "Điền hậu tố Hán Việt: \"tâm lý _____\" nghĩa là ngành nghiên cứu tâm lý",
+                    "wordBank": [
+                      "học",
+                      "quốc gia",
+                      "sơn hà"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -29412,7 +30010,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "\"Mỹ\" là dịch âm Hán Việt từ chữ 美 của tên nước _____"
+                    "sentence": "\"Mỹ\" là dịch âm Hán Việt từ chữ 美 của tên nước _____",
+                    "wordBank": [
+                      "Mỹ",
+                      "Bồ Đào Nha",
+                      "sơ mi",
+                      "xà phòng"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -29613,7 +30217,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hoàn thành câu lục bát nổi tiếng: \"Trăm năm trong cõi người _____\""
+                    "sentence": "Hoàn thành câu lục bát nổi tiếng: \"Trăm năm trong cõi người _____\"",
+                    "wordBank": [
+                      "ta",
+                      "Hán Nôm",
+                      "vịnh",
+                      "lục bát"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -29907,7 +30517,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Trong câu cổ \"Dời non lấp biển, nghiệp nhóm nên\", _____ đã bị lược bỏ."
+                    "sentence": "Trong câu cổ \"Dời non lấp biển, nghiệp nhóm nên\", _____ đã bị lược bỏ.",
+                    "wordBank": [
+                      "chủ ngữ",
+                      "biền ngẫu",
+                      "đối ngẫu"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -30099,7 +30714,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hoàn thành vần chân: \"Trăm năm trong cõi người ta / Chữ tài chữ mệnh khéo là ghét _____\""
+                    "sentence": "Hoàn thành vần chân: \"Trăm năm trong cõi người ta / Chữ tài chữ mệnh khéo là ghét _____\"",
+                    "wordBank": [
+                      "nhau",
+                      "vần chân",
+                      "bằng trắc"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -30223,7 +30843,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Điền từ phù hợp câu bát (chữ 6 vần với \"ta\"): \"Chữ tài chữ mệnh khéo _____ ghét nhau\""
+                    "sentence": "Điền từ phù hợp câu bát (chữ 6 vần với \"ta\"): \"Chữ tài chữ mệnh khéo _____ ghét nhau\"",
+                    "wordBank": [
+                      "là",
+                      "vần giàu",
+                      "vần nghèo"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -30433,7 +31058,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hồ Xuân Hương nổi tiếng về nghệ thuật _____ trong thơ Nôm."
+                    "sentence": "Hồ Xuân Hương nổi tiếng về nghệ thuật _____ trong thơ Nôm.",
+                    "wordBank": [
+                      "chơi chữ",
+                      "tục ngữ",
+                      "uyển chuyển",
+                      "lóng"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -30722,7 +31353,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "\"Thòng lèo\" nói lái thành _____"
+                    "sentence": "\"Thòng lèo\" nói lái thành _____",
+                    "wordBank": [
+                      "lèo thòng",
+                      "ẩn dụ",
+                      "hoán dụ"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -30957,7 +31593,11 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "\"Đánh trống bỏ _____\" nghĩa là nói một đằng làm một nẻo."
+                    "sentence": "\"Đánh trống bỏ _____\" nghĩa là nói một đằng làm một nẻo.",
+                    "wordBank": [
+                      "dùi",
+                      "bà xã"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -31330,7 +31970,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "\"Có công mài sắt có ngày nên _____\" — tục ngữ khuyên kiên trì."
+                    "sentence": "\"Có công mài sắt có ngày nên _____\" — tục ngữ khuyên kiên trì.",
+                    "wordBank": [
+                      "kim",
+                      "thành ngữ",
+                      "phong tục",
+                      "ca dao"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -31668,7 +32314,11 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hoàn thành ca dao: \"Công cha như núi Thái Sơn / Nghĩa mẹ như nước trong _____ chảy ra\""
+                    "sentence": "Hoàn thành ca dao: \"Công cha như núi Thái Sơn / Nghĩa mẹ như nước trong _____ chảy ra\"",
+                    "wordBank": [
+                      "nguồn",
+                      "từ láy"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -31886,7 +32536,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "\"_____ quả nhớ kẻ trồng cây\" — khuyên biết ơn."
+                    "sentence": "\"_____ quả nhớ kẻ trồng cây\" — khuyên biết ơn.",
+                    "wordBank": [
+                      "Ăn",
+                      "thâm thúy",
+                      "gượng ép"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,

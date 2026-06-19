@@ -54,7 +54,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tôi đã _____ vào vị trí quản lý dự án."
+                    "sentence": "Tôi đã _____ vào vị trí quản lý dự án.",
+                    "wordBank": [
+                      "ứng tuyển",
+                      "nghề",
+                      "hợp đồng",
+                      "phòng ban"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -591,7 +597,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Cửa hàng _____ trộm đêm qua. (bị/được)"
+                    "sentence": "Cửa hàng _____ trộm đêm qua. (bị/được)",
+                    "wordBank": [
+                      "bị",
+                      "phạt",
+                      "được",
+                      "mắng"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -614,7 +626,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Dự án mới _____ hội đồng duyệt tuần trước. (bị/được)"
+                    "sentence": "Dự án mới _____ hội đồng duyệt tuần trước. (bị/được)",
+                    "wordBank": [
+                      "được",
+                      "bị",
+                      "thưởng",
+                      "phạt"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -985,7 +1003,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Lan _____ sếp giao thêm một dự án mới. (bị/được)"
+                    "sentence": "Lan _____ sếp giao thêm một dự án mới. (bị/được)",
+                    "wordBank": [
+                      "được",
+                      "cơm trưa",
+                      "làm thêm giờ",
+                      "xuất nhập khẩu"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -1148,7 +1172,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Đi làm _____ bị coi là thiếu tôn trọng ở Việt Nam."
+                    "sentence": "Đi làm _____ bị coi là thiếu tôn trọng ở Việt Nam.",
+                    "wordBank": [
+                      "muộn",
+                      "giám đốc",
+                      "thứ bậc",
+                      "xưng hô"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -1394,7 +1424,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Em _____ nhận học bổng toàn phần năm nay. (bị/được)"
+                    "sentence": "Em _____ nhận học bổng toàn phần năm nay. (bị/được)",
+                    "wordBank": [
+                      "được",
+                      "môn học",
+                      "đại học",
+                      "sinh viên"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -1809,7 +1845,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ bạn học chăm thì bạn sẽ thi đậu."
+                    "sentence": "_____ bạn học chăm thì bạn sẽ thi đậu.",
+                    "wordBank": [
+                      "Nếu",
+                      "thi đậu",
+                      "thì",
+                      "thi rớt"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -1907,7 +1949,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Bạn phải đi ngay, _____ không thì sẽ muộn."
+                    "sentence": "Bạn phải đi ngay, _____ không thì sẽ muộn.",
+                    "wordBank": [
+                      "nếu",
+                      "thì",
+                      "thi rớt",
+                      "thi đậu"
+                    ]
                   },
                   "order_index": 5,
                   "question": null,
@@ -2181,7 +2229,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ chúng ta được học hành tốt thì sẽ có nhiều cơ hội trong cuộc sống."
+                    "sentence": "_____ chúng ta được học hành tốt thì sẽ có nhiều cơ hội trong cuộc sống.",
+                    "wordBank": [
+                      "Nếu",
+                      "kết bài",
+                      "mở bài",
+                      "thân bài"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -2383,7 +2437,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Em đã _____ vé máy bay đi Đà Nẵng rồi."
+                    "sentence": "Em đã _____ vé máy bay đi Đà Nẵng rồi.",
+                    "wordBank": [
+                      "đặt",
+                      "khách sạn",
+                      "sân bay",
+                      "tham quan"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -2764,7 +2824,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ xe rồi rẽ trái là đến khách sạn."
+                    "sentence": "_____ xe rồi rẽ trái là đến khách sạn.",
+                    "wordBank": [
+                      "Xuống",
+                      "lên",
+                      "ra",
+                      "vào"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -3130,7 +3196,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Cửa cổng sẽ _____ lúc hai giờ bốn mươi lăm."
+                    "sentence": "Cửa cổng sẽ _____ lúc hai giờ bốn mươi lăm.",
+                    "wordBank": [
+                      "đóng",
+                      "cổng",
+                      "chuyến bay",
+                      "cất cánh"
+                    ]
                   },
                   "order_index": 3,
                   "question": null,
@@ -3581,7 +3653,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Tình yêu cần sự _____ và thấu hiểu."
+                    "sentence": "Tình yêu cần sự _____ và thấu hiểu.",
+                    "wordBank": [
+                      "tin tưởng",
+                      "tình bạn",
+                      "ly hôn",
+                      "hẹn hò"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -3962,7 +4040,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ trời mưa, tôi vẫn đi làm."
+                    "sentence": "_____ trời mưa, tôi vẫn đi làm.",
+                    "wordBank": [
+                      "Dù",
+                      "chính là",
+                      "Chính",
+                      "mặc dù"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -4053,7 +4137,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ là tình bạn mới giúp tôi vượt qua khó khăn."
+                    "sentence": "_____ là tình bạn mới giúp tôi vượt qua khó khăn.",
+                    "wordBank": [
+                      "Chính",
+                      "vẫn",
+                      "mặc dù",
+                      "chính là"
+                    ]
                   },
                   "order_index": 5,
                   "question": null,
@@ -4324,7 +4414,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Dù cãi nhau, họ _____ yêu nhau."
+                    "sentence": "Dù cãi nhau, họ _____ yêu nhau.",
+                    "wordBank": [
+                      "vẫn",
+                      "hạnh phúc",
+                      "cãi nhau",
+                      "xin lỗi"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -4616,7 +4712,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ xe ở trung tâm rất khó và đắt."
+                    "sentence": "_____ xe ở trung tâm rất khó và đắt.",
+                    "wordBank": [
+                      "Đậu",
+                      "xe buýt",
+                      "đi chậm",
+                      "mũ bảo hiểm"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -5033,7 +5135,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ đi quá nhanh! Nguy hiểm lắm."
+                    "sentence": "_____ đi quá nhanh! Nguy hiểm lắm.",
+                    "wordBank": [
+                      "Đừng",
+                      "nhé",
+                      "hãy",
+                      "đi"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,
@@ -5124,7 +5232,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hãy ngồi xuống _____. (đi/rồi)"
+                    "sentence": "Hãy ngồi xuống _____. (đi/rồi)",
+                    "wordBank": [
+                      "đi",
+                      "đừng",
+                      "nha",
+                      "hãy"
+                    ]
                   },
                   "order_index": 6,
                   "question": null,
@@ -5400,7 +5514,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Hãy _____ mũ bảo hiểm khi đi xe máy."
+                    "sentence": "Hãy _____ mũ bảo hiểm khi đi xe máy.",
+                    "wordBank": [
+                      "đội",
+                      "vi phạm",
+                      "tuân thủ",
+                      "tử vong"
+                    ]
                   },
                   "order_index": 2,
                   "question": null,

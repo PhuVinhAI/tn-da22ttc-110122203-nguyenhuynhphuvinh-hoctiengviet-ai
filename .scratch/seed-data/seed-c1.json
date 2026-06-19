@@ -72,7 +72,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Chủ nghĩa _____ cho rằng vật chất quyết định ý thức."
+                    "sentence": "Chủ nghĩa _____ cho rằng vật chất quyết định ý thức.",
+                    "wordBank": [
+                      "duy vật",
+                      "triết học",
+                      "nhận thức",
+                      "biện chứng"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -93,7 +99,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Triết học _____ nhấn mạnh sự tồn tại cá nhân."
+                    "sentence": "Triết học _____ nhấn mạnh sự tồn tại cá nhân.",
+                    "wordBank": [
+                      "hiện sinh",
+                      "tư tưởng",
+                      "duy tâm",
+                      "biện chứng"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -526,7 +538,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ nói là, tư tưởng triết học chịu ảnh hưởng từ bối cảnh lịch sử."
+                    "sentence": "_____ nói là, tư tưởng triết học chịu ảnh hưởng từ bối cảnh lịch sử.",
+                    "wordBank": [
+                      "Có thể",
+                      "chủ quan",
+                      "mâu thuẫn",
+                      "khách quan"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -828,7 +846,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Mâu thuẫn chủ yếu không phải giữa tư sản và _____, mà giữa dân tộc và đế quốc."
+                    "sentence": "Mâu thuẫn chủ yếu không phải giữa tư sản và _____, mà giữa dân tộc và đế quốc.",
+                    "wordBank": [
+                      "vô sản",
+                      "di sản",
+                      "yên dân",
+                      "phương pháp luận"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -1049,7 +1073,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ quan điểm duy vật biện chứng, vật chất có trước ý thức."
+                    "sentence": "_____ quan điểm duy vật biện chứng, vật chất có trước ý thức.",
+                    "wordBank": [
+                      "Theo",
+                      "tựu trung lại",
+                      "luận điểm",
+                      "chứng cứ"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -1276,7 +1306,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Quốc hội thực hiện quyền _____ pháp."
+                    "sentence": "Quốc hội thực hiện quyền _____ pháp.",
+                    "wordBank": [
+                      "lập",
+                      "bị đơn",
+                      "bản án",
+                      "nguyên đơn"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -1653,7 +1689,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ quy định tại Điều 10 Luật Đất đai, người sử dụng đất có quyền chuyển nhượng."
+                    "sentence": "_____ quy định tại Điều 10 Luật Đất đai, người sử dụng đất có quyền chuyển nhượng.",
+                    "wordBank": [
+                      "Theo",
+                      "căn cứ",
+                      "đề nghị",
+                      "còn"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -1716,7 +1758,13 @@
                     ],
                     "blanks": 2,
                     "type": "fill_blank",
-                    "sentence": "Cá nhân này không _____ vi phạm quy định mà _____ chống đối công vụ."
+                    "sentence": "Cá nhân này không _____ vi phạm quy định mà _____ chống đối công vụ.",
+                    "wordBank": [
+                      "những",
+                      "còn",
+                      "căn cứ",
+                      "vi phạm"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -1962,7 +2010,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Mỗi hành vi chỉ bị xử phạt một lần bởi cơ quan có _____."
+                    "sentence": "Mỗi hành vi chỉ bị xử phạt một lần bởi cơ quan có _____.",
+                    "wordBank": [
+                      "thẩm quyền",
+                      "tái phạm",
+                      "nghiêm cấm"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -2169,7 +2222,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ sớm giúp nâng cao hiệu quả điều trị."
+                    "sentence": "_____ sớm giúp nâng cao hiệu quả điều trị.",
+                    "wordBank": [
+                      "Chẩn đoán",
+                      "lâm sàng",
+                      "sức khỏe cộng đồng",
+                      "triệu chứng"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -2545,7 +2604,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Ung thư là _____ đặc trưng bởi tăng sinh không kiểm soát."
+                    "sentence": "Ung thư là _____ đặc trưng bởi tăng sinh không kiểm soát.",
+                    "wordBank": [
+                      "bệnh lý",
+                      "hoại tử",
+                      "tăng sinh",
+                      "viêm"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -2799,7 +2864,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nghiên cứu _____ vắc-xin đang ở giai đoạn 3."
+                    "sentence": "Nghiên cứu _____ vắc-xin đang ở giai đoạn 3.",
+                    "wordBank": [
+                      "lâm sàng",
+                      "biến chứng",
+                      "phục hồi",
+                      "ngăn ngừa"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -3006,7 +3077,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Ngày 2/9/1945, Việt Nam tuyên bố _____."
+                    "sentence": "Ngày 2/9/1945, Việt Nam tuyên bố _____.",
+                    "wordBank": [
+                      "độc lập",
+                      "di tích",
+                      "di sản",
+                      "kháng chiến"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -3402,7 +3479,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ truyền rằng Lý Thường Kiệt đọc Nam quốc sơn hà trong đêm kháng chiến."
+                    "sentence": "_____ truyền rằng Lý Thường Kiệt đọc Nam quốc sơn hà trong đêm kháng chiến.",
+                    "wordBank": [
+                      "Tương",
+                      "ám chỉ",
+                      "tương truyền",
+                      "thi vị"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -3719,7 +3802,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "_____ sắc văn hóa cần được bảo tồn và phát huy."
+                    "sentence": "_____ sắc văn hóa cần được bảo tồn và phát huy.",
+                    "wordBank": [
+                      "Bản",
+                      "hồn cốt",
+                      "bản sắc",
+                      "truyền thống"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -3859,7 +3948,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Sử ký ghi từ thời Hồng Bàng đến thời _____ sơ."
+                    "sentence": "Sử ký ghi từ thời Hồng Bàng đến thời _____ sơ.",
+                    "wordBank": [
+                      "Lê",
+                      "sử ký",
+                      "biên niên",
+                      "khởi nghĩa"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -4066,7 +4161,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Nguyễn Du được mệnh danh đại thi hào _____."
+                    "sentence": "Nguyễn Du được mệnh danh đại thi hào _____.",
+                    "wordBank": [
+                      "dân tộc",
+                      "thơ ca",
+                      "hậu hiện đại",
+                      "truyện ngắn"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -4484,7 +4585,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Ông ấy đã _____ — nói giảm thay 'chết'."
+                    "sentence": "Ông ấy đã _____ — nói giảm thay 'chết'.",
+                    "wordBank": [
+                      "đi xa",
+                      "hoán dụ",
+                      "nói giảm",
+                      "ngoại dụ"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -4801,7 +4908,13 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Người đã _____ nhưng hương hồn còn mãi — nói giảm."
+                    "sentence": "Người đã _____ nhưng hương hồn còn mãi — nói giảm.",
+                    "wordBank": [
+                      "khuất",
+                      "trữ tình",
+                      "thi liệu",
+                      "tả thực"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,
@@ -4986,7 +5099,12 @@
                     ],
                     "blanks": 1,
                     "type": "fill_blank",
-                    "sentence": "Truyện Kiều gồm 3254 câu _____."
+                    "sentence": "Truyện Kiều gồm 3254 câu _____.",
+                    "wordBank": [
+                      "lục bát",
+                      "song thất lục bát",
+                      "chữ Nôm"
+                    ]
                   },
                   "order_index": 1,
                   "question": null,

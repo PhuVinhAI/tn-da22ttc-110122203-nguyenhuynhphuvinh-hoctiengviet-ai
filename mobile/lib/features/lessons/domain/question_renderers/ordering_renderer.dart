@@ -15,7 +15,8 @@ class OrderingRenderer extends QuestionRenderer {
   bool validateAnswer(Question question, dynamic answer) {
     if (answer is! List<String>) return false;
     final options = question.options as OrderingOptions;
-    return answer.length == options.items.length;
+    if (answer.length != options.items.length) return false;
+    return answer.every((s) => s.trim().isNotEmpty);
   }
 
   @override
@@ -68,43 +69,91 @@ class _OrderingInput extends StatefulWidget {
 }
 
 class _OrderingInputState extends State<_OrderingInput> {
-  late List<String> _items;
+  // Shuffled bank words (each index is independent — duplicates are fine).
+  late List<String> _bankWords;
+  late List<bool> _bankUsed;
+  // For each slot in the row: bank index of the chosen chip (-1 = empty).
+  late List<int> _placement;
 
   @override
   void initState() {
     super.initState();
-    _initItems();
+    _init();
   }
 
   @override
   void didUpdateWidget(covariant _OrderingInput oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.currentAnswer is List<String> &&
-        (widget.currentAnswer as List<String>).isNotEmpty &&
+    if (widget.options != oldWidget.options) {
+      _init();
+    } else if (widget.currentAnswer is List<String> &&
         widget.currentAnswer != oldWidget.currentAnswer) {
-      _items = List<String>.from(widget.currentAnswer as List<String>);
+      _restoreFromAnswer(widget.currentAnswer as List<String>);
     }
   }
 
-  void _initItems() {
-    if (widget.currentAnswer is List<String> &&
-        (widget.currentAnswer as List<String>).isNotEmpty) {
-      _items = List<String>.from(widget.currentAnswer as List<String>);
-    } else {
-      _items = List<String>.from(widget.options.items)..shuffle();
+  void _init() {
+    _bankWords = List<String>.from(widget.options.items)..shuffle();
+    _bankUsed = List<bool>.filled(_bankWords.length, false);
+    _placement = List<int>.filled(widget.options.items.length, -1);
+    if (widget.currentAnswer is List<String>) {
+      final saved = widget.currentAnswer as List<String>;
+      if (saved.isNotEmpty) _restoreFromAnswer(saved);
     }
   }
 
-  void _onReorder(int oldIndex, int newIndex) {
-    setState(() {
-      if (newIndex > oldIndex) newIndex--;
-      final item = _items.removeAt(oldIndex);
-      _items.insert(newIndex, item);
+  void _restoreFromAnswer(List<String> saved) {
+    _bankUsed = List<bool>.filled(_bankWords.length, false);
+    _placement = List<int>.filled(widget.options.items.length, -1);
+    for (int i = 0; i < saved.length && i < _placement.length; i++) {
+      final word = saved[i];
+      if (word.isEmpty) continue;
+      final match = _firstUnusedMatch(word);
+      if (match >= 0) {
+        _bankUsed[match] = true;
+        _placement[i] = match;
+      }
+    }
+    setState(() {});
+  }
+
+  int _firstUnusedMatch(String word) {
+    final target = word.trim().toLowerCase();
+    for (int i = 0; i < _bankWords.length; i++) {
+      if (_bankUsed[i]) continue;
+      if (_bankWords[i].trim().toLowerCase() == target) return i;
+    }
+    return -1;
+  }
+
+  void _emit() {
+    final out = List<String>.generate(_placement.length, (i) {
+      final p = _placement[i];
+      return p >= 0 ? _bankWords[p] : '';
     });
-    widget.onAnswerChanged(List<String>.from(_items));
+    widget.onAnswerChanged(out);
   }
 
-  static const _circledNumbers = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
+  void _placeWord(int bankIndex) {
+    if (_bankUsed[bankIndex]) return;
+    final firstEmpty = _placement.indexOf(-1);
+    if (firstEmpty < 0) return;
+    setState(() {
+      _placement[firstEmpty] = bankIndex;
+      _bankUsed[bankIndex] = true;
+    });
+    _emit();
+  }
+
+  void _clearSlot(int slot) {
+    final p = _placement[slot];
+    if (p < 0) return;
+    setState(() {
+      _placement[slot] = -1;
+      _bankUsed[p] = false;
+    });
+    _emit();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,14 +180,14 @@ class _OrderingInputState extends State<_OrderingInput> {
           child: Row(
             children: [
               Icon(
-                Icons.swap_vert_rounded,
+                Icons.touch_app_rounded,
                 size: 18,
                 color: visuals.accent,
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  'Drag the handle to arrange in the correct order',
+                  'Tap the words below to arrange them in the correct order',
                   style: GoogleFonts.inter(
                     fontSize: AppTypography.bodySmall,
                     color: visuals.accent,
@@ -151,144 +200,181 @@ class _OrderingInputState extends State<_OrderingInput> {
         ),
         const SizedBox(height: AppSpacing.lg),
 
-        // Reorderable list
-        ReorderableListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _items.length,
-          onReorder: _onReorder,
-
-          proxyDecorator: (child, index, animation) {
-            // No elevation/shadow — just render the child as-is
-            return Material(
-              color: Colors.transparent,
-              elevation: 0,
-              child: child,
-            );
-          },
-          itemBuilder: (context, index) {
-            final isLast = index == _items.length - 1;
-            final numberLabel = index < _circledNumbers.length
-                ? _circledNumbers[index]
-                : '${index + 1}';
-
-            return Column(
-              key: ValueKey(_items[index]),
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: c.card,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(color: c.border, width: 1),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.md,
-                    ),
-                    child: Row(
-                      children: [
-                        // Position number
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: visuals.accent.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(AppRadius.sm + 2),
-                          ),
-                          child: Center(
-                            child: Text(
-                              numberLabel,
-                              style: GoogleFonts.inter(
-                                fontSize: AppTypography.bodyMedium,
-                                fontWeight: FontWeight.w700,
-                                color: visuals.accent,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        // Item text
-                        Expanded(
-                          child: Text(
-                            _items[index],
-                            style: GoogleFonts.inter(
-                              fontSize: AppTypography.bodyLarge,
-                              fontWeight: FontWeight.w500,
-                              color: c.foreground,
-                            ),
-                          ),
-                        ),
-                        // Drag handle (visual indicator)
-                        Padding(
-                          padding: const EdgeInsets.all(AppSpacing.sm),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _GripDot(color: c.mutedForeground),
-                                  const SizedBox(width: 4),
-                                  _GripDot(color: c.mutedForeground),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _GripDot(color: c.mutedForeground),
-                                  const SizedBox(width: 4),
-                                  _GripDot(color: c.mutedForeground),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _GripDot(color: c.mutedForeground),
-                                  const SizedBox(width: 4),
-                                  _GripDot(color: c.mutedForeground),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+        // Answer row (horizontal slots wrapping if too wide)
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: c.card,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: c.border, width: 1),
+          ),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 10,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              for (int i = 0; i < _placement.length; i++)
+                _AnswerSlot(
+                  index: i,
+                  filledWord: _placement[i] >= 0
+                      ? _bankWords[_placement[i]]
+                      : null,
+                  accent: visuals.accent,
+                  background: c.muted,
+                  foreground: c.foreground,
+                  onTap: () => _clearSlot(i),
                 ),
-                // Down arrow between items (except last)
-                if (!isLast)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                    child: Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 20,
-                      color: visuals.accent.withValues(alpha: 0.40),
-                    ),
-                  ),
-              ],
-            );
-          },
+            ],
+          ),
+        ),
+
+        const SizedBox(height: AppSpacing.xl),
+
+        // Word bank
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: c.muted.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: c.border, width: 1),
+          ),
+          child: Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            alignment: WrapAlignment.center,
+            children: [
+              for (int i = 0; i < _bankWords.length; i++)
+                _BankChip(
+                  label: _bankWords[i],
+                  used: _bankUsed[i],
+                  accent: visuals.accent,
+                  background: c.card,
+                  foreground: c.foreground,
+                  onTap: _bankUsed[i] ? null : () => _placeWord(i),
+                ),
+            ],
+          ),
         ),
       ],
     );
   }
 }
 
-class _GripDot extends StatelessWidget {
-  const _GripDot({required this.color});
-  final Color color;
+class _AnswerSlot extends StatelessWidget {
+  const _AnswerSlot({
+    required this.index,
+    required this.filledWord,
+    required this.accent,
+    required this.background,
+    required this.foreground,
+    required this.onTap,
+  });
+
+  final int index;
+  final String? filledWord;
+  final Color accent;
+  final Color background;
+  final Color foreground;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 4,
-      height: 4,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.40),
-        shape: BoxShape.circle,
+    final filled = filledWord != null && filledWord!.isNotEmpty;
+    return InkWell(
+      onTap: filled ? onTap : null,
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 64, minHeight: 48),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: filled ? accent.withValues(alpha: 0.10) : background,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
+            color: filled ? accent : accent.withValues(alpha: 0.30),
+            width: filled ? 2 : 1.5,
+            style: filled ? BorderStyle.solid : BorderStyle.solid,
+          ),
+        ),
+        child: filled
+            ? Text(
+                filledWord!,
+                style: GoogleFonts.inter(
+                  fontSize: AppTypography.bodyLarge,
+                  fontWeight: FontWeight.w700,
+                  color: accent,
+                ),
+              )
+            : Text(
+                '${index + 1}',
+                style: GoogleFonts.inter(
+                  fontSize: AppTypography.bodyMedium,
+                  fontWeight: FontWeight.w700,
+                  color: foreground.withValues(alpha: 0.35),
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+class _BankChip extends StatelessWidget {
+  const _BankChip({
+    required this.label,
+    required this.used,
+    required this.accent,
+    required this.background,
+    required this.foreground,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool used;
+  final Color accent;
+  final Color background;
+  final Color foreground;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 150),
+      opacity: used ? 0.20 : 1.0,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: background,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(
+                color: used
+                    ? Colors.transparent
+                    : accent.withValues(alpha: 0.30),
+                width: 1.5,
+              ),
+              boxShadow: used
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+            ),
+            child: Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: AppTypography.bodyLarge,
+                fontWeight: FontWeight.w700,
+                color: foreground,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
