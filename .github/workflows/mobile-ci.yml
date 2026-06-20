@@ -30,6 +30,9 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Create dummy .env for analysis
+        run: touch .env
+
       - name: Fetch dependencies
         run: flutter pub get
 

@@ -12,7 +12,7 @@ export class DropUserVocabulariesTable20260619140000 implements MigrationInterfa
     await queryRunner.query(`DROP TABLE IF EXISTS "user_vocabularies" CASCADE`);
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {
+  public async down(_queryRunner: QueryRunner): Promise<void> {
     // Không khôi phục — bảng đã mồ côi từ lâu, không có dữ liệu hữu ích.
     // Nếu cần phục hồi schema cũ, chạy lại các migration AddFSRSFields +
     // bất kỳ migration nào tạo user_vocabularies nguyên thủy.

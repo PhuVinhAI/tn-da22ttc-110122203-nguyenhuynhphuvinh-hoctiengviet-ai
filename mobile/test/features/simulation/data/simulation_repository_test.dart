@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:dio/dio.dart';
 import 'package:linvnix/features/simulation/data/simulation_repository.dart';
 import 'package:linvnix/core/exceptions/app_exception.dart';
-import 'package:linvnix/features/simulation/domain/simulation_stats.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockDio extends Mock implements Dio {}

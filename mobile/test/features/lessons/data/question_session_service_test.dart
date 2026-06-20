@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
-import 'package:linvnix/features/lessons/domain/exercise_models.dart';
 import 'package:linvnix/features/lessons/domain/question_models.dart';
 import 'package:linvnix/features/lessons/domain/question_session.dart';
 import 'package:linvnix/features/lessons/data/question_session_service.dart';
@@ -28,9 +27,6 @@ class _FakeBox implements Box<Map<dynamic, dynamic>> {
 
   @override
   Future<Iterable<int>> addAll(Iterable<Map<dynamic, dynamic>> values) => throw UnimplementedError();
-
-  @override
-  Future<Iterable<int>> addAllGetList(Iterable<Map<dynamic, dynamic>> values) => throw UnimplementedError();
 
   @override
   Future<int> clear() => throw UnimplementedError();
@@ -61,9 +57,6 @@ class _FakeBox implements Box<Map<dynamic, dynamic>> {
 
   @override
   Iterable<Map<dynamic, dynamic>> valuesBetween({dynamic startKey, dynamic endKey}) => throw UnimplementedError();
-
-  @override
-  Iterable<Map<dynamic, dynamic>> toList() => throw UnimplementedError();
 
   @override
   Map<dynamic, Map<dynamic, dynamic>> toMap() => throw UnimplementedError();
@@ -106,21 +99,6 @@ class _FakeBox implements Box<Map<dynamic, dynamic>> {
 
   @override
   bool get lazy => throw UnimplementedError();
-
-  @override
-  bool get hasAutoIncrement => throw UnimplementedError();
-
-  @override
-  int get maxModifiedKey => throw UnimplementedError();
-
-  @override
-  BoxBase get base => throw UnimplementedError();
-
-  @override
-  void Function() subscribe(
-    void Function(Map<dynamic, dynamic>? oldValue, Map<dynamic, dynamic>? newValue) listener, {
-    bool Function(Map<dynamic, dynamic>?, Map<dynamic, dynamic>?)? onError,
-  }) => throw UnimplementedError();
 }
 
 void main() {

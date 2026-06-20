@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:linvnix/core/sync/sync.dart';
 import 'package:linvnix/core/theme/app_theme.dart';
 import 'package:linvnix/features/courses/data/courses_providers.dart';
 import 'package:linvnix/features/courses/domain/course_models.dart';
 import 'package:linvnix/features/courses/presentation/screens/module_detail_screen.dart';
 import 'package:linvnix/features/lessons/data/lesson_providers.dart';
-import 'package:linvnix/features/lessons/domain/exercise_models.dart';
-import 'package:linvnix/features/lessons/domain/question_models.dart';
 import 'package:linvnix/features/profile/data/profile_providers.dart';
 import 'package:linvnix/features/user/domain/user_profile.dart';
 
