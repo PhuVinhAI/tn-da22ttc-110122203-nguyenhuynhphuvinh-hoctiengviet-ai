@@ -270,7 +270,7 @@ export function BulkImportVocabDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent dimBackdrop={false} showCloseButton={false}>
+      <DialogContent dimBackdrop={false} showCloseButton={false} className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSpreadsheet className="h-5 w-5 text-primary" />
