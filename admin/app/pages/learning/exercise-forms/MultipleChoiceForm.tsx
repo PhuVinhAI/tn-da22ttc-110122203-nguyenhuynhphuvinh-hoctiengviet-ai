@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Check, Plus, Trash2 } from 'lucide-react'
-import { Input } from '../../../components/ui/input'
 import { Textarea } from '../../../components/ui/textarea'
 import type { QuestionFormProps } from './types'
 import { getCorrectAnswerObject, getOptionsObject } from './types'
@@ -121,7 +120,7 @@ export function MultipleChoiceForm({ initial, onChange }: QuestionFormProps) {
             return (
               <div
                 key={i}
-                className={`group flex items-center gap-3 rounded-2xl border-2 px-4 py-3 min-h-[60px] transition-colors ${
+                className={`group flex items-center gap-3 rounded-xl border-2 px-4 py-2.5 min-h-[52px] transition-colors ${
                   isCorrect
                     ? 'border-primary bg-primary/5'
                     : 'border-border bg-card hover:border-foreground/30'
@@ -132,7 +131,7 @@ export function MultipleChoiceForm({ initial, onChange }: QuestionFormProps) {
                   onClick={() => pickCorrect(opt)}
                   disabled={!opt}
                   aria-label={isCorrect ? 'Đáp án đúng' : 'Đánh dấu là đáp án đúng'}
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
                     isCorrect
                       ? 'border-primary bg-primary text-primary-foreground'
                       : 'border-border bg-muted/40 text-muted-foreground hover:border-primary hover:text-primary disabled:opacity-40'
@@ -144,18 +143,18 @@ export function MultipleChoiceForm({ initial, onChange }: QuestionFormProps) {
                     <span className="text-sm font-bold">{String.fromCharCode(65 + i)}</span>
                   )}
                 </button>
-                <Input
+                <input
                   value={opt}
                   onChange={(e) => setChoice(i, e.target.value)}
                   placeholder={`Lựa chọn ${String.fromCharCode(65 + i)}`}
-                  className="flex-1 font-semibold"
+                  className="flex-1 bg-transparent border-none outline-none p-0 m-0 text-sm font-semibold text-foreground placeholder:text-muted-foreground/60"
                 />
                 <button
                   type="button"
                   onClick={() => removeChoice(i)}
                   disabled={state.choices.length <= 2}
                   aria-label="Xóa lựa chọn"
-                  className="h-9 w-9 shrink-0 rounded-full text-muted-foreground/50 hover:bg-destructive/10 hover:text-destructive disabled:opacity-20 disabled:pointer-events-none transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                  className="h-8 w-8 shrink-0 rounded-full text-muted-foreground/50 hover:bg-destructive/10 hover:text-destructive disabled:opacity-20 disabled:pointer-events-none transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
                 >
                   <Trash2 className="h-4 w-4 mx-auto" />
                 </button>

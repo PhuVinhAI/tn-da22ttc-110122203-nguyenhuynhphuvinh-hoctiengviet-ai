@@ -81,40 +81,51 @@ export function MatchingForm({ initial, onChange }: QuestionFormProps) {
         Mobile sẽ tự xáo vế phải khi học viên làm bài
       </p>
 
-      <div className="space-y-3">
+      <div className="rounded-lg border-2 border-border bg-card overflow-hidden">
+        {/* Column headers */}
+        <div className="grid grid-cols-[2.5rem_1fr_1fr_2.5rem] gap-3 px-4 py-2.5 bg-muted/40 border-b-2 border-border">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-center">
+            #
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Vế trái
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Vế phải
+          </span>
+          <span />
+        </div>
+
+        {/* Rows */}
         {state.pairs.map((pair, i) => (
           <div
             key={i}
-            className="group rounded-lg border-2 border-border bg-card p-4 space-y-3"
+            className={`grid grid-cols-[2.5rem_1fr_1fr_2.5rem] gap-3 px-4 py-3 items-center transition-colors hover:bg-muted/20 ${
+              i > 0 ? 'border-t border-border/50' : ''
+            }`}
           >
-            <div className="flex items-center justify-between">
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-muted text-xs font-bold tabular-nums text-muted-foreground">
-                {i + 1}
-              </span>
-              <button
-                type="button"
-                onClick={() => remove(i)}
-                disabled={state.pairs.length <= 1}
-                className="h-8 w-8 rounded-full text-muted-foreground/50 hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity disabled:pointer-events-none disabled:opacity-30"
-                aria-label="Xóa cặp"
-              >
-                <Trash2 className="h-4 w-4 mx-auto" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
-              <Input
-                value={pair.left}
-                onChange={(e) => setSide(i, 'left', e.target.value)}
-                placeholder="Vế trái"
-              />
-              <span className="text-muted-foreground/60 font-bold text-lg px-1">↔</span>
-              <Input
-                value={pair.right}
-                onChange={(e) => setSide(i, 'right', e.target.value)}
-                placeholder="Vế phải"
-              />
-            </div>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-xs font-bold tabular-nums text-muted-foreground">
+              {i + 1}
+            </span>
+            <Input
+              value={pair.left}
+              onChange={(e) => setSide(i, 'left', e.target.value)}
+              placeholder="Nhập vế trái..."
+            />
+            <Input
+              value={pair.right}
+              onChange={(e) => setSide(i, 'right', e.target.value)}
+              placeholder="Nhập vế phải..."
+            />
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              disabled={state.pairs.length <= 1}
+              className="h-7 w-7 rounded-full text-muted-foreground/40 hover:bg-destructive/10 hover:text-destructive transition-colors disabled:pointer-events-none disabled:opacity-30"
+              aria-label="Xóa cặp"
+            >
+              <Trash2 className="h-3.5 w-3.5 mx-auto" />
+            </button>
           </div>
         ))}
       </div>

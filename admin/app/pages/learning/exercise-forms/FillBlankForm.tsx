@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Plus, X, Trash2, Library } from 'lucide-react'
-import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
+import { Plus, X, Library } from 'lucide-react'
 import { useAdminExercise } from '../../../features/learning/api/use-learning-admin'
 import { useParams } from 'react-router'
 import type { QuestionFormProps } from './types'
@@ -88,8 +87,6 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
       .join('')
     const acceptedAnswers = blanks.map((b) => b.answers.filter(Boolean))
     const answers = blanks.map((b) => b.answers[0] ?? '')
-    // Auto-include every primary answer in wordBank so the bank always
-    // contains at least the correct words. Distractors come from the user.
     const bankSet = new Set<string>()
     for (const w of state.wordBank) {
       const t = w.trim()
@@ -137,13 +134,11 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
       ),
     }))
 
-  const setBlankAnswers = (id: string, answers: string[]) =>
+  const setBlankAnswer = (id: string, answer: string) =>
     setState((prev) => ({
       ...prev,
       parts: prev.parts.map((p) =>
-        p.id === id && p.kind === 'blank'
-          ? { ...p, answers: answers.length ? answers : [''] }
-          : p,
+        p.id === id && p.kind === 'blank' ? { ...p, answers: [answer] } : p,
       ),
     }))
 
@@ -169,32 +164,55 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
       return { ...prev, parts: merged }
     })
 
-  const insertBlank = () => {
+  /** Insert a blank with the given word as answer — at cursor or auto-find */
+  const insertBlankWithWord = (word: string) => {
     setState((prev) => {
       const targetId = activeTextId ?? prev.parts[prev.parts.length - 1]?.id
       const cursor = activeCursorRef.current
       const idx = prev.parts.findIndex((p) => p.id === targetId)
-      if (idx < 0 || prev.parts[idx].kind !== 'text') {
-        const last = prev.parts[prev.parts.length - 1]
-        const next: Part[] = [...prev.parts]
-        if (!last || last.kind === 'blank') {
-          next.push({ id: genId(), kind: 'text', value: ' ' })
-        }
-        next.push({ id: genId(), kind: 'blank', answers: [''] })
-        next.push({ id: genId(), kind: 'text', value: ' ' })
+
+      if (idx >= 0 && prev.parts[idx].kind === 'text') {
+        const target = prev.parts[idx] as Extract<Part, { kind: 'text' }>
+        const pos = cursor ?? target.value.indexOf(word)
+        const safePos = pos >= 0 ? pos : target.value.length
+        const before = target.value.slice(0, safePos)
+        const after = target.value.slice(safePos)
+        const next: Part[] = [
+          ...prev.parts.slice(0, idx),
+          { id: genId(), kind: 'text', value: before },
+          { id: genId(), kind: 'blank', answers: [word] },
+          { id: genId(), kind: 'text', value: after },
+          ...prev.parts.slice(idx + 1),
+        ]
         return { ...prev, parts: next }
       }
-      const target = prev.parts[idx] as Extract<Part, { kind: 'text' }>
-      const pos = cursor ?? target.value.length
-      const before = target.value.slice(0, pos)
-      const after = target.value.slice(pos)
-      const next: Part[] = [
-        ...prev.parts.slice(0, idx),
-        { id: genId(), kind: 'text', value: before },
-        { id: genId(), kind: 'blank', answers: [''] },
-        { id: genId(), kind: 'text', value: after },
-        ...prev.parts.slice(idx + 1),
-      ]
+
+      // No active text — find first occurrence of word in any text part
+      for (let i = 0; i < prev.parts.length; i++) {
+        const part = prev.parts[i]
+        if (part.kind !== 'text') continue
+        const wIdx = part.value.indexOf(word)
+        if (wIdx < 0) continue
+        const before = part.value.slice(0, wIdx)
+        const after = part.value.slice(wIdx + word.length)
+        const next: Part[] = [
+          ...prev.parts.slice(0, i),
+          { id: genId(), kind: 'text', value: before },
+          { id: genId(), kind: 'blank', answers: [word] },
+          { id: genId(), kind: 'text', value: after },
+          ...prev.parts.slice(i + 1),
+        ]
+        return { ...prev, parts: next }
+      }
+
+      // Word not found anywhere — append at end
+      const last = prev.parts[prev.parts.length - 1]
+      const next: Part[] = [...prev.parts]
+      if (!last || last.kind === 'blank') {
+        next.push({ id: genId(), kind: 'text', value: ' ' })
+      }
+      next.push({ id: genId(), kind: 'blank', answers: [word] })
+      next.push({ id: genId(), kind: 'text', value: ' ' })
       return { ...prev, parts: next }
     })
   }
@@ -231,7 +249,12 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
     })
   }
 
-  // Words that already match a primary correct answer — pinned (cannot remove)
+  // Sentence text used to check if a bank word exists in the sentence
+  const sentenceText = useMemo(
+    () => state.parts.filter((p): p is Extract<Part, { kind: 'text' }> => p.kind === 'text').map((p) => p.value).join(''),
+    [state.parts],
+  )
+
   const correctSet = new Set(
     blanks
       .map((b) => (b.answers[0] ?? '').trim().toLowerCase())
@@ -246,7 +269,7 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
           <span className="text-destructive ml-0.5">*</span>
         </label>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Gõ câu rồi bấm <span className="font-bold">+ Thêm chỗ trống</span> để chèn ô đáp án tại con trỏ
+          Nhập câu đầy đủ, rồi bấm vào từ ở kho từ bên dưới để biến từ đó thành chỗ trống
         </p>
       </div>
 
@@ -269,8 +292,8 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
               <BlankInput
                 key={part.id}
                 index={blanks.findIndex((b) => b.id === part.id)}
-                answers={part.answers}
-                onChange={(a) => setBlankAnswers(part.id, a)}
+                answer={part.answers[0] ?? ''}
+                onChange={(a) => setBlankAnswer(part.id, a)}
                 onRemove={() => removeBlank(part.id)}
               />
             ),
@@ -278,20 +301,13 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={insertBlank}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-transparent px-4 py-3 text-sm font-semibold text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
-      >
-        <Plus className="h-4 w-4" />
-        Thêm chỗ trống tại con trỏ
-      </button>
-
       <WordBankEditor
         words={state.wordBank}
         correctSet={correctSet}
+        sentenceText={sentenceText}
         onAdd={addWord}
         onRemove={removeWord}
+        onWordClick={insertBlankWithWord}
         onAddAllVocab={addAllVocab}
         vocabCount={lessonVocab.length}
       />
@@ -302,15 +318,19 @@ export function FillBlankForm({ initial, onChange }: QuestionFormProps) {
 function WordBankEditor({
   words,
   correctSet,
+  sentenceText,
   onAdd,
   onRemove,
+  onWordClick,
   onAddAllVocab,
   vocabCount,
 }: {
   words: string[]
   correctSet: Set<string>
+  sentenceText: string
   onAdd: (word: string) => void
   onRemove: (word: string) => void
+  onWordClick: (word: string) => void
   onAddAllVocab: () => void
   vocabCount: number
 }) {
@@ -326,10 +346,10 @@ function WordBankEditor({
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-semibold text-foreground">
-            Kho từ — học viên bấm chọn để điền
+            Kho từ — bấm vào từ để tạo chỗ trống
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Đáp án chính tự động có trong kho. Thêm các từ gây nhiễu để học viên phải lựa chọn.
+            Từ xuất hiện trong câu sẽ được chèn thành ___ tại vị trí con trỏ khi bấm vào
           </p>
         </div>
         <button
@@ -347,28 +367,44 @@ function WordBankEditor({
       {words.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {words.map((w) => {
-            const isCorrect = correctSet.has(w.trim().toLowerCase())
+            const isAnswer = correctSet.has(w.trim().toLowerCase())
+            const existsInSentence = sentenceText.indexOf(w) >= 0
             return (
               <span
                 key={w}
-                className={`inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1 text-sm font-bold ${
-                  isCorrect
+                role={!isAnswer ? 'button' : undefined}
+                tabIndex={!isAnswer ? 0 : undefined}
+                onClick={!isAnswer ? () => onWordClick(w) : undefined}
+                onKeyDown={
+                  !isAnswer
+                    ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          onWordClick(w)
+                        }
+                      }
+                    : undefined
+                }
+                className={`inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1 text-sm font-bold transition-colors ${
+                  isAnswer
                     ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border bg-muted/50 text-foreground'
+                    : existsInSentence
+                      ? 'border-border bg-muted/50 text-foreground cursor-pointer hover:border-primary hover:text-primary hover:bg-primary/5'
+                      : 'border-border bg-muted/50 text-foreground cursor-pointer hover:border-primary/50 hover:text-primary/70'
                 }`}
               >
                 {w}
-                {isCorrect ? (
-                  <span
-                    className="text-[10px] uppercase font-bold tracking-wider text-primary/70"
-                    title="Đáp án — luôn nằm trong kho"
-                  >
+                {isAnswer ? (
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-primary/70">
                     đáp án
                   </span>
                 ) : (
                   <button
                     type="button"
-                    onClick={() => onRemove(w)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onRemove(w)
+                    }}
                     className="h-4 w-4 inline-flex items-center justify-center rounded-full text-muted-foreground/70 hover:bg-destructive/15 hover:text-destructive"
                     aria-label={`Xóa từ ${w}`}
                   >
@@ -391,7 +427,7 @@ function WordBankEditor({
               submit()
             }
           }}
-          placeholder="Thêm một từ rồi nhấn Enter..."
+          placeholder="Thêm từ gây nhiễu rồi nhấn Enter..."
           className="flex-1 rounded-lg border-2 border-input bg-card px-3 py-2 text-sm outline-none focus-visible:border-primary"
         />
         <button
@@ -473,25 +509,23 @@ function FlowingText({
 
 function BlankInput({
   index,
-  answers,
+  answer,
   onChange,
   onRemove,
 }: {
   index: number
-  answers: string[]
-  onChange: (a: string[]) => void
+  answer: string
+  onChange: (a: string) => void
   onRemove: () => void
 }) {
-  const primary = answers[0] ?? ''
-  const variants = answers.slice(1)
   const measureRef = useRef<HTMLSpanElement>(null)
   const [inputWidth, setInputWidth] = useState<number>(60)
   useLayoutEffect(() => {
     if (measureRef.current) {
       setInputWidth(Math.max(measureRef.current.offsetWidth + 2, 60))
     }
-  }, [primary])
-  const measured = primary.length > 0 ? primary : 'đáp án'
+  }, [answer])
+  const measured = answer.length > 0 ? answer : 'đáp án'
 
   return (
     <span className="mx-0.5 inline-flex items-baseline gap-1.5 rounded-lg border-2 border-primary bg-primary/10 pl-2 pr-1.5 py-0.5 align-baseline">
@@ -507,38 +541,12 @@ function BlankInput({
         {measured}
       </span>
       <input
-        value={primary}
-        onChange={(e) => onChange([e.target.value, ...variants])}
+        value={answer}
+        onChange={(e) => onChange(e.target.value)}
         placeholder="đáp án"
         style={{ width: inputWidth }}
         className="inline bg-transparent border-none outline-none p-0 m-0 text-2xl font-bold leading-relaxed text-primary placeholder:text-primary/50 placeholder:italic placeholder:font-semibold"
       />
-      {variants.length > 0 && (
-        <span className="self-center text-xs font-bold text-primary/70">
-          +{variants.length}
-        </span>
-      )}
-      <Popover>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            className="self-center h-6 w-6 rounded-full text-primary/60 hover:bg-primary/10 hover:text-primary"
-            aria-label="Biến thể đáp án"
-            title="Thêm biến thể đáp án"
-          >
-            <Plus className="h-3.5 w-3.5 mx-auto" />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent align="start" className="w-72 p-3 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Biến thể đáp án
-            </span>
-            <span className="text-xs text-muted-foreground">Chỗ trống #{index + 1}</span>
-          </div>
-          <VariantEditor answers={answers} onChange={onChange} />
-        </PopoverContent>
-      </Popover>
       <button
         type="button"
         onClick={onRemove}
@@ -549,54 +557,5 @@ function BlankInput({
         <X className="h-3.5 w-3.5 mx-auto" />
       </button>
     </span>
-  )
-}
-
-function VariantEditor({
-  answers,
-  onChange,
-}: {
-  answers: string[]
-  onChange: (a: string[]) => void
-}) {
-  const items = answers.length ? answers : ['']
-  return (
-    <div className="space-y-1.5">
-      {items.map((it, i) => (
-        <div key={i} className="flex items-center gap-1.5">
-          <span className="text-[10px] font-bold text-muted-foreground w-12 shrink-0">
-            {i === 0 ? 'Chính' : `Biến thể ${i}`}
-          </span>
-          <input
-            value={it}
-            onChange={(e) => {
-              const next = [...items]
-              next[i] = e.target.value
-              onChange(next)
-            }}
-            placeholder={i === 0 ? 'Đáp án chính' : `Biến thể ${i}`}
-            className="flex-1 rounded-lg border-2 border-input bg-card px-3 py-1.5 text-sm outline-none focus-visible:border-primary"
-          />
-          {items.length > 1 && i > 0 && (
-            <button
-              type="button"
-              onClick={() => onChange(items.filter((_, idx) => idx !== i))}
-              className="h-7 w-7 rounded-md text-muted-foreground/60 hover:bg-destructive/10 hover:text-destructive transition-colors"
-              aria-label="Xóa biến thể"
-            >
-              <Trash2 className="h-3.5 w-3.5 mx-auto" />
-            </button>
-          )}
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={() => onChange([...items, ''])}
-        className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:border-primary hover:text-primary"
-      >
-        <Plus className="h-3 w-3" />
-        Thêm biến thể
-      </button>
-    </div>
   )
 }

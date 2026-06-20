@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Plus, Trash2, Headphones } from 'lucide-react'
-import { Input } from '../../../components/ui/input'
 import { Textarea } from '../../../components/ui/textarea'
 import type { QuestionFormProps } from './types'
 import { getOptionsObject } from './types'
@@ -123,14 +122,16 @@ export function ListeningForm({ initial, onChange }: QuestionFormProps) {
           {state.transcriptType === 'exact' ? 'Transcript chấp nhận' : 'Các từ khoá bắt buộc'}
           <span className="text-destructive ml-0.5">*</span>
         </label>
-        <div className="mt-1.5 space-y-2.5">
+        <div className="mt-1.5 rounded-lg border-2 border-border bg-card overflow-hidden">
           {state.keywords.map((kw, i) => (
             <div
               key={i}
-              className="group flex items-center gap-3 rounded-lg border-2 border-border bg-card px-4 py-2.5"
+              className={`group flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/20 ${
+                i > 0 ? 'border-t border-border/50' : ''
+              }`}
             >
-              <Headphones className="h-4 w-4 text-muted-foreground shrink-0" />
-              <Input
+              <Headphones className="h-4 w-4 text-muted-foreground/70 shrink-0" />
+              <input
                 value={kw}
                 onChange={(e) => setKw(i, e.target.value)}
                 placeholder={
@@ -138,16 +139,16 @@ export function ListeningForm({ initial, onChange }: QuestionFormProps) {
                     ? 'Transcript đầy đủ...'
                     : 'Từ khoá...'
                 }
-                className="flex-1 font-semibold"
+                className="flex-1 bg-transparent border-none outline-none p-0 m-0 text-sm font-semibold text-foreground placeholder:text-muted-foreground/60"
               />
               <button
                 type="button"
                 onClick={() => removeKw(i)}
                 disabled={state.keywords.length <= 1}
-                className="h-8 w-8 rounded-full text-muted-foreground/50 hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity disabled:pointer-events-none disabled:opacity-30"
+                className="h-7 w-7 shrink-0 rounded-full text-muted-foreground/40 hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-30 transition-colors"
                 aria-label="Xóa"
               >
-                <Trash2 className="h-4 w-4 mx-auto" />
+                <Trash2 className="h-3.5 w-3.5 mx-auto" />
               </button>
             </div>
           ))}

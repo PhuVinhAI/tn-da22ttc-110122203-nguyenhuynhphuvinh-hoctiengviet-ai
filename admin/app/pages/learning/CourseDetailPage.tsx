@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { DndContext, closestCenter } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import {
-  Plus, Pencil, BookOpen, Layers, MoreVertical, Trash2, Clock, ChevronRight,
+  Plus, Pencil, BookOpen, Layers, MoreVertical, Trash2, Clock,
 } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Breadcrumbs } from '../../components/admin/Breadcrumbs'
@@ -278,7 +278,6 @@ function ModuleRow({
   onDelete: () => void
   stop: (e: MouseEvent | KeyboardEvent) => void
 }) {
-  const [expanded, setExpanded] = useState(false)
   const lessonCount = module.lessons?.length ?? 0
   return (
     <SortableRow id={module.id}>
@@ -296,19 +295,6 @@ function ModuleRow({
             <div onClick={stop} onKeyDown={stop} className="shrink-0">
               <DragHandle {...listeners} {...attributes} />
             </div>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                setExpanded((v) => !v)
-              }}
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border-2 border-border text-muted-foreground hover:text-foreground hover:border-primary transition-transform ${
-                expanded ? 'rotate-90' : ''
-              }`}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
 
             <div className="flex-1 min-w-0">
               <h3 className="text-base font-bold text-foreground truncate">{module.title}</h3>
@@ -347,39 +333,6 @@ function ModuleRow({
               </DropdownMenu>
             </div>
           </div>
-
-          {expanded && lessonCount > 0 && (
-            <div className="border-t-2 border-border bg-muted/20">
-              {module.lessons?.map((lesson, idx) => (
-                <Link
-                  key={lesson.id}
-                  to={learningPath.lesson(lesson.id)}
-                  className={`flex items-center gap-3 px-4 py-2.5 hover:bg-card transition-colors ${
-                    idx > 0 ? 'border-t border-border/50' : ''
-                  }`}
-                >
-                  <div className="w-12 flex justify-center">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-muted-foreground text-[10px] font-bold text-white">
-                      {lesson.orderIndex}
-                    </span>
-                  </div>
-                  <span className="flex-1 text-sm font-semibold truncate">{lesson.title}</span>
-                  {lesson.estimatedDuration && (
-                    <span className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground shrink-0">
-                      <Clock className="h-3 w-3" />
-                      <span className="tabular-nums">{lesson.estimatedDuration}p</span>
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {expanded && lessonCount === 0 && (
-            <div className="border-t-2 border-border bg-muted/20 px-4 py-3 text-center text-xs text-muted-foreground">
-              Chủ đề này chưa có bài học nào
-            </div>
-          )}
         </div>
       )}
     </SortableRow>

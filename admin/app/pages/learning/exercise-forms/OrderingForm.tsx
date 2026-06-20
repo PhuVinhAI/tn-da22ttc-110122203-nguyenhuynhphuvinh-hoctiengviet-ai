@@ -1,8 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Plus, Trash2, ArrowUp, ArrowDown, Library } from 'lucide-react'
+import { type MouseEvent, type KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { Plus, Trash2, Library } from 'lucide-react'
 import { useParams } from 'react-router'
-import { Input } from '../../../components/ui/input'
+import {
+  DndContext,
+  PointerSensor,
+  KeyboardSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { Textarea } from '../../../components/ui/textarea'
+import { DragHandle } from '../../../components/admin/shared/DragHandle'
+import { SortableRow } from '../../../components/admin/shared/SortableRow'
 import { useAdminExercise } from '../../../features/learning/api/use-learning-admin'
 import type { QuestionFormProps } from './types'
 import { getCorrectAnswerObject, getOptionsObject } from './types'
@@ -88,15 +99,29 @@ export function OrderingForm({ initial, onChange }: QuestionFormProps) {
         : { ...prev, items: prev.items.filter((it) => it.id !== id) },
     )
 
-  const move = (id: string, dir: -1 | 1) =>
-    setState((prev) => {
-      const idx = prev.items.findIndex((it) => it.id === id)
-      const next = idx + dir
-      if (idx < 0 || next < 0 || next >= prev.items.length) return prev
-      const items = [...prev.items]
-      ;[items[idx], items[next]] = [items[next], items[idx]]
-      return { ...prev, items }
-    })
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+      setState((prev) => {
+        const fromIdx = prev.items.findIndex((it) => it.id === String(active.id))
+        const toIdx = prev.items.findIndex((it) => it.id === String(over.id))
+        if (fromIdx < 0 || toIdx < 0) return prev
+        const next = [...prev.items]
+        const [moved] = next.splice(fromIdx, 1)
+        next.splice(toIdx, 0, moved)
+        return { ...prev, items: next }
+      })
+    },
+    [],
+  )
+
+  const stop = (e: MouseEvent | KeyboardEvent) => e.stopPropagation()
 
   const addItem = (value = '') =>
     setState((prev) => ({
@@ -145,7 +170,7 @@ export function OrderingForm({ initial, onChange }: QuestionFormProps) {
               <span className="text-destructive ml-0.5">*</span>
             </label>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Mobile xáo trộn các từ thành kho, người học bấm để xếp vào hàng đúng
+              Kéo thả để sắp xếp thứ tự đúng — Mobile sẽ xáo trộn khi học viên làm bài
             </p>
           </div>
           <button
@@ -160,53 +185,46 @@ export function OrderingForm({ initial, onChange }: QuestionFormProps) {
           </button>
         </div>
 
-        <div className="space-y-2.5">
-          {state.items.map((it, i) => (
-            <div
-              key={it.id}
-              className="group flex items-center gap-3 rounded-lg border-2 border-border bg-card px-4 py-2.5"
-            >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground tabular-nums">
-                {i + 1}
-              </span>
-              <Input
-                value={it.value}
-                onChange={(e) => setItem(it.id, e.target.value)}
-                placeholder={`Từ ${i + 1}`}
-                className="flex-1 font-semibold"
-              />
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                <button
-                  type="button"
-                  onClick={() => move(it.id, -1)}
-                  disabled={i === 0}
-                  className="h-8 w-8 rounded-full text-muted-foreground/70 hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
-                  aria-label="Lên trên"
-                >
-                  <ArrowUp className="h-4 w-4 mx-auto" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => move(it.id, 1)}
-                  disabled={i === state.items.length - 1}
-                  className="h-8 w-8 rounded-full text-muted-foreground/70 hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
-                  aria-label="Xuống dưới"
-                >
-                  <ArrowDown className="h-4 w-4 mx-auto" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => remove(it.id)}
-                  disabled={state.items.length <= 2}
-                  className="h-8 w-8 rounded-full text-muted-foreground/50 hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-40"
-                  aria-label="Xóa"
-                >
-                  <Trash2 className="h-4 w-4 mx-auto" />
-                </button>
-              </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={state.items.map((it) => it.id)} strategy={verticalListSortingStrategy}>
+            <div className="rounded-lg border-2 border-border bg-card overflow-hidden">
+              {state.items.map((it, i) => (
+                <SortableRow key={it.id} id={it.id}>
+                  {({ listeners, attributes }) => (
+                    <div
+                      className={`group flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/20 ${
+                        i > 0 ? 'border-t border-border/50' : ''
+                      }`}
+                    >
+                      <div onClick={stop} onKeyDown={stop} className="shrink-0">
+                        <DragHandle {...listeners} {...attributes} />
+                      </div>
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground tabular-nums">
+                        {i + 1}
+                      </span>
+                      <input
+                        value={it.value}
+                        onChange={(e) => setItem(it.id, e.target.value)}
+                        placeholder={`Từ ${i + 1}`}
+                        className="flex-1 bg-transparent border-none outline-none p-0 m-0 text-sm font-semibold text-foreground placeholder:text-muted-foreground/60"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => remove(it.id)}
+                        disabled={state.items.length <= 2}
+                        aria-label="Xóa"
+                        className="h-7 w-7 shrink-0 rounded-full text-muted-foreground/40 hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-30 transition-colors"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mx-auto" />
+                      </button>
+                    </div>
+                  )}
+                </SortableRow>
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
+
         <button
           type="button"
           onClick={() => addItem('')}

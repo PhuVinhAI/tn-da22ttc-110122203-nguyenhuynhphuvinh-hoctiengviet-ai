@@ -4,13 +4,6 @@ import { toast } from 'sonner'
 import { ArrowLeft, Save, Volume2 } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Textarea } from '../../components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../components/ui/select'
 import { Breadcrumbs } from '../../components/admin/Breadcrumbs'
 import { FormField, FormSection } from '../../components/admin/FormSection'
 import { MediaUpload } from '../../components/admin/editors/MediaUpload'
@@ -184,55 +177,6 @@ export function QuestionFormPage({ mode }: { mode: 'create' | 'edit' }) {
         <form id="question-form" onSubmit={submit} className="space-y-8">
           <FormSection
             icon={typeMeta.Icon}
-            title="Cấu hình câu hỏi"
-            description="Loại câu hỏi, audio và giải thích hiển thị sau khi trả lời"
-          >
-            <FormField label="Loại câu hỏi" required help="Loại quyết định cấu trúc đáp án của câu hỏi">
-              <Select
-                value={common.questionType}
-                onValueChange={(v) => updateCommon('questionType', v)}
-                disabled={typeIsLocked}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  {QUESTION_TYPES.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      <t.Icon className={`h-4 w-4 ${t.tone}`} />
-                      {t.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormField>
-
-            <FormField label="Audio câu hỏi" help="Âm thanh phát cùng câu hỏi (tùy chọn)">
-              <MediaUpload
-                kind="audio"
-                value={common.questionAudioUrl || null}
-                onChange={(url) => updateCommon('questionAudioUrl', url ?? '')}
-              />
-              {common.questionAudioUrl && (
-                <p className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Volume2 className="h-3.5 w-3.5" />
-                  {common.questionAudioUrl}
-                </p>
-              )}
-            </FormField>
-
-            <FormField label="Giải thích" help="Hiển thị với học viên sau khi trả lời">
-              <Textarea
-                value={common.explanation}
-                onChange={(e) => updateCommon('explanation', e.target.value)}
-                placeholder="Vì sao đáp án này đúng..."
-                className="min-h-24"
-              />
-            </FormField>
-          </FormSection>
-
-          <FormSection
-            icon={typeMeta.Icon}
             title={`Nội dung ${typeMeta.label.toLowerCase()}`}
             description={typeMeta.description}
           >
@@ -257,6 +201,35 @@ export function QuestionFormPage({ mode }: { mode: 'create' | 'edit' }) {
             {common.questionType === 'speaking' && (
               <SpeakingForm key={formKey} initial={initialForForm} onChange={handleFormChange} />
             )}
+          </FormSection>
+
+          <FormSection
+            icon={Volume2}
+            title="Audio & Giải thích"
+            description="Âm thanh phát cùng câu hỏi và giải thích hiển thị sau khi trả lời"
+          >
+            <FormField label="Audio câu hỏi" help="Âm thanh phát cùng câu hỏi (tùy chọn)">
+              <MediaUpload
+                kind="audio"
+                value={common.questionAudioUrl || null}
+                onChange={(url) => updateCommon('questionAudioUrl', url ?? '')}
+              />
+              {common.questionAudioUrl && (
+                <p className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Volume2 className="h-3.5 w-3.5" />
+                  {common.questionAudioUrl}
+                </p>
+              )}
+            </FormField>
+
+            <FormField label="Giải thích" help="Hiển thị với học viên sau khi trả lời">
+              <Textarea
+                value={common.explanation}
+                onChange={(e) => updateCommon('explanation', e.target.value)}
+                placeholder="Vì sao đáp án này đúng..."
+                className="min-h-24"
+              />
+            </FormField>
           </FormSection>
         </form>
 
