@@ -16,6 +16,16 @@ export function ScenarioFormPage({ mode }: { mode: 'create' | 'edit' }) {
   const mutations = useSimulationsAdminMutation()
 
   const submit = async (payload: Record<string, unknown>) => {
+    const criteria = Array.isArray(payload.scoringCriteria) ? payload.scoringCriteria : []
+    const totalWeight = criteria.reduce(
+      (sum: number, c: any) => sum + (Number(c?.weight) || 0),
+      0,
+    )
+    if (criteria.length > 0 && totalWeight !== 100) {
+      toast.error(`Tổng trọng số các tiêu chí phải đúng 100% (hiện ${totalWeight}%).`)
+      return
+    }
+
     try {
       if (mode === 'edit' && id) {
         await mutations.updateScenario.mutateAsync({ id, payload })

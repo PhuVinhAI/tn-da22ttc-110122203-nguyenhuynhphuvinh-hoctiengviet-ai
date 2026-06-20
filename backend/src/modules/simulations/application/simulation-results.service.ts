@@ -25,7 +25,6 @@ export interface ResultDetail {
   criteriaScores: Array<{
     name: string;
     score: number;
-    maxScore: number;
     comment: string;
   }>;
   endReason: string;

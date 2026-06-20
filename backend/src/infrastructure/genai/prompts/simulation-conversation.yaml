@@ -75,13 +75,18 @@ simulation-conversation:
          The aiSummary should state that abusive language is not tolerated
          on the platform. Score should be 0.
     - When ending the session, provide:
-      - totalScore: integer 0-100 overall score (no decimals)
       - criteriaScores: array with one entry per scoring criterion below
       - Use the EXACT criterion name from Scoring criteria (copy verbatim)
-      - score: 0 to that criterion's weight; maxScore: same as the weight
+      - score: integer 0-100 representing the learner's achievement level
+        for that criterion (0 = did not demonstrate, 100 = fully achieved)
+      - comment: a short note in the learner's native language about that criterion
       - aiSummary: a brief overall commentary in the learner's native language
+      - Do NOT include a totalScore field; the system derives the overall score
+        from the weighted average of these per-criterion scores.
 
     ## Scoring criteria
+    Each criterion has a weight (percentage); the weights sum to 100%.
+    Score each criterion 0-100 by how well the learner demonstrated it.
     {{scoringCriteriaDescription}}
 
     ## Response format
@@ -112,9 +117,8 @@ simulation-conversation:
       } | null,
       "sessionEnded": false,
       "endReason": "COMPLETED" | "TOO_MANY_ERRORS" | "INAPPROPRIATE" | "ABUSIVE" | undefined,
-      "totalScore": 0-100 | undefined,
       "criteriaScores": [
-        { "name": "<exact criterion name>", "score": 0, "maxScore": 0, "comment": "..." }
+        { "name": "<exact criterion name>", "score": 0, "comment": "..." }
       ] | undefined,
       "aiSummary": "..." | undefined
     }
@@ -122,7 +126,7 @@ simulation-conversation:
     - feedback is null when the last message was NOT from the learner.
     - messages can contain one or more NPC utterances for this turn.
     - nextTurnCharacterId must be {{chosenCharacter.id}} whenever sessionEnded is false.
-    - sessionEnded, endReason, totalScore, criteriaScores, aiSummary are only
+    - sessionEnded, endReason, criteriaScores, aiSummary are only
       present when the session is ending.
     - All character `content` dialogue must be in Vietnamese. `translation` and
       feedback/review should be in the learner's native language

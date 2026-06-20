@@ -46,7 +46,6 @@ Map<String, dynamic> criteriaScoreContextSummary(CriteriaScore cs) {
   return {
     'name': cs.name,
     'score': cs.score,
-    'maxScore': cs.maxScore,
     if (cs.comment != null && cs.comment!.isNotEmpty) 'comment': cs.comment,
   };
 }

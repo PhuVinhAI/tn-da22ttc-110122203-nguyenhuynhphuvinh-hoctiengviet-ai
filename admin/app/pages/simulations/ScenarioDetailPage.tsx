@@ -119,6 +119,7 @@ export function ScenarioDetailPage() {
   const playableCount = scenario?.characters?.filter((c) => c.isPlayable).length ?? 0
   const scoringCriteria = Array.isArray(scenario?.scoringCriteria) ? scenario.scoringCriteria : []
   const totalWeight = scoringCriteria.reduce((sum, c) => sum + (Number(c.weight) || 0), 0)
+  const weightBalanced = totalWeight === 100
   const levelBg = levelMeta[scenario?.requiredLevel ?? ''] ?? 'bg-muted'
   const diff = difficultyMeta[scenario?.difficulty ?? ''] ?? {
     label: scenario?.difficulty ?? '—',
@@ -325,8 +326,14 @@ export function ScenarioDetailPage() {
                   </div>
                   <h2 className="text-sm font-bold tracking-tight">Tiêu chí chấm điểm</h2>
                 </div>
-                <span className="text-xs font-bold text-muted-foreground tabular-nums">
-                  {scoringCriteria.length} tiêu chí
+                <span
+                  className={`text-xs font-bold tabular-nums ${
+                    weightBalanced
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-destructive'
+                  }`}
+                >
+                  {scoringCriteria.length} tiêu chí · tổng {totalWeight}%
                 </span>
               </div>
 
@@ -337,7 +344,7 @@ export function ScenarioDetailPage() {
               ) : (
                 <div className="divide-y-2 divide-border">
                   {scoringCriteria.map((criterion, i) => {
-                    const percent = totalWeight > 0 ? ((Number(criterion.weight) || 0) / totalWeight) * 100 : 0
+                    const weight = Number(criterion.weight) || 0
                     return (
                       <div key={i} className="p-4">
                         <div className="flex items-start justify-between gap-3 mb-2">
@@ -347,14 +354,9 @@ export function ScenarioDetailPage() {
                             </span>
                             <h3 className="text-sm font-bold text-foreground">{criterion.name}</h3>
                           </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-xs font-semibold text-muted-foreground tabular-nums">
-                              {percent.toFixed(0)}%
-                            </span>
-                            <span className="text-xs font-bold tabular-nums text-amber-600 dark:text-amber-400">
-                              ×{Number(criterion.weight).toFixed(1)}
-                            </span>
-                          </div>
+                          <span className="text-xs font-bold tabular-nums text-amber-600 dark:text-amber-400 shrink-0">
+                            {weight}%
+                          </span>
                         </div>
                         {criterion.description && (
                           <p className="text-xs text-muted-foreground leading-relaxed pl-8">
@@ -364,7 +366,7 @@ export function ScenarioDetailPage() {
                         <div className="mt-2 ml-8 h-1.5 rounded-full bg-muted overflow-hidden">
                           <div
                             className="h-full bg-amber-500"
-                            style={{ width: `${percent}%` }}
+                            style={{ width: `${Math.min(100, weight)}%` }}
                           />
                         </div>
                       </div>

@@ -735,10 +735,9 @@ describe('SimulationSessionService', () => {
       const aiResponse = makeAiResponse({
         sessionEnded: true,
         endReason: SimulationEndReason.COMPLETED,
-        totalScore: 85,
         criteriaScores: [
-          { name: 'Vocabulary', score: 45, maxScore: 50, comment: 'Good' },
-          { name: 'Grammar', score: 40, maxScore: 50, comment: 'Fair' },
+          { name: 'Vocabulary', score: 90, comment: 'Good' },
+          { name: 'Grammar', score: 80, comment: 'Fair' },
         ],
         aiSummary: 'Well done!',
       });
@@ -762,10 +761,9 @@ describe('SimulationSessionService', () => {
       const aiResponse = makeAiResponse({
         sessionEnded: true,
         endReason: SimulationEndReason.COMPLETED,
-        totalScore: 85,
         criteriaScores: [
-          { name: 'Vocabulary', score: 45, maxScore: 50, comment: 'Good' },
-          { name: 'Grammar', score: 40, maxScore: 50, comment: 'Fair' },
+          { name: 'Vocabulary', score: 90, comment: 'Good' },
+          { name: 'Grammar', score: 80, comment: 'Fair' },
         ],
         aiSummary: 'Well done!',
       });
@@ -926,9 +924,8 @@ describe('SimulationSessionService', () => {
       const aiResponse = makeAiResponse({
         sessionEnded: true,
         endReason: SimulationEndReason.COMPLETED,
-        totalScore: 60,
         criteriaScores: [
-          { name: 'Vocabulary', score: 35, maxScore: 50, comment: 'Good' },
+          { name: 'Vocabulary', score: 70, comment: 'Good' },
         ],
         aiSummary: 'Well done!',
       });
@@ -944,19 +941,18 @@ describe('SimulationSessionService', () => {
       expect(resultsRepo.create).toHaveBeenCalledWith(
         expect.objectContaining({
           criteriaScores: [
-            { name: 'Vocabulary', score: 35, maxScore: 50, comment: 'Good' },
-            { name: 'Grammar', score: 0, maxScore: 50, comment: '' },
+            { name: 'Vocabulary', score: 70, comment: 'Good' },
+            { name: 'Grammar', score: 0, comment: '' },
           ],
         }),
       );
     });
 
-    it('distributes totalScore when AI returns empty criteriaScores', async () => {
+    it('scores all criteria 0 when AI returns empty criteriaScores', async () => {
       setupSendMessage();
       const aiResponse = makeAiResponse({
         sessionEnded: true,
         endReason: SimulationEndReason.TOO_MANY_ERRORS,
-        totalScore: 20,
         criteriaScores: [],
         aiSummary: 'Study more before trying again.',
       });
@@ -969,9 +965,10 @@ describe('SimulationSessionService', () => {
       expect(resultsRepo.create).toHaveBeenCalledWith(
         expect.objectContaining({
           criteriaScores: [
-            { name: 'Vocabulary', score: 10, maxScore: 50, comment: '' },
-            { name: 'Grammar', score: 10, maxScore: 50, comment: '' },
+            { name: 'Vocabulary', score: 0, comment: '' },
+            { name: 'Grammar', score: 0, comment: '' },
           ],
+          totalScore: 0,
           endReason: SimulationEndReason.TOO_MANY_ERRORS,
           aiSummary: 'Study more before trying again.',
         }),
@@ -983,18 +980,15 @@ describe('SimulationSessionService', () => {
       const aiResponse = makeAiResponse({
         sessionEnded: true,
         endReason: SimulationEndReason.COMPLETED,
-        totalScore: 80,
         criteriaScores: [
           {
             name: 'Communication',
-            score: 40,
-            maxScore: 50,
+            score: 80,
             comment: 'Good vocabulary',
           },
           {
             name: 'Grammar accuracy',
-            score: 35,
-            maxScore: 50,
+            score: 70,
             comment: 'Minor issues',
           },
         ],
@@ -1011,14 +1005,12 @@ describe('SimulationSessionService', () => {
           criteriaScores: [
             {
               name: 'Vocabulary',
-              score: 40,
-              maxScore: 50,
+              score: 80,
               comment: 'Good vocabulary',
             },
             {
               name: 'Grammar',
-              score: 35,
-              maxScore: 50,
+              score: 70,
               comment: 'Minor issues',
             },
           ],
@@ -1026,17 +1018,15 @@ describe('SimulationSessionService', () => {
       );
     });
 
-    it('distributes totalScore when AI criteria names do not match', async () => {
+    it('scores all criteria 0 when AI criteria names do not match', async () => {
       setupSendMessage();
       const aiResponse = makeAiResponse({
         sessionEnded: true,
         endReason: SimulationEndReason.COMPLETED,
-        totalScore: 60,
         criteriaScores: [
           {
             name: 'Fluency',
-            score: 0,
-            maxScore: 100,
+            score: 90,
             comment: 'Ignored due to name mismatch',
           },
         ],
@@ -1051,9 +1041,10 @@ describe('SimulationSessionService', () => {
       expect(resultsRepo.create).toHaveBeenCalledWith(
         expect.objectContaining({
           criteriaScores: [
-            { name: 'Vocabulary', score: 30, maxScore: 50, comment: '' },
-            { name: 'Grammar', score: 30, maxScore: 50, comment: '' },
+            { name: 'Vocabulary', score: 0, comment: '' },
+            { name: 'Grammar', score: 0, comment: '' },
           ],
+          totalScore: 0,
         }),
       );
     });
@@ -1063,15 +1054,13 @@ describe('SimulationSessionService', () => {
       const aiResponse = makeAiResponse({
         sessionEnded: true,
         endReason: SimulationEndReason.TOO_MANY_ERRORS,
-        totalScore: 25,
         criteriaScores: [
           {
             name: 'Vocabulary',
-            score: 15,
-            maxScore: 50,
+            score: 30,
             comment: 'Needs work',
           },
-          { name: 'Grammar', score: 10, maxScore: 50, comment: 'Many errors' },
+          { name: 'Grammar', score: 20, comment: 'Many errors' },
         ],
         aiSummary:
           'You are making too many errors. Study vocabulary and grammar more before trying again.',
@@ -1100,10 +1089,9 @@ describe('SimulationSessionService', () => {
       const aiResponse = makeAiResponse({
         sessionEnded: true,
         endReason: SimulationEndReason.INAPPROPRIATE,
-        totalScore: 0,
         criteriaScores: [
-          { name: 'Vocabulary', score: 0, maxScore: 50, comment: '' },
-          { name: 'Grammar', score: 0, maxScore: 50, comment: '' },
+          { name: 'Vocabulary', score: 0, comment: '' },
+          { name: 'Grammar', score: 0, comment: '' },
         ],
         aiSummary:
           'Your language was inappropriate. Please keep the conversation respectful.',
@@ -1134,10 +1122,9 @@ describe('SimulationSessionService', () => {
       const aiResponse = makeAiResponse({
         sessionEnded: true,
         endReason: SimulationEndReason.ABUSIVE,
-        totalScore: 0,
         criteriaScores: [
-          { name: 'Vocabulary', score: 0, maxScore: 50, comment: '' },
-          { name: 'Grammar', score: 0, maxScore: 50, comment: '' },
+          { name: 'Vocabulary', score: 0, comment: '' },
+          { name: 'Grammar', score: 0, comment: '' },
         ],
         aiSummary: 'Abusive language is not tolerated on this platform.',
       });

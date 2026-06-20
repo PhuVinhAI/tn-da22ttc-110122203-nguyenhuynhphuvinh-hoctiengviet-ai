@@ -2,7 +2,6 @@ class CriteriaScore {
   const CriteriaScore({
     required this.name,
     required this.score,
-    required this.maxScore,
     this.comment,
   });
 
@@ -10,20 +9,17 @@ class CriteriaScore {
     return CriteriaScore(
       name: json['name'] as String? ?? '',
       score: (json['score'] as num?)?.toDouble() ?? 0,
-      maxScore: (json['maxScore'] as num?)?.toDouble() ?? 0,
       comment: json['comment'] as String?,
     );
   }
 
   final String name;
   final double score;
-  final double maxScore;
   final String? comment;
 
   Map<String, dynamic> toJson() => {
         'name': name,
         'score': score,
-        'maxScore': maxScore,
         'comment': comment,
       };
 }

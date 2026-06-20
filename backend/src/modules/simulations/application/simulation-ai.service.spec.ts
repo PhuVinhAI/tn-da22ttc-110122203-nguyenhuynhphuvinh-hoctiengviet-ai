@@ -477,7 +477,7 @@ describe('SimulationAiService', () => {
       expect(result.feedback!.reviewAvailable).toBe(true);
     });
 
-    it('parses session-ended response with float totalScore and missing feedback', () => {
+    it('parses session-ended response with missing feedback', () => {
       const raw = JSON.stringify({
         messages: [
           {
@@ -490,13 +490,11 @@ describe('SimulationAiService', () => {
         nextTurnCharacterId: 'ch-1',
         sessionEnded: true,
         endReason: 'COMPLETED',
-        totalScore: 60.000000000000014,
       });
 
       const result = service.parseAiResponse(raw);
 
       expect(result.sessionEnded).toBe(true);
-      expect(result.totalScore).toBe(60);
       expect(result.feedback).toBeNull();
     });
 
@@ -514,18 +512,15 @@ describe('SimulationAiService', () => {
         feedback: null,
         sessionEnded: true,
         endReason: 'COMPLETED',
-        totalScore: 75,
         criteriaScores: [
           {
             name: 'Giao tiếp',
-            score: 38,
-            maxScore: 50,
+            score: 76,
             comment: 'Good interaction flow',
           },
           {
             name: 'Ngữ pháp',
-            score: 37,
-            maxScore: 50,
+            score: 74,
             comment: 'Minor grammar issues',
           },
         ],
@@ -536,9 +531,36 @@ describe('SimulationAiService', () => {
 
       expect(result.sessionEnded).toBe(true);
       expect(result.endReason).toBe(SimulationEndReason.COMPLETED);
-      expect(result.totalScore).toBe(75);
       expect(result.criteriaScores).toHaveLength(2);
+      expect(result.criteriaScores![0].score).toBe(76);
       expect(result.aiSummary).toBe('You did well at the market!');
+    });
+
+    it('clamps criteria score to 0-100 and rounds floats', () => {
+      const raw = JSON.stringify({
+        messages: [
+          {
+            speakerCharacterId: 'ch-2',
+            speakerName: 'Bà Lan',
+            content: 'Tạm biệt!',
+            translation: 'Translation.',
+          },
+        ],
+        nextTurnCharacterId: 'ch-1',
+        feedback: null,
+        sessionEnded: true,
+        endReason: 'COMPLETED',
+        criteriaScores: [
+          { name: 'Giao tiếp', score: 60.4, comment: '' },
+          { name: 'Ngữ pháp', score: 150, comment: '' },
+        ],
+        aiSummary: 'Done',
+      });
+
+      const result = service.parseAiResponse(raw);
+
+      expect(result.criteriaScores![0].score).toBe(60);
+      expect(result.criteriaScores![1].score).toBe(100);
     });
 
     it('throws BadRequestException for invalid JSON', () => {

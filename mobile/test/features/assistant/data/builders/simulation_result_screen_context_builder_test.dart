@@ -15,14 +15,12 @@ SimulationResultDetail _sampleResult({String endReason = 'COMPLETED'}) {
     criteriaScores: const [
       CriteriaScore(
         name: 'Politeness',
-        score: 32,
-        maxScore: 40,
+        score: 80,
         comment: 'Mostly polite, a few slips',
       ),
       CriteriaScore(
         name: 'Vocabulary',
-        score: 46,
-        maxScore: 60,
+        score: 77,
       ),
     ],
     endReason: endReason,
@@ -77,8 +75,7 @@ void main() {
         final criteria = ctx.data['criteriaScores'] as List;
         expect(criteria, hasLength(2));
         expect(criteria.first, containsPair('name', 'Politeness'));
-        expect(criteria.first, containsPair('score', 32.0));
-        expect(criteria.first, containsPair('maxScore', 40.0));
+        expect(criteria.first, containsPair('score', 80.0));
         expect(criteria.first, containsPair('comment', isNotEmpty));
       },
     );

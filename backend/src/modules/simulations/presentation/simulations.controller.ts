@@ -451,8 +451,8 @@ export class SimulationsController {
         id: 'uuid',
         totalScore: 85,
         criteriaScores: [
-          { name: 'Vocabulary', score: 45, maxScore: 50, comment: 'Good' },
-          { name: 'Grammar', score: 40, maxScore: 50, comment: 'Fair' },
+          { name: 'Vocabulary', score: 90, comment: 'Good' },
+          { name: 'Grammar', score: 80, comment: 'Fair' },
         ],
         endReason: 'COMPLETED',
         aiSummary: 'Well done!',

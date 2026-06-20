@@ -73,11 +73,9 @@ export interface SimulationAiTurnResponse {
   feedback: SimulationMessageFeedback | null;
   sessionEnded: boolean;
   endReason?: SimulationEndReason;
-  totalScore?: number;
   criteriaScores?: Array<{
     name: string;
     score: number;
-    maxScore: number;
     comment: string;
   }>;
   aiSummary?: string;
@@ -99,18 +97,11 @@ const FeedbackSchema = z.object({
   reviewAvailable: z.boolean(),
 });
 
-function roundBoundedScore(value: unknown): unknown {
+function roundBoundedPercent(value: unknown): unknown {
   if (value == null || value === '') return undefined;
   const n = Number(value);
   if (!Number.isFinite(n)) return value;
   return Math.min(100, Math.max(0, Math.round(n)));
-}
-
-function roundNonNegative(value: unknown): unknown {
-  if (value == null || value === '') return undefined;
-  const n = Number(value);
-  if (!Number.isFinite(n)) return value;
-  return Math.max(0, Math.round(n));
 }
 
 function normalizeAiResponsePayload(parsed: unknown): unknown {
@@ -123,15 +114,13 @@ function normalizeAiResponsePayload(parsed: unknown): unknown {
   return {
     ...record,
     feedback: record.feedback ?? null,
-    totalScore: roundBoundedScore(record.totalScore),
     criteriaScores: Array.isArray(record.criteriaScores)
       ? record.criteriaScores.map((item) => {
           if (item == null || typeof item !== 'object') return item;
           const criteria = item as Record<string, unknown>;
           return {
             ...criteria,
-            score: roundNonNegative(criteria.score),
-            maxScore: roundNonNegative(criteria.maxScore),
+            score: roundBoundedPercent(criteria.score),
           };
         })
       : record.criteriaScores,
@@ -140,8 +129,7 @@ function normalizeAiResponsePayload(parsed: unknown): unknown {
 
 const CriteriaScoreSchema = z.object({
   name: z.string(),
-  score: z.preprocess(roundNonNegative, z.number().min(0)),
-  maxScore: z.preprocess(roundNonNegative, z.number().min(0)),
+  score: z.preprocess(roundBoundedPercent, z.number().int().min(0).max(100)),
   comment: z.string(),
 });
 
@@ -166,9 +154,6 @@ const AiResponseSchema = z.object({
       SimulationEndReason.INAPPROPRIATE,
       SimulationEndReason.ABUSIVE,
     ])
-    .optional(),
-  totalScore: z
-    .preprocess(roundBoundedScore, z.number().int().min(0).max(100))
     .optional(),
   criteriaScores: z.array(CriteriaScoreSchema).optional(),
   aiSummary: z.string().optional(),
@@ -249,7 +234,6 @@ const SIMULATION_RESPONSE_SCHEMA = {
     },
     sessionEnded: { type: Type.BOOLEAN, nullable: false },
     endReason: { type: Type.STRING, nullable: true },
-    totalScore: { type: Type.NUMBER, nullable: true },
     criteriaScores: {
       type: Type.ARRAY,
       nullable: true,
@@ -258,10 +242,9 @@ const SIMULATION_RESPONSE_SCHEMA = {
         properties: {
           name: { type: Type.STRING, nullable: false },
           score: { type: Type.NUMBER, nullable: false },
-          maxScore: { type: Type.NUMBER, nullable: false },
           comment: { type: Type.STRING, nullable: false },
         },
-        required: ['name', 'score', 'maxScore', 'comment'],
+        required: ['name', 'score', 'comment'],
       },
     },
     aiSummary: { type: Type.STRING, nullable: true },

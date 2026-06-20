@@ -307,24 +307,20 @@ describe('Simulations (e2e)', () => {
         feedback: null,
         sessionEnded: true,
         endReason: 'COMPLETED',
-        totalScore: 75,
         criteriaScores: [
           {
             name: 'Vocabulary',
-            score: 30,
-            maxScore: 40,
+            score: 75,
             comment: 'Good vocabulary',
           },
           {
             name: 'Grammar',
-            score: 22,
-            maxScore: 30,
+            score: 75,
             comment: 'Some errors',
           },
           {
             name: 'Communication',
-            score: 23,
-            maxScore: 30,
+            score: 75,
             comment: 'Natural flow',
           },
         ],
@@ -596,7 +592,6 @@ describe('Simulations (e2e)', () => {
         criteriaScores: SCORING_CRITERIA.map((c) => ({
           name: c.name,
           score: 0,
-          maxScore: c.weight,
           comment: '',
         })),
         aiSummary: 'Session ended.',

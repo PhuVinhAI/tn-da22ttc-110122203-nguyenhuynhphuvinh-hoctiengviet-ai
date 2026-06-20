@@ -25,55 +25,9 @@ function normalizeCriteriaName(name: string): string {
   return name.normalize('NFC').trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
-function scaleCriterionScore(
-  score: number,
-  aiMaxScore: number,
-  criterionWeight: number,
-): number {
-  const safeScore = Number.isFinite(score) ? score : 0;
-  const safeMax =
-    Number.isFinite(aiMaxScore) && aiMaxScore > 0
-      ? aiMaxScore
-      : criterionWeight;
-  const scaled = Math.round((safeScore / safeMax) * criterionWeight);
-  return Math.min(criterionWeight, Math.max(0, scaled));
-}
-
-function distributeTotalScoreByWeight(
-  totalScore: number,
-  scoringCriteria: Array<{ name: string; description: string; weight: number }>,
-): Array<{ name: string; score: number; maxScore: number; comment: string }> {
-  const boundedTotal = Math.min(100, Math.max(0, Math.round(totalScore)));
-  const totalWeight =
-    scoringCriteria.reduce((sum, criterion) => sum + criterion.weight, 0) ||
-    100;
-
-  const entries = scoringCriteria.map((criterion) => ({
-    criterion,
-    exact: (boundedTotal * criterion.weight) / totalWeight,
-    score: 0,
-  }));
-
-  let allocated = 0;
-  for (const entry of entries) {
-    entry.score = Math.floor(entry.exact);
-    allocated += entry.score;
-  }
-
-  const remainder = boundedTotal - allocated;
-  const sorted = [...entries].sort(
-    (a, b) => b.exact - b.score - (a.exact - a.score),
-  );
-  for (let i = 0; i < remainder && i < sorted.length; i++) {
-    sorted[i].score += 1;
-  }
-
-  return entries.map((entry) => ({
-    name: entry.criterion.name,
-    score: entry.score,
-    maxScore: entry.criterion.weight,
-    comment: '',
-  }));
+function clampPercent(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.min(100, Math.max(0, Math.round(value)));
 }
 
 function findCriteriaMatchIndex(
@@ -97,18 +51,18 @@ function findCriteriaMatchIndex(
   return -1;
 }
 
+type AlignedCriterion = { name: string; score: number; comment: string };
+
 function alignCriteriaScores(
   criteriaScores: Array<{
     name: string;
     score: number;
-    maxScore: number;
     comment: string;
   }>,
   scoringCriteria: Array<{ name: string; description: string; weight: number }>,
-  totalScore?: number,
-): Array<{ name: string; score: number; maxScore: number; comment: string }> {
+): { criteria: AlignedCriterion[]; totalScore: number } {
   if (!scoringCriteria || scoringCriteria.length === 0) {
-    return criteriaScores ?? [];
+    return { criteria: (criteriaScores ?? []) as AlignedCriterion[], totalScore: 0 };
   }
 
   const usedIndices = new Set<number>();
@@ -128,30 +82,27 @@ function alignCriteriaScores(
     }
 
     if (matchIndex === -1) {
-      return {
-        name: criterion.name,
-        score: 0,
-        maxScore: criterion.weight,
-        comment: '',
-      };
+      return { name: criterion.name, score: 0, comment: '' };
     }
 
     usedIndices.add(matchIndex);
     const match = criteriaScores[matchIndex];
     return {
       name: criterion.name,
-      score: scaleCriterionScore(match.score, match.maxScore, criterion.weight),
-      maxScore: criterion.weight,
+      score: clampPercent(match.score),
       comment: match.comment ?? '',
     };
   });
 
-  const summed = aligned.reduce((sum, item) => sum + item.score, 0);
-  if (summed === 0 && (totalScore ?? 0) > 0) {
-    return distributeTotalScoreByWeight(totalScore!, scoringCriteria);
-  }
+  const totalWeight =
+    scoringCriteria.reduce((sum, criterion) => sum + criterion.weight, 0) || 100;
+  const weighted = aligned.reduce(
+    (sum, item, i) => sum + item.score * scoringCriteria[i].weight,
+    0,
+  );
+  const totalScore = Math.min(100, Math.max(0, Math.round(weighted / totalWeight)));
 
-  return aligned;
+  return { criteria: aligned, totalScore };
 }
 
 export interface CreateSessionDto {
@@ -599,17 +550,18 @@ export class SimulationSessionService {
       session.id,
     );
 
+    const { criteria, totalScore } = alignCriteriaScores(
+      aiResponse.criteriaScores ?? [],
+      scenario.scoringCriteria,
+    );
+
     return this.resultsRepository.create({
       userId: session.userId,
       sessionId: session.id,
       scenarioId: session.scenarioId,
       chosenCharacterId: session.chosenCharacterId,
-      totalScore: aiResponse.totalScore ?? 0,
-      criteriaScores: alignCriteriaScores(
-        aiResponse.criteriaScores ?? [],
-        scenario.scoringCriteria,
-        aiResponse.totalScore,
-      ),
+      totalScore,
+      criteriaScores: criteria,
       endReason: aiResponse.endReason ?? SimulationEndReason.COMPLETED,
       aiSummary: aiResponse.aiSummary ?? '',
       totalMessages: allMessages.length,

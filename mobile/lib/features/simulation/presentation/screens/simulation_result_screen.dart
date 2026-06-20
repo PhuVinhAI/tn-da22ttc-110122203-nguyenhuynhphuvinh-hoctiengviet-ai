@@ -290,11 +290,9 @@ class _CriteriaScoreItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppTheme.colors(context);
-    final progress =
-        criteriaScore.maxScore > 0
-            ? criteriaScore.score / criteriaScore.maxScore
-            : 0.0;
-    final scoreColor = _scoreColor(progress * 100, c);
+    final score = criteriaScore.score.clamp(0.0, 100.0);
+    final progress = score / 100;
+    final scoreColor = _scoreColor(score, c);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -318,7 +316,7 @@ class _CriteriaScoreItem extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${criteriaScore.score.round()}/${criteriaScore.maxScore.round()}',
+                  '${score.round()}%',
                   style: GoogleFonts.inter(
                     fontSize: AppTypography.bodySmall,
                     fontWeight: FontWeight.w600,
