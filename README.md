@@ -1,6 +1,6 @@
-# LinVNix
+# Ứng dụng hỗ trợ dạy học tiếng Việt với trí tuệ nhân tạo
 
-LinVNix là nền tảng học tiếng Việt có hỗ trợ AI dành cho người học nước ngoài. Hệ thống giúp người học theo các bài giảng có cấu trúc, từ vựng, ngữ pháp, phát âm, khám phá từ vựng qua hình ảnh, mục tiêu học hằng ngày, trợ lý AI toàn ứng dụng và các hội thoại tiếng Việt mô phỏng tình huống thực tế.
+Ứng dụng hỗ trợ dạy học tiếng Việt với trí tuệ nhân tạo (LinVNix) là nền tảng học tiếng Việt có hỗ trợ AI dành cho người học nước ngoài. Hệ thống giúp người học theo các bài giảng có cấu trúc, từ vựng, ngữ pháp, phát âm, khám phá từ vựng qua hình ảnh, mục tiêu học hằng ngày, trợ lý AI toàn ứng dụng và các hội thoại tiếng Việt mô phỏng tình huống thực tế.
 
 ## Bố cục kho mã
 

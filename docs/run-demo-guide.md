@@ -1,6 +1,6 @@
-# Hướng dẫn chạy và demo LinVNix
+# Hướng dẫn chạy và demo Ứng dụng hỗ trợ dạy học tiếng Việt với trí tuệ nhân tạo
 
-Tài liệu này hướng dẫn cách chạy đồ án tốt nghiệp LinVNix trên máy cục bộ để trình diễn.
+Tài liệu này hướng dẫn cách chạy đồ án tốt nghiệp "Ứng dụng hỗ trợ dạy học tiếng Việt với trí tuệ nhân tạo" (LinVNix) trên máy cục bộ để trình diễn.
 
 ## 1. Chuẩn bị yêu cầu hệ thống
 
