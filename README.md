@@ -1,153 +1,166 @@
 # LinVNix
 
-Nền tảng hỗ trợ dạy học tiếng Việt cho người nước ngoài, tích hợp AI đa phương thức. Học viên rèn luyện từ vựng, ngữ pháp, phát âm và giao tiếp thông qua bài học có cấu trúc, bài tập tương tác, Trợ lý AI bao quát toàn app, và hội thoại mô phỏng tình huống thực.
+LinVNix là nền tảng học tiếng Việt có hỗ trợ AI dành cho người học nước ngoài. Hệ thống giúp người học theo các bài giảng có cấu trúc, từ vựng, ngữ pháp, phát âm, khám phá từ vựng qua hình ảnh, mục tiêu học hằng ngày, trợ lý AI toàn ứng dụng và các hội thoại tiếng Việt mô phỏng tình huống thực tế.
 
-## Cấu trúc monorepo
+## Bố cục kho mã
 
-```
-LinVNix/
-├── backend/              # NestJS 11 API · PostgreSQL · Redis · Gemini AI
-├── mobile/               # Flutter app · Riverpod · GoRouter
-├── admin/                # Electron + React + Vite admin panel (tách rời — không trong bun workspace)
-├── packages/             # Shared packages (placeholder)
-├── docs/                 # ADR + agent docs
-├── docker-compose.yml    # postgres:16 + redis:7 + backend
-├── CONTEXT.md            # Domain language tiếng Việt (Khóa học, Chủ đề, Trợ lý AI…)
-├── AGENTS.md             # Quy ước cho agent: commands, guards, style, test
-└── package.json          # Bun workspace root (chỉ chứa backend + packages/*)
+Kho mã nộp bài này tuân theo cấu trúc đồ án tốt nghiệp quy định:
+
+```text
+.
+├── docs/      # Tài liệu đồ án và hướng dẫn chạy demo
+├── src/       # Toàn bộ mã nguồn và tài nguyên dự án
+└── README.md  # Tổng quan dự án, kiến trúc, yêu cầu và hướng dẫn chạy
 ```
 
-Ba app **độc lập** về dependencies:
+Thư mục `docs/` chứa các tệp báo cáo đồ án và đề cương chi tiết hiện có. Các tệp slide và poster chưa được đưa vào do hiện chưa hoàn thiện.
 
-| App | Package manager | Trong bun workspace? |
-|-----|-----------------|---------------------|
-| `backend` | Bun | ✅ |
-| `mobile` | `flutter pub` | ❌ |
-| `admin` | Bun (riêng) | ❌ — cài từ `admin/` |
+Thư mục `src/` chứa toàn bộ mã nguồn dự án, bao gồm backend, admin, landing page, ứng dụng mobile, gói dùng chung, các tệp Docker, dữ liệu seed, và các tệp media runtime thuộc dự án.
+
+## Tính năng chính
+
+- Khóa học tiếng Việt có cấu trúc theo trình độ CEFR, chủ đề, bài học, từ vựng, ngữ pháp và bài tập tương tác.
+- Ứng dụng mobile Flutter dành cho người học với xác thực, onboarding, học khóa học, từ đã lưu, mục tiêu hằng ngày và hồ sơ cá nhân.
+- Trợ lý AI toàn ứng dụng với ngữ cảnh màn hình hiện tại, phản hồi dạng streaming và các công cụ backend để tra cứu bài học, tiến độ, từ vựng, ngữ pháp và bookmark.
+- Mô phỏng hội thoại bằng AI với kịch bản, nhân vật, sửa lỗi theo từng tin nhắn, tiêu chí chấm điểm và lịch sử kết quả.
+- Luồng khám phá hình ảnh giúp người học phân tích hình ảnh và thu thập từ vựng cá nhân.
+- Ứng dụng admin để quản lý nội dung học, kịch bản mô phỏng, người dùng và cấu hình nền tảng.
+- Landing page giới thiệu dự án và nội dung công khai.
+
+## Kiến trúc
+
+```text
+Ứng dụng mobile Flutter
+        |
+        | REST API + SSE streaming
+        v
+API backend NestJS
+        |
+        +-- PostgreSQL 16 cho dữ liệu quan hệ
+        +-- Redis 7 + Bull cho hàng đợi/bộ nhớ đệm
+        +-- Google Gemini / nhà cung cấp tương thích OpenAI cho tính năng AI
+        +-- Media tải lên và tạo ra nằm trong backend/uploads
+
+Ứng dụng admin Electron/React
+        |
+        +-- Dùng chung API backend
+
+Landing page Astro
+        |
+        +-- Trải nghiệm web tĩnh/công khai
+```
+
+Mã nguồn là một monorepo Bun workspace trong `src/`:
+
+```text
+src/
+├── backend/             # API NestJS 11
+├── admin/               # Ứng dụng admin Electron + React + Vite
+├── landing/             # Landing page Astro
+├── packages/shared/     # Trừu tượng AI và schema dùng chung
+├── mobile/              # Ứng dụng mobile Flutter
+├── docker-compose.yml   # PostgreSQL, Redis, backend
+└── package.json         # Gốc Bun workspace
+```
 
 ## Yêu cầu hệ thống
 
-- [Bun](https://bun.sh/) ≥ 1.0
-- [Node.js](https://nodejs.org/) ≥ 18 (cho tooling — runtime backend dùng Bun)
-- [Flutter](https://flutter.dev/) ≥ 3.11
-- [Docker](https://www.docker.com/) + Docker Compose
-- API key Google Gemini (cho tính năng AI) và Google OAuth client (cho đăng nhập)
+- Bun 1.x
+- Node.js 18 trở lên
+- Docker và Docker Compose
+- Flutter SDK 3.11 trở lên
+- Google OAuth client ID để đăng nhập
+- Khóa API Gemini, hoặc cấu hình nhà cung cấp tương thích OpenAI, cho các tính năng AI
 
-## Quickstart
+## Khởi động nhanh
+
+Tất cả lệnh dưới đây chạy từ thư mục gốc của kho mã nộp bài.
 
 ```bash
-# 1. Hạ tầng: PostgreSQL 16 + Redis 7 (Docker)
-bun run db:up
+cd src
+bun install
+```
 
-# 2. Backend
+Khởi động PostgreSQL, Redis và container backend:
+
+```bash
+cp .env.example .env
 cp backend/.env.example backend/.env
-# Sửa GOOGLE_CLIENT_ID, GENAI_API_KEYS, MAIL_USER, MAIL_PASSWORD…
-cd backend && bun install && bun run start:dev
-# → http://localhost:3000
-# → Swagger: http://localhost:3000/api/v1/docs
+# Chỉnh sửa backend/.env và đặt giá trị JWT, Google OAuth, mail và nhà cung cấp AI.
+bun run db:up
+```
 
-# 3. Mobile (cửa sổ terminal khác)
-cd mobile
+Chạy backend ở chế độ phát triển mà không đóng gói API trong Docker:
+
+```bash
+cd src/backend
+bun run start:dev
+```
+
+Địa chỉ backend:
+
+- API: `http://localhost:3000/api/v1`
+- Swagger: `http://localhost:3000/api/v1/docs`
+
+Chạy ứng dụng admin:
+
+```bash
+cd src/admin
+cp .env.example .env
+bun install
+bun run dev:web
+```
+
+Chạy landing page:
+
+```bash
+cd src/landing
+bun install
+bun run dev
+```
+
+Chạy ứng dụng mobile:
+
+```bash
+cd src/mobile
 flutter pub get
+cp .env.example assets/.env
+# Chỉnh sửa assets/.env nếu backend không ở http://localhost:3000.
 dart run build_runner build --delete-conflicting-outputs
-# Tạo assets/.env (API_URL, GOOGLE_CLIENT_ID) — xem mobile/README.md
 flutter run
 ```
 
-Chi tiết per-app: [`backend/README.md`](backend/README.md), [`mobile/README.md`](mobile/README.md).
+Với Android emulator, đặt `API_URL=http://10.0.2.2:3000` trong `src/mobile/assets/.env`. Với thiết bị vật lý, dùng địa chỉ IP LAN của máy phát triển.
 
-## Scripts gốc
+## Hướng dẫn demo
+
+Xem [`docs/run-demo-guide.md`](docs/run-demo-guide.md) để có hướng dẫn đầy đủ hơn về cách thiết lập và sử dụng demo.
+
+## Lệnh hữu ích
+
+Từ `src/`:
 
 ```bash
-# Hạ tầng
-bun run db:up        # docker-compose up -d
+bun run db:up
 bun run db:down
-bun run db:logs
-
-# Backend (delegate xuống backend/)
 bun run backend:dev
-bun run backend:build
-bun run backend:start
-
-# Mobile (delegate xuống mobile/)
+bun run admin:dev:web
+bun run landing:dev
+bun run mobile:pub:get
 bun run mobile:run
-bun run mobile:build:android
-bun run mobile:build:ios
 ```
 
-## Docker compose
+Từ `src/backend/`:
 
-`docker-compose.yml` lên 3 service:
-
-| Service | Image | Port | Volume |
-|---------|-------|------|--------|
-| `postgres` | `postgres:16-alpine` | `5432:5432` | `postgres_data` |
-| `redis` | `redis:7-alpine` (AOF on) | `6379:6379` | `redis_data` |
-| `backend` | build từ `backend/Dockerfile` (Bun multi-stage) | `${PORT:-3000}:3000` | `backend_uploads`, `backend_logs` |
-
-Khi chạy compose, backend tự trỏ `DATABASE_HOST=postgres`, `REDIS_HOST=redis` (override `.env`).
-
-## Tech stack
-
-**Backend** — NestJS 11 · TypeORM 0.3 · PostgreSQL 16 · Redis 7 · Bull · JWT + Google OAuth · Google Gemini (key pool) · Swagger · Bun runtime · Docker multi-stage.
-
-**Mobile** — Flutter ≥ 3.11 · Riverpod 3 · GoRouter 17 · Dio · Freezed · Hive · flutter_secure_storage · just_audio · speech_to_text · google_sign_in · flutter_local_notifications.
-
-**Admin** (tách rời) — Electron + React + Vite. Không ưu tiên phát triển ở giai đoạn hiện tại.
-
-## Cấu trúc giải pháp
-
-Kiến trúc thực thi:
-
-- Mobile gửi REST + SSE → Backend.
-- Trợ lý AI: mobile POST `/api/v1/ai/chat/stream` kèm `screenContext` snapshot → backend lazy-create Hội thoại → chạy agent loop (Gemini + 12 tool) → SSE typed events về mobile.
-- Hội thoại mô phỏng: REST request-response thuần (không streaming) — backend trả structured metadata (`speakerCharacterId`, `nextTurnCharacterId`, `corrections`, `review`).
-- Phiên bài tập: mobile lưu Hive offline, sync khi nộp.
-- TTS audio: backend sinh trước (script `generate:a1-lesson1-audio`) hoặc theo nhu cầu → mobile phát qua `just_audio` từ `/uploads/audio/...`.
-
-## Domain language
-
-Đọc [`CONTEXT.md`](CONTEXT.md) trước khi viết code. Một số term quan trọng dễ nhầm:
-
-- **Chủ đề** = Module (không gọi "Unit")
-- **Yêu sách** = Bookmark (không gọi "Flashcard"/"Favorite")
-- **Học viên** = User vai trò USER (vs **Quản trị viên** vai trò ADMIN)
-- **Hội thoại** = phiên hỏi đáp ngắn 1-ngữ-cảnh với Trợ lý AI (KHÁC **Hội thoại mô phỏng** ở tab riêng)
-- **Bài tập do AI sinh** = Custom Exercise Set, cá nhân học viên
-- **Khám phá ảnh** = ephemeral, KHÁC Trợ lý AI
-
-## AI Provider Configuration
-
-Backend hỗ trợ 3 chế độ vận hành AI:
-
-1. **Default Gemini** — Không set bất kỳ `AI_*_PROVIDER` nào. Mọi feature dùng chung Gemini KeyPool global (`GENAI_API_KEYS`). Backwards-compatible 100%.
-2. **Per-feature OpenAI** — Set `AI_<FEATURE>_PROVIDER=openai` cho feature muốn override. Feature đó dùng OpenAI-compatible gateway (OpenRouter, LiteLLM, Ollama, vLLM…) với URL/key/model riêng.
-3. **Mix** — Một số feature dùng OpenAI, còn lại vẫn Gemini. Mỗi feature cấu hình độc lập.
-
-### Feature × Provider support
-
-| Feature | Gemini | OpenAI-compatible | Ghi chú |
-|---------|--------|-------------------|---------|
-| `exercise` | ✅ | ✅ | Sinh bài tập tùy chỉnh |
-| `simulation` | ✅ | ✅ | Hội thoại mô phỏng |
-| `assistant` | ✅ | ✅ | Trợ lý AI — xem caveat bên dưới |
-| `image_analysis` | ✅ | ❌ locked | Khám phá ảnh — Gemini multimodal |
-
-> **Lưu ý `assistant`**: Nếu gateway OpenAI không hỗ trợ tool calling, Trợ lý AI sẽ chạy ở chế độ text-only (agent loop kết thúc sớm sau turn đầu). Xem warning trong `backend/.env.example`.
-
-Xem cấu hình chi tiết trong `backend/.env.example`. Xem quyết định kiến trúc tại [`docs/adr/0001-multi-provider-ai-routing.md`](docs/adr/0001-multi-provider-ai-routing.md).
-
-## Tài liệu
-
-- [`CONTEXT.md`](CONTEXT.md) — domain language + nghi vấn đã giải quyết
-- [`AGENTS.md`](AGENTS.md) — quy ước cho coding agent (commands, guards, decorators, style)
-- [`docs/`](docs/) — ADR + agent skill docs
-- [`docs/adr/0001-multi-provider-ai-routing.md`](docs/adr/0001-multi-provider-ai-routing.md) — Multi-provider AI routing ADR
-- [`backend/README.md`](backend/README.md) — chi tiết backend
-- [`mobile/README.md`](mobile/README.md) — chi tiết mobile
-
-## Repository
-
+```bash
+bun run admin:create
+bun run db:reset-seed
+bun run test
+bun run test:e2e
 ```
-git@github.com:PhuVinhAI/LinVNix.git
-```
+
+## Lưu ý
+
+- Các bí mật runtime không được commit. Dùng các tệp `.env.example` trong `src/`, `src/backend/`, `src/admin/` và `src/mobile/`.
+- Các kết quả build và thư mục phụ thuộc như `node_modules`, `dist`, `build`, `.dart_tool` và `.astro` được loại trừ có chủ đích.
+- README gốc của dự án được giữ lại tại `src/README.md`.
